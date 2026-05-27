@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="xb_wish_reminders_view_form" model="ir.ui.view">
+        <field name="name">xb.wish.reminders.form</field>
+        <field name="model">xb.wish.reminders</field>
+        <field name="arch" type="xml">
+            <form string="Special Date Reminder">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="wish_type"/>
+                            <field name="partner_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="period_type"/>
+                            <field name="day_type"
+                                   invisible="period_type != 'day'"
+                                   required="period_type == 'day'"/>
+                            <field name="no_of_day"
+                                   invisible="period_type != 'no_of_day'"
+                                   required="period_type == 'no_of_day'"/>
+                            <field name="date"
+                                   invisible="period_type != 'year'"
+                                   required="period_type == 'year'"/>
+                            <field name="last_wished_date"/>
+                            <field name="next_occurrence_date" readonly="1"/>
+                            <field name="is_due_today" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Today" invisible="not is_due_today">
+                        <group>
+                            <field name="today_comm_status" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="today_activity_status" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="xb_wish_reminders_view_list" model="ir.ui.view">
+        <field name="name">xb.wish.reminders.list</field>
+        <field name="model">xb.wish.reminders</field>
+        <field name="arch" type="xml">
+            <list sample="1" string="Reminders">
+                <field name="wish_type"/>
+                <field name="partner_id"/>
+                <field name="period_type"/>
+                <field name="day_type" optional="hide"/>
+                <field name="no_of_day" optional="hide"/>
+                <field name="date"/>
+                <field name="next_occurrence_date" string="Next" optional="show"/>
+                <field name="today_comm_status" string="📧 Comms" optional="show"/>
+                <field name="today_activity_status" string="📋 Activities" optional="show"/>
+                <field name="last_wished_date" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_wish_reminders_view_search" model="ir.ui.view">
+        <field name="name">xb.wish.reminders.search</field>
+        <field name="model">xb.wish.reminders</field>
+        <field name="arch" type="xml">
+            <search string="Reminders">
+                <field name="wish_type"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <filter name="filter_due_today" string="Due Today"
+                        domain="[('is_due_today','=',True)]"/>
+                <filter name="filter_active" string="Active" domain="[('active','=',True)]"/>
+                <separator/>
+                <filter name="filter_yearly" string="Anniversaries"
+                        domain="[('period_type','=','year')]"/>
+                <filter name="filter_weekly" string="Weekly"
+                        domain="[('period_type','=','day')]"/>
+                <filter name="filter_n_days" string="Every N Days"
+                        domain="[('period_type','=','no_of_day')]"/>
+                <separator/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by':'wish_type'}"/>
+                    <filter name="group_partner" string="Customer" context="{'group_by':'partner_id'}"/>
+                    <filter name="group_period" string="Period" context="{'group_by':'period_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="xb_wish_reminders_action" model="ir.actions.act_window">
+        <field name="name">Special Date Reminders</field>
+        <field name="res_model">xb.wish.reminders</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="xb_wish_reminders_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No reminders yet</p>
+            <p>Add the special dates of your customers — birthdays,
+               anniversaries, contract renewals — and we'll send
+               an email greeting on the right day.</p>
+        </field>
+    </record>
+
+</odoo>

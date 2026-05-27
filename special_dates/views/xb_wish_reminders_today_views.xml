@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        "Today" is a server action that computes the list of due-today
+        reminder IDs in Python (no field cache, no computed search
+        method) and opens an act_window with a hardcoded ID domain.
+
+        We use a NEW xml id (xb_wish_today_server_action) to avoid
+        clashing with the legacy xb_wish_reminders_today_action which
+        in earlier versions of the module was an ir.actions.act_window
+        and can't be transformed in-place into an ir.actions.server.
+    -->
+    <record id="xb_wish_today_server_action" model="ir.actions.server">
+        <field name="name">Today's Reminders</field>
+        <field name="model_id" ref="model_xb_wish_reminders"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_today_reminders()</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         All Special Dates menus live under CONTACTS.
+         ============================================================ -->
+    <menuitem id="menu_special_dates_contacts_root"
+              name="Special Dates"
+              parent="contacts.menu_contacts"
+              sequence="2"
+              groups="special_dates.group_special_dates_user"/>
+
+    <menuitem id="menu_special_dates_contacts_reminders"
+              name="Reminders"
+              parent="menu_special_dates_contacts_root"
+              action="xb_wish_reminders_action"
+              sequence="10"/>
+
+    <menuitem id="menu_special_dates_contacts_today"
+              name="Today"
+              parent="menu_special_dates_contacts_root"
+              action="xb_wish_today_server_action"
+              sequence="20"/>
+
+    <menuitem id="menu_special_dates_contacts_types"
+              name="Reminder Types"
+              parent="menu_special_dates_contacts_root"
+              action="xb_wish_type_action"
+              sequence="30"
+              groups="special_dates.group_special_dates_manager"/>
+
+</odoo>

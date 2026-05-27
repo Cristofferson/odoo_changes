@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="special_dates.PartnerReminderPopup">
+        <Dialog title="title" size="'md'" footer="false" bodyClass="'p-0'">
+            <div class="xb-reminder-popup">
+                <div class="xb-reminder-hero">
+                    <div class="xb-reminder-emoji">🎉</div>
+                    <div class="xb-reminder-greeting">
+                        <t t-esc="props.partnerName"/>
+                    </div>
+                    <div class="xb-reminder-sub">
+                        Today is a special day — make it memorable!
+                    </div>
+                </div>
+                <div class="xb-reminder-body">
+                    <ul class="xb-reminder-list">
+                        <t t-foreach="props.reminders" t-as="r" t-key="r.id">
+                            <li class="xb-reminder-item">
+                                <span class="xb-reminder-icon">
+                                    <t t-esc="r.icon"/>
+                                </span>
+                                <span class="xb-reminder-name">
+                                    <t t-esc="r.wish_type_name"/>
+                                </span>
+                                <t t-if="r.date">
+                                    <span class="xb-reminder-date">
+                                        <t t-esc="r.date"/>
+                                    </span>
+                                </t>
+                            </li>
+                        </t>
+                    </ul>
+                </div>
+                <div class="xb-reminder-footer">
+                    <button class="btn btn-primary btn-lg xb-reminder-ok"
+                            t-on-click="onClose">
+                        Got it!
+                    </button>
+                </div>
+            </div>
+        </Dialog>
+    </t>
+
+</templates>

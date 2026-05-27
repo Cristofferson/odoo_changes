@@ -1,0 +1,574 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* special_dates
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-27 00:00+0000\n"
+"PO-Revision-Date: 2026-05-27 00:00+0000\n"
+"Last-Translator: XUBAX\n"
+"Language-Team: en\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: special_dates
+#: model:ir.model,name:special_dates.model_xb_wish_type
+msgid "Special Date Type"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model,name:special_dates.model_xb_wish_reminders
+msgid "Special Date Reminder"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model,name:special_dates.model_xb_wish_reminders_today
+msgid "Today's Special Dates"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model,name:special_dates.model_xb_wish_schedule
+msgid "Special Date Communication Schedule"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model,name:special_dates.model_xb_wish_activity
+msgid "Special Date Auto-Activity"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__name
+msgid "Name"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__active
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__active
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__active
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__active
+msgid "Active"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__sequence
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__sequence
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__color
+msgid "Color Index"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__period_type
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__period_type
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__period_type
+msgid "Period"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__day_type
+msgid "Default Day"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__no_of_day
+msgid "Default Number of Days"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__date
+msgid "Default Date"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__show_in_pos
+msgid "Show Popup in Point of Sale"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__icon
+msgid "Icon"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__schedule_ids
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_search
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_search
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_schedule_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_activity_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_activity_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.res_partner_view_form_special_dates
+msgid "Communications"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__activity_ids
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_search
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_search
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_schedule_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_activity_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_activity_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.res_partner_view_form_special_dates
+msgid "Auto-Activities"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__schedule_count
+msgid "# Schedules"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__activity_count
+msgid "# Activities"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__wish_type
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__wish_type
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__wish_type_id
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__wish_type_id
+msgid "Reminder Type"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__partner_id
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__partner_id
+msgid "Customer / Contact"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__company_id
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__company_id
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__company_id
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__company_id
+msgid "Company"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__date
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__date
+msgid "Reminder Date"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__day_type
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__day_type
+msgid "Day"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__no_of_day
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__no_of_day
+msgid "Number of Days"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__last_wished_date
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__last_wished_date
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__last_sent
+msgid "Last Sent"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__display_name
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders_today__display_name
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__display_name
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__display_name
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_type__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__is_due_today
+msgid "Due Today"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__next_occurrence_date
+msgid "Next Occurrence"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_comm_total
+msgid "Communications Today"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_comm_sent
+msgid "Communications Sent"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_comm_status
+msgid "Comms Status"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_activity_total
+msgid "Activities Today"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_activity_done
+msgid "Activities Done"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_reminders__today_activity_status
+msgid "Activities Status"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__channel
+msgid "Channel"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__interval_nbr
+msgid "Interval"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__interval_unit
+msgid "Unit"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__interval_type
+msgid "Trigger"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__mail_template_id
+msgid "Email Template"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__sms_template_id
+msgid "SMS Template"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__sent_count
+msgid "Sent"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_schedule__note
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__note
+msgid "Note"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__activity_type_id
+msgid "Activity Type"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__summary
+msgid "Summary"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__delay_count
+msgid "Delay"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__delay_direction
+msgid "Direction"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__user_field
+msgid "Assign To"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_xb_wish_activity__user_id
+msgid "Fixed User"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_res_partner__xb_wish_line
+#: model:ir.model.fields,field_description:special_dates.field_res_users__xb_wish_line
+#: model:ir.ui.menu,name:special_dates.menu_special_dates_contacts_root
+msgid "Special Dates"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,field_description:special_dates.field_res_partner__xb_wish_count
+#: model:ir.model.fields,field_description:special_dates.field_res_users__xb_wish_count
+msgid "Special Dates Count"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__period_type__day
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__period_type__day
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__period_type__day
+msgid "Day of the Week"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__period_type__no_of_day
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__period_type__no_of_day
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__period_type__no_of_day
+msgid "Every N Days"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__period_type__year
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__period_type__year
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__period_type__year
+msgid "Every Year (anniversary)"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__0
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__0
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__0
+msgid "Monday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__1
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__1
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__1
+msgid "Tuesday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__2
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__2
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__2
+msgid "Wednesday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__3
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__3
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__3
+msgid "Thursday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__4
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__4
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__4
+msgid "Friday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__5
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__5
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__5
+msgid "Saturday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_type__day_type__6
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders__day_type__6
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_reminders_today__day_type__6
+msgid "Sunday"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_unit__now
+msgid "Immediately"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_unit__hours
+msgid "Hours"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_unit__days
+msgid "Days"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_unit__weeks
+msgid "Weeks"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_unit__months
+msgid "Months"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_type__before_event
+msgid "Before the reminder date"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_type__after_event
+msgid "After the reminder date"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_schedule__interval_type__on_event
+msgid "On the reminder date"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__delay_direction__before
+msgid "Before"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__delay_direction__after
+msgid "After"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__delay_direction__on
+msgid "On the day"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__user_field__salesperson
+msgid "Customer's Salesperson"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__user_field__creator
+msgid "Creator of the reminder"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__user_field__fixed
+msgid "Always this user"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields.selection,name:special_dates.selection__xb_wish_activity__user_field__current
+msgid "Current user"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_type__icon
+msgid "Emoji shown in the POS popup. Choose from the list."
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_type__activity_ids
+msgid "Activities (Call, Email, To-Do, ...) automatically created on the customer's record when this date arrives."
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_type__activity_ids
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+msgid "Activities scheduled on the customer the day of the event (or N days before/after). The responsible user receives the notification in their Activities dashboard."
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_type__show_in_pos
+msgid "When enabled, this reminder type can trigger a celebratory popup in the Point of Sale on its date. Uncheck to silence this type from the POS without disabling it for emails, SMS, or auto-activities."
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_reminders__is_due_today
+msgid "True when this reminder's next occurrence is today."
+msgstr ""
+
+#. module: special_dates
+#: model:ir.model.fields,help:special_dates.field_xb_wish_reminders__next_occurrence_date
+msgid "The next date on which this reminder will trigger. For yearly anniversaries, this is the upcoming birthday/anniversary."
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+msgid "Run Daily Cron Now"
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+msgid "This will process all due reminders right now (emails, SMS, activities). Continue?"
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_form
+msgid "Archived"
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_type_view_form
+msgid "Add one line per message you want to send. Pick the channel (Email, SMS, WhatsApp if installed), the number of days before/after the date, and the template."
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_form
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_search
+#: model:ir.ui.menu,name:special_dates.menu_special_dates_contacts_today
+msgid "Today"
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_form
+msgid "New Reminder"
+msgstr ""
+
+#. module: special_dates
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_list
+#: model_terms:ir.ui.view,arch_db:special_dates.xb_wish_reminders_view_search
+#: model:ir.ui.menu,name:special_dates.menu_special_dates_contacts_reminders
+msgid "Reminders"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.ui.menu,name:special_dates.menu_special_dates_contacts_types
+#: model:ir.actions.act_window,name:special_dates.xb_wish_type_action
+msgid "Reminder Types"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.actions.server,name:special_dates.xb_wish_today_server_action
+msgid "Today's Reminders"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.actions.act_window,name:special_dates.xb_wish_reminders_action
+msgid "Special Date Reminders"
+msgstr ""
+
+#. module: special_dates
+#: model:mail.template,name:special_dates.email_template_special_date_default
+msgid "Special Date: Default Greeting"
+msgstr ""
+
+#. module: special_dates
+#: model:res.groups,name:special_dates.group_special_dates_user
+msgid "Special Dates / User"
+msgstr ""
+
+#. module: special_dates
+#: model:res.groups,name:special_dates.group_special_dates_manager
+msgid "Special Dates / Manager"
+msgstr ""
+
+#. module: special_dates
+#: model:ir.cron,cron_name:special_dates.ir_cron_special_dates
+#: model:ir.actions.server,name:special_dates.ir_cron_special_dates_ir_actions_server
+msgid "Special Dates: Send Daily Reminders"
+msgstr ""

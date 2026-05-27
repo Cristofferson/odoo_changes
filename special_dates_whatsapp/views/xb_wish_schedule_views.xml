@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_wish_schedule_view_list_inherit_whatsapp" model="ir.ui.view">
+        <field name="name">xb.wish.schedule.list.whatsapp</field>
+        <field name="model">xb.wish.schedule</field>
+        <field name="inherit_id" ref="special_dates.xb_wish_schedule_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='sms_template_id']" position="after">
+                <field name="whatsapp_template_id"
+                       invisible="channel != 'whatsapp'"
+                       required="channel == 'whatsapp'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

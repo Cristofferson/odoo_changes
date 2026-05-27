@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_view_form_special_dates" model="ir.ui.view">
+        <field name="name">res.partner.form.special.dates</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Special Dates" name="special_dates">
+                    <field name="xb_wish_line">
+                        <list editable="bottom">
+                            <field name="wish_type"/>
+                            <field name="partner_id" column_invisible="1"/>
+                            <field name="period_type"/>
+                            <field name="day_type"
+                                   invisible="period_type != 'day'"
+                                   required="period_type == 'day'"/>
+                            <field name="no_of_day"
+                                   invisible="period_type != 'no_of_day'"
+                                   required="period_type == 'no_of_day'"/>
+                            <field name="date"
+                                   invisible="period_type != 'year'"
+                                   required="period_type == 'year'"/>
+                            <field name="last_wished_date"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </list>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="wish_type"/>
+                                    <field name="partner_id" invisible="1"/>
+                                    <field name="period_type"/>
+                                </group>
+                                <group>
+                                    <field name="day_type"
+                                           invisible="period_type != 'day'"
+                                           required="period_type == 'day'"/>
+                                    <field name="no_of_day"
+                                           invisible="period_type != 'no_of_day'"
+                                           required="period_type == 'no_of_day'"/>
+                                    <field name="date"
+                                           invisible="period_type != 'year'"
+                                           required="period_type == 'year'"/>
+                                    <field name="active"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

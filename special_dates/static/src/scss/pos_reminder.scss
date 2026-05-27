@@ -1,0 +1,257 @@
+.xb-reminder-popup {
+    min-width: 360px;
+    text-align: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #2b2b2b;
+}
+
+.xb-reminder-hero {
+    background: linear-gradient(135deg, #714B67 0%, #017E84 100%);
+    color: #fff;
+    padding: 28px 20px 22px 20px;
+}
+
+.xb-reminder-emoji {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.xb-reminder-greeting {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+.xb-reminder-sub {
+    font-size: 14px;
+    opacity: .85;
+    margin-top: 4px;
+}
+
+.xb-reminder-body {
+    padding: 20px 24px 4px 24px;
+}
+
+.xb-reminder-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.xb-reminder-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f7f7fb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.xb-reminder-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.xb-reminder-name {
+    flex: 1;
+    text-align: left;
+    font-weight: 600;
+    color: #1e266d;
+}
+
+.xb-reminder-date {
+    color: #888;
+    font-size: 13px;
+}
+
+.xb-reminder-footer {
+    padding: 12px 20px 22px 20px;
+}
+
+.xb-reminder-ok {
+    min-width: 160px;
+    border-radius: 999px;
+    background: #714B67;
+    border-color: #714B67;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+.xb-reminder-ok:hover,
+.xb-reminder-ok:focus {
+    background: #5a3a52;
+    border-color: #5a3a52;
+}
+
+/* ---------- Today reminders popup (welcome / bell) ---------- */
+.xb-today-popup {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #2b2b2b;
+}
+
+.xb-today-hero {
+    background: linear-gradient(135deg, #714B67 0%, #017E84 100%);
+    color: #fff;
+    padding: 26px 24px;
+    text-align: center;
+}
+
+.xb-today-emoji {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.xb-today-headline {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.xb-today-sub {
+    font-size: 13px;
+    opacity: .85;
+    margin-top: 4px;
+}
+
+.xb-today-search {
+    padding: 14px 20px 4px 20px;
+}
+
+.xb-today-list {
+    padding: 8px 12px 4px 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.xb-today-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: #f7f7fb;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color .12s ease, transform .12s ease;
+}
+
+.xb-today-item:hover {
+    background: #ece8f1;
+}
+
+.xb-today-item:active {
+    transform: scale(.99);
+}
+
+.xb-today-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ddd;
+    flex-shrink: 0;
+}
+
+.xb-today-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.xb-today-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e266d;
+    margin-bottom: 4px;
+}
+
+.xb-today-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.xb-today-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #ffffff;
+    border: 1px solid #e4e6f0;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: #5a5f6e;
+}
+
+.xb-today-chip-icon {
+    font-size: 14px;
+}
+
+.xb-today-chip-name {
+    font-weight: 500;
+}
+
+.xb-today-chevron {
+    font-size: 28px;
+    color: #aaa;
+    padding-right: 6px;
+}
+
+.xb-today-footer {
+    padding: 14px 20px 18px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.xb-today-close {
+    min-width: 140px;
+    border-radius: 999px;
+    background: #f1f1f4;
+    border: none;
+    color: #5a5f6e;
+    font-weight: 600;
+}
+
+/* ---------- Bell button in the POS navbar ---------- */
+.xb-bell-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-right: 8px;
+    border-radius: 50%;
+    transition: background-color .12s ease;
+}
+
+.xb-bell-btn:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+.xb-bell-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.xb-bell-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 0 0 2px #714B67;
+}

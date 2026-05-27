@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="email_template_special_date_default" model="mail.template">
+            <field name="name">Special Date: Default Greeting</field>
+            <field name="subject">{{ object.wish_type.name or 'Special Date' }} - Best wishes from {{ object.company_id.name or user.company_id.name }}!</field>
+            <field name="model_id" ref="model_xb_wish_reminders"/>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;background:#f4f6fb;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;
+              box-shadow:0 4px 24px rgba(0,0,0,.06);overflow:hidden;
+              font-family:'Helvetica Neue',Arial,sans-serif;color:#2b2b2b;">
+    <div style="background:linear-gradient(135deg,#714B67 0%,#017E84 100%);
+                padding:32px 24px;text-align:center;color:#fff;">
+      <div style="font-size:48px;line-height:1;margin-bottom:8px;">🎉</div>
+      <h1 style="margin:0;font-size:24px;font-weight:600;letter-spacing:.5px;">
+        <t t-out="object.wish_type.name or 'A special date'"/>
+      </h1>
+    </div>
+    <div style="padding:32px 28px;font-size:15px;line-height:1.6;">
+      <p style="margin:0 0 16px 0;">
+        Dear <strong t-out="object.partner_id.name or ''"/>,
+      </p>
+      <p style="margin:0 0 16px 0;">
+        On this special day, we want to take a moment to send you our warmest
+        wishes. Thank you for being part of our story — we hope your day is
+        filled with joy and the year ahead with success.
+      </p>
+      <p style="margin:0 0 24px 0;">
+        With appreciation,<br/>
+        <strong t-out="object.company_id.name or user.company_id.name"/>
+      </p>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
+      <p style="margin:0;font-size:12px;color:#888;text-align:center;">
+        This message was sent automatically by Special Dates.
+      </p>
+    </div>
+  </div>
+</div>
+            </field>
+        </record>
+    </data>
+</odoo>

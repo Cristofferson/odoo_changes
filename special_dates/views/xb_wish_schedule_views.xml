@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="xb_wish_schedule_view_list" model="ir.ui.view">
+        <field name="name">xb.wish.schedule.list</field>
+        <field name="model">xb.wish.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Communications" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="channel"/>
+                <field name="interval_nbr"
+                       invisible="interval_unit == 'now'"/>
+                <field name="interval_unit"/>
+                <field name="interval_type"
+                       invisible="interval_unit == 'now'"/>
+                <field name="mail_template_id"
+                       invisible="channel != 'mail'"
+                       required="channel == 'mail'"
+                       options="{'no_create_edit': True}"/>
+                <field name="sms_template_id"
+                       invisible="channel != 'sms'"
+                       required="channel == 'sms'"
+                       options="{'no_create_edit': True}"/>
+                <field name="last_sent" optional="hide"/>
+                <field name="sent_count" string="# Sent"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_wish_schedule_view_form" model="ir.ui.view">
+        <field name="name">xb.wish.schedule.form</field>
+        <field name="model">xb.wish.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Communication">
+                <sheet>
+                    <group>
+                        <group string="When">
+                            <field name="interval_nbr"
+                                   invisible="interval_unit == 'now'"/>
+                            <field name="interval_unit"/>
+                            <field name="interval_type"
+                                   invisible="interval_unit == 'now'"/>
+                        </group>
+                        <group string="What">
+                            <field name="channel"/>
+                            <field name="mail_template_id"
+                                   invisible="channel != 'mail'"
+                                   required="channel == 'mail'"/>
+                            <field name="sms_template_id"
+                                   invisible="channel != 'sms'"
+                                   required="channel == 'sms'"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Audit">
+                        <field name="last_sent" readonly="1"/>
+                        <field name="sent_count" readonly="1"/>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

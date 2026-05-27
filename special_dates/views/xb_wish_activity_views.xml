@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="xb_wish_activity_view_list" model="ir.ui.view">
+        <field name="name">xb.wish.activity.list</field>
+        <field name="model">xb.wish.activity</field>
+        <field name="arch" type="xml">
+            <list string="Auto-Activities" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="activity_type_id"/>
+                <field name="summary"/>
+                <field name="delay_count"
+                       invisible="delay_direction == 'on'"/>
+                <field name="delay_direction"/>
+                <field name="user_field"/>
+                <field name="user_id"
+                       invisible="user_field != 'fixed'"
+                       required="user_field == 'fixed'"
+                       options="{'no_create_edit': True}"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_wish_activity_view_form" model="ir.ui.view">
+        <field name="name">xb.wish.activity.form</field>
+        <field name="model">xb.wish.activity</field>
+        <field name="arch" type="xml">
+            <form string="Auto-Activity">
+                <sheet>
+                    <group>
+                        <group string="Activity">
+                            <field name="activity_type_id"/>
+                            <field name="summary"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="delay_direction"/>
+                            <field name="delay_count"
+                                   invisible="delay_direction == 'on'"/>
+                            <field name="user_field"/>
+                            <field name="user_id"
+                                   invisible="user_field != 'fixed'"
+                                   required="user_field == 'fixed'"/>
+                        </group>
+                    </group>
+                    <group string="Note">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

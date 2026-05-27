@@ -46,7 +46,7 @@ Key features
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Sales/Sales",
-    "version": "19.0.1.5.5",
+    "version": "19.0.1.5.6",
     "license": "OPL-1",
     "depends": [
         "base",

@@ -572,3 +572,33 @@ msgstr "Fechas Especiales / Administrador"
 #: model:ir.actions.server,name:special_dates.ir_cron_special_dates_ir_actions_server
 msgid "Special Dates: Send Daily Reminders"
 msgstr "Fechas Especiales: Enviar Recordatorios Diarios"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Special date added"
+msgstr "Fecha especial agregada"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Type"
+msgstr "Tipo"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Date"
+msgstr "Fecha"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Recurrence"
+msgstr "Recurrencia"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Every %s days"
+msgstr "Cada %s días"
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Special Date"
+msgstr "Fecha Especial"

@@ -572,3 +572,33 @@ msgstr ""
 #: model:ir.actions.server,name:special_dates.ir_cron_special_dates_ir_actions_server
 msgid "Special Dates: Send Daily Reminders"
 msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Special date added"
+msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Type"
+msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Date"
+msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Recurrence"
+msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Every %s days"
+msgstr ""
+
+#. module: special_dates
+#: code:addons/special_dates/models/xb_wish_reminders.py:0
+msgid "Special Date"
+msgstr ""

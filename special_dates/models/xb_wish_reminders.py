@@ -2,8 +2,10 @@
 import logging
 from datetime import date as _date
 from dateutil.relativedelta import relativedelta
+from markupsafe import Markup
 
 from odoo import api, fields, models, _
+from odoo.tools import format_date
 
 _logger = logging.getLogger(__name__)
 
@@ -287,6 +289,71 @@ class XbWishReminders(models.Model):
             self.day_type = self.wish_type.day_type
             self.no_of_day = self.wish_type.no_of_day
             self.date = self.wish_type.date
+
+    # ------------------------------------------------------------------
+    # Create override - log the new special date on the customer chatter
+    # ------------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._log_special_date_on_partner()
+        return records
+
+    def _log_special_date_on_partner(self):
+        """Post a note in the customer's chatter whenever a special date
+        is added to them, so the contact's history reflects it.
+
+        Split into its own method (with ``_special_date_log_body`` for the
+        message content) so that bridge modules can extend the body, e.g.
+        to mention the source document the date originated from.
+        """
+        if self.env.context.get("install_mode"):
+            return
+        for rec in self:
+            partner = rec.partner_id
+            if not partner:
+                continue
+            try:
+                partner.message_post(
+                    body=rec._special_date_log_body(),
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note",
+                )
+            except Exception as exc:  # noqa: BLE001
+                _logger.warning(
+                    "[special_dates] could not log special date %s "
+                    "on partner %s: %s", rec.id, partner.id, exc,
+                )
+
+    def _recurrence_label(self):
+        """Human, translated description of this reminder's recurrence."""
+        self.ensure_one()
+        sel = self.fields_get(["period_type", "day_type"])
+        period_labels = dict(sel["period_type"]["selection"])
+        if self.period_type == "day":
+            day_labels = dict(sel["day_type"]["selection"])
+            return day_labels.get(self.day_type) or period_labels.get("day", "")
+        if self.period_type == "no_of_day":
+            return _("Every %s days", self.no_of_day or 0)
+        return period_labels.get(self.period_type, "")
+
+    def _special_date_log_body(self):
+        """Return the Markup HTML body describing the special date that was
+        just added. Overridable by bridge modules."""
+        self.ensure_one()
+        icon = (self.wish_type.icon or "🎉") if self.wish_type else "🎉"
+        type_name = self.wish_type.name if self.wish_type else _("Special Date")
+        rows = [(_("Type"), type_name)]
+        if self.date:
+            rows.append((_("Date"), format_date(self.env, self.date)))
+        rows.append((_("Recurrence"), self._recurrence_label()))
+        items = Markup("").join(
+            Markup("<li>%s: %s</li>") % (label, value)
+            for label, value in rows
+        )
+        return Markup("<b>%s %s</b><ul>%s</ul>") % (
+            icon, _("Special date added"), items,
+        )
 
     # ------------------------------------------------------------------
     # Date arithmetic

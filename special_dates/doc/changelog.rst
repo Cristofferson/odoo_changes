@@ -1,6 +1,19 @@
 Changelog
 =========
 
+19.0.1.6.0 (2026-06)
+--------------------
+
+* **Chatter log on the customer.** Whenever a special date is added to
+  a contact, a note is now posted automatically in that contact's
+  chatter (type icon, type name, date and recurrence), so the partner's
+  history reflects when each reminder was created. The message body is
+  produced by ``_special_date_log_body`` and the posting by
+  ``_log_special_date_on_partner`` on ``xb.wish.reminders``, both
+  overridable so add-on/bridge modules can enrich the note (e.g. with
+  the source document the date came from). New strings translated to
+  es / es_MX.
+
 19.0.1.5.2 (2026-05)
 --------------------
 

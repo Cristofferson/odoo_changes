@@ -139,6 +139,17 @@ class XbWishType(models.Model):
         help="Emoji shown in the POS popup. Choose from the list.",
     )
 
+    xb_pos_auto_capture = fields.Boolean(
+        string="Capture at Point of Sale",
+        default=False,
+        help="When enabled, this Reminder Type can be captured at the "
+             "Point of Sale: when a cashier sells a product whose POS "
+             "category triggers this type, a popup asks to register the "
+             "special date for the customer. Independent of "
+             "'Show Popup in Point of Sale' (which controls the day-of "
+             "celebratory popup).",
+    )
+
     schedule_ids = fields.One2many(
         comodel_name="xb.wish.schedule",
         inverse_name="wish_type_id",

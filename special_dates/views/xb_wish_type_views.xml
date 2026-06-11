@@ -35,6 +35,7 @@
                                    required="period_type == 'no_of_day'"/>
                             <field name="date" invisible="period_type != 'year'"/>
                             <field name="show_in_pos"/>
+                            <field name="xb_pos_auto_capture"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>

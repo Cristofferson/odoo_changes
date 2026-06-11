@@ -386,3 +386,133 @@ class XbWishReminders(models.Model):
                     "Special Dates reminder %s failed: %s", reminder.id, exc
                 )
         return True
+
+    # ------------------------------------------------------------------
+    # POS integration - RPC endpoints
+    # ------------------------------------------------------------------
+    @api.model
+    def get_pos_capture_config(self):
+        """Return the list of POS categories that trigger special date
+        capture, paired with their target wish type.
+
+        Called once by the POS frontend at session load. The shape:
+            [
+                {
+                    "pos_category_id": 12,
+                    "wish_type_id": 1,
+                    "wish_type_name": "Aniversario de bodas",
+                    "wish_type_icon": "💕",
+                },
+                ...
+            ]
+        """
+        cats = self.env["pos.category"].sudo().search([
+            ("xb_triggers_wish_type_id", "!=", False),
+            ("xb_triggers_wish_type_id.active", "=", True),
+            ("xb_triggers_wish_type_id.xb_pos_auto_capture", "=", True),
+        ])
+        result = []
+        for cat in cats:
+            wt = cat.xb_triggers_wish_type_id
+            result.append({
+                "pos_category_id": cat.id,
+                "wish_type_id": wt.id,
+                "wish_type_name": wt.name,
+                "wish_type_icon": wt.icon or "🎉",
+            })
+        return result
+
+    @api.model
+    def check_existing_for_capture(self, partner_id, wish_type_id):
+        """Anti-duplicate check used by the POS popup.
+
+        Returns True if the customer ALREADY has an active reminder of
+        this wish type whose date falls within the next 90 days. In that
+        case the POS frontend will skip showing the capture popup.
+
+        Returns False if the popup should be shown (no clash).
+        """
+        if not partner_id or not wish_type_id:
+            return False
+        today = fields.Date.context_today(self)
+        horizon = today + relativedelta(days=90)
+        existing = self.sudo().search([
+            ("partner_id", "=", partner_id),
+            ("wish_type", "=", wish_type_id),
+            ("active", "=", True),
+            ("date", ">=", today),
+            ("date", "<=", horizon),
+        ], limit=1)
+        return bool(existing)
+
+    @api.model
+    def create_from_pos(self, partner_id, wish_type_id, event_date,
+                       pos_order_ref=None):
+        """Create a reminder from the POS capture popup.
+
+        Inherits period_type and other defaults from the wish type.
+        Adds a chatter message linking back to the POS order.
+
+        Args:
+            partner_id (int): res.partner.id of the customer.
+            wish_type_id (int): xb.wish.type.id to use.
+            event_date (str): ISO date 'YYYY-MM-DD' of the event.
+            pos_order_ref (str, optional): POS order reference for audit.
+
+        Returns:
+            dict with id and display_name of the created record, or
+            {"error": "..."} if validation fails.
+        """
+        if not partner_id or not wish_type_id or not event_date:
+            return {"error": _("Missing required data.")}
+
+        wish_type = self.env["xb.wish.type"].sudo().browse(wish_type_id)
+        if not wish_type.exists():
+            return {"error": _("Reminder type not found.")}
+
+        partner = self.env["res.partner"].sudo().browse(partner_id)
+        if not partner.exists():
+            return {"error": _("Customer not found.")}
+
+        # Safety: re-run the duplicate check server-side so the frontend
+        # can't bypass it by sending a stale state.
+        if self.check_existing_for_capture(partner_id, wish_type_id):
+            return {
+                "skipped": True,
+                "reason": _(
+                    "%(partner)s already has an active %(type)s reminder "
+                    "within the next 90 days."
+                ) % {"partner": partner.display_name, "type": wish_type.name},
+            }
+
+        vals = {
+            "wish_type": wish_type.id,
+            "partner_id": partner.id,
+            "date": event_date,
+            "period_type": wish_type.period_type,
+            "active": True,
+        }
+        # Inherit weekday / N-days defaults from the wish type when relevant.
+        if wish_type.period_type == "day" and wish_type.day_type:
+            vals["day_type"] = wish_type.day_type
+        if wish_type.period_type == "no_of_day" and wish_type.no_of_day:
+            vals["no_of_day"] = wish_type.no_of_day
+
+        reminder = self.sudo().create(vals)
+
+        # Audit trail in the chatter
+        ref_txt = " %s" % pos_order_ref if pos_order_ref else ""
+        reminder.message_post(
+            body=_(
+                "Reminder created from Point of Sale%(ref)s by %(user)s."
+            ) % {"ref": ref_txt, "user": self.env.user.display_name},
+            subtype_xmlid="mail.mt_note",
+        )
+
+        return {
+            "id": reminder.id,
+            "display_name": reminder.display_name,
+            "wish_type_name": wish_type.name,
+            "wish_type_icon": wish_type.icon or "🎉",
+            "date": event_date,
+        }

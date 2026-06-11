@@ -6,3 +6,4 @@ from . import xb_wish_reminders
 from . import xb_wish_reminders_today
 from . import res_partner
 from . import pos_session
+from . import pos_category

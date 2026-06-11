@@ -46,7 +46,7 @@ Key features
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Sales/Sales",
-    "version": "19.0.1.5.6",
+    "version": "19.0.1.6.1",
     "license": "OPL-1",
     "depends": [
         "base",
@@ -66,6 +66,7 @@ Key features
         "views/xb_wish_reminders_views.xml",
         "views/xb_wish_reminders_today_views.xml",
         "views/res_partner_views.xml",
+        "views/pos_category_views.xml",
         "views/special_dates_menus.xml",
     ],
     "assets": {
@@ -73,8 +74,10 @@ Key features
             "special_dates/static/src/js/pos/pos_store.js",
             "special_dates/static/src/js/pos/partner_reminder_popup.js",
             "special_dates/static/src/js/pos/today_reminders_popup.js",
+            "special_dates/static/src/js/pos/capture_special_date_popup.js",
             "special_dates/static/src/xml/partner_reminder_popup.xml",
             "special_dates/static/src/xml/today_reminders_popup.xml",
+            "special_dates/static/src/xml/capture_special_date_popup.xml",
             "special_dates/static/src/scss/pos_reminder.scss",
         ],
     },

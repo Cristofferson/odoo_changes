@@ -1,0 +1,511 @@
+# Spanish (Mexico) translation for xb_sale_order_from_pos.
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_sale_order_from_pos 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. ======================= Printed receipt =======================
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.js:0
+msgid "QUOTATION"
+msgstr "COTIZACIÓN"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.js:0
+msgid "ORDER"
+msgstr "PEDIDO"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.js:0
+msgid "LAYAWAY"
+msgstr "APARTADO"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.js:0
+msgid "ORDER / LAYAWAY"
+msgstr "PEDIDO / APARTADO"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Payment summary"
+msgstr "Resumen de pagos"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Order summary"
+msgstr "Resumen del pedido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Settlement payment"
+msgstr "Pago de esta liquidación"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "SETTLED"
+msgstr "LIQUIDADO"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Down payment / Paid"
+msgstr "Anticipado"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Balance due"
+msgstr "Saldo"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "Pay or review your order online:"
+msgstr "Paga o revisa tu pedido en línea:"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
+msgid "on the base of"
+msgstr "de"
+
+#. ======================= Cashier-facing (POS button, dialog, selector,
+#. alerts) =======================
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.xml:0
+msgid "Create Order"
+msgstr "Crear pedido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.xml:0
+msgid "Create Sale Order"
+msgstr "Crear pedido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Create from POS"
+msgstr "Crear desde el Punto de Venta"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Quotation"
+msgstr "Cotización"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Order"
+msgstr "Pedido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Layaway"
+msgstr "Apartado"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Order / Layaway"
+msgstr "Pedido / Apartado"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Missing customer"
+msgstr "Falta el cliente"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Select a customer before creating the order."
+msgstr "Selecciona un cliente antes de crear el pedido."
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Empty order"
+msgstr "Pedido vacío"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Add at least one product before creating the order."
+msgstr "Agrega al menos un producto antes de crear el pedido."
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Down-payment product missing"
+msgstr "Falta el producto de anticipo"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid ""
+"To register a layaway advance, set the down-payment product first:\n"
+"Point of Sale ▸ Settings ▸ this POS ▸ Down Payment Product."
+msgstr ""
+"Para registrar un anticipo de apartado, configura primero el producto de anticipo:\n"
+"Punto de Venta ▸ Ajustes ▸ este PdV ▸ Producto de Anticipo."
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "%s created from POS."
+msgstr "%s creado desde el Punto de Venta."
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Could not create the order"
+msgstr "No se pudo crear el pedido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/control_buttons/control_buttons.js:0
+msgid "Could not create the order."
+msgstr "No se pudo crear el pedido."
+
+#. ======================= Phase 4: layaway advance =======================
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/utils/order_payment_validation.js:0
+msgid "Advance required"
+msgstr "Anticipo requerido"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/utils/order_payment_validation.js:0
+msgid "This layaway requires an advance."
+msgstr "El apartado requiere un anticipo."
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/utils/order_payment_validation.js:0
+msgid "Balance mismatch"
+msgstr "Descuadre del saldo"
+
+#. module: xb_sale_order_from_pos
+#. odoo-javascript
+#: code:addons/xb_sale_order_from_pos/static/src/app/utils/order_payment_validation.js:0
+msgid ""
+"The amount to settle for %s (%s) does not match its balance (%s). Reload the"
+" order and try again."
+msgstr ""
+"El monto a liquidar de %s (%s) no coincide con su saldo (%s). Recarga el "
+"pedido e intenta de nuevo."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"0% IVA service product used to absorb the per-tax rounding cent when "
+"settling an all-16% order, so the CFDI total stays exact."
+msgstr ""
+"Producto de servicio con IVA 0% para absorber el centavo de redondeo por "
+"impuesto al liquidar un pedido todo-16%, manteniendo exacto el total del "
+"CFDI."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Add a payment QR to the receipt so the customer can review or pay the "
+"remaining balance online. Requires \"Detailed order receipt\"."
+msgstr ""
+"Agrega un QR de pago al recibo para que el cliente revise o pague el saldo "
+"restante en línea. Requiere «Recibo detallado del pedido»."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_show_portal_link
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_portal_link
+msgid ""
+"Add the order's online portal link (with access token) and a short "
+"instruction to the receipt, so the customer can review, add advances or "
+"settle the order online. Requires Online Payment and payment providers to be"
+" configured."
+msgstr ""
+"Agrega al recibo el enlace al portal en línea del pedido (con token de "
+"acceso) y una breve instrucción, para que el cliente pueda revisar, abonar o"
+" liquidar el pedido en línea. Requiere Pago en Línea y proveedores de pago "
+"configurados."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_enrich_receipt
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_enrich_receipt
+msgid ""
+"Add the order's product detail, total and pending balance to the printed "
+"receipt."
+msgstr ""
+"Agrega el detalle de productos, el total y el saldo pendiente del pedido al "
+"recibo impreso."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_enable_sale_order
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_enable_sale_order
+msgid ""
+"Allow creating quotations, sale orders and layaways (apartados) from this "
+"Point of Sale."
+msgstr ""
+"Permite crear cotizaciones, pedidos y apartados desde este Punto de Venta."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_allow_quotation
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_allow_quotation
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Allow quotations"
+msgstr "Permitir cotizaciones"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_autoprint_on_create
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_autoprint_on_create
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Auto-print receipt on create"
+msgstr "Imprimir recibo al crear"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_autoprint_on_create
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_autoprint_on_create
+msgid ""
+"Automatically print the order receipt right after creating the quotation / "
+"sale order / layaway from the POS."
+msgstr ""
+"Imprime automáticamente el recibo del pedido justo después de crear la "
+"cotización / pedido / apartado desde el PdV."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_autofactura_qr_paid_only
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_autofactura_qr_paid_only
+msgid ""
+"Controls the native self-invoice (\"Need an invoice?\") QR on receipts linked to a Sale Order.\n"
+"Enabled (default): the self-invoice QR appears only when the balance is 0 (settlement / fully-paid ticket), avoiding a double QR alongside the online payment QR on advance tickets.\n"
+"Disabled: the self-invoice QR appears on every ticket where it applies (native behaviour), for merchants that invoice each ticket. The online payment QR is independent (balance > 0 + 'Show online portal link')."
+msgstr ""
+"Controla el QR nativo de autofactura («¿Necesita factura?») en recibos ligados a un pedido de venta.\n"
+"Activado (por defecto): el QR de autofactura aparece solo cuando el saldo es 0 (ticket de liquidación / totalmente pagado), evitando un QR doble junto al QR de pago en línea en los abonos.\n"
+"Desactivado: el QR de autofactura aparece en cada ticket donde aplique (comportamiento nativo), para comercios que facturan cada ticket. El QR de pago en línea es independiente (saldo > 0 + «Mostrar enlace al portal en el recibo»)."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_enable_sale_order
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_enable_sale_order
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Create Sale Order / Quotation"
+msgstr "Crear pedido / cotización"
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Create quotations, sale orders and layaways (apartados) right from the Point"
+" of Sale."
+msgstr ""
+"Crea cotizaciones, pedidos y apartados directamente desde el Punto de Venta."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Default document state"
+msgstr "Estado por defecto del documento"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_default_so_state
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_default_so_state
+msgid "Default state"
+msgstr "Estado por defecto"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_enrich_receipt
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_enrich_receipt
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Detailed order receipt"
+msgstr "Recibo detallado del pedido"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_differentiate_order_layaway
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_differentiate_order_layaway
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Differentiate Order and Layaway"
+msgstr "Diferenciar Pedido y Apartado"
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Display the order total and pending balance next to its reference in the POS"
+" order panel."
+msgstr ""
+"Muestra el total y el saldo pendiente junto a la referencia en el panel de "
+"pedidos del PdV."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_show_order_balance
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_order_balance
+msgid ""
+"Display the order total and pending balance next to the order reference in "
+"the POS order panel."
+msgstr ""
+"Muestra el total del pedido y el saldo pendiente junto a la referencia del "
+"pedido en el panel de pedidos del PdV."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_rounding_product_id
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_rounding_product_id
+msgid ""
+"Fallback used when settling a sale order whose down payments cannot absorb "
+"the per-tax rounding cent in a 0% line (e.g. an all-16% order). Should be a "
+"0% IVA service product with a valid SAT ClaveProdServ so the CFDI stamps."
+msgstr ""
+"Alternativa al liquidar un pedido cuyos anticipos no pueden absorber el "
+"centavo de redondeo por impuesto en una línea 0% (p.ej. un pedido todo-16%)."
+" Debe ser un producto de servicio con IVA 0% y una ClaveProdServ del SAT "
+"válida para que el CFDI timbre."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_allow_quotation
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_allow_quotation
+msgid ""
+"Let the cashier create the order as a draft quotation that the customer can "
+"complete online or recover in-store."
+msgstr ""
+"Permite al cajero crear el pedido como cotización borrador que el cliente "
+"puede completar en línea o recuperar en tienda."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Let the cashier save the order as a draft quotation to complete online or "
+"recover later."
+msgstr ""
+"Permite al cajero guardar el pedido como cotización borrador para completar "
+"en línea o recuperar después."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_differentiate_order_layaway
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_differentiate_order_layaway
+msgid ""
+"OFF (default): the POS shows a single \"Order / Layaway\" action — a confirmed sale order with an optional advance (down payment).\n"
+"ON: the POS shows two separate actions — \"Order\" (confirmed, no advance) and \"Layaway\" (confirmed, with advance).\n"
+"\"Quotation\" is offered separately according to \"Allow quotations\"."
+msgstr ""
+"OFF (por defecto): el PdV muestra una sola acción «Pedido / Apartado» — un pedido confirmado con un anticipo opcional.\n"
+"ON: el PdV muestra dos acciones separadas — «Pedido» (confirmado, sin anticipo) y «Apartado» (confirmado, con anticipo).\n"
+"«Cotización» se ofrece aparte según «Permitir cotizaciones»."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Print the customer's reference code before their name on the receipt."
+msgstr ""
+"Imprime el código de referencia del cliente antes de su nombre en el recibo."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Print the order's product detail, total and pending balance on the receipt."
+msgstr ""
+"Imprime el detalle de productos, el total y el saldo pendiente en el recibo."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Print the receipt automatically right after the order is created."
+msgstr "Imprime el recibo automáticamente justo después de crear el pedido."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_autofactura_qr_paid_only
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_autofactura_qr_paid_only
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Self-invoice QR only when settled"
+msgstr "QR de autofactura solo al liquidar"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_rounding_product_id
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_rounding_product_id
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Settle rounding product"
+msgstr "Producto de redondeo de liquidación"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_show_partner_ref
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_partner_ref
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Show customer reference"
+msgstr "Mostrar referencia del cliente"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_show_portal_link
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_portal_link
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Show online portal link on receipt"
+msgstr "Mostrar enlace al portal en el recibo"
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Show separate \"Order\" and \"Layaway\" actions instead of a single combined"
+" one."
+msgstr ""
+"Muestra acciones separadas «Pedido» y «Apartado» en vez de una sola "
+"combinada."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_show_partner_ref
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_partner_ref
+msgid "Show the customer's reference code before their name."
+msgstr "Muestra el código de referencia del cliente antes de su nombre."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Show the self-invoice (\"Need an invoice?\") QR only on settled/paid "
+"tickets, avoiding a double QR on advance tickets. Requires Self-Invoicing."
+msgstr ""
+"Muestra el QR de autofactura («¿Necesita factura?») solo en tickets "
+"liquidados/pagados, evitando un QR doble en los abonos. Requiere "
+"Autofacturación."
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_pos_config__xb_show_order_balance
+#: model:ir.model.fields,field_description:xb_sale_order_from_pos.field_res_config_settings__pos_xb_show_order_balance
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "Show total & pending balance"
+msgstr "Mostrar total y saldo pendiente"
+
+#. module: xb_sale_order_from_pos
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_pos_config__xb_default_so_state
+#: model:ir.model.fields,help:xb_sale_order_from_pos.field_res_config_settings__pos_xb_default_so_state
+msgid ""
+"Pre-selects which document type is highlighted by default in the POS create "
+"dialog: a draft Quotation, or a Sale Order / Layaway. It only sets the "
+"default choice — nothing is confirmed on creation (the order is confirmed "
+"natively when its payment is collected)."
+msgstr ""
+"Preselecciona qué tipo de documento queda resaltado por defecto en el "
+"diálogo de creación del PdV: una Cotización borrador, o un Pedido de venta /"
+" Apartado. Solo fija la opción por defecto — no se confirma nada al crear "
+"(el pedido se confirma de forma nativa al cobrar su pago)."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid ""
+"Which document type is pre-selected by default in the POS create dialog. It "
+"does not confirm anything on creation."
+msgstr ""
+"Qué tipo de documento queda preseleccionado por defecto en el diálogo de "
+"creación del PdV. No confirma nada al crear."
+
+#. module: xb_sale_order_from_pos
+#: model_terms:ir.ui.view,arch_db:xb_sale_order_from_pos.res_config_settings_view_form_xb
+msgid "XUBAX - Sale Order / Quotation"
+msgstr "XUBAX - Pedido / Cotización"

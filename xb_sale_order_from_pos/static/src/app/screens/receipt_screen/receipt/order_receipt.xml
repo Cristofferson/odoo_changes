@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!--
+      XUBAX - Phase 3 receipt polish. All Sale-Order blocks only render when the
+      receipt's order carries SO data (xbGetSaleOrderTotals) and xb_enrich_receipt is
+      on, so regular POS receipts are untouched. Sizing lives in order_receipt.css.
+      Strings are translated to es_MX via i18n/es_MX.po.
+    -->
+
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <!-- (e) Sale-Order block AFTER the payment lines + change, so the POS
+             payments stay right under the TOTAL and our SO summary reads as a
+             distinct, final section. -->
+        <xpath expr="//div[hasclass('receipt-change')]" position="after">
+            <t t-set="xbSo" t-value="xbSaleOrder"/>
+            <t t-if="order.config.xb_enrich_receipt and xbSo">
+                <!-- (b) The Total/Advance/Balance summary is redundant when there was
+                     no advance (paid == 0): the printed TOTAL already says it all.
+                     Show it only when an advance/settlement was collected. -->
+                <t t-if="xbSo.paid &gt; 0">
+                    <div style="border-top:1px dashed #000;margin:6px 0 2px 0;"/>
+                    <!-- (g) Settlement ticket (balance reaches 0) is titled distinctly. -->
+                    <div class="xb-so-summary-title" style="font-size:11px;opacity:.8;">
+                        <t t-if="xbSo.balance &lt;= 0">Settlement payment</t>
+                        <t t-else="">Order summary</t>
+                    </div>
+                    <div class="xb-so-summary">
+                        <div class="pos-receipt-amount">
+                            <span>Total <t t-esc="xbSo.name"/></span>
+                            <span t-out="formatCurrency(xbSo.total)" class="pos-receipt-right-align font-monospace"/>
+                        </div>
+                        <!-- (h) Component breakdown = the SO's own product lines. Only on
+                             the ADVANCE ticket (balance &gt; 0); on a settle it is hidden
+                             (the products are already line items there). Small typography. -->
+                        <table t-if="xbSaleDetails and xbSo.balance &gt; 0" class="xb-so-details">
+                            <tr t-foreach="xbSaleDetails" t-as="xbDet" t-key="xbDet_index">
+                                <td class="text-truncate"><t t-esc="xbDet.product_uom_qty"/>x</td>
+                                <td class="text-truncate product-name"><t t-esc="xbDet.product_name"/></td>
+                                <td class="text-truncate">: </td>
+                                <td class="text-truncate"><t t-esc="xbDet.total"/></td>
+                            </tr>
+                        </table>
+                        <div class="pos-receipt-amount">
+                            <span>Down payment / Paid</span>
+                            <span t-out="formatCurrency(xbSo.paid)" class="pos-receipt-right-align font-monospace"/>
+                        </div>
+                        <!-- (g) Plain balance line, always "Saldo $X.XX" (so a settle shows
+                             "Saldo $0.00", no "LIQUIDADO" tag). The settlement context is
+                             already conveyed by the title above. -->
+                        <div class="pos-receipt-amount fw-bolder">
+                            <span>Balance due</span>
+                            <span t-out="formatCurrency(xbSo.balance)" class="pos-receipt-right-align font-monospace"/>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- (c) Payment QR: only while there is still a balance to pay (>0),
+                     both on creation and on advances. Hidden once settled (balance 0). -->
+                <div t-if="order.config.xb_show_portal_link and xbSo.portalUrl and xbSo.balance &gt; 0"
+                     class="xb-so-portal pt-3 text-center">
+                    <div>Pay or review your order online:</div>
+                    <img t-att-src="xbPortalQrCode(xbSo.portalUrl)" class="xb-so-portal-qr"
+                         alt="Order portal QR"/>
+                </div>
+            </t>
+        </xpath>
+
+        <!-- Tax breakdown connector: replace the bare generic "on" with our OWN unique
+             translatable term so es_MX renders "de" without retranslating shared "on". -->
+        <xpath expr="//t[@id='tax_base']" position="replace">
+            <t id="tax_base" t-if="!taxTotals.same_tax_base">
+                on the base of
+                <span t-esc="formatCurrency(tax_group.base_amount_currency)"/>
+            </t>
+        </xpath>
+
+        <!-- (PRIORITY) Cash-rounding consistency. The native "Rounding"/"To Pay" block is
+             gated on order.appliedRounding, which is 0 whenever the payment overpays by
+             more than a rounding unit (any change) -> the lines vanish and Total + Change
+             != Cash. Replace it with a block gated on xbShowRounding (cash rounding
+             applies AND the delta is non-zero) that derives the amounts from the TOTAL
+             itself, so it ALWAYS shows with or without change. Guarantees Total + Rounding
+             = To Pay; the native (asymmetric) Change keeps Cash - To Pay = Change. -->
+        <xpath expr="//t[@t-if='order.appliedRounding']" position="replace">
+            <t t-if="xbShowRounding">
+                <div class="pos-receipt-amount receipt-rounding">
+                    <span class="label-rounding">Rounding</span>
+                    <span t-out="formatCurrency(xbRoundingAmount)" class="pos-receipt-right-align font-monospace"/>
+                </div>
+                <div class="pos-receipt-amount receipt-to-pay">
+                    To Pay
+                    <span t-out="formatCurrency(xbRoundedTotal)" class="pos-receipt-right-align font-monospace"/>
+                </div>
+            </t>
+        </xpath>
+
+        <!-- (i) Footer RFC must show the fiscal entity's RFC even for a branch whose
+             own VAT is empty (then the parent's, via xb_cfdi_emisor_rfc). Widen the
+             native gate; the value comes from our vatText override. -->
+        <xpath expr="//div[@t-out='vatText']" position="attributes">
+            <attribute name="t-if">company.vat or company.xb_cfdi_emisor_rfc</attribute>
+        </xpath>
+
+        <!-- (d) The native self-invoice ("Need an invoice?") QR stays in its native
+             position (a position="move" dropped it). Only the unique code is enlarged,
+             via order_receipt.css (.unique-code). Add our configurable gate
+             (xb_autofactura_qr_paid_only) so the merchant can hide it on advance tickets
+             (balance > 0) and keep it on settle/paid tickets and normal sales. -->
+        <xpath expr="//div[@t-if='order.company.point_of_sale_use_ticket_qr_code and order.finalized']" position="attributes">
+            <attribute name="t-if">order.company.point_of_sale_use_ticket_qr_code and order.finalized and !xbHideAutofacturaQr</attribute>
+        </xpath>
+    </t>
+
+    <!-- ReceiptHeader: type header "<TYPE> <SO number>" between the logo and the ticket
+         number, and the highlighted customer block (ref before name, bold). -->
+    <t t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
+        <xpath expr="//img[hasclass('pos-receipt-logo')]" position="after">
+            <t t-set="xbSoHdr" t-value="order.xbGetSaleOrderTotals()"/>
+            <!-- (a) Title by STATE: a confirmed quotation (state 'sale') prints PEDIDO;
+                 only draft/sent quotations print COTIZACIÓN. Order/Layaway are fixed. -->
+            <t t-set="xbKind"
+               t-value="xbSoHdr and (xbSoHdr.type === 'quotation' ? (xbSoHdr.state === 'sale' ? 'order' : 'quotation') : xbSoHdr.type)"/>
+            <div t-if="xbSoHdr and xbSoHdr.type" class="xb-so-type text-center">
+                <span class="xb-so-type-word">
+                    <t t-if="xbKind === 'quotation'">QUOTATION</t>
+                    <t t-elif="xbKind === 'order'">ORDER</t>
+                    <t t-elif="xbKind === 'layaway'">LAYAWAY</t>
+                    <t t-else="">ORDER / LAYAWAY</t>
+                </span>
+                <t t-esc="' ' + xbSoHdr.name"/>
+            </div>
+        </xpath>
+
+        <xpath expr="//span[@t-esc='order.partner_id.name']" position="replace">
+            <t t-set="xbSoHdr2" t-value="order.xbGetSaleOrderTotals()"/>
+            <span t-att-class="xbSoHdr2 ? 'fw-bolder' : ''">
+                <t t-if="xbSoHdr2 and xbSoHdr2.partnerRef"><t t-esc="xbSoHdr2.partnerRef"/> — </t>
+                <t t-esc="order.partner_id.name"/>
+            </span>
+        </xpath>
+    </t>
+</templates>

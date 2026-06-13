@@ -1,0 +1,116 @@
+/*
+  XUBAX - Phase 3 printed receipt polish. Cosmetic only, all rules scoped to
+  .pos-receipt so the live order/cart screen is never affected. Clean-room.
+*/
+
+/* Type header (<TYPE> <SO number>) — small, between logo and ticket no. */
+.pos-receipt .xb-so-type {
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
+}
+/* Pull the native ticket-number block (pt-3) up tight against the type header. */
+.pos-receipt .xb-so-type + .pt-3 {
+    padding-top: 0.25rem !important;
+}
+
+/* Payment summary: centered title, and the three lines read as a smaller sub-block. */
+.pos-receipt .xb-so-summary-title {
+    text-align: center;
+}
+.pos-receipt .xb-so-summary .pos-receipt-amount {
+    font-size: 0.85em;
+}
+
+/* (c) Payment QR: enlarged so it scans easily from the printed ticket. */
+.pos-receipt .xb-so-portal-qr {
+    width: 160px;
+    height: 160px;
+    display: inline-block;
+    margin-top: 6px;
+}
+
+/* (h) Advance product breakdown in the order summary: small, same family as the
+   summary amounts, slightly dimmed. Full width, tight rows. */
+.pos-receipt .xb-so-details {
+    width: 100%;
+    font-size: 0.78em;
+    opacity: 0.85;
+    margin: 1px 0 2px 0;
+}
+.pos-receipt .xb-so-details td {
+    padding: 0 0.15rem 0 0;
+    vertical-align: top;
+}
+
+/* (d) Self-invoice ("Need an invoice?") block: enlarge the unique code so the
+   customer can read/type it. Its container is at font-size 75%. */
+.pos-receipt .unique-code {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* Product name (confirmed element: OrderDisplay[mode=receipt] -> Orderline ->
+   orderline.xml:11 .product-name > span.text-wrap). Undo the native .text-truncate
+   so the name uses the full row width and wraps to the end instead of being
+   clipped. Forced with !important since the non-!important rule had no effect. */
+.pos-receipt .product-name,
+.pos-receipt .product-name .text-wrap {
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+}
+/* Round 3: the real problem was width, not truncation — the big price shared the
+   row and squeezed the name into a narrow column. Give the name the FULL row width
+   so it uses long lines, and let the price drop to its own row below. The price's
+   parent is .line-details (d-flex, no wrap by default), so it must wrap too. */
+.pos-receipt .line-details {
+    flex-wrap: wrap !important;
+}
+.pos-receipt .product-name {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+}
+/* Price on its own row below the name, kept right-aligned. */
+.pos-receipt .product-price {
+    margin-left: auto !important;
+}
+.pos-receipt .product-name .text-wrap {
+    overflow-wrap: anywhere;
+}
+/* Pull the name hard to the left. The real indent is NOT a name padding: the
+   printed receipt forces the quantity column to min-width 3.5rem
+   (point_of_sale/static/src/css/pos_receipts.css: .pos-receipt-print .qty), so the
+   name starts ~3.5rem in. Shrink that column and tighten the gap after the
+   quantity, scoped to the receipt/print contexts (the cart screen is neither). */
+.pos-receipt .qty,
+.pos-receipt-print .qty {
+    min-width: 0 !important;
+}
+.pos-receipt .product-name .qty,
+.pos-receipt-print .product-name .qty {
+    padding-left: 0 !important;
+    padding-right: 0.1rem !important;
+}
+/* (f) Residual left indent: the name sits after the qty column. With .qty at
+   min-width 0 and the gap tightened above, the name starts ~1ch in. Also zero any
+   name/orderline left padding so wrapped lines hug the left edge. NOTE: confirm the
+   final indent on the rendered ticket — no live DOM was available here. */
+.pos-receipt .product-name,
+.pos-receipt-print .product-name {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* Order-level general customer note: print it at the SAME small size as the
+   per-product orderline notes (info-list font-size: 75%). The native receipt
+   shows the general note at normal size. The general note is rendered by
+   OrderDisplay as a direct-child div of .order-container with the receipt-only
+   marker class .bg-opacity-75 (order_display.xml). Scoped to .pos-receipt. */
+.pos-receipt .order-container > div.bg-opacity-75 {
+    font-size: 0.75em;
+}

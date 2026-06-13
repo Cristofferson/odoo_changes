@@ -1,0 +1,17 @@
+# Spanish translation for xb_sale_order_from_pos.
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_sale_order_from_pos 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# --- Reference translations (the module's own source strings will be the msgids) ---
+# msgid "Create Sale Order"
+# msgstr "Crear Pedido/Apartado"
+#
+# msgid "View Sales Order"
+# msgstr "Ver Pedidos/Apartados"

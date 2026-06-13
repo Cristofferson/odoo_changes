@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--
+      XUBAX - show the per-line POS notes on the EXPANDED Sale Order line form
+      (the inline <form> of the order_line field), not as tree columns, to avoid
+      cluttering the order lines list. Anchored after the line Description.
+    -->
+    <record id="view_order_form_xb_line_notes" model="ir.ui.view">
+        <field name="name">sale.order.form.xb.line.notes</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/form/field[@name='name']" position="after">
+                <group invisible="display_type" name="xb_line_notes" string="POS Notes">
+                    <field name="xb_customer_note"/>
+                    <field name="xb_internal_note"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+      XUBAX - show the POS pending balance (sale.order.amount_unpaid) as an optional
+      column in the Sale Order list. Inherits the base list (sale.sale_order_tree)
+      so it also appears in the quotations list used by the native POS "Quotation /
+      Order" recovery dialog (SelectCreateDialog), where each SO row then shows its
+      balance.
+    -->
+    <record id="view_order_tree_xb_balance" model="ir.ui.view">
+        <field name="name">sale.order.list.xb.balance</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="amount_unpaid" optional="show" string="Balance (POS)"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

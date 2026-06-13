@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_xb" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.xb.sale.order.from.pos</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!--
+              ANCHOR (verified against point_of_sale.res_config_settings_view_form in
+              Odoo 19.0): the native view uses <app name="point_of_sale"> with all
+              per-POS blocks inside the single <div invisible="not pos_config_id">
+              wrapper. We append our block there: it sits among the native sections and
+              only shows when a POS is selected. Each toggle is its own <setting> (title +
+              muted help), so Odoo lays them out in the native two-column grid (col-lg-6).
+              Sub-settings are hidden until the master toggle is on.
+            -->
+            <xpath expr="//div[@invisible='not pos_config_id']" position="inside">
+                <block title="XUBAX - Sale Order / Quotation" id="xb_sale_order_block">
+                    <!-- Master toggle -->
+                    <setting id="xb_enable_sale_order_setting"
+                             string="Create Sale Order / Quotation"
+                             help="Create quotations, sale orders and layaways (apartados) right from the Point of Sale.">
+                        <field name="pos_xb_enable_sale_order"/>
+                    </setting>
+
+                    <!-- Document handling -->
+                    <setting id="xb_default_so_state_setting"
+                             string="Default document state"
+                             help="Which document type is pre-selected by default in the POS create dialog. It does not confirm anything on creation."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_default_so_state"/>
+                    </setting>
+                    <setting id="xb_allow_quotation_setting"
+                             string="Allow quotations"
+                             help="Let the cashier save the order as a draft quotation to complete online or recover later."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_allow_quotation"/>
+                    </setting>
+                    <setting id="xb_differentiate_setting"
+                             string="Differentiate Order and Layaway"
+                             help="Show separate &quot;Order&quot; and &quot;Layaway&quot; actions instead of a single combined one."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_differentiate_order_layaway"/>
+                    </setting>
+
+                    <!-- POS display -->
+                    <setting id="xb_show_order_balance_setting"
+                             string="Show total &amp; pending balance"
+                             help="Display the order total and pending balance next to its reference in the POS order panel."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_show_order_balance"/>
+                    </setting>
+
+                    <!-- Receipt -->
+                    <setting id="xb_enrich_receipt_setting"
+                             string="Detailed order receipt"
+                             help="Print the order's product detail, total and pending balance on the receipt."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_enrich_receipt"/>
+                    </setting>
+                    <setting id="xb_show_partner_ref_setting"
+                             string="Show customer reference"
+                             help="Print the customer's reference code before their name on the receipt."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_show_partner_ref"/>
+                    </setting>
+                    <setting id="xb_autoprint_setting"
+                             string="Auto-print receipt on create"
+                             help="Print the receipt automatically right after the order is created."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_autoprint_on_create"/>
+                    </setting>
+                    <setting id="xb_show_portal_link_setting"
+                             string="Show online portal link on receipt"
+                             help="Add a payment QR to the receipt so the customer can review or pay the remaining balance online. Requires &quot;Detailed order receipt&quot;."
+                             invisible="not pos_xb_enable_sale_order or not pos_xb_enrich_receipt">
+                        <field name="pos_xb_show_portal_link"/>
+                    </setting>
+                    <setting id="xb_autofactura_qr_setting"
+                             string="Self-invoice QR only when settled"
+                             help="Show the self-invoice (&quot;Need an invoice?&quot;) QR only on settled/paid tickets, avoiding a double QR on advance tickets. Requires Self-Invoicing."
+                             invisible="not pos_xb_enable_sale_order or not point_of_sale_use_ticket_qr_code">
+                        <field name="pos_xb_autofactura_qr_paid_only"/>
+                    </setting>
+
+                    <!-- Settlement -->
+                    <setting id="xb_rounding_product_setting"
+                             string="Settle rounding product"
+                             help="0% IVA service product used to absorb the per-tax rounding cent when settling an all-16% order, so the CFDI total stays exact."
+                             invisible="not pos_xb_enable_sale_order">
+                        <field name="pos_xb_rounding_product_id" options="{'no_create': True}"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

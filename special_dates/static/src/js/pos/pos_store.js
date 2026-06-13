@@ -58,6 +58,10 @@ patch(PosStore.prototype, {
         this._xbPendingCaptures = new Map();
         // Map<"orderUuid:wishTypeId", "dismissed"> -- user explicitly opted out
         this._xbDismissedCaptures = new Set();
+        // True while a capture popup is on screen. Re-entry guard: no
+        // matter which path triggers a capture (product added, partner
+        // set, pre-payment drain), only one popup may be open at a time.
+        this._xbCaptureDialogOpen = false;
         this._xbLoadCaptureConfig().catch((err) => {
             console.warn("[special_dates] capture config load failed:", err);
         });
@@ -168,11 +172,6 @@ patch(PosStore.prototype, {
                 wish_type_icon: row.wish_type_icon || "🎉",
             });
         }
-        console.info(
-            "[special_dates] capture config loaded:",
-            this._xbCaptureConfig.size,
-            "trigger categories"
-        );
     },
 
     /**
@@ -185,15 +184,32 @@ patch(PosStore.prototype, {
         if (!this._xbCaptureConfig || this._xbCaptureConfig.size === 0) {
             return null;
         }
-        // Different POS data shapes -- be defensive.
+        // pos_categ_ids is a product.template field. In Odoo 19 the POS
+        // order line's product_id is a product.product variant. Its
+        // template proxy only delegates a field to the template when the
+        // field is absent from the variant model -- but product.product
+        // inherits pos_categ_ids via _inherits, so the field IS present on
+        // the variant model yet is NOT loaded with data in the POS (it's in
+        // product.template._load_pos_data_fields, not product.product's).
+        // The proxy therefore returns the variant's empty value and never
+        // reaches the template. Read the template explicitly first, then
+        // fall back to the other shapes defensively.
+        const sources = [
+            product.product_tmpl_id && product.product_tmpl_id.pos_categ_ids,
+            product.pos_categ_ids,
+            product.pos_categ_id,
+        ];
         let catIds = [];
-        if (Array.isArray(product.pos_categ_ids)) {
-            catIds = product.pos_categ_ids
-                .map((c) => (typeof c === "object" ? c.id : c))
-                .filter(Boolean);
-        } else if (product.pos_categ_id) {
-            const c = product.pos_categ_id;
-            catIds = [typeof c === "object" ? c.id : c];
+        for (const src of sources) {
+            if (!src) continue;
+            if (Array.isArray(src)) {
+                catIds = src
+                    .map((c) => (typeof c === "object" ? c.id : c))
+                    .filter(Boolean);
+            } else {
+                catIds = [typeof src === "object" ? src.id : src];
+            }
+            if (catIds.length) break;
         }
         for (const id of catIds) {
             const cfg = this._xbCaptureConfig.get(id);
@@ -262,63 +278,101 @@ patch(PosStore.prototype, {
         if (this._xbDismissedCaptures.has(dismissKey)) {
             return;
         }
-        // Anti-duplicate: ask the backend if this partner already has a
-        // matching reminder in the next 90 days.
-        let exists;
-        try {
-            exists = await this.env.services.orm.call(
-                "xb.wish.reminders",
-                "check_existing_for_capture",
-                [partner.id, cfg.wish_type_id]
-            );
-        } catch (err) {
-            console.warn("[special_dates] dupe-check failed:", err);
-            exists = false;
-        }
-        if (exists) {
-            // Silently clear the pending entry.
-            this._xbClearPending(order, cfg.wish_type_id);
+        // Re-entry guard. Claim the slot before any await so two
+        // concurrent calls can't both reach dialog.add.
+        if (this._xbCaptureDialogOpen) {
             return;
         }
-
-        const partnerName = partner.name || partner.display_name || "";
-        const orderRef = order.name || order.uuid || "";
-
-        const self = this;
-        const onConfirm = async (dateIso) => {
-            const result = await self.env.services.orm.call(
-                "xb.wish.reminders",
-                "create_from_pos",
-                [partner.id, cfg.wish_type_id, dateIso, orderRef]
-            );
-            if (result && result.error) {
-                throw new Error(result.error);
-            }
-            self._xbClearPending(order, cfg.wish_type_id);
-            if (self.env.services.notification) {
-                self.env.services.notification.add(
-                    `${cfg.wish_type_icon || "🎉"} ${cfg.wish_type_name} saved`,
-                    { type: "success" }
+        this._xbCaptureDialogOpen = true;
+        let opened = false;
+        try {
+            // Anti-duplicate: ask the backend if this partner already has
+            // a matching reminder in the next 90 days.
+            let exists;
+            try {
+                exists = await this.env.services.orm.call(
+                    "xb.wish.reminders",
+                    "check_existing_for_capture",
+                    [partner.id, cfg.wish_type_id]
                 );
+            } catch (err) {
+                console.warn("[special_dates] dupe-check failed:", err);
+                exists = false;
             }
-        };
-        const onLater = () => {
-            // Keep pending; don't dismiss. Will reappear at payment time.
-        };
-        const onDismiss = () => {
-            self._xbDismissedCaptures.add(dismissKey);
-            self._xbClearPending(order, cfg.wish_type_id);
-        };
+            if (exists) {
+                // Silently clear the pending entry.
+                this._xbClearPending(order, cfg.wish_type_id);
+                return;
+            }
 
-        this.dialog.add(CaptureSpecialDatePopup, {
-            partnerName,
-            wishTypeName: cfg.wish_type_name,
-            wishTypeIcon: cfg.wish_type_icon || "🎉",
-            defaultDate: nextSaturdayIso(),
-            onConfirm,
-            onLater,
-            onDismiss,
-        });
+            const partnerName = partner.name || partner.display_name || "";
+            const orderRef = order.name || order.uuid || "";
+
+            const self = this;
+            const onConfirm = async (dateIso) => {
+                // Settle local state BEFORE the RPC: anything that fires
+                // while the call is in flight must see this capture as
+                // already handled.
+                self._xbDismissedCaptures.add(dismissKey);
+                self._xbClearPending(order, cfg.wish_type_id);
+                let result;
+                try {
+                    result = await self.env.services.orm.call(
+                        "xb.wish.reminders",
+                        "create_from_pos",
+                        [partner.id, cfg.wish_type_id, dateIso, orderRef]
+                    );
+                } catch (err) {
+                    // Roll back so the user can retry or use "Later".
+                    self._xbDismissedCaptures.delete(dismissKey);
+                    self._xbRegisterPending(order, cfg);
+                    throw err;
+                }
+                if (result && result.error) {
+                    self._xbDismissedCaptures.delete(dismissKey);
+                    self._xbRegisterPending(order, cfg);
+                    throw new Error(result.error);
+                }
+                if (self.env.services.notification) {
+                    self.env.services.notification.add(
+                        `${cfg.wish_type_icon || "🎉"} ${cfg.wish_type_name} saved`,
+                        { type: "success" }
+                    );
+                }
+            };
+            const onLater = () => {
+                // Keep pending; don't dismiss. Will reappear at payment time.
+            };
+            const onDismiss = () => {
+                self._xbDismissedCaptures.add(dismissKey);
+                self._xbClearPending(order, cfg.wish_type_id);
+            };
+
+            this.dialog.add(
+                CaptureSpecialDatePopup,
+                {
+                    partnerName,
+                    wishTypeName: cfg.wish_type_name,
+                    wishTypeIcon: cfg.wish_type_icon || "🎉",
+                    defaultDate: nextSaturdayIso(),
+                    onConfirm,
+                    onLater,
+                    onDismiss,
+                },
+                {
+                    // Runs on ANY close path (buttons, ESC, closeAll), so
+                    // the guard can never be left stuck.
+                    onClose: () => {
+                        this._xbCaptureDialogOpen = false;
+                    },
+                }
+            );
+            opened = true;
+        } finally {
+            if (!opened) {
+                this._xbCaptureDialogOpen = false;
+            }
+        }
     },
 
     _xbClearPending(order, wishTypeId) {
@@ -357,7 +411,9 @@ patch(PosStore.prototype, {
                 }
             }
             if (cfg) {
-                // Wait for each popup sequentially to avoid stacking.
+                // The dialog-open guard inside _xbMaybeShowCapture keeps a
+                // single popup on screen; captures not shown now stay
+                // pending and resurface on the next drain (e.g. at pay).
                 try {
                     await this._xbMaybeShowCapture(order, partner, cfg);
                 } catch (err) {

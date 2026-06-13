@@ -1,6 +1,27 @@
 Changelog
 =========
 
+19.0.1.6.2 (2026-06)
+--------------------
+
+* **Fix: POS capture popup never appeared.** ``_xbCaptureForProduct``
+  read ``pos_categ_ids`` from the order line's ``product.product``
+  variant, which is empty in the POS (the field is loaded for
+  ``product.template`` only). The proxy never falls through to the
+  template because the variant *inherits* the field via ``_inherits``,
+  so it returns the variant's empty value. Now reads
+  ``product.product_tmpl_id.pos_categ_ids`` explicitly, with defensive
+  fallbacks.
+* **Single-popup re-entry guard.** A ``_xbCaptureDialogOpen`` flag
+  ensures only one capture popup is on screen regardless of which path
+  triggers it (product added, partner set, pre-payment drain). Local
+  state is now settled before the ``create_from_pos`` RPC and rolled
+  back on error.
+* **Translations regenerated.** ``es`` / ``es_MX`` / ``.pot`` rebuilt
+  against the current module — the POS-capture feature added ~146 new
+  strings (the ``Triggers Reminder Type`` field, capture/today popups,
+  emoji selection labels, help texts) that were previously untranslated.
+
 19.0.1.5.2 (2026-05)
 --------------------
 

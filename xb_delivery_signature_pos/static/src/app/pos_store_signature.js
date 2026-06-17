@@ -10,10 +10,10 @@ import { DeliverySignaturePopup } from "@xb_delivery_signature_pos/app/signature
 
 patch(PosStore.prototype, {
     async xbCaptureDeliverySignature(order) {
-        const partner = order.get_partner?.();
+        const partnerName = order.getPartnerName?.() || order.getPartner?.()?.name || "";
         const payload = await makeAwaitable(this.dialog, DeliverySignaturePopup, {
             title: _t("Delivery receipt signature"),
-            defaultName: partner?.name || "",
+            defaultName: partnerName,
         });
         if (!payload || !payload.signature) {
             return; // customer skipped / closed
@@ -22,7 +22,7 @@ patch(PosStore.prototype, {
         // it (the auto-print happens right after this, in super.afterOrderValidation).
         order.uiState.xbDeliverySignature = {
             image: "data:image/png;base64," + payload.signature,
-            name: payload.name || partner?.name || "",
+            name: payload.name || partnerName || "",
         };
         // After sync the local record carries the real database id.
         const orderId = typeof order.id === "number" && order.id > 0 ? order.id : false;

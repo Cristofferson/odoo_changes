@@ -18,6 +18,12 @@ patch(PosStore.prototype, {
         if (!payload || !payload.signature) {
             return; // customer skipped / closed
         }
+        // Stash the full data URL on the order so the receipt template can render
+        // it (the auto-print happens right after this, in super.afterOrderValidation).
+        order.uiState.xbDeliverySignature = {
+            image: "data:image/png;base64," + payload.signature,
+            name: payload.name || partner?.name || "",
+        };
         // After sync the local record carries the real database id.
         const orderId = typeof order.id === "number" && order.id > 0 ? order.id : false;
         if (!orderId) {

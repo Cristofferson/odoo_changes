@@ -33,6 +33,12 @@
                              invisible="not xb_delivery_signature_required">
                         <field name="xb_delivery_signature_mirror_so"/>
                     </setting>
+                    <setting id="xb_delivery_signature_on_slip_setting"
+                             string="Print signature on the delivery slip"
+                             help="Show the captured signature (and who signed) on the printed delivery slip (PDF)."
+                             invisible="not xb_delivery_signature_required">
+                        <field name="xb_delivery_signature_on_slip"/>
+                    </setting>
                 </block>
             </xpath>
         </field>

@@ -20,3 +20,6 @@ class ResConfigSettings(models.TransientModel):
     xb_delivery_signature_mirror_so = fields.Boolean(
         related="company_id.xb_delivery_signature_mirror_so", readonly=False
     )
+    xb_delivery_signature_on_slip = fields.Boolean(
+        related="company_id.xb_delivery_signature_on_slip", readonly=False
+    )

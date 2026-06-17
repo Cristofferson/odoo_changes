@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!-- Show the captured delivery signature on the POS receipt, gated on the
+         per-POS toggle. Only renders when a signature was captured for this
+         order (order.uiState.xbDeliverySignature), so normal receipts are
+         untouched. -->
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('after-footer')]" position="after">
+            <t t-if="order.config.xb_delivery_signature_on_receipt and order.uiState.xbDeliverySignature">
+                <div class="xb-delivery-signature text-center" style="margin-top:8px;border-top:1px dashed #000;padding-top:6px;">
+                    <div style="font-size:11px;opacity:.8;">Received by:</div>
+                    <img t-att-src="order.uiState.xbDeliverySignature.image"
+                         style="max-height:120px;max-width:100%;"
+                         alt="Delivery signature"/>
+                    <div t-if="order.uiState.xbDeliverySignature.name" style="font-size:12px;">
+                        <t t-esc="order.uiState.xbDeliverySignature.name"/>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-17 22:36+0000\n"
+"POT-Creation-Date: 2026-06-17 23:10+0000\n"
 "PO-Revision-Date: 2026-06-17 22:40+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -22,6 +22,13 @@ msgid ""
 "<i class=\"fa fa-check-circle me-1\"/>\n"
 "                                    Thank you. This delivery was signed"
 msgstr ""
+"<i class=\"fa fa-check-circle me-1\"/>\n"
+"                                    Gracias. Esta entrega fue firmada"
+
+#. module: xb_delivery_signature
+#: model_terms:ir.ui.view,arch_db:xb_delivery_signature.report_delivery_document_xb_signature
+msgid "<strong>Received by:</strong>"
+msgstr "<strong>Recibido por:</strong>"
 
 #. module: xb_delivery_signature
 #: model:ir.model.fields,field_description:xb_delivery_signature.field_res_company__xb_delivery_signature_portal
@@ -39,6 +46,10 @@ msgid ""
 "deliveries the Sale Order reflects the most recent one; the per-delivery "
 "copy is always kept."
 msgstr ""
+"Escribe también la firma capturada en los campos de firma nativos del pedido"
+" de venta vinculado (Firma / Firmado por / Firmado el). Con entregas "
+"parciales el pedido de venta refleja la más reciente; la copia por entrega "
+"siempre se conserva."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
@@ -46,6 +57,9 @@ msgid ""
 "Also write the signature to the linked Sale Order's native signature fields."
 " With partial deliveries the Sale Order reflects the most recent one."
 msgstr ""
+"Escribe también la firma en los campos de firma nativos del pedido de venta "
+"vinculado. Con entregas parciales el pedido de venta refleja la más "
+"reciente."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
@@ -53,6 +67,8 @@ msgid ""
 "Block validation of an outgoing delivery until it is signed (the signature "
 "pad pops up on the operator's device)."
 msgstr ""
+"Bloquea la validación de una entrega saliente hasta que sea firmada (el "
+"panel de firma aparece en el dispositivo del operador)."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.xb_delivery_signature_wizard_form
@@ -66,6 +82,8 @@ msgid ""
 "Capture the customer's received signature on outgoing deliveries of this "
 "company (on the operator's tablet and/or from the portal)."
 msgstr ""
+"Captura la firma de recibido del cliente en las entregas salientes de esta "
+"compañía (en la tableta del operador y/o desde el portal)."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
@@ -166,6 +184,9 @@ msgid ""
 "order's access token) so the customer can sign the delivery from their own "
 "phone."
 msgstr ""
+"Expone un enlace seguro de portal (/my/delivery/<id>/sign, autorizado por el"
+" token de acceso del pedido de venta) para que el cliente pueda firmar la "
+"entrega desde su propio teléfono."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
@@ -173,6 +194,9 @@ msgid ""
 "Expose a secure portal link so the customer can sign the delivery from their"
 " own phone (authorised by the sale order's access token)."
 msgstr ""
+"Expone un enlace seguro de portal para que el cliente pueda firmar la "
+"entrega desde su propio teléfono (autorizado por el token de acceso del "
+"pedido de venta)."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.xb_delivery_signature_wizard_form
@@ -192,6 +216,11 @@ msgstr ""
 #: code:addons/xb_delivery_signature/controllers/portal.py:0
 msgid "Invalid signature data."
 msgstr "Datos de firma no válidos."
+
+#. module: xb_delivery_signature
+#: model_terms:ir.ui.view,arch_db:xb_delivery_signature.report_delivery_document_xb_signature
+msgid "John Doe"
+msgstr ""
 
 #. module: xb_delivery_signature
 #: model:ir.model.fields,field_description:xb_delivery_signature.field_xb_delivery_signature_wizard__write_uid
@@ -221,9 +250,26 @@ msgid "Please sign below to confirm you received this delivery."
 msgstr "Firme abajo para confirmar que recibió esta entrega."
 
 #. module: xb_delivery_signature
+#: model:ir.model.fields,field_description:xb_delivery_signature.field_res_company__xb_delivery_signature_on_slip
+#: model:ir.model.fields,field_description:xb_delivery_signature.field_res_config_settings__xb_delivery_signature_on_slip
+#: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
+msgid "Print signature on the delivery slip"
+msgstr "Imprimir firma en el albarán"
+
+#. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.view_picking_form_xb_signature
 msgid "Request signature"
 msgstr "Solicitar firma"
+
+#. module: xb_delivery_signature
+#: model:ir.model.fields,help:xb_delivery_signature.field_res_company__xb_delivery_signature_on_slip
+#: model:ir.model.fields,help:xb_delivery_signature.field_res_config_settings__xb_delivery_signature_on_slip
+#: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature
+msgid ""
+"Show the captured signature (and who signed) on the printed delivery slip "
+"(PDF)."
+msgstr ""
+"Mostrar la firma capturada (y quién firmó) en el albarán impreso (PDF)."
 
 #. module: xb_delivery_signature
 #: model:ir.model.fields,field_description:xb_delivery_signature.field_xb_delivery_signature_wizard__signature
@@ -280,6 +326,10 @@ msgid ""
 "disabled, the signature is offered (\"Request signature\" button / portal) "
 "but never blocks validation."
 msgstr ""
+"Cuando está activado, una entrega saliente no puede validarse hasta "
+"firmarse: al validarla aparece el panel de firma en el dispositivo del "
+"operador. Cuando está desactivado, la firma se ofrece (botón \"Solicitar "
+"firma\" / portal) pero nunca bloquea la validación."
 
 #. module: xb_delivery_signature
 #: model_terms:ir.ui.view,arch_db:xb_delivery_signature.res_config_settings_view_form_xb_delivery_signature

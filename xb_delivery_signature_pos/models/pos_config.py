@@ -14,3 +14,8 @@ class PosConfig(models.Model):
         help="Pop up a signature pad right after the order is validated so the "
              "customer signs the reception on the cashier's device.",
     )
+    xb_delivery_signature_on_receipt = fields.Boolean(
+        string="Print signature on the POS receipt",
+        default=True,
+        help="Show the captured signature on the POS receipt/ticket.",
+    )

@@ -6,11 +6,13 @@ import OrderPaymentValidation from "@point_of_sale/app/utils/order_payment_valid
 
 patch(OrderPaymentValidation.prototype, {
     async afterOrderValidation() {
-        const res = await super.afterOrderValidation(...arguments);
+        // Capture BEFORE super so the signature is stashed on the order in time
+        // for the auto-print + receipt screen. The order is already synced here
+        // (afterOrderValidation runs after syncAllOrders), so it carries a
+        // server id we can write to.
         if (this.pos.config.xb_capture_delivery_signature) {
-            // The order is synced here, so it carries a server id we can write to.
             await this.pos.xbCaptureDeliverySignature(this.order);
         }
-        return res;
+        return super.afterOrderValidation(...arguments);
     },
 });

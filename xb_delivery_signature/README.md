@@ -28,6 +28,9 @@ Settings ▸ Inventory ▸ *XUBAX - Delivery Receipt Signature*:
 | Signature mandatory to validate | Block validation until signed |
 | Allow portal self-signature | Expose the portal sign link |
 | Copy signature to the Sale Order | Mirror to the SO native fields |
+| Print signature on the delivery slip | Render the signature on the delivery slip PDF |
+
+The POS bridge adds a per-POS *Print signature on the POS receipt* toggle.
 
 ## POS
 

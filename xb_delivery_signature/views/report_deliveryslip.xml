@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add the captured delivery-receipt signature to the delivery slip PDF,
+         gated on the company toggle. Anchored after the native signature block
+         (which renders the native stock.picking.signature, unused by this
+         module), so the two never collide. -->
+    <template id="report_delivery_document_xb_signature"
+              inherit_id="stock.report_delivery_document">
+        <xpath expr="//div[@name='signature']" position="after">
+            <div t-if="o.company_id.xb_delivery_signature_on_slip and o.xb_delivery_signature"
+                 class="mt32 ml64 mr4" name="xb_delivery_signature">
+                <div class="offset-8">
+                    <strong>Received by:</strong>
+                </div>
+                <div class="offset-8">
+                    <img t-att-src="image_data_uri(o.xb_delivery_signature)"
+                         style="max-height: 4cm; max-width: 8cm;"/>
+                </div>
+                <div t-if="o.xb_delivery_signed_by" class="offset-8 text-center">
+                    <p t-out="o.xb_delivery_signed_by">John Doe</p>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

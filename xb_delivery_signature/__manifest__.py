@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Delivery Receipt Signature",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Inventory/Inventory",
     "summary": "Capture the customer's signature when a delivery is handed over "
                "(on a tablet at validation, or self-signed from the portal) and "
@@ -46,6 +46,7 @@ present.
         "views/stock_picking_views.xml",
         "views/res_config_settings_views.xml",
         "views/delivery_portal_templates.xml",
+        "views/report_deliveryslip.xml",
     ],
     "images": [
         "static/description/banner.png",

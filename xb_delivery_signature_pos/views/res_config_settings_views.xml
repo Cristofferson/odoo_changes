@@ -14,6 +14,12 @@
                              help="Pop up a signature pad after the order is validated so the customer signs the reception on the cashier's device. Configure mandatory/portal options under Settings ▸ Inventory.">
                         <field name="pos_xb_capture_delivery_signature"/>
                     </setting>
+                    <setting id="xb_delivery_signature_on_receipt_setting"
+                             string="Print signature on the POS receipt"
+                             help="Show the captured signature on the POS receipt/ticket."
+                             invisible="not pos_xb_capture_delivery_signature">
+                        <field name="pos_xb_delivery_signature_on_receipt"/>
+                    </setting>
                 </block>
             </xpath>
         </field>

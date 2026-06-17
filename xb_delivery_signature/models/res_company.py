@@ -39,3 +39,9 @@ class ResCompany(models.Model):
              "partial deliveries the Sale Order reflects the most recent one; the "
              "per-delivery copy is always kept.",
     )
+    xb_delivery_signature_on_slip = fields.Boolean(
+        string="Print signature on the delivery slip",
+        default=True,
+        help="Show the captured signature (and who signed) on the printed "
+             "delivery slip (PDF).",
+    )

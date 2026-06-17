@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Delivery Receipt Signature - POS Bridge",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Point of Sale",
     "summary": "Capture the customer's received signature inside the Point of "
                "Sale, at hand-over time.",
@@ -40,6 +40,7 @@ are present.
             "xb_delivery_signature_pos/static/src/app/signature_popup/signature_popup.xml",
             "xb_delivery_signature_pos/static/src/app/order_payment_validation.js",
             "xb_delivery_signature_pos/static/src/app/pos_store_signature.js",
+            "xb_delivery_signature_pos/static/src/app/order_receipt.xml",
         ],
     },
     "images": [

@@ -45,6 +45,10 @@ are present.
     "images": [
         "static/description/banner.png",
     ],
+    # Free bridge: the paid value lives in the base module (xb_delivery_signature).
+    # It auto-installs alongside Point of Sale, so POS users get it at no extra cost.
+    "price": 0.00,
+    "currency": "USD",
     "installable": True,
     "application": False,
     # Auto-install once both dependencies (xb_delivery_signature + point_of_sale)

@@ -50,9 +50,8 @@ present.
     "images": [
         "static/description/banner.png",
     ],
-    # For a paid app on apps.odoo.com, set price/currency here, e.g.:
-    # "price": 39.00,
-    # "currency": "USD",
+    "price": 28.00,
+    "currency": "USD",
     "installable": True,
     "application": False,
     "auto_install": False,

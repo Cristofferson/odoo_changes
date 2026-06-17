@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_delivery_sign" name="Delivery Receipt Signature">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-8">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h4 class="card-title">
+                                    Delivery receipt — <span t-field="picking.name"/>
+                                </h4>
+                                <p class="text-muted">
+                                    <span t-field="picking.partner_id"/>
+                                </p>
+
+                                <div t-if="already_signed" class="alert alert-success" role="alert">
+                                    <i class="fa fa-check-circle me-1"/>
+                                    Thank you. This delivery was signed
+                                    <span t-if="picking.xb_delivery_signed_on">
+                                        on <span t-field="picking.xb_delivery_signed_on"/>
+                                    </span>
+                                    <span t-if="picking.xb_delivery_signed_by">
+                                        by <span t-esc="picking.xb_delivery_signed_by"/>
+                                    </span>.
+                                    <div class="mt-3">
+                                        <img class="border rounded"
+                                             style="max-width: 100%; max-height: 200px;"
+                                             t-att-src="image_data_uri(picking.xb_delivery_signature)"
+                                             alt="Signature"/>
+                                    </div>
+                                </div>
+
+                                <div t-else="">
+                                    <p>Please sign below to confirm you received this delivery.</p>
+                                    <t t-call="portal.signature_form">
+                                        <t t-set="call_url" t-value="call_url"/>
+                                        <t t-set="default_name" t-value="default_name"/>
+                                        <t t-set="send_label">Confirm receipt</t>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

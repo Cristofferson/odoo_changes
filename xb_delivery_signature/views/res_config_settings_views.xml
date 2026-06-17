@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_xb_delivery_signature" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.xb.delivery.signature</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Append our block inside the native Inventory settings app. Each
+                 toggle is its own <setting>; sub-settings stay hidden until the
+                 master toggle is on (native two-column grid). -->
+            <xpath expr="//app[@name='stock']" position="inside">
+                <block title="XUBAX - Delivery Receipt Signature" id="xb_delivery_signature_block">
+                    <setting id="xb_delivery_signature_required_setting"
+                             string="Delivery receipt signature"
+                             help="Capture the customer's received signature on outgoing deliveries.">
+                        <field name="xb_delivery_signature_required"/>
+                    </setting>
+                    <setting id="xb_delivery_signature_mandatory_setting"
+                             string="Signature mandatory to validate"
+                             help="Block validation of an outgoing delivery until it is signed (the signature pad pops up on the operator's device)."
+                             invisible="not xb_delivery_signature_required">
+                        <field name="xb_delivery_signature_mandatory"/>
+                    </setting>
+                    <setting id="xb_delivery_signature_portal_setting"
+                             string="Allow portal self-signature"
+                             help="Expose a secure portal link so the customer can sign the delivery from their own phone (authorised by the sale order's access token)."
+                             invisible="not xb_delivery_signature_required">
+                        <field name="xb_delivery_signature_portal"/>
+                    </setting>
+                    <setting id="xb_delivery_signature_mirror_so_setting"
+                             string="Copy signature to the Sale Order"
+                             help="Also write the signature to the linked Sale Order's native signature fields. With partial deliveries the Sale Order reflects the most recent one."
+                             invisible="not xb_delivery_signature_required">
+                        <field name="xb_delivery_signature_mirror_so"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

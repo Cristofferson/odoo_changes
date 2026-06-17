@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_xb_signature" model="ir.ui.view">
+        <field name="name">stock.picking.form.xb.delivery.signature</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Header button: request the signature on demand (tablet hand-over). -->
+            <xpath expr="//header" position="inside">
+                <button name="action_xb_request_signature" type="object"
+                        string="Request signature"
+                        invisible="not xb_show_delivery_signature or state in ('done', 'cancel')"/>
+            </xpath>
+            <!-- Captured signature, shown in the Additional Info notebook page. -->
+            <xpath expr="//page[@name='extra']" position="inside">
+                <field name="xb_show_delivery_signature" invisible="1"/>
+                <group string="Delivery receipt signature"
+                       invisible="not xb_show_delivery_signature">
+                    <field name="xb_delivery_signed_by"/>
+                    <field name="xb_delivery_signed_on"/>
+                    <field name="xb_delivery_signature" widget="signature"
+                           options="{'full_name': 'xb_delivery_signed_by'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

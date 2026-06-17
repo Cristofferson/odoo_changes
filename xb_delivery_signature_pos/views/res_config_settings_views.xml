@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_xb_delivery_signature_pos" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.xb.delivery.signature.pos</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Per-POS toggle, inside the native POS settings block (only shown
+                 when a Point of Sale is selected). -->
+            <xpath expr="//div[@invisible='not pos_config_id']" position="inside">
+                <block title="XUBAX - Delivery Receipt Signature" id="xb_delivery_signature_pos_block">
+                    <setting id="xb_capture_delivery_signature_setting"
+                             string="Capture delivery signature at POS"
+                             help="Pop up a signature pad after the order is validated so the customer signs the reception on the cashier's device. Configure mandatory/portal options under Settings ▸ Inventory.">
+                        <field name="pos_xb_capture_delivery_signature"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

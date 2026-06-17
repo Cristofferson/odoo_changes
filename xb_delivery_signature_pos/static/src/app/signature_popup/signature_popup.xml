@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="xb_delivery_signature_pos.DeliverySignaturePopup">
+        <Dialog title="props.title" size="'lg'">
+            <div class="xb-delivery-signature-popup">
+                <p class="text-muted">
+                    Please sign below to confirm reception of the products.
+                </p>
+                <NameAndSignature t-props="nameAndSignatureProps"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="() => this.confirm()">
+                    Confirm signature
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.cancel()">
+                    Skip
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -38,4 +38,19 @@ class PosOrder(models.Model):
                     "signed_by": signed_by,
                     "signed_on": signed_on,
                 })
+        # POS configs that deliver from stock generate their own stock.picking
+        # directly (no sale.order in between). Mirror onto the picking's native
+        # signature field so the delivery slip / picking form show the hand-over.
+        self._xb_mirror_signature_to_pickings(signature, signed_by, signed_on)
         return True
+
+    def _xb_mirror_signature_to_pickings(self, signature, signed_by, signed_on):
+        """Copy the hand-over signature onto the POS order's own pickings."""
+        for order in self:
+            pickings = order.picking_ids.filtered(lambda p: not p.signature)
+            if pickings:
+                pickings.write({
+                    "signature": signature,
+                    "xb_delivery_signed_by": signed_by,
+                    "xb_delivery_signed_on": signed_on,
+                })

@@ -47,6 +47,11 @@ msgid "Delivery receipt signature"
 msgstr ""
 
 #. module: xb_delivery_signature_pos
+#: model_terms:ir.ui.view,arch_db:xb_delivery_signature_pos.view_pos_pos_form_xb_signature
+msgid "Delivery Signature"
+msgstr ""
+
+#. module: xb_delivery_signature_pos
 #. odoo-javascript
 #: code:addons/xb_delivery_signature_pos/static/src/app/order_receipt.xml:0
 #: model:ir.model.fields,field_description:xb_delivery_signature_pos.field_pos_order__xb_delivery_signature

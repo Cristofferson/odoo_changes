@@ -33,7 +33,9 @@ export class DeliverySignaturePopup extends Component {
     }
 
     get nameAndSignatureProps() {
-        return { signature: this.signature, signatureType: "signature" };
+        // mode "draw" forces the hand-drawing pad by default (finger/stylus),
+        // even though the customer's name is prefilled on the record/receipt.
+        return { signature: this.signature, signatureType: "signature", mode: "draw" };
     }
 
     confirm() {

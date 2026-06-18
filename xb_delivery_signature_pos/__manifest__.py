@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Delivery Receipt Signature - POS Bridge",
-    "version": "19.0.1.1.1",
+    "version": "19.0.1.1.2",
     "category": "Point of Sale",
     "summary": "Capture the customer's received signature inside the Point of "
                "Sale, at hand-over time.",

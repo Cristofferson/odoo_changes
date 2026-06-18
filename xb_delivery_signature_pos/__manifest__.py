@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Delivery Receipt Signature - POS Bridge",
-    "version": "19.0.1.1.2",
+    "version": "19.0.1.2.0",
     "category": "Point of Sale",
     "summary": "Capture the customer's received signature inside the Point of "
                "Sale, at hand-over time.",
@@ -33,6 +33,7 @@ are present.
     ],
     "data": [
         "views/res_config_settings_views.xml",
+        "views/pos_order_views.xml",
     ],
     "assets": {
         "point_of_sale._assets_pos": [

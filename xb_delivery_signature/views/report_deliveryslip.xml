@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Add the captured delivery-receipt signature to the delivery slip PDF,
-         gated on the company toggle. Anchored after the native signature block
-         (which renders the native stock.picking.signature, unused by this
-         module), so the two never collide. -->
+    <!-- The signature image is rendered by Odoo's NATIVE delivery-slip block
+         (stock.report_delivery_document, div[name='signature'], which prints
+         o.signature). We only enrich that native block with who signed and
+         when, gated on the company toggle, so there is never a duplicate image. -->
     <template id="report_delivery_document_xb_signature"
               inherit_id="stock.report_delivery_document">
-        <xpath expr="//div[@name='signature']" position="after">
-            <div t-if="o.company_id.xb_delivery_signature_on_slip and o.xb_delivery_signature"
-                 class="mt32 ml64 mr4" name="xb_delivery_signature">
-                <div class="offset-8">
-                    <strong>Received by:</strong>
-                </div>
-                <div class="offset-8">
-                    <img t-att-src="image_data_uri(o.xb_delivery_signature)"
-                         style="max-height: 4cm; max-width: 8cm;"/>
-                </div>
-                <div t-if="o.xb_delivery_signed_by" class="offset-8 text-center">
-                    <p t-out="o.xb_delivery_signed_by">John Doe</p>
-                </div>
+        <xpath expr="//div[@name='signature']" position="inside">
+            <div t-if="o.company_id.xb_delivery_signature_on_slip and o.xb_delivery_signed_by"
+                 class="offset-8 text-center" name="xb_delivery_signed_by">
+                <p class="mb-0">
+                    <small>Received by: <span t-out="o.xb_delivery_signed_by">John Doe</span></small>
+                </p>
+                <p t-if="o.xb_delivery_signed_on" class="text-muted">
+                    <small><span t-field="o.xb_delivery_signed_on"/></small>
+                </p>
             </div>
         </xpath>
     </template>

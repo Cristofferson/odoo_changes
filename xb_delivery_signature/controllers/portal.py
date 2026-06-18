@@ -34,7 +34,7 @@ class DeliverySignaturePortal(SaleStockPortal):
         token_qs = ("?access_token=%s" % access_token) if access_token else ""
         values = {
             "picking": picking_sudo,
-            "already_signed": bool(picking_sudo.xb_delivery_signature),
+            "already_signed": bool(picking_sudo.signature),
             "call_url": "/my/delivery/%s/sign/accept%s" % (picking_sudo.id, token_qs),
             "default_name": picking_sudo.partner_id.name or "",
             "page_name": "delivery_signature",

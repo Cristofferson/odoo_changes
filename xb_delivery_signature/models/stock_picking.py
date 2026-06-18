@@ -10,16 +10,9 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    # Per-delivery signature copy. Image (attachment-backed) mirroring the
-    # native sale.order.signature definition, so partial deliveries each keep
-    # their own signature (the Sale Order only holds one).
-    xb_delivery_signature = fields.Image(
-        string="Delivery signature",
-        copy=False,
-        max_width=1024,
-        max_height=1024,
-        attachment=True,
-    )
+    # The signature image itself lives on Odoo's NATIVE stock.picking.signature
+    # field, so it renders on the standard delivery slip and reuses the native
+    # signature widget. We only add who/when, which the native model lacks.
     xb_delivery_signed_by = fields.Char(string="Signed by", copy=False)
     xb_delivery_signed_on = fields.Datetime(string="Signed on", copy=False)
 
@@ -61,7 +54,7 @@ class StockPicking(models.Model):
         self.ensure_one()
         signed_on = signed_on or fields.Datetime.now()
         self.write({
-            "xb_delivery_signature": signature,
+            "signature": signature,
             "xb_delivery_signed_by": signed_by or self.partner_id.name or "",
             "xb_delivery_signed_on": signed_on,
         })
@@ -114,7 +107,7 @@ class StockPicking(models.Model):
         # so the native flow then proceeds normally.
         if not self.env.context.get("xb_skip_signature_check"):
             need = self.filtered(
-                lambda p: p._xb_signature_mandatory() and not p.xb_delivery_signature
+                lambda p: p._xb_signature_mandatory() and not p.signature
             )
             if need:
                 return need[:1]._xb_open_signature_wizard(validate_after=True)

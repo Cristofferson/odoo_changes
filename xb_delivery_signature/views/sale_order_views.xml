@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Odoo's native Sale Order form already has a "Customer Signature" page
+         bound to the native signature / signed_by / signed_on fields, but it is
+         restricted to base.group_no_one (developer mode), so normal users never
+         see the signature we mirror there from the delivery / POS hand-over.
+         We lift that restriction; the page's own invisible= guard still keeps it
+         hidden until a signature actually exists. -->
+    <record id="view_order_form_xb_signature" model="ir.ui.view">
+        <field name="name">sale.order.form.xb.delivery.signature</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='customer_signature']" position="attributes">
+                <attribute name="groups"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

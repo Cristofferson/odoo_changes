@@ -18,7 +18,7 @@
                        invisible="not xb_show_delivery_signature">
                     <field name="xb_delivery_signed_by"/>
                     <field name="xb_delivery_signed_on"/>
-                    <field name="xb_delivery_signature" widget="signature"
+                    <field name="signature" widget="signature"
                            options="{'full_name': 'xb_delivery_signed_by'}"/>
                 </group>
             </xpath>

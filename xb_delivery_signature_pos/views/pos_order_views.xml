@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Surface the hand-over signature captured in the POS on the back-office
+         pos.order form. pos.order has no native signature field, so we show our
+         own; the page only appears once a signature was captured. -->
+    <record id="view_pos_pos_form_xb_signature" model="ir.ui.view">
+        <field name="name">pos.order.form.xb.delivery.signature</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='extra']" position="after">
+                <page string="Delivery Signature" name="xb_delivery_signature"
+                      invisible="not xb_delivery_signature">
+                    <group>
+                        <field name="xb_delivery_signed_by"/>
+                        <field name="xb_delivery_signed_on"/>
+                        <field name="xb_delivery_signature" widget="image"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

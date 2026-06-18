@@ -27,7 +27,7 @@
                                     <div class="mt-3">
                                         <img class="border rounded"
                                              style="max-width: 100%; max-height: 200px;"
-                                             t-att-src="image_data_uri(picking.xb_delivery_signature)"
+                                             t-att-src="image_data_uri(picking.signature)"
                                              alt="Signature"/>
                                     </div>
                                 </div>

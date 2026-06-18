@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Odoo 19 ir.cron schema: numbercall/doall/nextcall removed.
+            This cron drains the AI generation queue; running the long AI
+            calls here (instead of in the request) avoids worker timeouts.
+        -->
+        <record id="ir_cron_run_generation_jobs" model="ir.cron">
+            <field name="name">AI Social Planner: Run Generation Jobs</field>
+            <field name="model_id" ref="model_xb_social_generation_job"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_run_generation_jobs()</field>
+            <field name="interval_number">2</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xb_social_brand_profile_user,xb.social.brand.profile user,model_xb_social_brand_profile,group_xb_social_planner_user,1,1,1,0
+access_xb_social_brand_profile_manager,xb.social.brand.profile manager,model_xb_social_brand_profile,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_competitor_user,xb.social.competitor user,model_xb_social_competitor,group_xb_social_planner_user,1,1,1,1
+access_xb_social_competitor_manager,xb.social.competitor manager,model_xb_social_competitor,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_content_plan_user,xb.social.content.plan user,model_xb_social_content_plan,group_xb_social_planner_user,1,1,1,1
+access_xb_social_content_plan_manager,xb.social.content.plan manager,model_xb_social_content_plan,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_plan_item_user,xb.social.plan.item user,model_xb_social_plan_item,group_xb_social_planner_user,1,1,1,1
+access_xb_social_plan_item_manager,xb.social.plan.item manager,model_xb_social_plan_item,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_ai_provider_user,xb.social.ai.provider user,model_xb_social_ai_provider,group_xb_social_planner_user,1,0,0,0
+access_xb_social_ai_provider_manager,xb.social.ai.provider manager,model_xb_social_ai_provider,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_generation_job_user,xb.social.generation.job user,model_xb_social_generation_job,group_xb_social_planner_user,1,0,0,0
+access_xb_social_generation_job_manager,xb.social.generation.job manager,model_xb_social_generation_job,group_xb_social_planner_manager,1,1,1,1
+access_xb_social_generate_month_wizard_user,xb.social.generate.month.wizard user,model_xb_social_generate_month_wizard,group_xb_social_planner_user,1,1,1,1

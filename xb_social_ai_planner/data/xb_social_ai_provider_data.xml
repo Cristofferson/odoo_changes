@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default provider: Claude (bring-your-own-key in Settings). -->
+        <record id="ai_provider_claude_default" model="xb.social.ai.provider">
+            <field name="name">Claude (default)</field>
+            <!-- Global provider (no company) so every company can use it out of
+                 the box; admins may still create company-specific providers. -->
+            <field name="company_id" eval="False"/>
+            <field name="provider_type">anthropic</field>
+            <field name="text_model">claude-opus-4-8</field>
+            <field name="effort">high</field>
+            <field name="max_tokens">8000</field>
+            <field name="timeout">120</field>
+            <field name="image_provider_type">none</field>
+        </record>
+    </data>
+</odoo>

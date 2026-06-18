@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        This module complements the native Social Marketing app: all menus are
+        nested under social.menu_social_global (no separate application).
+    -->
+
+    <!-- Top-level entries under "Social Marketing" -->
+    <menuitem id="menu_xb_social_generate_month"
+              name="AI: Generate Month"
+              parent="social.menu_social_global"
+              action="action_xb_social_generate_month_wizard"
+              groups="group_xb_social_planner_user"
+              sequence="11"/>
+
+    <menuitem id="menu_xb_social_content_plan"
+              name="AI Content Plans"
+              parent="social.menu_social_global"
+              action="action_xb_social_content_plan"
+              groups="group_xb_social_planner_user"
+              sequence="12"/>
+
+    <!-- Planning data under the native Configuration menu -->
+    <menuitem id="menu_xb_social_brand_profile"
+              name="Brand Profiles"
+              parent="social.menu_social_configuration"
+              action="action_xb_social_brand_profile"
+              groups="group_xb_social_planner_user"
+              sequence="40"/>
+
+    <menuitem id="menu_xb_social_competitor"
+              name="Competitors"
+              parent="social.menu_social_configuration"
+              action="action_xb_social_competitor"
+              groups="group_xb_social_planner_user"
+              sequence="41"/>
+
+    <menuitem id="menu_xb_social_ai_provider"
+              name="AI Providers"
+              parent="social.menu_social_configuration"
+              action="action_xb_social_ai_provider"
+              groups="group_xb_social_planner_manager"
+              sequence="42"/>
+
+    <menuitem id="menu_xb_social_generation_job"
+              name="AI Generation Jobs"
+              parent="social.menu_social_configuration"
+              action="action_xb_social_generation_job"
+              groups="group_xb_social_planner_manager"
+              sequence="43"/>
+
+    <menuitem id="menu_xb_social_settings"
+              name="AI Planner Settings"
+              parent="social.menu_social_configuration"
+              action="action_xb_social_settings"
+              groups="group_xb_social_planner_manager"
+              sequence="44"/>
+</odoo>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_social_content_plan_view_form" model="ir.ui.view">
+        <field name="name">xb.social.content.plan.form</field>
+        <field name="model">xb.social.content.plan</field>
+        <field name="arch" type="xml">
+            <form string="Content Plan">
+                <header>
+                    <button name="action_generate" type="object"
+                            string="Generate with AI" class="btn-primary"
+                            invisible="state not in ('draft','generated','generating')"/>
+                    <button name="action_approve_all" type="object"
+                            string="Approve All"
+                            invisible="state not in ('generated',)"/>
+                    <button name="action_push_approved" type="object"
+                            string="Push Approved" class="btn-primary"
+                            invisible="state not in ('generated','approved')"/>
+                    <button name="action_open_native_calendar" type="object"
+                            string="Native Calendar"
+                            invisible="state not in ('pushed','done')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,generating,generated,approved,pushed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-file-text-o" disabled="1">
+                            <field name="item_count" widget="statinfo" string="Posts"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-check" disabled="1">
+                            <field name="approved_count" widget="statinfo" string="Approved"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-paper-plane" disabled="1">
+                            <field name="pushed_count" widget="statinfo" string="Pushed"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="brand_profile_id"/>
+                            <field name="plan_date"/>
+                            <field name="posts_per_week"/>
+                            <field name="target_post_count"/>
+                        </group>
+                        <group>
+                            <field name="account_ids" widget="many2many_tags"/>
+                            <field name="utm_campaign_id"/>
+                            <field name="ai_provider_id"/>
+                            <field name="also_generate_images"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Strategy" name="strategy">
+                            <group>
+                                <field name="monthly_theme" readonly="1"/>
+                            </group>
+                            <field name="strategy_summary" readonly="1"/>
+                        </page>
+                        <page string="Posts" name="posts">
+                            <field name="item_ids" mode="kanban,list">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="planned_date"/>
+                                    <field name="theme"/>
+                                    <field name="message"/>
+                                    <field name="length_warning"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state in ('approved','pushed','posted')"
+                                           decoration-warning="state == 'needs_review'"
+                                           decoration-danger="state == 'failed'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Generation Jobs" name="jobs"
+                              groups="xb_social_ai_planner.group_xb_social_planner_manager">
+                            <field name="generation_job_ids">
+                                <list>
+                                    <field name="job_type"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="token_usage_input"/>
+                                    <field name="token_usage_output"/>
+                                    <field name="error_message"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="xb_social_content_plan_view_list" model="ir.ui.view">
+        <field name="name">xb.social.content.plan.list</field>
+        <field name="model">xb.social.content.plan</field>
+        <field name="arch" type="xml">
+            <list string="Content Plans">
+                <field name="name"/>
+                <field name="brand_profile_id"/>
+                <field name="plan_date"/>
+                <field name="item_count"/>
+                <field name="approved_count"/>
+                <field name="pushed_count"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'generating'"
+                       decoration-success="state in ('pushed','done')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_social_content_plan_view_kanban" model="ir.ui.view">
+        <field name="name">xb.social.content.plan.kanban</field>
+        <field name="model">xb.social.content.plan</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div class="text-muted"><field name="brand_profile_id"/></div>
+                            <div>
+                                <field name="item_count"/> posts ·
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'pushed': 'success', 'generating': 'info', 'done': 'success'}}"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_xb_social_content_plan" model="ir.actions.act_window">
+        <field name="name">Content Plans</field>
+        <field name="res_model">xb.social.content.plan</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first content plan</p>
+            <p>Use <b>Generate Month</b> to let AI build a full monthly plan.</p>
+        </field>
+    </record>
+</odoo>

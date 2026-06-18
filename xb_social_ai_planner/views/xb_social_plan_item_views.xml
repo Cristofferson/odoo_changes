@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_social_plan_item_view_form" model="ir.ui.view">
+        <field name="name">xb.social.plan.item.form</field>
+        <field name="model">xb.social.plan.item</field>
+        <field name="arch" type="xml">
+            <form string="Plan Item">
+                <header>
+                    <button name="action_approve" type="object" string="Approve"
+                            class="btn-primary"
+                            invisible="state not in ('generated','needs_review')"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state not in ('generated','needs_review')"/>
+                    <button name="action_push_to_social" type="object"
+                            string="Push to Social" class="btn-primary"
+                            invisible="state != 'approved'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state in ('draft','pushed','posted')"/>
+                    <button name="action_open_social_post" type="object"
+                            string="Open Published Post"
+                            invisible="not social_post_id"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,generated,approved,pushed,posted"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not length_warning">
+                        <field name="length_warning"/>
+                    </div>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="state != 'failed'">
+                        <field name="error_message"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="theme"/>
+                            <field name="planned_date"/>
+                            <field name="account_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="utm_campaign_id"/>
+                            <field name="inferred_trends"/>
+                            <field name="social_post_id" readonly="1"/>
+                            <field name="social_post_state"/>
+                            <field name="is_split_per_media"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Copy" name="copy">
+                            <group>
+                                <field name="message" placeholder="Ready-to-post text…"/>
+                                <field name="cta"/>
+                                <field name="hashtags"/>
+                            </group>
+                        </page>
+                        <page string="Per Network" name="per_network">
+                            <group>
+                                <field name="facebook_message"/>
+                                <field name="instagram_message"/>
+                                <field name="linkedin_message"/>
+                                <field name="twitter_message"/>
+                            </group>
+                        </page>
+                        <page string="Creative Briefs" name="briefs">
+                            <group>
+                                <field name="image_brief"/>
+                                <field name="video_brief"/>
+                            </group>
+                        </page>
+                        <page string="Images" name="images">
+                            <field name="generated_image_ids" widget="many2many_binary"/>
+                            <separator string="Selected for posting"/>
+                            <field name="selected_image_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="xb_social_plan_item_view_list" model="ir.ui.view">
+        <field name="name">xb.social.plan.item.list</field>
+        <field name="model">xb.social.plan.item</field>
+        <field name="arch" type="xml">
+            <list string="Plan Items" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="planned_date"/>
+                <field name="theme"/>
+                <field name="message" optional="show"/>
+                <field name="account_ids" widget="many2many_tags" optional="hide"/>
+                <field name="length_warning" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state in ('approved','pushed','posted')"
+                       decoration-warning="state == 'needs_review'"
+                       decoration-danger="state == 'failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_social_plan_item_view_kanban" model="ir.ui.view">
+        <field name="name">xb.social.plan.item.kanban</field>
+        <field name="model">xb.social.plan.item</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="week_number" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="week_number"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_title">
+                                <strong><field name="theme"/></strong>
+                            </div>
+                            <div class="text-muted">
+                                <field name="planned_date"/>
+                            </div>
+                            <div><field name="message"/></div>
+                            <div class="mt-2">
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'approved': 'success', 'needs_review': 'warning', 'failed': 'danger', 'pushed': 'info', 'posted': 'success'}}"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="xb_social_plan_item_view_calendar" model="ir.ui.view">
+        <field name="name">xb.social.plan.item.calendar</field>
+        <field name="model">xb.social.plan.item</field>
+        <field name="arch" type="xml">
+            <calendar string="Planner" date_start="planned_date" color="plan_id"
+                      mode="month" quick_create="0">
+                <field name="theme"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_xb_social_plan_item" model="ir.actions.act_window">
+        <field name="name">Posts</field>
+        <field name="res_model">xb.social.plan.item</field>
+        <field name="view_mode">kanban,calendar,list,form</field>
+    </record>
+</odoo>

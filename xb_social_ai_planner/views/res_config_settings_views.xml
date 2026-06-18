@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_xb_social" model="ir.ui.view">
+        <field name="name">res.config.settings.form.xb.social.ai.planner</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="AI Social Planner" string="AI Social Planner"
+                     name="xb_social_ai_planner"
+                     groups="xb_social_ai_planner.group_xb_social_planner_manager">
+                    <block title="AI Provider Keys (Bring Your Own Key)"
+                           name="xb_social_ai_keys">
+                        <setting string="AI Text API Key"
+                                 help="Key for the text/strategy provider (e.g. Claude).">
+                            <field name="xb_social_ai_api_key" password="True"/>
+                        </setting>
+                        <setting string="AI Image API Key"
+                                 help="Optional key for the image-generation provider.">
+                            <field name="xb_social_ai_image_api_key" password="True"/>
+                        </setting>
+                        <setting string="Default AI Provider">
+                            <field name="xb_social_ai_default_provider_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_xb_social_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'xb_social_ai_planner'}</field>
+    </record>
+</odoo>

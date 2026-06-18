@@ -1,0 +1,497 @@
+#  Translation template translation for xb_social_ai_planner.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: XUBAX\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: xb_social_ai_planner
+msgid "AI Social Planner"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generate Month"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Content Plans"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Content Plan"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Brand Profiles"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Brand Profile"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Providers"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Provider"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generation Jobs"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Configuration"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Settings"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Posts"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generate with AI"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generate"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Approve All"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Approve"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Reject"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Push Approved"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Push to Social"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Reset to Draft"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Native Calendar"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Open Published Post"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Re-queue"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Monthly Theme"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Strategy Summary"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Strategy"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Month"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Accounts"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Campaign"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Posts / Week"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Target Posts"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Also Generate Images"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Angle / Theme"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Planned Date"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Post Text"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Call to Action"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Hashtags"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Inferred Trends"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Per Network"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Split Per Network"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Creative Briefs"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Image Brief"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Video Brief"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Images"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generated Images"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Selected Images"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Industry"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Brand Voice / Tone"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Target Audience"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Value Proposition"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Always-on Keywords"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Words to Avoid"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Preferred CTA Style"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Output Language"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Emoji Policy"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Hashtag Policy"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Draft"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generating"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Generated"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Needs Review"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Approved"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Rejected"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Pushed"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Posted"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Failed"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Queued"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Running"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Done"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Text API Key"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Image API Key"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Default AI Provider"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "No approved posts to push."
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Add at least one account to the plan first."
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Competitors"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Competitor"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "For Brand"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Public Website / URL"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Social Handles"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Sample Posts (pasted)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Analysis"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Key Themes"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Tone"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Content Gaps / Opportunities"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Scrape Website"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Analyze with AI"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Scraped Page Text"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Scraped Text"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Notes"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Inputs"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "Competitor Analysis"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Content Plans"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI: Generate Month"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Generation Jobs"
+msgstr ""
+
+#. module: xb_social_ai_planner
+msgid "AI Planner Settings"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__anthropic
+msgid "Anthropic API (Claude — bring your own key)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__claude_code
+msgid "Claude Code CLI (existing subscription, no API key)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_claude_code
+msgid "AI Transport — Claude Code CLI (subscription, no API key)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__cli_binary
+msgid "CLI Binary"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__cli_config_dir
+msgid "CLI Config Dir"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_binary
+msgid ""
+"Path to the Claude Code executable runnable by the Odoo service user (e.g. "
+"/usr/local/bin/claude). 'claude' resolves it on PATH."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_config_dir
+msgid ""
+"Optional value for CLAUDE_CONFIG_DIR — the directory holding the CLI's "
+"auth/credentials, readable by the Odoo service user. Leave empty to use the "
+"service user's default (~/.claude)."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__provider_type
+msgid ""
+"Selects the transport implementation used to call the model.\n"
+"• Anthropic API: pay-per-use, needs an API key.\n"
+"• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing)."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid ""
+"No API key needed: this reuses a Claude Code subscription\n"
+"                        on the server. The <code>claude</code> binary and its\n"
+"                        login must be reachable by the Odoo service user."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"Claude Code CLI not found ('%s'). Install it and set the CLI Binary path on "
+"the AI provider."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"The Claude Code CLI timed out after %ss. Increase the provider's Timeout or "
+"lower Effort."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"Claude Code CLI failed (exit %s). Check that the service user is "
+"authenticated (run `claude` once as that user, or set CLI Config Dir). "
+"Details: %s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "Claude Code CLI returned unreadable output: %s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "Claude Code CLI error: %s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The Claude Code CLI returned an empty response."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The Claude Code CLI returned malformed JSON."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "e.g. /opt/odoo/.claude (optional)"
+msgstr ""

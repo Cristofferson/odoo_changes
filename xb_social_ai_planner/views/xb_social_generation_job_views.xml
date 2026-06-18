@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_social_generation_job_view_list" model="ir.ui.view">
+        <field name="name">xb.social.generation.job.list</field>
+        <field name="model">xb.social.generation.job</field>
+        <field name="arch" type="xml">
+            <list string="Generation Jobs">
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="job_type"/>
+                <field name="state" widget="badge"
+                       decoration-info="state in ('queued','running')"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="token_usage_input" sum="Input"/>
+                <field name="token_usage_output" sum="Output"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_social_generation_job_view_form" model="ir.ui.view">
+        <field name="name">xb.social.generation.job.form</field>
+        <field name="model">xb.social.generation.job</field>
+        <field name="arch" type="xml">
+            <form string="Generation Job">
+                <header>
+                    <button name="action_requeue" type="object" string="Re-queue"
+                            invisible="state != 'failed'" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="job_type"/>
+                            <field name="plan_id"/>
+                            <field name="item_id"/>
+                            <field name="provider_id"/>
+                        </group>
+                        <group>
+                            <field name="started_at"/>
+                            <field name="finished_at"/>
+                            <field name="token_usage_input"/>
+                            <field name="token_usage_output"/>
+                            <field name="idempotency_key"/>
+                        </group>
+                    </group>
+                    <field name="error_message" invisible="state != 'failed'"/>
+                    <notebook>
+                        <page string="Request"><field name="request_payload"/></page>
+                        <page string="Response"><field name="response_raw"/></page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xb_social_generation_job" model="ir.actions.act_window">
+        <field name="name">Generation Jobs</field>
+        <field name="res_model">xb.social.generation.job</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

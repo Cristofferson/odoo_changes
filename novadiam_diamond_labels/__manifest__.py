@@ -1,6 +1,6 @@
 {
     "name": "Novadiam - Etiquetas de Diamante (ZPL)",
-    "version": "19.0.1.2.9",
+    "version": "19.0.1.2.10",
     "category": "Inventory",
     "summary": "Plantillas ZPL para etiquetas de producto: Joyeria (mejorada) y Diamond Papers (certificado de diamante)",
     "author": "Diamane / Cristofferson Reyes",

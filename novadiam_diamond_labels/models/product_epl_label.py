@@ -255,8 +255,9 @@ def _diamond_papers_epl(tpl):
     bands = _ink_bands(_logo_ink(company))
     icon_ink = bands[0] if len(bands) >= 1 else None
     word_ink = bands[1] if len(bands) >= 2 else None
-    # Icono del diamante: centro-derecha, debajo del No. de cert.
-    icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=478, y=150, target_w=95, max_h=120)
+    # Icono del diamante: centro-derecha, debajo del No. de cert. Subido para
+    # dejar separacion con el wordmark "DIAMANE" (que va mas abajo).
+    icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=478, y=125, target_w=95, max_h=120)
     lines += icon_cmds
     # Wordmark "DIAMANE" + numero de plastico, abajo-derecha. Subido para que la
     # BASE del numero quede al ras de la base del renglon "Brillo" (~y=314).

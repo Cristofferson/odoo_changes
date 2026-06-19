@@ -22,59 +22,136 @@ except ImportError:  # pragma: no cover
     Image = None
 
 
-def _logo_as_lo(company, x, y, target_w, lum_cut=248, alpha_cut=120, max_h=90):
-    """Rasteriza el logo de una compania (res.company.logo) a comandos EPL 'LO'.
+def _logo_ink(company, lum_cut=248, alpha_cut=120):
+    """Binariza res.company.logo a una imagen 'L' (255=tinta) en su resolucion
+    nativa, o None.
 
-    Misma tecnica firmware-/transporte-segura que el QR: ASCII puro, sin 'GW'
-    binario (que el agente corromperia al mandarlo UTF-8->base64).
-
-    Binariza con regla COMBINADA alfa+luminancia: tinta = pixel OPACO (alfa>=
-    alpha_cut) Y no-casi-blanco (luminancia<lum_cut). Asi conserva iconos claros
-    pero opacos (p.ej. el diamante gris del logo DIAMANE, que un umbral simple de
-    luminancia borraba) y a la vez descarta fondos (transparentes -> blanco;
-    blancos opacos -> luminancia 255). Luego AUTO-RECORTA al area con tinta.
-    Devuelve (comandos, alto_en_dots) o (None,0) si no hay logo / PIL falta /
-    nada sobrevive.
+    Regla COMBINADA alfa+luminancia: tinta = pixel OPACO (alfa>=alpha_cut) Y
+    no-casi-blanco (luminancia<lum_cut). Asi conserva iconos claros pero opacos
+    (p.ej. el diamante gris del logo DIAMANE, que un umbral simple de luminancia
+    borraba) y descarta fondos (transparentes->blanco; blancos opacos->lum 255).
     """
     if Image is None or not company or not company.logo:
-        return None, 0
+        return None
     try:
         src = Image.open(io.BytesIO(base64.b64decode(company.logo))).convert('RGBA')
     except Exception:
-        return None, 0
-    h = max(1, round(src.height * target_w / src.width))
-    src = src.resize((target_w, h), Image.LANCZOS)
+        return None
     alpha = src.getchannel('A')
     lum = Image.alpha_composite(
         Image.new('RGBA', src.size, (255, 255, 255, 255)), src).convert('L')
     dark = lum.point(lambda p: 255 if p < lum_cut else 0, mode='L')
     opaque = alpha.point(lambda p: 255 if p >= alpha_cut else 0, mode='L')
-    ink = ImageChops.multiply(dark, opaque)  # 255 donde hay tinta (AND)
-    bw = ink.point(lambda p: 0 if p >= 128 else 255, mode='L').convert('1')
-    # bbox del area NEGRA: invertir y getbbox (getbbox da bbox de lo no-cero)
-    bbox = ImageChops.invert(bw.convert('L')).getbbox()
+    return ImageChops.multiply(dark, opaque)  # 255 = tinta
+
+
+def _split_icon_wordmark(ink):
+    """Parte una imagen de tinta 'L' (255=tinta) en (icono_arriba, wordmark_abajo)
+    cortando por la banda HORIZONTAL vacia mas grande del interior. Devuelve crops
+    'L' (o None cada uno). Si no hay banda vacia interior, devuelve (None, todo).
+    """
+    bbox = ink.getbbox()
     if not bbox:
-        return None, 0
-    bw = bw.crop(bbox)
-    if bw.height > max_h:  # cap de alto: reescala manteniendo proporcion
-        nw = max(1, round(bw.width * max_h / bw.height))
-        bw = bw.resize((nw, max_h), Image.LANCZOS).point(
-            lambda p: 0 if p < 128 else 255, mode='L').convert('1')
-    px = bw.load()
-    w, hh = bw.size
+        return None, None
+    ink = ink.crop(bbox)
+    w, h = ink.size
+    px = ink.load()
+    row_has = [any(px[x, y] for x in range(w)) for y in range(h)]
+    # buscar la banda mas larga de filas vacias ENTRE contenido (no en los bordes)
+    best_lo = best_hi = None
+    y = 0
+    while y < h:
+        if not row_has[y]:
+            j = y
+            while j < h and not row_has[j]:
+                j += 1
+            if y > 0 and j < h:  # banda interior
+                if best_lo is None or (j - y) > (best_hi - best_lo):
+                    best_lo, best_hi = y, j
+            y = j
+        else:
+            y += 1
+    if best_lo is None:
+        return None, ink  # sin separacion: todo es wordmark
+    cut = (best_lo + best_hi) // 2
+    icon = ink.crop((0, 0, w, cut))
+    word = ink.crop((0, cut, w, h))
+    ib, wb = icon.getbbox(), word.getbbox()
+    return (icon.crop(ib) if ib else None), (word.crop(wb) if wb else None)
+
+
+def _ink_bands(ink, min_gap=3):
+    """Parte una imagen de tinta 'L' (255=tinta) en BANDAS horizontales de
+    contenido (separadas por >=min_gap filas vacias), de arriba a abajo. Para el
+    logo DIAMANE devuelve [diamante, "DIAMANE", "Diamantes & Tecnologia"], asi se
+    puede usar la banda 0 (icono) y la 1 (wordmark) y DESCARTAR el tagline.
+    Gaps pequenos (<min_gap) se fusionan para no romper el icono/letras.
+    """
+    if ink is None:
+        return []
+    bbox = ink.getbbox()
+    if not bbox:
+        return []
+    ink = ink.crop(bbox)
+    w, h = ink.size
+    px = ink.load()
+    row_has = [any(px[x, y] for x in range(w)) for y in range(h)]
+    bands = []
+    y = 0
+    while y < h:
+        if not row_has[y]:
+            y += 1
+            continue
+        start = y
+        while y < h:
+            if row_has[y]:
+                y += 1
+                continue
+            g = y
+            while g < h and not row_has[g]:
+                g += 1
+            if g >= h or (g - y) >= min_gap:
+                break  # fin de banda (gap grande o borde)
+            y = g      # gap chico: sigue la misma banda
+        band = ink.crop((0, start, w, y))
+        bb = band.getbbox()
+        if bb:
+            bands.append(band.crop(bb))
+        while y < h and not row_has[y]:
+            y += 1
+    return bands
+
+
+def _ink_to_lo(ink, x, y, target_w, max_h=None):
+    """Coloca una imagen de tinta 'L' (255=tinta) como cajas EPL 'LO' en (x,y),
+    reescalada a target_w (manteniendo proporcion, con cap opcional de alto).
+    Devuelve (comandos, ancho, alto) en dots; ([],0,0) si vacia.
+    """
+    if ink is None:
+        return [], 0, 0
+    bb = ink.getbbox()
+    if not bb:
+        return [], 0, 0
+    ink = ink.crop(bb)
+    h = max(1, round(ink.height * target_w / ink.width))
+    if max_h and h > max_h:
+        target_w = max(1, round(target_w * max_h / h))
+        h = max_h
+    ink = ink.resize((target_w, h), Image.LANCZOS)
+    px = ink.load()
     cmds = []
-    for ry in range(hh):
+    for ry in range(h):
         rx = 0
-        while rx < w:
-            if px[rx, ry] == 0:  # negro
+        while rx < target_w:
+            if px[rx, ry] >= 128:  # tinta
                 run = 1
-                while rx + run < w and px[rx + run, ry] == 0:
+                while rx + run < target_w and px[rx + run, ry] >= 128:
                     run += 1
                 cmds.append('LO%d,%d,%d,%d' % (x + rx, y + ry, run, 1))
                 rx += run
             else:
                 rx += 1
-    return cmds, hh
+    return cmds, target_w, h
 
 
 def _qr_as_lo(data, x, y, mod=4, border=2):
@@ -141,34 +218,57 @@ def _diamond_papers_epl(tpl):
     qr_url = 'https://diamane.mx/report-check/%s' % (clave or cert)
     header = ' '.join([v for v in [forma, ct, pureza, color, corte] if v])
 
+    # Layout segun la etiqueta REAL (foto /tmp/diamond_paper2.jpg):
+    #   - QR GRANDE a la izquierda (ocupa ~1/3 del ancho y casi toda la altura)
+    #   - Encabezado y bloque de datos a la DERECHA del QR
+    #   - Icono del diamante centro-derecha (debajo del No. de cert)
+    #   - Wordmark "DIAMANE" (SIN tagline) + No. de plastico abajo-derecha
+    DATA_X = 262   # columna de etiquetas, a la derecha del QR
+    VAL_X = 400    # columna de valores
+    # TITULO: banner superior a todo lo ancho, fuente 5 (32x48, la mas grande
+    # de EPL) centrado horizontalmente. El QR y los datos van DEBAJO.
+    htext = _esc(header)
+    hx = max(8, (634 - len(htext) * 32) // 2)
     lines = [
         'N',
         'q634',
-        'A20,18,0,4,2,2,N,"%s"' % _esc(header),
-        'A210,80,0,3,1,1,N,"Cert DIA %s"' % _esc(cert),
-        'A210,114,0,4,1,1,N,"CLAVE: %s"' % _esc(clave),
-        'A210,152,0,3,1,1,N,"Fluor. %s"' % _esc(fluor),
-        'A210,186,0,3,1,1,N,"Pulido. %s"' % _esc(pulido),
-        'A210,220,0,3,1,1,N,"Simetria: %s"' % _esc(simetria),
-        'A210,254,0,3,1,1,N,"Brillo %s"' % _esc(brillo),
+        'A%d,14,0,5,1,1,N,"%s"' % (hx, htext),
+        'A%d,92,0,3,1,1,N,"Cert"' % DATA_X,
+        'A%d,92,0,3,1,1,N,"DIA %s"' % (VAL_X - 40, _esc(cert)),
+        'A%d,132,0,4,1,1,N,"CLAVE: %s"' % (DATA_X, _esc(clave)),
+        'A%d,180,0,3,1,1,N,"Fluor."' % DATA_X,
+        'A%d,180,0,3,1,1,N,"%s"' % (VAL_X, _esc(fluor)),
+        'A%d,218,0,3,1,1,N,"Pulido."' % DATA_X,
+        'A%d,218,0,3,1,1,N,"%s"' % (VAL_X, _esc(pulido)),
+        'A%d,256,0,3,1,1,N,"Simetria:"' % DATA_X,
+        'A%d,256,0,3,1,1,N,"%s"' % (VAL_X, _esc(simetria)),
+        'A%d,294,0,3,1,1,N,"Brillo"' % DATA_X,
+        'A%d,294,0,3,1,1,N,"%s"' % (VAL_X, _esc(brillo)),
     ]
-    # QR rasterizado a cajas LO (no usa el comando 'b', firmware-independiente).
-    lines += _qr_as_lo(qr_url, x=20, y=150, mod=4)
-    # Logo de la compania DIAMANE (la marca de certificacion de esta etiqueta).
-    # Resolvemos por nombre y caemos a la compania activa si no existe; asi el
-    # branding es correcto sin importar la compania activa al imprimir.
+    # QR rasterizado a cajas LO (firmware-independiente). mod=7 -> ~231 dots.
+    lines += _qr_as_lo(qr_url, x=16, y=82, mod=7)
+    # Logo de la compania DIAMANE (marca de certificacion). Se separa en bandas
+    # para usar SOLO el icono (banda 0) y el wordmark "DIAMANE" (banda 1),
+    # DESCARTANDO el tagline "Diamantes & Tecnologia" (banda 2).
     company = (tpl.env['res.company'].search([('name', '=', 'DIAMANE')], limit=1)
                or tpl.env.company)
-    # Logo (diamante + wordmark) abajo-derecha. Es ~cuadrado, por eso queda
-    # solo; el serial va abajo-izquierda (debajo del QR, zona libre).
-    logo_cmds, _logo_h = _logo_as_lo(company, x=435, y=280, target_w=150, max_h=118)
-    if logo_cmds:
-        lines += logo_cmds
+    bands = _ink_bands(_logo_ink(company))
+    icon_ink = bands[0] if len(bands) >= 1 else None
+    word_ink = bands[1] if len(bands) >= 2 else None
+    # Icono del diamante: centro-derecha, debajo del No. de cert.
+    icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=478, y=150, target_w=95, max_h=120)
+    lines += icon_cmds
+    # Wordmark "DIAMANE" + numero de plastico, abajo-derecha. Alineado con el
+    # renglon de "Brillo" (y=294) del bloque de datos.
+    word_cmds, _ww, word_h = _ink_to_lo(word_ink, x=445, y=284, target_w=175, max_h=46)
+    if word_cmds:
+        lines += word_cmds
+        serie_y = 284 + word_h + 8
     else:
-        # Fallback: wordmark de texto (comportamiento anterior).
-        lines.append('A435,300,0,4,1,1,N,"DIAMANE"')
-    # Serial / numero de plastico, abajo-izquierda bajo el QR.
-    lines.append('A20,300,0,3,1,1,N,"No. %s"' % _esc(serie))
+        lines.append('A445,288,0,4,1,1,N,"DIAMANE"')
+        serie_y = 330
+    # Numero de plastico (font2) abajo-derecha, SIN prefijo "No.".
+    lines.append('A445,%d,0,2,1,1,N,"%s"' % (serie_y, _esc(serie)))
     lines.append('P1')
     return lines
 

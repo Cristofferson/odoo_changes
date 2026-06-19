@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6D28D9"/>
+      <stop offset="0.5" stop-color="#A21CAF"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F3ECFF"/>
+    </linearGradient>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#2E1065" flood-opacity="0.40"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <circle cx="1010" cy="40" r="220" fill="#FFFFFF" opacity="0.07"/>
+  <circle cx="150" cy="300" r="180" fill="#000000" opacity="0.06"/>
+
+  <!-- ===== left: wordmark + copy ===== -->
+  <text x="64" y="96" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="bold" letter-spacing="6" fill="#FBBF24">X U B A X</text>
+  <text x="62" y="162" font-family="DejaVu Serif, serif" font-size="46" font-weight="bold" fill="#FFFFFF">AI Social Content Planner</text>
+  <text x="64" y="212" font-family="DejaVu Sans, sans-serif" font-size="24" fill="#EDE4FF">Plan a month of posts — strategy, copy &amp; images — with AI,</text>
+  <text x="64" y="244" font-family="DejaVu Sans, sans-serif" font-size="24" fill="#EDE4FF">published natively from Odoo Social Marketing.</text>
+
+  <!-- ===== right: content calendar + generated-image card ===== -->
+  <g filter="url(#sh)">
+    <!-- back: mini month grid -->
+    <g transform="translate(815 58)">
+      <rect width="150" height="184" rx="16" fill="url(#card)"/>
+      <rect x="0" y="0" width="150" height="34" rx="16" fill="#7C3AED"/>
+      <rect x="0" y="22" width="150" height="12" fill="#7C3AED"/>
+      <text x="16" y="24" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="bold" fill="#FFFFFF">Month plan</text>
+      <!-- day cells -->
+      <g fill="#D8C9F2">
+        <rect x="16" y="48"  width="22" height="18" rx="4"/>
+        <rect x="46" y="48"  width="22" height="18" rx="4"/>
+        <rect x="76" y="48"  width="22" height="18" rx="4"/>
+        <rect x="106" y="48" width="22" height="18" rx="4"/>
+        <rect x="16" y="76"  width="22" height="18" rx="4"/>
+        <rect x="76" y="76"  width="22" height="18" rx="4"/>
+        <rect x="106" y="76" width="22" height="18" rx="4"/>
+        <rect x="46" y="104" width="22" height="18" rx="4"/>
+        <rect x="76" y="104" width="22" height="18" rx="4"/>
+        <rect x="16" y="132" width="22" height="18" rx="4"/>
+        <rect x="106" y="132" width="22" height="18" rx="4"/>
+      </g>
+      <!-- scheduled posts highlighted -->
+      <g fill="#EC4899">
+        <rect x="46" y="76"  width="22" height="18" rx="4"/>
+        <rect x="16" y="104" width="22" height="18" rx="4"/>
+        <rect x="106" y="104" width="22" height="18" rx="4"/>
+        <rect x="46" y="132" width="22" height="18" rx="4"/>
+        <rect x="76" y="132" width="22" height="18" rx="4"/>
+      </g>
+    </g>
+
+    <!-- front: a generated post card -->
+    <g transform="translate(1000 92)">
+      <rect width="150" height="150" rx="16" fill="url(#card)"/>
+      <!-- AI image chip with little ring motif -->
+      <rect x="14" y="14" width="122" height="74" rx="10" fill="#1E1B4B"/>
+      <circle cx="58" cy="58" r="20" fill="none" stroke="#FBBF24" stroke-width="6"/>
+      <path d="M86 30 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4 Z" fill="#FFFFFF" opacity="0.92"/>
+      <!-- caption lines -->
+      <rect x="14" y="100" width="92" height="9" rx="4.5" fill="#A21CAF"/>
+      <rect x="14" y="118" width="122" height="7" rx="3.5" fill="#CBB7E6"/>
+      <rect x="14" y="131" width="104" height="7" rx="3.5" fill="#CBB7E6"/>
+    </g>
+  </g>
+
+  <!-- big AI sparkle linking the two -->
+  <g transform="translate(792 96)">
+    <path d="M0 -26 L6.8 -6.8 L26 0 L6.8 6.8 L0 26 L-6.8 6.8 L-26 0 L-6.8 -6.8 Z" fill="#FBBF24"/>
+    <circle cx="0" cy="0" r="6" fill="#FFFFFF"/>
+  </g>
+</svg>

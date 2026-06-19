@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--
+            Re-definicion de la plantilla de etiqueta de producto.
+            La impresora destino es una Zebra TLP 2844, que es nativa EPL2 (NO ZPL).
+            Por eso generamos EPL2 (no ZPL): el codigo lo arma Python en
+            product.product/product.template novadiam_epl_label(), y aqui solo
+            hacemos t-out del resultado (sin wrapper ^XA/^XZ de ZPL).
+
+            Esta redefinicion vive solo en la BD novadiam-anello-diamane-xubax
+            (unico lugar donde se instala este modulo); otras BDs no se afectan.
+        -->
+        <template id="stock.label_product_product_view">
+            <t t-foreach="quantity.items()" t-as="barcode_and_qty_by_product">
+                <t t-set="product" t-value="barcode_and_qty_by_product[0]"/>
+                <t t-foreach="barcode_and_qty_by_product[1]" t-as="product_info">
+                    <t t-foreach="range(product_info['quantity'])" t-as="qty"><t t-out="product.novadiam_epl_label(zpl_template, price_included, product_info['barcode'])"/></t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

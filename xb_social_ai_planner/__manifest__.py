@@ -39,8 +39,14 @@ Key features
 * Multi-company, Odoo 19 privilege-based security, English / Spanish /
   Spanish (Mexico) translations bundled and auto-loaded.
 
-AI image generation (v1.1) and AI video (v2) plug in through a separate,
-configurable media-generation provider.
+* **AI image generation** — optionally generate an on-brand image per post.
+  The AI designs a vector graphic from each post's brief and your brand kit
+  (palette, typography, logo), which is rasterised to PNG and attached to the
+  post — no separate image-generation API key required. (Requires the optional
+  ``cairosvg`` Python library; disabled gracefully when absent.)
+
+AI video (v2) plugs in through a separate, configurable media-generation
+provider.
 """,
     "author": "Cristofferson Reyes",
     "maintainer": "XUBAX",
@@ -48,7 +54,7 @@ configurable media-generation provider.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Marketing/Social Marketing",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "license": "OPL-1",
     "depends": [
         "social",

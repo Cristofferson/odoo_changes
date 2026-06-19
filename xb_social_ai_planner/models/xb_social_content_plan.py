@@ -275,6 +275,15 @@ class XbSocialContentPlan(models.Model):
                 "job_type": "item_copy",
                 "idempotency_key": "copy-%s" % item.id,
             })
+            if self.also_generate_images:
+                Job.create({
+                    "plan_id": self.id,
+                    "item_id": item.id,
+                    "company_id": self.company_id.id,
+                    "provider_id": provider.id,
+                    "job_type": "image",
+                    "idempotency_key": "image-%s" % item.id,
+                })
         return usage
 
     def _refresh_state_after_generation(self):

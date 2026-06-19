@@ -57,12 +57,78 @@ class XbSocialAiTransport(models.AbstractModel):
         raise NotImplementedError()
 
     @api.model
-    def generate_image(self, provider, brief, n=1, size="1024x1024"):
-        """Return a list of (bytes, mimetype). Override per image provider."""
-        raise UserError(
-            _("AI image generation is not available in this version. "
-              "Configure an image provider or upload images manually.")
-        )
+    def generate_image(self, provider, brief, n=1, size="1080x1080"):
+        """Generate on-brand post image(s) without a dedicated image API.
+
+        Strategy: ask the (text) model for a single, self-contained SVG that
+        matches the art brief, then rasterise it to PNG with cairosvg. This
+        works for ANY text-capable provider (Anthropic HTTP or Claude Code
+        CLI) because it only relies on `generate_text`. Returns a list of
+        ``(png_bytes, mimetype)`` tuples.
+        """
+        try:
+            width, height = (int(x) for x in str(size).lower().split("x"))
+        except (ValueError, TypeError):
+            width = height = 1080
+        system = self._image_svg_system(width, height)
+        images = []
+        for _i in range(max(1, n)):
+            text, _usage = self.generate_text(provider, system, brief)
+            svg = self._extract_svg(text)
+            images.append((self._svg_to_png(svg, width, height), "image/png"))
+        return images
+
+    # ----- image helpers ----------------------------------------------------
+    @api.model
+    def _image_svg_system(self, width, height):
+        return (
+            "You are a senior graphic designer. You output clean, valid, "
+            "self-contained SVG for social-media post images.\n"
+            "Hard requirements:\n"
+            "- The root element is <svg> with "
+            'width="%(w)s" height="%(h)s" viewBox="0 0 %(w)s %(h)s" '
+            'and xmlns="http://www.w3.org/2000/svg".\n'
+            "- Fully self-contained: NO external URLs, remote fonts, scripts, "
+            "or <image> referencing remote resources. Use only inline shapes, "
+            "gradients, and <text> with generic font families "
+            "(serif, sans-serif).\n"
+            "- A polished composition that fills the entire canvas, respects "
+            "the brand palette, and keeps any headline text legible with strong "
+            "contrast. Leave the bottom-right corner relatively clear for a "
+            "logo overlay.\n"
+            "- Output ONLY the SVG markup: start with <svg and end with </svg>. "
+            "No prose, no explanations, no markdown code fences."
+        ) % {"w": width, "h": height}
+
+    @api.model
+    def _extract_svg(self, text):
+        """Pull the <svg>…</svg> document out of the model's reply, tolerating
+        stray code fences or surrounding prose."""
+        s = (text or "").strip()
+        start = s.find("<svg")
+        end = s.rfind("</svg>")
+        if start == -1 or end == -1 or end < start:
+            raise UserError(_("The AI did not return a valid SVG image."))
+        return s[start:end + len("</svg>")]
+
+    @api.model
+    def _svg_to_png(self, svg, width, height):
+        """Rasterise an SVG string to PNG bytes via the optional cairosvg lib."""
+        try:
+            import cairosvg
+        except ImportError:
+            raise UserError(_(
+                "AI image generation needs the optional 'cairosvg' Python "
+                "library (and the system Cairo library). Install it with "
+                "`pip install cairosvg`, or disable 'Also Generate Images'."))
+        try:
+            return cairosvg.svg2png(
+                bytestring=svg.encode("utf-8"),
+                output_width=width, output_height=height,
+            )
+        except Exception as exc:  # noqa: BLE001 — surface a clean error
+            raise UserError(
+                _("Could not rasterise the generated SVG: %s") % exc)
 
     # ----- shared helpers ---------------------------------------------------
     @api.model

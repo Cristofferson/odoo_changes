@@ -495,3 +495,101 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
 msgid "e.g. /opt/odoo/.claude (optional)"
 msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Generate Image"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_primary
+msgid "Primary Color"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_secondary
+msgid "Secondary Color"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_accent
+msgid "Text / Accent Color"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__font_hint
+msgid "Typography Hint"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__visual_style
+msgid "Visual Style"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Palette"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Visual / Brand Kit"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__logo
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Logo"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__palette_primary
+msgid "Hex color (e.g. #1A1A2E) used as the dominant background."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__palette_secondary
+msgid "Hex color used for accents and shapes."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__palette_accent
+msgid "Hex color used for headline text on the image."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__logo
+msgid "Optional. Embedded into AI-generated post images."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "e.g. elegant serif"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Generated %s image(s)."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "Could not rasterise the generated SVG: %s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The AI did not return a valid SVG image."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"AI image generation needs the optional 'cairosvg' Python library (and the "
+"system Cairo library). Install it with `pip install cairosvg`, or disable "
+"'Also Generate Images'."
+msgstr ""

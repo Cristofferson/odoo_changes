@@ -45,6 +45,34 @@ class XbSocialBrandProfile(models.Model):
         string="Hashtag Policy", default="few",
     )
 
+    # ----- visual brand kit (drives AI image generation) -------------------
+    logo = fields.Image(
+        string="Logo", max_width=512, max_height=512,
+        help="Optional. Embedded into AI-generated post images.",
+    )
+    palette_primary = fields.Char(
+        string="Primary Color", default="#1A1A2E",
+        help="Hex color (e.g. #1A1A2E) used as the dominant background.",
+    )
+    palette_secondary = fields.Char(
+        string="Secondary Color", default="#E94560",
+        help="Hex color used for accents and shapes.",
+    )
+    palette_accent = fields.Char(
+        string="Text / Accent Color", default="#FFFFFF",
+        help="Hex color used for headline text on the image.",
+    )
+    font_hint = fields.Char(
+        string="Typography Hint",
+        help="Free text describing the desired type style "
+             "(e.g. 'elegant serif', 'bold modern sans').",
+    )
+    visual_style = fields.Text(
+        string="Visual Style",
+        help="Art-direction notes for AI images: mood, composition, motifs, "
+             "what to avoid.",
+    )
+
     default_utm_campaign_id = fields.Many2one(
         "utm.campaign", string="Default Campaign",
         domain="[('is_auto_campaign', '=', False)]",
@@ -92,6 +120,28 @@ class XbSocialBrandProfile(models.Model):
             "domain": [("brand_profile_id", "=", self.id)],
             "context": {"default_brand_profile_id": self.id},
         }
+
+    def _image_visual_context(self):
+        """Art-direction block injected into the image (SVG) prompt. Keeps the
+        generated graphics on-brand: palette, typography and style notes."""
+        self.ensure_one()
+        lines = [
+            "Brand: %s." % (self.name or ""),
+        ]
+        if self.industry:
+            lines.append("Industry: %s." % self.industry)
+        lines.append(
+            "Color palette — primary/background: %s, secondary/accent: %s, "
+            "text: %s. Stay within this palette."
+            % (self.palette_primary or "#1A1A2E",
+               self.palette_secondary or "#E94560",
+               self.palette_accent or "#FFFFFF")
+        )
+        if self.font_hint:
+            lines.append("Typography style: %s." % self.font_hint)
+        if self.visual_style:
+            lines.append("Art direction: %s" % self.visual_style)
+        return "\n".join(lines)
 
     def _ai_system_context(self):
         """Frozen, brand-grounded system prompt shared by every generation."""

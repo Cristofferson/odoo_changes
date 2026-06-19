@@ -49,6 +49,23 @@
                                 <field name="banned_words" placeholder="Words to avoid"/>
                             </group>
                         </page>
+                        <page string="Visual / Brand Kit" name="visual">
+                            <group>
+                                <group string="Logo">
+                                    <field name="logo" widget="image" class="oe_avatar"/>
+                                </group>
+                                <group string="Palette">
+                                    <field name="palette_primary" widget="color"/>
+                                    <field name="palette_secondary" widget="color"/>
+                                    <field name="palette_accent" widget="color"/>
+                                    <field name="font_hint" placeholder="e.g. elegant serif"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="visual_style" nolabel="1"
+                                       placeholder="Art-direction notes for AI images: mood, composition, motifs, what to avoid…"/>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
                 <chatter/>

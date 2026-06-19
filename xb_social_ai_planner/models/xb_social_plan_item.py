@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+import base64
+import io
 import json
+import logging
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 # media_type -> our per-network copy field. Native social.post field names are
 # resolved at runtime via social.post._message_fields() / _images_fields().
@@ -196,6 +201,82 @@ class XbSocialPlanItem(models.Model):
         self.state = "needs_review" if self.length_warning else "generated"
         return usage
 
+    # ----- image generation -------------------------------------------------
+    def _build_image_brief(self, brand):
+        """Compose the full art brief handed to the (SVG) image generator."""
+        self.ensure_one()
+        parts = [
+            brand._image_visual_context(),
+            "Design a single, square social-media post image for this post.",
+            "Post angle/theme: %s" % (self.theme or self.plan_id.monthly_theme or ""),
+        ]
+        if self.image_brief:
+            parts.append("Creative brief: %s" % self.image_brief)
+        parts.append(
+            "If you place text on the image, keep it to a few words, on-brand, "
+            "correctly spelled, and high-contrast against the background.")
+        return "\n".join(p for p in parts if p)
+
+    def _overlay_logo(self, png_bytes, brand):
+        """Composite the brand logo into the bottom-right corner of a PNG.
+        Best-effort: returns the original bytes unchanged on any failure."""
+        if not brand.logo:
+            return png_bytes
+        try:
+            from PIL import Image  # Pillow ships with Odoo
+            base = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
+            logo = Image.open(
+                io.BytesIO(base64.b64decode(brand.logo))).convert("RGBA")
+            target_w = max(1, int(base.width * 0.18))
+            ratio = target_w / float(logo.width)
+            logo = logo.resize((target_w, max(1, int(logo.height * ratio))))
+            margin = int(base.width * 0.04)
+            base.alpha_composite(
+                logo,
+                (base.width - logo.width - margin,
+                 base.height - logo.height - margin),
+            )
+            out = io.BytesIO()
+            base.convert("RGB").save(out, format="PNG")
+            return out.getvalue()
+        except Exception as exc:  # noqa: BLE001 — overlay is optional polish
+            _logger.warning(
+                "[xb_social_ai_planner] logo overlay failed on item %s: %s",
+                self.id, exc)
+            return png_bytes
+
+    def _generate_image(self, job):
+        """Called by the generation job. Generates image(s) for this item,
+        stores them as attachments, and auto-selects the first. Returns usage."""
+        self.ensure_one()
+        provider = job.provider_id or self.plan_id._get_provider()
+        brand = self.plan_id.brand_profile_id
+        brief = self._build_image_brief(brand)
+        transport = self.env["xb.social.ai.transport"]._get_transport(provider)
+        job.request_payload = brief[:30000]
+
+        images = transport.generate_image(provider, brief, n=1)
+        Attachment = self.env["ir.attachment"]
+        created = self.env["ir.attachment"]
+        for idx, (data, mimetype) in enumerate(images):
+            data = self._overlay_logo(data, brand)
+            att = Attachment.create({
+                "name": "%s-%s.png" % (
+                    (self.theme or "post").strip()[:40] or "post", idx + 1),
+                "datas": base64.b64encode(data),
+                "mimetype": mimetype or "image/png",
+                "res_model": self._name,
+                "res_id": self.id,
+            })
+            created |= att
+
+        if created:
+            self.generated_image_ids = [(4, a.id) for a in created]
+            if not self.selected_image_ids:
+                self.selected_image_ids = [(6, 0, created[:1].ids)]
+            job.response_raw = _("Generated %s image(s).") % len(created)
+        return {}
+
     # ----- approval ---------------------------------------------------------
     def action_approve(self):
         for item in self:
@@ -205,6 +286,22 @@ class XbSocialPlanItem(models.Model):
 
     def action_reject(self):
         self.write({"state": "rejected"})
+        return True
+
+    def action_generate_image(self):
+        """Queue an image-generation job for each item (runs on the AI cron)."""
+        Job = self.env["xb.social.generation.job"]
+        stamp = fields.Datetime.now().strftime("%Y%m%d%H%M%S")
+        for item in self:
+            provider = item.plan_id._get_provider()
+            Job.create({
+                "plan_id": item.plan_id.id,
+                "item_id": item.id,
+                "company_id": item.company_id.id,
+                "provider_id": provider.id,
+                "job_type": "image",
+                "idempotency_key": "image-%s-%s" % (item.id, stamp),
+            })
         return True
 
     def action_reset_draft(self):

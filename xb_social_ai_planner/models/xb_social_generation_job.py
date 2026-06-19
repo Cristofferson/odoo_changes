@@ -71,6 +71,8 @@ class XbSocialGenerationJob(models.Model):
                 usage = self.item_id._generate_copy(self)
             elif self.job_type == "competitor":
                 usage = self.competitor_id._generate_analysis(self)
+            elif self.job_type == "image":
+                usage = self.item_id._generate_image(self)
             else:
                 raise NotImplementedError(self.job_type)
             self.write({

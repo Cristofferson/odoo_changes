@@ -258,15 +258,15 @@ def _diamond_papers_epl(tpl):
     # Icono del diamante: centro-derecha, debajo del No. de cert.
     icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=478, y=150, target_w=95, max_h=120)
     lines += icon_cmds
-    # Wordmark "DIAMANE" + numero de plastico, abajo-derecha. Alineado con el
-    # renglon de "Brillo" (y=294) del bloque de datos.
-    word_cmds, _ww, word_h = _ink_to_lo(word_ink, x=445, y=284, target_w=175, max_h=46)
+    # Wordmark "DIAMANE" + numero de plastico, abajo-derecha. Subido para que la
+    # BASE del numero quede al ras de la base del renglon "Brillo" (~y=314).
+    word_cmds, _ww, word_h = _ink_to_lo(word_ink, x=445, y=264, target_w=175, max_h=46)
     if word_cmds:
         lines += word_cmds
-        serie_y = 284 + word_h + 8
+        serie_y = 264 + word_h + 8
     else:
-        lines.append('A445,288,0,4,1,1,N,"DIAMANE"')
-        serie_y = 330
+        lines.append('A445,268,0,4,1,1,N,"DIAMANE"')
+        serie_y = 310
     # Numero de plastico (font2) abajo-derecha, SIN prefijo "No.".
     lines.append('A445,%d,0,2,1,1,N,"%s"' % (serie_y, _esc(serie)))
     lines.append('P1')

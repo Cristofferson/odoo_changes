@@ -15,9 +15,9 @@ CENSUS_DB_RE = re.compile(r'^[a-z][a-z0-9_-]{1,62}$')
 DOMAIN_RE = re.compile(r'^[a-z0-9][a-z0-9.-]{1,99}$')
 MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 
-# Operaciones habilitadas (Fase 1: alta+censo; Fase 2 etapa 1: baja). El resto
+# Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo). El resto
 # vive en la selección para compatibilidad futura, pero action_provision las rechaza.
-PHASE1_OPS = ('alta', 'census', 'baja')
+PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo')
 
 # Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
 # el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
@@ -164,6 +164,19 @@ class DespachoDbOperation(models.Model):
             'simulate': bool(self.simulate),
         }
 
+    def _build_respaldo_req(self):
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('El respaldo requiere seleccionar una base de datos del inventario.')
+        db = (proj.database_name or '').strip()
+        if not CENSUS_DB_RE.match(db):
+            raise UserError('Nombre de BD inválido para respaldo: %r' % db)
+        server = (proj.despacho_server or 'diamane.mx').strip()
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor de la BD no reconocido: %s' % server)
+        return {'id': self.id, 'op': 'respaldo', 'db': db, 'server': server,
+                'simulate': False}
+
     def _build_census_req(self):
         server = self.target_server or 'diamane.mx'
         if server not in SERVER_KEYS:
@@ -201,6 +214,12 @@ class DespachoDbOperation(models.Model):
             # El censo trae el inventario en la respuesta: hacer upsert.
             if rec.op == 'census' and res.get('state') == 'done' and isinstance(res.get('census'), list):
                 self.env['project.project']._census_upsert(res['census'])
+            # El respaldo trae fecha/rutas: refrescar "Último respaldo" de la BD.
+            if (rec.op == 'respaldo' and res.get('state') == 'done'
+                    and isinstance(res.get('backup'), dict) and rec.project_id):
+                bt = res['backup'].get('backup_time')
+                if bt:
+                    rec.project_id.sudo().despacho_last_backup = bt
         return True
 
     @api.model

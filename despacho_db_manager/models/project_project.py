@@ -112,6 +112,25 @@ class ProjectProject(models.Model):
             },
         }
 
+    def action_respaldo(self):
+        """Encola un respaldo (dump + filestore) de esta BD. Operación segura (read-only)."""
+        self.ensure_one()
+        op = self.env['despacho.db.operation'].create({
+            'op': 'respaldo', 'project_id': self.id, 'simulate': False,
+        })
+        op.action_provision()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Respaldo encolado',
+                'message': 'Se está respaldando %s. "Último respaldo" se actualizará en ~1 minuto.'
+                           % (self.database_name or self.name),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
     def action_view_operations(self):
         self.ensure_one()
         return {

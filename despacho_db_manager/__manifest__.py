@@ -1,7 +1,7 @@
 {
     'name': 'Despacho - Administración de Bases de Datos',
-    'version': '19.0.1.2.0',
-    'summary': 'Inventario y operaciones (alta, censo multi-servidor, baja) de las bases de datos de clientes, sobre la app nativa Databases',
+    'version': '19.0.1.3.0',
+    'summary': 'Inventario y operaciones (alta, censo multi-servidor, baja, respaldo) de las bases de datos de clientes, sobre la app nativa Databases',
     'description': """
 Administración de bases de datos de clientes (XUBAX)
 ===================================================

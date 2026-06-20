@@ -15,9 +15,9 @@ CENSUS_DB_RE = re.compile(r'^[a-z][a-z0-9_-]{1,62}$')
 DOMAIN_RE = re.compile(r'^[a-z0-9][a-z0-9.-]{1,99}$')
 MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 
-# Operaciones implementadas en Fase 1. El resto vive en la selección para
-# compatibilidad futura, pero action_provision las rechaza por ahora.
-PHASE1_OPS = ('alta', 'census')
+# Operaciones habilitadas (Fase 1: alta+censo; Fase 2 etapa 1: baja). El resto
+# vive en la selección para compatibilidad futura, pero action_provision las rechaza.
+PHASE1_OPS = ('alta', 'census', 'baja')
 
 # Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
 # el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
@@ -64,6 +64,15 @@ class DespachoDbOperation(models.Model):
     with_mail = fields.Boolean('Configurar correo (DKIM/SPF/DMARC)', default=True)
     wants_cfdi = fields.Boolean('El cliente quiere CFDI',
                                 help='Recordatorio para cuando crees su suscripción.')
+
+    # --- Parámetros de BAJA ---
+    do_drop = fields.Boolean(
+        'Eliminar la BD (irreversible)', default=False,
+        help='Apagado: la baja SOLO respalda y deshabilita el sitio en nginx (reversible). '
+             'Encendido: además ELIMINA la base de datos y su filestore, tras respaldar.')
+    confirm_name = fields.Char(
+        'Confirmar (nombre exacto de la BD)',
+        help='Para eliminar, escribe exactamente el nombre de la base de datos.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -123,6 +132,36 @@ class DespachoDbOperation(models.Model):
             'db': name, 'domain': domain, 'mail_domain': mail_domain, 'modules': modules,
             'with_dns': bool(self.with_dns), 'with_ssl': bool(self.with_ssl),
             'with_mail': bool(self.with_mail), 'simulate': bool(self.simulate),
+        }
+
+    def _build_baja_req(self):
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('La baja requiere seleccionar una base de datos del inventario.')
+        db = (proj.database_name or '').strip()
+        if not CENSUS_DB_RE.match(db):
+            raise UserError('Nombre de BD inválido para baja: %r' % db)
+        server = (proj.despacho_server or 'diamane.mx').strip()
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor de la BD no reconocido: %s' % server)
+        # Dominio para deshabilitar nginx: el host del database_url (sin ?srv=…),
+        # o <db>.xubax.com como respaldo.
+        domain = ''
+        m = re.search(r'https?://([^/?#]+)', proj.database_url or '')
+        if m:
+            domain = m.group(1)
+        if not domain:
+            domain = '%s.xubax.com' % db
+        if not DOMAIN_RE.match(domain):
+            raise UserError('Dominio inválido derivado de la BD: %s' % domain)
+        drop = bool(self.do_drop)
+        if drop and (self.confirm_name or '').strip() != db:
+            raise UserError('Para ELIMINAR la BD escribe exactamente su nombre (%s) en "Confirmar".' % db)
+        return {
+            'id': self.id, 'op': 'baja',
+            'db': db, 'domain': domain, 'server': server,
+            'drop': drop, 'confirm': db if drop else '',
+            'simulate': bool(self.simulate),
         }
 
     def _build_census_req(self):

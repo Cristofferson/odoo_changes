@@ -96,6 +96,22 @@ class ProjectProject(models.Model):
             },
         }
 
+    def action_baja(self):
+        """Abre el formulario de baja prellenado para esta BD (dry-run por defecto)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Dar de baja: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'baja',
+                'default_project_id': self.id,
+                'default_simulate': True,
+            },
+        }
+
     def action_view_operations(self):
         self.ensure_one()
         return {

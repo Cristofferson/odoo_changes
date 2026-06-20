@@ -44,6 +44,11 @@
                 <page name="despacho_server" string="Servidor"
                       invisible="not database_hosting"
                       groups="databases.group_databases_manager">
+                    <div class="oe_button_box" name="despacho_baja_box">
+                        <button name="action_baja" type="object" string="Dar de baja"
+                                class="btn-danger" icon="fa-trash"
+                                confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                    </div>
                     <group>
                         <group string="Inventario">
                             <field name="despacho_db_local"/>

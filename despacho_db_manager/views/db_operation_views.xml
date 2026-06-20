@@ -18,7 +18,9 @@
                     <group>
                         <field name="op"/>
                         <field name="project_id"
-                               invisible="op in ('alta','census')"/>
+                               invisible="op in ('alta','census')"
+                               required="op == 'baja'"
+                               readonly="op == 'baja' and context.get('default_project_id')"/>
                         <field name="simulate"/>
                     </group>
                     <!-- ALTA -->
@@ -37,6 +39,19 @@
                             <field name="with_mail"/>
                             <field name="wants_cfdi"/>
                         </group>
+                    </group>
+                    <!-- BAJA -->
+                    <group string="Baja de cliente" invisible="op != 'baja'">
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="op != 'baja'">
+                            Por defecto la baja SOLO respalda y deshabilita el sitio (reversible).
+                            Deja "Simular" activado para ver el plan; desactívalo y vuelve a Ejecutar para aplicar.
+                        </div>
+                        <field name="do_drop"/>
+                        <field name="confirm_name"
+                               invisible="not do_drop"
+                               required="do_drop and not simulate"
+                               placeholder="escribe el nombre exacto de la BD"/>
                     </group>
                     <!-- CENSO -->
                     <group string="Escaneo" invisible="op != 'census'">

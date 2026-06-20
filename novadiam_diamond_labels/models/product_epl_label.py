@@ -6,7 +6,7 @@ construimos el codigo EPL2 en Python (control exacto de bytes y saltos de
 linea) y la plantilla QWeb solo hace t-out del resultado.
 
 @203 DPI = 8 dots/mm.
-  Diamond Papers: 3-1/8" x 2"  -> 634 x 406 dots
+  Diamond Papers: 78 x 34 mm   -> 624 x 272 dots
   Joyeria:        63 x 22 mm   -> 504 x 176 dots
 """
 import base64
@@ -17,9 +17,51 @@ import qrcode
 from odoo import models
 
 try:
-    from PIL import Image, ImageChops
+    from PIL import Image, ImageChops, ImageDraw, ImageFont
 except ImportError:  # pragma: no cover
     Image = None
+
+# Fuente para rasterizar texto a cajas LO (p.ej. el numero de plastico, que debe
+# tener EXACTAMENTE el ancho del wordmark "DIAMANE"; la fuente nativa EPL solo
+# escala por multiplos enteros y no permite cuadrar ese ancho).
+_TTF = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+
+
+def _text_ink(text, font_px=48):
+    """Renderiza `text` a una imagen 'L' (255=tinta) recortada al contenido, o
+    None si no hay PIL/fuente. Se usa con _ink_to_lo para escalar el texto a un
+    ancho objetivo (mismo ancho que DIAMANE)."""
+    if Image is None or not text:
+        return None
+    try:
+        font = ImageFont.truetype(_TTF, font_px)
+    except Exception:
+        return None
+    bb = font.getbbox(text)
+    w = max(1, bb[2] - bb[0]) + 4
+    h = max(1, bb[3] - bb[1]) + 4
+    img = Image.new('L', (w, h), 0)
+    ImageDraw.Draw(img).text((2 - bb[0], 2 - bb[1]), text, fill=255, font=font)
+    crop = img.getbbox()
+    return img.crop(crop) if crop else None
+
+
+def _scaled_size(ink, target_w, max_h=None):
+    """Tamano (w,h) en dots que tendria `ink` reescalada a target_w (con cap
+    opcional de alto), SIN dibujarla. Espeja la logica de _ink_to_lo para poder
+    apilar/alinear elementos antes de colocarlos."""
+    if ink is None:
+        return 0, 0
+    bb = ink.getbbox()
+    if not bb:
+        return 0, 0
+    iw = bb[2] - bb[0]
+    ih = bb[3] - bb[1]
+    h = max(1, round(ih * target_w / iw))
+    if max_h and h > max_h:
+        target_w = max(1, round(target_w * max_h / h))
+        h = max_h
+    return target_w, h
 
 
 def _logo_ink(company, lum_cut=248, alpha_cut=120):
@@ -218,35 +260,51 @@ def _diamond_papers_epl(tpl):
     qr_url = 'https://diamane.mx/report-check/%s' % (clave or cert)
     header = ' '.join([v for v in [forma, ct, pureza, color, corte] if v])
 
-    # Layout segun la etiqueta REAL (foto /tmp/diamond_paper2.jpg):
-    #   - QR GRANDE a la izquierda (ocupa ~1/3 del ancho y casi toda la altura)
+    # Layout segun la etiqueta REAL (foto /tmp/diamond_paper2.jpg), pero a su
+    # tamano FISICO correcto 78x34 mm = 624x272 dots @203dpi (antes se uso por
+    # error 634x406 y todo desbordaba por abajo). Mismo arreglo visual, eje Y
+    # comprimido para caber en 272 dots:
+    #   - TITULO banner arriba (font 4; el font 5 de 48 dots no cabe ya)
+    #   - QR GRANDE a la izquierda (mod=6 ~ 198-222 dots de alto)
     #   - Encabezado y bloque de datos a la DERECHA del QR
-    #   - Icono del diamante centro-derecha (debajo del No. de cert)
+    #   - Icono del diamante derecha (debajo del No. de cert)
     #   - Wordmark "DIAMANE" (SIN tagline) + No. de plastico abajo-derecha
-    DATA_X = 262   # columna de etiquetas, a la derecha del QR
-    VAL_X = 400    # columna de valores
-    # TITULO: banner superior a todo lo ancho, fuente 5 (32x48, la mas grande
-    # de EPL) centrado horizontalmente. El QR y los datos van DEBAJO.
+    WIDTH = 624
+    DATA_X = 240   # columna de etiquetas, a la derecha del QR
+    VAL_X = 366    # columna de valores
+    # TITULO: banner superior centrado, fuente 5 (32x48, la mas grande de EPL)
+    # para que abarque todo el renglon. El QR y los datos van DEBAJO.
     htext = _esc(header)
-    hx = max(8, (634 - len(htext) * 32) // 2)
+    hx = max(4, (WIDTH - len(htext) * 32) // 2)
     lines = [
         'N',
-        'q634',
-        'A%d,14,0,5,1,1,N,"%s"' % (hx, htext),
-        'A%d,92,0,3,1,1,N,"Cert"' % DATA_X,
-        'A%d,92,0,3,1,1,N,"DIA %s"' % (VAL_X - 40, _esc(cert)),
-        'A%d,132,0,4,1,1,N,"CLAVE: %s"' % (DATA_X, _esc(clave)),
-        'A%d,180,0,3,1,1,N,"Fluor."' % DATA_X,
-        'A%d,180,0,3,1,1,N,"%s"' % (VAL_X, _esc(fluor)),
-        'A%d,218,0,3,1,1,N,"Pulido."' % DATA_X,
-        'A%d,218,0,3,1,1,N,"%s"' % (VAL_X, _esc(pulido)),
-        'A%d,256,0,3,1,1,N,"Simetria:"' % DATA_X,
-        'A%d,256,0,3,1,1,N,"%s"' % (VAL_X, _esc(simetria)),
-        'A%d,294,0,3,1,1,N,"Brillo"' % DATA_X,
-        'A%d,294,0,3,1,1,N,"%s"' % (VAL_X, _esc(brillo)),
+        'q624',
+        'A%d,2,0,5,1,1,N,"%s"' % (hx, htext),
+        'A%d,58,0,3,1,1,N,"Cert"' % DATA_X,
+        'A%d,58,0,3,1,1,N,"DIA %s"' % (DATA_X + 84, _esc(cert)),
+        'A%d,89,0,4,1,1,N,"CLAVE: %s"' % (DATA_X, _esc(clave)),
+        'A%d,120,0,3,1,1,N,"Fluor."' % DATA_X,
+        'A%d,120,0,3,1,1,N,"%s"' % (VAL_X, _esc(fluor)),
+        'A%d,151,0,3,1,1,N,"Pulido."' % DATA_X,
+        'A%d,151,0,3,1,1,N,"%s"' % (VAL_X, _esc(pulido)),
+        'A%d,182,0,3,1,1,N,"Simetria:"' % DATA_X,
+        'A%d,182,0,3,1,1,N,"%s"' % (VAL_X, _esc(simetria)),
+        'A%d,213,0,3,1,1,N,"Brillo"' % DATA_X,
+        'A%d,213,0,3,1,1,N,"%s"' % (VAL_X, _esc(brillo)),
     ]
-    # QR rasterizado a cajas LO (firmware-independiente). mod=7 -> ~231 dots.
-    lines += _qr_as_lo(qr_url, x=16, y=82, mod=7)
+    # QR rasterizado a cajas LO (firmware-independiente). El modulo se calcula
+    # dinamicamente: el QR mas grande que quepa a la izquierda (debajo del
+    # titulo) sin desbordar el alto 272 ni invadir la columna de datos. Asi una
+    # clave corta da un QR mas grande y una larga (mas modulos) no desborda.
+    _qr = qrcode.QRCode(border=2, error_correction=qrcode.constants.ERROR_CORRECT_M)
+    _qr.add_data(qr_url)
+    _qr.make(fit=True)
+    n_mod = len(_qr.get_matrix())
+    qr_y = 52
+    # El QR vive en la columna izquierda: puede bajar hasta ~262 (no choca con
+    # los datos, que estan a la derecha). Asi entra mod=6 (~198 dots) en vez de 5.
+    qr_mod = max(4, min(7, (262 - qr_y) // n_mod, (DATA_X - 12 - 6) // n_mod))
+    lines += _qr_as_lo(qr_url, x=12, y=qr_y, mod=qr_mod, border=2)
     # Logo de la compania DIAMANE (marca de certificacion). Se separa en bandas
     # para usar SOLO el icono (banda 0) y el wordmark "DIAMANE" (banda 1),
     # DESCARTANDO el tagline "Diamantes & Tecnologia" (banda 2).
@@ -255,21 +313,44 @@ def _diamond_papers_epl(tpl):
     bands = _ink_bands(_logo_ink(company))
     icon_ink = bands[0] if len(bands) >= 1 else None
     word_ink = bands[1] if len(bands) >= 2 else None
-    # Icono del diamante: centro-derecha, debajo del No. de cert. Subido para
-    # dejar separacion con el wordmark "DIAMANE" (que va mas abajo).
-    icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=478, y=125, target_w=95, max_h=120)
+    # Bloque-marca abajo-derecha, replicando el LOGO de DIAMANE (icono sobre la
+    # palabra): icono CENTRADO arriba, "DIAMANE" en medio y el numero de plastico
+    # (mismo ancho que la palabra) abajo, con su BASE al ras de "Brillo" (y=233).
+    WORD_X = 432
+    WORD_TW = 182
+    BRILLO_BOT = 233          # base de "Brillo" (font 3 @ y=213 -> 213+20)
+    word_cx = WORD_X + WORD_TW // 2
+    eserie = _esc(serie)
+    serie_ink = _text_ink(eserie)
+    ww, wh = _scaled_size(word_ink, WORD_TW, 46)      # tamano real del wordmark
+    if not ww:                                        # sin logo: caer a texto EPL
+        ww, wh = 7 * 14, 24
+    sw, sh = _scaled_size(serie_ink, ww)              # numero al ancho del wordmark
+    if not sw:
+        sw, sh = len(eserie) * 10, 16
+    # Icono al MISMO escalado que la palabra: en el logo el diamante mide 56 de
+    # ancho y "DIAMANE" 127 -> icono = WORD_TW * 56/127 (~80). Asi conserva la
+    # proporcion icono:palabra del logo. Centrado sobre la palabra.
+    icon_tw = round(WORD_TW * 56 / 127)
+    iw, ih = _scaled_size(icon_ink, icon_tw, 130)
+    # Apilado de abajo hacia arriba para fijar la base del numero en BRILLO_BOT.
+    serie_y = BRILLO_BOT - sh
+    word_y = serie_y - 6 - wh
+    icon_y = word_y - 8 - ih
+    icon_x = word_cx - iw // 2
+    icon_cmds, _iw, _ih = _ink_to_lo(icon_ink, x=icon_x, y=icon_y, target_w=icon_tw, max_h=130)
     lines += icon_cmds
-    # Wordmark "DIAMANE" + numero de plastico, abajo-derecha. Subido para que la
-    # BASE del numero quede al ras de la base del renglon "Brillo" (~y=314).
-    word_cmds, _ww, word_h = _ink_to_lo(word_ink, x=445, y=264, target_w=175, max_h=46)
+    word_cmds, _ww2, _wh2 = _ink_to_lo(word_ink, x=WORD_X, y=word_y, target_w=WORD_TW, max_h=46)
     if word_cmds:
         lines += word_cmds
-        serie_y = 264 + word_h + 8
     else:
-        lines.append('A445,268,0,4,1,1,N,"DIAMANE"')
-        serie_y = 310
-    # Numero de plastico (font2) abajo-derecha, SIN prefijo "No.".
-    lines.append('A445,%d,0,2,1,1,N,"%s"' % (serie_y, _esc(serie)))
+        lines.append('A%d,%d,0,4,1,1,N,"DIAMANE"' % (WORD_X, word_y))
+    serie_cmds, _sw2, _sh2 = _ink_to_lo(serie_ink, x=WORD_X, y=serie_y, target_w=ww)
+    if serie_cmds:
+        lines += serie_cmds
+    else:  # fallback: texto EPL alineado a la derecha del wordmark
+        lines.append('A%d,%d,0,2,1,1,N,"%s"' % (
+            WORD_X + ww - len(eserie) * 10, serie_y, eserie))
     lines.append('P1')
     return lines
 

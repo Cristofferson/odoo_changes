@@ -40,6 +40,7 @@
                     </group>
                     <!-- CENSO -->
                     <group string="Escaneo" invisible="op != 'census'">
+                        <field name="target_server"/>
                         <field name="with_modules"/>
                     </group>
                     <notebook>

@@ -19,6 +19,17 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # compatibilidad futura, pero action_provision las rechaza por ahora.
 PHASE1_OPS = ('alta', 'census')
 
+# Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
+# el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
+# un host/usuario arbitrario. La clave DEBE ser el socket.gethostname() de cada
+# servidor para casar con el campo `server` que emite despacho-census.sh y con
+# THIS_SERVER del upsert (idempotencia por (database_name, despacho_server)).
+SERVERS = [
+    ('diamane.mx', 'Este servidor (diamane.mx)'),
+    ('vps-f101b860', 'Servidor 2 (OVH · vps-f101b860)'),
+]
+SERVER_KEYS = tuple(k for k, _ in SERVERS)
+
 
 class DespachoDbOperation(models.Model):
     _name = 'despacho.db.operation'
@@ -56,6 +67,10 @@ class DespachoDbOperation(models.Model):
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
+    target_server = fields.Selection(
+        SERVERS, string='Servidor a escanear', default='diamane.mx',
+        help='Servidor cuyo inventario de bases de datos se censará. Los remotos '
+             'se escanean por SSH (solo lectura).')
 
     simulate = fields.Boolean('Simular (dry-run, no crea nada)', default=True,
                               help='Déjalo activado la primera vez para revisar el plan. '
@@ -111,8 +126,11 @@ class DespachoDbOperation(models.Model):
         }
 
     def _build_census_req(self):
+        server = self.target_server or 'diamane.mx'
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor a escanear no reconocido: %s' % server)
         return {
-            'id': self.id, 'op': 'census',
+            'id': self.id, 'op': 'census', 'server': server,
             'with_modules': bool(self.with_modules), 'simulate': bool(self.simulate),
         }
 

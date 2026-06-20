@@ -3,7 +3,7 @@ import socket
 
 from odoo import api, fields, models
 
-from .db_operation import CENSUS_DB_RE
+from .db_operation import CENSUS_DB_RE, SERVER_KEYS
 
 _logger = logging.getLogger(__name__)
 
@@ -75,17 +75,22 @@ class ProjectProject(models.Model):
 
     @api.model
     def action_scan_server(self):
-        """Encola un censo del servidor (read-only). Lo dispara el botón del listado."""
-        op = self.env['despacho.db.operation'].create({
-            'op': 'census', 'with_modules': True, 'simulate': False,
-        })
-        op.action_provision()
+        """Encola un censo de CADA servidor conocido (read-only). Los remotos se
+        escanean por SSH. Lo dispara el botón del listado."""
+        Op = self.env['despacho.db.operation']
+        for server in SERVER_KEYS:
+            op = Op.create({
+                'op': 'census', 'target_server': server,
+                'with_modules': True, 'simulate': False,
+            })
+            op.action_provision()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Escaneo encolado',
-                'message': 'El inventario de bases de datos se actualizará en ~1 minuto.',
+                'message': 'El inventario de %d servidor(es) se actualizará en ~1-2 minutos.'
+                           % len(SERVER_KEYS),
                 'type': 'success',
                 'sticky': False,
             },
@@ -104,8 +109,10 @@ class ProjectProject(models.Model):
 
     @api.model
     def _census_upsert(self, census_list):
-        """Crea/actualiza un registro premise por cada BD local reportada por el censo.
-        Idempotente por (database_name, despacho_server)."""
+        """Crea/actualiza un registro premise por cada BD reportada por el censo.
+        Idempotente por (database_name, despacho_server). Honra el `server` que
+        emite cada fila (el censo remoto trae el hostname del otro servidor), de
+        modo que despacho_db_local solo es cierto para las BDs de ESTE servidor."""
         Project = self.sudo().with_context(active_test=False)
         company = self._despacho_company()
         now = fields.Datetime.now()
@@ -115,11 +122,23 @@ class ProjectProject(models.Model):
             if not CENSUS_DB_RE.match(db):
                 _logger.warning('Censo: nombre de BD inválido, omitido: %r', db)
                 continue
+            server = (row.get('server') or THIS_SERVER).strip()
             url = row.get('url') or ('https://%s.xubax.com' % db)
+            rec = Project.search([
+                ('database_name', '=', db),
+                ('despacho_server', '=', server),
+            ], limit=1)
+            # database_url tiene índice único. Una misma BD puede vivir en dos
+            # servidores (p.ej. una migración a medias): si la URL ya la ocupa
+            # OTRO registro, la desambiguamos con el servidor para no perder la
+            # fila ni romper el índice. El duplicado queda visible en el inventario.
+            holder = Project.search([('database_url', '=', url)], limit=1)
+            if holder and holder != rec:
+                url = '%s?srv=%s' % (url, server)
             vals = {
                 'database_url': url,
-                'despacho_db_local': True,
-                'despacho_server': THIS_SERVER,
+                'despacho_db_local': server == THIS_SERVER,
+                'despacho_server': server,
                 'despacho_db_size': row.get('db_size') or 0,
                 'despacho_filestore_size': row.get('filestore_size') or 0,
                 'despacho_installed_modules': row.get('modules') or False,
@@ -127,10 +146,6 @@ class ProjectProject(models.Model):
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',
             }
-            rec = Project.search([
-                ('database_name', '=', db),
-                ('despacho_server', '=', THIS_SERVER),
-            ], limit=1)
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

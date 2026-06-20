@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Refresca estado/log de operaciones encoladas y dispara el upsert del censo. -->
+    <record id="cron_db_operation_refresh" model="ir.cron">
+        <field name="name">Despacho: refrescar operaciones de BD</field>
+        <field name="model_id" ref="model_despacho_db_operation"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_refresh()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Censo automático del servidor. DESACTIVADO por defecto (opt-in). -->
+    <record id="cron_db_census" model="ir.cron">
+        <field name="name">Despacho: escanear servidor (censo de BDs)</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="state">code</field>
+        <field name="code">model.action_scan_server()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="False"/>
+    </record>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_db_operation_manager,despacho.db.operation.manager,model_despacho_db_operation,databases.group_databases_manager,1,1,1,0
+access_db_operation_system,despacho.db.operation.system,model_despacho_db_operation,base.group_system,1,1,1,1

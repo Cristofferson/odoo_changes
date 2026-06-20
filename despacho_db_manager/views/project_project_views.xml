@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción servidor para el botón "Escanear servidor" del listado -->
+    <record id="action_scan_server" model="ir.actions.server">
+        <field name="name">Escanear servidor</field>
+        <field name="model_id" ref="project.model_project_project"/>
+        <field name="group_ids" eval="[Command.link(ref('databases.group_databases_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_scan_server()</field>
+    </record>
+
+    <!-- Botón en la cabecera del listado nativo de Databases -->
+    <record id="view_databases_list_scan" model="ir.ui.view">
+        <field name="name">databases.project.list.scan</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="databases.view_databases_list"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
+                        display="always" groups="databases.group_databases_manager"/>
+            </header>
+            <field name="database_last_synchro" position="after">
+                <field name="despacho_size_display" optional="show" string="Tamaño"/>
+                <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Pestaña "Servidor" + smart button en el formulario de la BD -->
+    <record id="edit_project_despacho" model="ir.ui.view">
+        <field name="name">despacho.project.form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" icon="fa-tasks" type="object"
+                        name="action_view_operations"
+                        invisible="not database_hosting"
+                        groups="databases.group_databases_manager">
+                    <field name="despacho_operation_count" widget="statinfo" string="Operaciones"/>
+                </button>
+            </div>
+            <notebook position="inside">
+                <page name="despacho_server" string="Servidor"
+                      invisible="not database_hosting"
+                      groups="databases.group_databases_manager">
+                    <group>
+                        <group string="Inventario">
+                            <field name="despacho_db_local"/>
+                            <field name="despacho_server"/>
+                            <field name="despacho_provision_state"/>
+                            <field name="despacho_size_display"/>
+                        </group>
+                        <group string="Censo">
+                            <field name="despacho_last_census"/>
+                            <field name="despacho_last_backup"/>
+                        </group>
+                    </group>
+                    <group string="Módulos instalados">
+                        <field name="despacho_installed_modules" nolabel="1" readonly="1"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

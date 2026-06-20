@@ -1,0 +1,30 @@
+{
+    'name': 'Despacho - Administración de Bases de Datos',
+    'version': '19.0.1.0.2',
+    'summary': 'Inventario y operaciones (alta, censo) de las bases de datos de clientes, sobre la app nativa Databases',
+    'description': """
+Administración de bases de datos de clientes (XUBAX)
+===================================================
+Amplía la app nativa **Databases** de Odoo Enterprise para el despacho:
+
+* **Inventario auto-descubierto** de las bases de datos locales de este servidor
+  (tamaño, filestore, dominio, módulos, último respaldo) como registros premise.
+* **Alta de cliente nuevo** (BD + nginx + DNS + SSL + correo) desde un botón,
+  reutilizando la infraestructura segura cola → systemd → script (Odoo nunca
+  recibe privilegios de root).
+
+Fase 1: alta + censo. Fase 2 (posterior): baja, respaldo, correo, refresh de test.
+""",
+    'category': 'Administration',
+    'author': 'XUBAX',
+    'license': 'LGPL-3',
+    'depends': ['databases'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/ir_cron.xml',
+        'views/db_operation_views.xml',
+        'views/project_project_views.xml',
+    ],
+    'application': False,
+    'installable': True,
+}

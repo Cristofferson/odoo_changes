@@ -114,7 +114,6 @@ class ProjectProject(models.Model):
         emite cada fila (el censo remoto trae el hostname del otro servidor), de
         modo que despacho_db_local solo es cierto para las BDs de ESTE servidor."""
         Project = self.sudo().with_context(active_test=False)
-        company = self._despacho_company()
         now = fields.Datetime.now()
         created = updated = 0
         for row in census_list:
@@ -157,7 +156,10 @@ class ProjectProject(models.Model):
                             'name': db,
                             'database_name': db,
                             'database_hosting': 'premise',
-                            'company_id': company.id,
+                            # Sin compañía: el inventario es de infraestructura y
+                            # debe verse en cualquier compañía activa (la regla
+                            # multi-company de project.project permite company_id=False).
+                            'company_id': False,
                         })
                         Project.create(vals)
                         created += 1

@@ -44,9 +44,14 @@
                 <page name="despacho_server" string="Servidor"
                       invisible="not database_hosting"
                       groups="databases.group_databases_manager">
+                    <field name="despacho_is_test" invisible="1"/>
                     <div class="oe_button_box" name="despacho_baja_box">
                         <button name="action_respaldo" type="object" string="Respaldar ahora"
                                 class="btn-secondary" icon="fa-download"/>
+                        <button name="action_refresh_test" type="object" string="Refrescar desde prod"
+                                class="btn-warning" icon="fa-refresh"
+                                invisible="not despacho_is_test"
+                                confirm="Vas a refrescar esta BD de prueba desde producción (la sobrescribe). Se abrirá el asistente en modo simulación. ¿Continuar?"/>
                         <button name="action_baja" type="object" string="Dar de baja"
                                 class="btn-danger" icon="fa-trash"
                                 confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>

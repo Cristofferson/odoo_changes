@@ -19,8 +19,8 @@
                         <field name="op"/>
                         <field name="project_id"
                                invisible="op in ('alta','census')"
-                               required="op == 'baja'"
-                               readonly="op == 'baja' and context.get('default_project_id')"/>
+                               required="op in ('baja','refresh')"
+                               readonly="op in ('baja','refresh') and context.get('default_project_id')"/>
                         <field name="simulate"/>
                     </group>
                     <!-- ALTA -->
@@ -52,6 +52,21 @@
                                invisible="not do_drop"
                                required="do_drop and not simulate"
                                placeholder="escribe el nombre exacto de la BD"/>
+                    </group>
+                    <!-- REFRESH -->
+                    <group string="Refrescar BD de prueba" invisible="op != 'refresh'">
+                        <div class="alert alert-danger" role="alert" colspan="2"
+                             invisible="op != 'refresh'">
+                            SOBRESCRIBE la BD de prueba con una copia de producción y la NEUTRALIZA
+                            (sin correo ni CFDI reales). Deja "Simular" para ver el plan; desactívalo
+                            y escribe el nombre del destino en "Confirmar" para aplicar.
+                        </div>
+                        <field name="source_db" required="op == 'refresh'"
+                               placeholder="BD de producción, ej. novadiam-anello-diamane-xubax"/>
+                        <field name="confirm_name"
+                               invisible="op == 'refresh' and simulate"
+                               required="op == 'refresh' and not simulate"
+                               placeholder="escribe el nombre del destino (BD de prueba)"/>
                     </group>
                     <!-- CENSO -->
                     <group string="Escaneo" invisible="op != 'census'">

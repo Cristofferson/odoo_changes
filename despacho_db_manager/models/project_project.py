@@ -48,6 +48,13 @@ class ProjectProject(models.Model):
     despacho_operation_ids = fields.One2many('despacho.db.operation', 'project_id',
                                              string='Operaciones')
     despacho_operation_count = fields.Integer(compute='_compute_operation_count')
+    despacho_is_test = fields.Boolean(compute='_compute_is_test',
+                                      help='La BD parece de prueba (su nombre empieza con "test").')
+
+    @api.depends('database_name')
+    def _compute_is_test(self):
+        for rec in self:
+            rec.despacho_is_test = bool(rec.database_name and rec.database_name.startswith('test'))
 
     @api.depends('despacho_db_size', 'despacho_filestore_size')
     def _compute_size_display(self):
@@ -128,6 +135,23 @@ class ProjectProject(models.Model):
                            % (self.database_name or self.name),
                 'type': 'success',
                 'sticky': False,
+            },
+        }
+
+    def action_refresh_test(self):
+        """Abre el asistente para refrescar ESTA BD de prueba desde producción
+        (dry-run por defecto). Solo tiene sentido en BDs cuyo nombre empieza con 'test'."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Refrescar BD de prueba: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'refresh',
+                'default_project_id': self.id,
+                'default_simulate': True,
             },
         }
 

@@ -15,9 +15,9 @@ CENSUS_DB_RE = re.compile(r'^[a-z][a-z0-9_-]{1,62}$')
 DOMAIN_RE = re.compile(r'^[a-z0-9][a-z0-9.-]{1,99}$')
 MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 
-# Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo). El resto
-# vive en la selección para compatibilidad futura, pero action_provision las rechaza.
-PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo')
+# Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
+# El resto vive en la selección; action_provision rechaza lo no habilitado.
+PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh')
 
 # Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
 # el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
@@ -72,7 +72,13 @@ class DespachoDbOperation(models.Model):
              'Encendido: además ELIMINA la base de datos y su filestore, tras respaldar.')
     confirm_name = fields.Char(
         'Confirmar (nombre exacto de la BD)',
-        help='Para eliminar, escribe exactamente el nombre de la base de datos.')
+        help='Para eliminar/refrescar, escribe exactamente el nombre de la base de datos afectada.')
+
+    # --- Parámetros de REFRESH (refrescar BD de prueba desde producción) ---
+    source_db = fields.Char(
+        'BD de origen (producción)',
+        help='Base de datos de PRODUCCIÓN cuyos datos se copiarán a la de prueba. '
+             'Debe vivir en el mismo servidor que la de prueba.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -176,6 +182,32 @@ class DespachoDbOperation(models.Model):
             raise UserError('Servidor de la BD no reconocido: %s' % server)
         return {'id': self.id, 'op': 'respaldo', 'db': db, 'server': server,
                 'simulate': False}
+
+    def _build_refresh_req(self):
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('El refresh requiere seleccionar la BD de PRUEBA (destino) del inventario.')
+        dest = (proj.database_name or '').strip()
+        if not dest.startswith('test'):
+            raise UserError('Por seguridad, el destino debe ser una BD de prueba '
+                            '(su nombre debe empezar con "test"). "%s" no lo es.' % dest)
+        if not CENSUS_DB_RE.match(dest):
+            raise UserError('Nombre de BD destino inválido: %r' % dest)
+        src = (self.source_db or '').strip().lower()
+        if not CENSUS_DB_RE.match(src):
+            raise UserError('Indica una BD de origen (producción) válida.')
+        if src == dest:
+            raise UserError('El origen y el destino no pueden ser la misma BD.')
+        server = (proj.despacho_server or 'diamane.mx').strip()
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor de la BD no reconocido: %s' % server)
+        if not self.simulate and (self.confirm_name or '').strip() != dest:
+            raise UserError('Vas a SOBRESCRIBIR %s. Escribe su nombre exacto en "Confirmar".' % dest)
+        return {
+            'id': self.id, 'op': 'refresh', 'source': src, 'dest': dest,
+            'server': server, 'confirm': dest if not self.simulate else '',
+            'simulate': bool(self.simulate),
+        }
 
     def _build_census_req(self):
         server = self.target_server or 'diamane.mx'

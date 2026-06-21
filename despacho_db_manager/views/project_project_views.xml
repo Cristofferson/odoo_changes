@@ -52,6 +52,10 @@
                                 class="btn-warning" icon="fa-refresh"
                                 invisible="not despacho_is_test"
                                 confirm="Vas a refrescar esta BD de prueba desde producción (la sobrescribe). Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                        <button name="action_create_test" type="object" string="Crear BD de prueba"
+                                class="btn-info" icon="fa-flask"
+                                invisible="despacho_is_test"
+                                confirm="Vas a crear una BD de prueba como copia de ESTA BD de producción. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
                         <button name="action_baja" type="object" string="Dar de baja"
                                 class="btn-danger" icon="fa-trash"
                                 confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>

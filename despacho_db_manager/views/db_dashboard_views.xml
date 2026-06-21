@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================== -->
+    <!-- TABLERO de bases de datos: foto actual de tamaños y respaldos.  -->
+    <!-- Vistas dedicadas (enlazadas a la acción con view_ids para NO    -->
+    <!-- sobrescribir las vistas globales de project.project).           -->
+    <!-- ============================================================== -->
+
+    <record id="view_db_dashboard_graph" model="ir.ui.view">
+        <field name="name">despacho.db.dashboard.graph</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <graph string="Tamaño por servidor" type="bar" sample="1">
+                <field name="despacho_server" type="row"/>
+                <field name="despacho_total_size_gb" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_db_dashboard_pivot" model="ir.ui.view">
+        <field name="name">despacho.db.dashboard.pivot</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <pivot string="Inventario de bases de datos" sample="1">
+                <field name="despacho_server" type="row"/>
+                <field name="despacho_total_size_gb" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_db_dashboard_list" model="ir.ui.view">
+        <field name="name">despacho.db.dashboard.list</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <list string="Tablero de bases de datos" create="0" edit="0"
+                  decoration-danger="despacho_backup_status in ('never','late')"
+                  decoration-warning="despacho_backup_status == 'warn'">
+                <field name="database_name" string="Base de datos"/>
+                <field name="despacho_server"/>
+                <field name="despacho_provision_state"/>
+                <field name="despacho_size_display" string="Tamaño"/>
+                <field name="despacho_total_size_gb" string="Total (GB)" sum="Total (GB)"
+                       optional="show" digits="[16,2]"/>
+                <field name="despacho_last_backup"/>
+                <field name="despacho_days_since_backup" string="Días sin respaldo"/>
+                <field name="despacho_backup_status" string="Respaldo" widget="badge"
+                       decoration-success="despacho_backup_status == 'ok'"
+                       decoration-warning="despacho_backup_status == 'warn'"
+                       decoration-danger="despacho_backup_status in ('never','late')"/>
+                <field name="despacho_last_census" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_db_dashboard_search" model="ir.ui.view">
+        <field name="name">despacho.db.dashboard.search</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <search string="Bases de datos">
+                <field name="database_name"/>
+                <field name="despacho_server"/>
+                <filter name="local" string="Este servidor"
+                        domain="[('despacho_db_local','=',True)]"/>
+                <filter name="tests" string="BDs de prueba"
+                        domain="[('database_name','=like','test%')]"/>
+                <separator/>
+                <filter name="bk_never" string="Sin respaldo"
+                        domain="[('despacho_last_backup','=',False)]"/>
+                <filter name="bk_warn" string="&gt; 7 días sin respaldo"
+                        domain="[('despacho_last_backup','&lt;', (context_today() - relativedelta(days=7)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter name="bk_late" string="&gt; 30 días sin respaldo"
+                        domain="[('despacho_last_backup','&lt;', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group>
+                    <filter name="grp_server" string="Servidor"
+                            context="{'group_by':'despacho_server'}"/>
+                    <filter name="grp_state" string="Estado de provisión"
+                            context="{'group_by':'despacho_provision_state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_db_dashboard" model="ir.actions.act_window">
+        <field name="name">Tablero de bases de datos</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="domain">[('database_hosting','!=',False)]</field>
+        <field name="search_view_id" ref="view_db_dashboard_search"/>
+        <field name="context">{'search_default_grp_server': 1}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 10, 'view_mode': 'graph', 'view_id': ref('view_db_dashboard_graph')}),
+            (0, 0, {'sequence': 20, 'view_mode': 'pivot', 'view_id': ref('view_db_dashboard_pivot')}),
+            (0, 0, {'sequence': 30, 'view_mode': 'list', 'view_id': ref('view_db_dashboard_list')}),
+            (0, 0, {'sequence': 40, 'view_mode': 'form'})]"/>
+    </record>
+
+    <menuitem id="menu_db_dashboard" name="Tablero"
+              parent="databases.menu_main_databases"
+              action="action_db_dashboard" sequence="5"
+              groups="databases.group_databases_manager"/>
+</odoo>

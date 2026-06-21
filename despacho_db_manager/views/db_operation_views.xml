@@ -19,8 +19,8 @@
                         <field name="op"/>
                         <field name="project_id"
                                invisible="op in ('alta','census')"
-                               required="op in ('baja','refresh')"
-                               readonly="op in ('baja','refresh') and context.get('default_project_id')"/>
+                               required="op in ('baja','refresh','crear_test')"
+                               readonly="op in ('baja','refresh','crear_test') and context.get('default_project_id')"/>
                         <field name="simulate"/>
                     </group>
                     <!-- ALTA -->
@@ -67,6 +67,23 @@
                                invisible="op == 'refresh' and simulate"
                                required="op == 'refresh' and not simulate"
                                placeholder="escribe el nombre del destino (BD de prueba)"/>
+                    </group>
+                    <!-- CREAR BD DE PRUEBA -->
+                    <group string="Crear BD de prueba" invisible="op != 'crear_test'">
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="op != 'crear_test'">
+                            Crea una BD de prueba como copia EXACTA de la BD de origen
+                            (la de arriba) y la NEUTRALIZA (sin correo ni CFDI reales).
+                            Si el nombre ya existe, lo sobrescribe. Deja "Simular" para
+                            ver el plan; desactívalo y escribe el nombre en "Confirmar"
+                            para aplicar.
+                        </div>
+                        <field name="new_test_db" required="op == 'crear_test'"
+                               placeholder="nombre nuevo, ej. testnovadiam"/>
+                        <field name="confirm_name"
+                               invisible="op == 'crear_test' and simulate"
+                               required="op == 'crear_test' and not simulate"
+                               placeholder="escribe el nombre de la nueva BD de prueba"/>
                     </group>
                     <!-- CENSO -->
                     <group string="Escaneo" invisible="op != 'census'">

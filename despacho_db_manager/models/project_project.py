@@ -1,4 +1,5 @@
 import logging
+import re
 import socket
 
 from odoo import api, fields, models
@@ -32,9 +33,27 @@ class ProjectProject(models.Model):
                                   help='Hostname del servidor donde vive la BD.')
     # Float (double precision), no Integer: el filestore/BD de clientes grandes
     # supera el máximo de int4 de Postgres (~2.15 GB) y desbordaría.
-    despacho_db_size = fields.Float('Tamaño BD (bytes)', copy=False)
-    despacho_filestore_size = fields.Float('Tamaño filestore (bytes)', copy=False)
+    despacho_db_size = fields.Float('Tamaño BD (bytes)', copy=False, aggregator='sum')
+    despacho_filestore_size = fields.Float('Tamaño filestore (bytes)', copy=False, aggregator='sum')
+    # Totales almacenados: sirven de medida en las vistas de gráfico/pivot del
+    # tablero (un campo computado NO almacenado no se puede agregar en read_group).
+    despacho_total_size = fields.Float('Tamaño total (bytes)', copy=False,
+                                       compute='_compute_total_size', store=True, aggregator='sum')
+    despacho_total_size_gb = fields.Float('Tamaño total (GB)', copy=False,
+                                          compute='_compute_total_size', store=True, aggregator='sum',
+                                          help='Tamaño total (BD + filestore) en GB, para el tablero.')
     despacho_size_display = fields.Char('Tamaño', compute='_compute_size_display')
+    # Salud del respaldo (no almacenada: depende de la fecha actual). Se evalúa
+    # al leer; el tablero la usa para colorear y filtrar.
+    despacho_days_since_backup = fields.Integer(
+        'Días sin respaldo', compute='_compute_backup_health',
+        help='Días transcurridos desde el último respaldo. -1 = nunca se ha respaldado.')
+    despacho_backup_status = fields.Selection([
+        ('never', 'Sin respaldo'),
+        ('ok', 'Al día'),
+        ('warn', 'Atención'),
+        ('late', 'Atrasado'),
+    ], string='Estado de respaldo', compute='_compute_backup_health')
     despacho_installed_modules = fields.Text('Módulos instalados', copy=False)
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
     despacho_last_census = fields.Datetime('Último escaneo', copy=False)
@@ -55,6 +74,39 @@ class ProjectProject(models.Model):
     def _compute_is_test(self):
         for rec in self:
             rec.despacho_is_test = bool(rec.database_name and rec.database_name.startswith('test'))
+
+    @api.depends('despacho_db_size', 'despacho_filestore_size')
+    def _compute_total_size(self):
+        for rec in self:
+            total = (rec.despacho_db_size or 0) + (rec.despacho_filestore_size or 0)
+            rec.despacho_total_size = total
+            rec.despacho_total_size_gb = total / (1024.0 ** 3)
+
+    @api.model
+    def _backup_thresholds(self):
+        """Umbrales (días) de salud de respaldo. Configurables vía parámetros del
+        sistema despacho.backup_warn_days / despacho.backup_late_days."""
+        ICP = self.env['ir.config_parameter'].sudo()
+        def _int(key, default):
+            try:
+                return int(ICP.get_param(key, default))
+            except (TypeError, ValueError):
+                return default
+        return _int('despacho.backup_warn_days', 7), _int('despacho.backup_late_days', 30)
+
+    @api.depends('despacho_last_backup')
+    def _compute_backup_health(self):
+        warn, late = self._backup_thresholds()
+        now = fields.Datetime.now()
+        for rec in self:
+            if not rec.despacho_last_backup:
+                rec.despacho_days_since_backup = -1
+                rec.despacho_backup_status = 'never'
+                continue
+            days = (now - rec.despacho_last_backup).days
+            rec.despacho_days_since_backup = days
+            rec.despacho_backup_status = (
+                'late' if days > late else 'warn' if days > warn else 'ok')
 
     @api.depends('despacho_db_size', 'despacho_filestore_size')
     def _compute_size_display(self):
@@ -151,6 +203,27 @@ class ProjectProject(models.Model):
             'context': {
                 'default_op': 'refresh',
                 'default_project_id': self.id,
+                'default_simulate': True,
+            },
+        }
+
+    def action_create_test(self):
+        """Abre el asistente para CREAR una BD de prueba a partir de ESTA BD de
+        producción (copia exacta + neutralize, con un nombre nuevo que empieza con
+        'test'). Reutiliza el script de refresh (crea el destino si no existe).
+        Dry-run por defecto."""
+        self.ensure_one()
+        suggested = 'test%s' % re.sub(r'[^a-z0-9]', '', (self.database_name or '').lower())[:40]
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Crear BD de prueba desde: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'crear_test',
+                'default_project_id': self.id,
+                'default_new_test_db': suggested,
                 'default_simulate': True,
             },
         }

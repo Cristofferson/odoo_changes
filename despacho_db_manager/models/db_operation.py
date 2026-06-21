@@ -17,7 +17,7 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 
 # Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
-PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh')
+PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test')
 
 # Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
 # el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
@@ -43,6 +43,7 @@ class DespachoDbOperation(models.Model):
         ('respaldo', 'Respaldo'),
         ('email', 'Configurar correo'),
         ('refresh', 'Refrescar BD de prueba'),
+        ('crear_test', 'Crear BD de prueba'),
         ('census', 'Escanear servidor'),
     ], string='Operación', required=True, default='alta')
 
@@ -79,6 +80,13 @@ class DespachoDbOperation(models.Model):
         'BD de origen (producción)',
         help='Base de datos de PRODUCCIÓN cuyos datos se copiarán a la de prueba. '
              'Debe vivir en el mismo servidor que la de prueba.')
+
+    # --- Parámetros de CREAR_TEST (nueva BD de prueba desde una de producción) ---
+    new_test_db = fields.Char(
+        'Nombre de la BD de prueba',
+        help='Nombre de la NUEVA base de datos de prueba. Debe empezar con "test". '
+             'Si ya existe, se sobrescribe. Se crea como copia exacta de la BD de '
+             'origen (la de esta ficha) y se neutraliza.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -209,6 +217,37 @@ class DespachoDbOperation(models.Model):
             'simulate': bool(self.simulate),
         }
 
+    def _build_crear_test_req(self):
+        """Crear una BD de prueba NUEVA desde la BD de producción de la ficha.
+        El origen es project_id (la prod); el destino es new_test_db (nombre nuevo).
+        Reutiliza el worker/script de 'refresh' (crea el destino si no existe), por
+        eso emite op='refresh' a la cola: cero cambios en la capa OS."""
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('Selecciona la BD de PRODUCCIÓN de origen (la de esta ficha).')
+        src = (proj.database_name or '').strip().lower()
+        if not CENSUS_DB_RE.match(src):
+            raise UserError('Nombre de BD de origen inválido: %r' % src)
+        dest = (self.new_test_db or '').strip().lower()
+        if not dest.startswith('test'):
+            raise UserError('Por seguridad, la BD de prueba debe llamarse empezando '
+                            'con "test". "%s" no lo es.' % dest)
+        if not CENSUS_DB_RE.match(dest):
+            raise UserError('Nombre de BD de prueba inválido: %r' % dest)
+        if src == dest:
+            raise UserError('El origen y el destino no pueden ser la misma BD.')
+        server = (proj.despacho_server or 'diamane.mx').strip()
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor de la BD no reconocido: %s' % server)
+        if not self.simulate and (self.confirm_name or '').strip() != dest:
+            raise UserError('Vas a crear/sobrescribir %s. Escribe su nombre exacto '
+                            'en "Confirmar".' % dest)
+        return {
+            'id': self.id, 'op': 'refresh', 'source': src, 'dest': dest,
+            'server': server, 'confirm': dest if not self.simulate else '',
+            'simulate': bool(self.simulate),
+        }
+
     def _build_census_req(self):
         server = self.target_server or 'diamane.mx'
         if server not in SERVER_KEYS:
@@ -252,6 +291,17 @@ class DespachoDbOperation(models.Model):
                 bt = res['backup'].get('backup_time')
                 if bt:
                     rec.project_id.sudo().despacho_last_backup = bt
+            # Crear BD de prueba aplicado de verdad: dar de alta el nuevo test en el
+            # inventario para que aparezca de inmediato (el censo llenará tamaños).
+            if (rec.op == 'crear_test' and res.get('state') == 'done'
+                    and not rec.simulate and isinstance(res.get('refresh'), dict)):
+                ref = res['refresh']
+                dest = ref.get('dest')
+                server = ref.get('server') or (rec.project_id.despacho_server
+                                               if rec.project_id else False)
+                if dest and server:
+                    self.env['project.project']._census_upsert(
+                        [{'db_name': dest, 'server': server}])
         return True
 
     @api.model

@@ -77,6 +77,9 @@ class ProjectProject(models.Model):
     # conserva para el buscador "tiene app X" del tablero; el detalle vive aquí.
     despacho_module_ids = fields.One2many('despacho.db.module', 'project_id',
                                           string='Apps custom (detalle)')
+    # Todos los módulos instalados (tabla simple, para que no se desborde el texto).
+    despacho_installed_module_ids = fields.One2many(
+        'despacho.db.installed.module', 'project_id', string='Módulos instalados')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
     # Historial de respaldos NOCTURNOS (automáticos), uno por archivo en disco.
     # Lo llena el censo de CADA servidor; es de solo lectura (refleja /backup).
@@ -432,6 +435,21 @@ class ProjectProject(models.Model):
                         'website': (m.get('url') or '')[:256] or False,
                     }))
                 vals['despacho_module_ids'] = mcmds
+            # Tabla simple de TODOS los módulos instalados.
+            ilist = row.get('installed_detail')
+            if isinstance(ilist, list):
+                icmds = [(5, 0, 0)]
+                for m in ilist:
+                    inm = (m.get('name') or '').strip()
+                    if not inm:
+                        continue
+                    icmds.append((0, 0, {
+                        'name': inm[:128],
+                        'shortdesc': (m.get('shortdesc') or '')[:256] or False,
+                        'installed_version': (m.get('version') or '')[:64] or False,
+                        'application': bool(m.get('application')),
+                    }))
+                vals['despacho_installed_module_ids'] = icmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

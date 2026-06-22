@@ -125,9 +125,15 @@
                             <field name="website" string="Sitio" widget="url" optional="hide"/>
                         </list>
                     </field>
-                    <group string="Módulos instalados (todos)">
-                        <field name="despacho_installed_modules" nolabel="1" readonly="1"/>
-                    </group>
+                    <separator string="Módulos instalados (todos)"/>
+                    <field name="despacho_installed_module_ids" nolabel="1" readonly="1">
+                        <list string="Módulos instalados" create="0" edit="0" delete="0">
+                            <field name="name" string="Técnico"/>
+                            <field name="shortdesc" string="Nombre"/>
+                            <field name="installed_version" string="Versión"/>
+                            <field name="application" string="App" widget="boolean" optional="show"/>
+                        </list>
+                    </field>
                 </page>
                 <page name="despacho_backups" string="Respaldos"
                       invisible="not database_hosting"

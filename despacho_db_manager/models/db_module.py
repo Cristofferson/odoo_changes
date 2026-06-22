@@ -45,3 +45,20 @@ class DespachoDbModule(models.Model):
             rec.app_store_url = (
                 'https://apps.odoo.com/apps/modules/%s/%s/' % (rec._series(), rec.name)
                 if rec.name else False)
+
+
+class DespachoDbInstalledModule(models.Model):
+    """TODOS los módulos instalados en una BD (tabla simple, para que la lista no
+    se desborde). La llena el censo desde ir_module_module. Sin chequeo a
+    apps.odoo.com (serían cientos de módulos): eso vive en despacho.db.module
+    (apps custom)."""
+    _name = 'despacho.db.installed.module'
+    _description = 'Módulo instalado en una BD'
+    _order = 'application desc, name'
+
+    project_id = fields.Many2one('project.project', string='Base de datos',
+                                 required=True, ondelete='cascade', index=True)
+    name = fields.Char('Nombre técnico', required=True)
+    shortdesc = fields.Char('Nombre')
+    installed_version = fields.Char('Versión')
+    application = fields.Boolean('Es aplicación')

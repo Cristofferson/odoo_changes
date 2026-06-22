@@ -61,8 +61,9 @@
                             (sin correo ni CFDI reales). Deja "Simular" para ver el plan; desactívalo
                             y escribe el nombre del destino en "Confirmar" para aplicar.
                         </div>
-                        <field name="source_db" required="op == 'refresh'"
-                               placeholder="BD de producción, ej. novadiam-anello-diamane-xubax"/>
+                        <field name="dest_server" invisible="1"/>
+                        <field name="source_project_id" required="op == 'refresh'"
+                               options="{'no_create': True, 'no_open': True}"/>
                         <field name="confirm_name"
                                invisible="op == 'refresh' and simulate"
                                required="op == 'refresh' and not simulate"

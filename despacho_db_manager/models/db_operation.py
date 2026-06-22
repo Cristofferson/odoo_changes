@@ -78,10 +78,15 @@ class DespachoDbOperation(models.Model):
         help='Para eliminar/refrescar, escribe exactamente el nombre de la base de datos afectada.')
 
     # --- Parámetros de REFRESH (refrescar BD de prueba desde producción) ---
-    source_db = fields.Char(
-        'BD de origen (producción)',
-        help='Base de datos de PRODUCCIÓN cuyos datos se copiarán a la de prueba. '
-             'Debe vivir en el mismo servidor que la de prueba.')
+    source_project_id = fields.Many2one(
+        'project.project', string='BD de origen (producción)',
+        domain="[('database_hosting','!=',False),('despacho_is_test','=',False),"
+               "('despacho_server','=',dest_server)]",
+        help='Base de datos de PRODUCCIÓN (del inventario) cuyos datos se copiarán a '
+             'la de prueba. Solo se listan las del MISMO servidor que la de prueba.')
+    # Servidor de la BD destino (la de prueba): se usa para filtrar el desplegable
+    # de origen al mismo servidor. Va invisible en el formulario.
+    dest_server = fields.Char(related='project_id.despacho_server')
 
     # --- Parámetros de CREAR_TEST (nueva BD de prueba desde una de producción) ---
     new_test_db = fields.Char(
@@ -214,24 +219,23 @@ class DespachoDbOperation(models.Model):
                             '(su nombre debe empezar con "test"). "%s" no lo es.' % dest)
         if not CENSUS_DB_RE.match(dest):
             raise UserError('Nombre de BD destino inválido: %r' % dest)
-        src = (self.source_db or '').strip().lower()
-        if not CENSUS_DB_RE.match(src):
-            raise UserError('Indica una BD de origen (producción) válida.')
-        if src == dest:
-            raise UserError('El origen y el destino no pueden ser la misma BD.')
         server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
-        # Validación INMEDIATA del origen contra el inventario (mismo servidor): así
-        # un nombre mal escrito da un error al instante, en vez de fallar de forma
-        # asíncrona (el worker tardaría y el resultado solo se vería luego en el log).
-        src_rec = self.env['project.project'].sudo().with_context(active_test=False).search([
-            ('database_name', '=', src), ('despacho_server', '=', server)], limit=1)
-        if not src_rec:
-            raise UserError(
-                'No encuentro una BD de producción llamada "%s" en el servidor %s.\n'
-                'Revisa el nombre EXACTO como aparece en el inventario (p. ej. con guiones), '
-                'o escanea el servidor si es una BD nueva.' % (src, server))
+        # El origen se elige de una LISTA (no se teclea), así que no puede estar mal
+        # escrito. Solo backstops: que esté seleccionado, sea válido, distinto del
+        # destino y viva en el mismo servidor.
+        src_proj = self.source_project_id
+        if not src_proj or not src_proj.database_name:
+            raise UserError('Selecciona la BD de origen (producción) de la lista.')
+        src = src_proj.database_name.strip().lower()
+        if not CENSUS_DB_RE.match(src):
+            raise UserError('Nombre de BD de origen inválido: %r' % src)
+        if src == dest:
+            raise UserError('El origen y el destino no pueden ser la misma BD.')
+        if (src_proj.despacho_server or '').strip() != server:
+            raise UserError('La BD de origen debe estar en el mismo servidor (%s) '
+                            'que la de prueba.' % server)
         if not self.simulate and (self.confirm_name or '').strip() != dest:
             raise UserError('Vas a SOBRESCRIBIR %s. Escribe su nombre exacto en "Confirmar".' % dest)
         return {

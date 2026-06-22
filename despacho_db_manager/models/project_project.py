@@ -85,7 +85,7 @@ class ProjectProject(models.Model):
     despacho_operation_ids = fields.One2many('despacho.db.operation', 'project_id',
                                              string='Operaciones')
     despacho_operation_count = fields.Integer(compute='_compute_operation_count')
-    despacho_is_test = fields.Boolean(compute='_compute_is_test',
+    despacho_is_test = fields.Boolean(compute='_compute_is_test', store=True,
                                       help='La BD parece de prueba (su nombre empieza con "test").')
 
     @api.depends('database_name')

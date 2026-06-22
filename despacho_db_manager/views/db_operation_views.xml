@@ -80,6 +80,12 @@
                         </div>
                         <field name="new_test_db" required="op == 'crear_test'"
                                placeholder="nombre nuevo, ej. testnovadiam"/>
+                        <field name="crear_test_overwrite"/>
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="op != 'crear_test' or not crear_test_overwrite">
+                            ⚠️ Con "Sobrescribir" activado, si ya existe una BD con ese
+                            nombre será ELIMINADA y reemplazada. Úsalo solo a propósito.
+                        </div>
                         <field name="confirm_name"
                                invisible="op == 'crear_test' and simulate"
                                required="op == 'crear_test' and not simulate"

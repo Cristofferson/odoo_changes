@@ -85,8 +85,14 @@ class DespachoDbOperation(models.Model):
     new_test_db = fields.Char(
         'Nombre de la BD de prueba',
         help='Nombre de la NUEVA base de datos de prueba. Debe empezar con "test". '
-             'Si ya existe, se sobrescribe. Se crea como copia exacta de la BD de '
-             'origen (la de esta ficha) y se neutraliza.')
+             'Se crea como copia exacta de la BD de origen (la de esta ficha) y se '
+             'neutraliza. Si ya existe una BD con ese nombre, la operación se ABORTA '
+             'salvo que marques "Sobrescribir si ya existe".')
+    crear_test_overwrite = fields.Boolean(
+        'Sobrescribir si ya existe', default=False,
+        help='Por seguridad, crear una BD de prueba se ABORTA si el nombre ya existe '
+             '(para no pisar una BD en uso). Activa esto solo si de verdad quieres '
+             'reemplazar una BD de prueba existente.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -242,10 +248,22 @@ class DespachoDbOperation(models.Model):
         if not self.simulate and (self.confirm_name or '').strip() != dest:
             raise UserError('Vas a crear/sobrescribir %s. Escribe su nombre exacto '
                             'en "Confirmar".' % dest)
+        overwrite = bool(self.crear_test_overwrite)
+        # Salvaguarda anti-clobber (capa Odoo): si NO se pidió sobrescribir y ya hay
+        # una BD con ese nombre en el inventario del mismo servidor, abortar pronto.
+        # El backstop autoritativo (--no-clobber) vive en el script por si la BD no
+        # está aún en el inventario.
+        if not overwrite:
+            existing = self.env['project.project'].sudo().with_context(active_test=False).search([
+                ('database_name', '=', dest), ('despacho_server', '=', server)], limit=1)
+            if existing:
+                raise UserError(
+                    'Ya existe una BD de prueba llamada "%s" en %s. Para reemplazarla '
+                    'marca "Sobrescribir si ya existe"; si no, usa otro nombre.' % (dest, server))
         return {
             'id': self.id, 'op': 'refresh', 'source': src, 'dest': dest,
             'server': server, 'confirm': dest if not self.simulate else '',
-            'simulate': bool(self.simulate),
+            'no_clobber': not overwrite, 'simulate': bool(self.simulate),
         }
 
     def _build_census_req(self):

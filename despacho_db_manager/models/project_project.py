@@ -166,7 +166,8 @@ class ProjectProject(models.Model):
                 'op': 'census', 'target_server': server,
                 'with_modules': True, 'simulate': False,
             })
-            op.action_provision()
+            # dpm_no_wait: encolar sin bloquear (este botón ya muestra su propio aviso).
+            op.with_context(dpm_no_wait=True).action_provision()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -192,6 +193,7 @@ class ProjectProject(models.Model):
                 'default_op': 'baja',
                 'default_project_id': self.id,
                 'default_simulate': True,
+                'dpm_modal': True,
             },
         }
 
@@ -228,6 +230,7 @@ class ProjectProject(models.Model):
                 'default_op': 'refresh',
                 'default_project_id': self.id,
                 'default_simulate': True,
+                'dpm_modal': True,
             },
         }
 
@@ -249,6 +252,7 @@ class ProjectProject(models.Model):
                 'default_project_id': self.id,
                 'default_new_test_db': suggested,
                 'default_simulate': True,
+                'dpm_modal': True,
             },
         }
 

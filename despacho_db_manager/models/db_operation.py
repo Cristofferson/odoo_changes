@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -128,6 +129,41 @@ class DespachoDbOperation(models.Model):
             rec.display_name = '%s%s' % (labels.get(rec.op, rec.op or ''),
                                          (': %s' % target) if target else '')
 
+    # ------------------------------------------------------------------ feedback
+    def _notify(self, kind, title, message, sticky=False):
+        """Envía un toast (bus) al usuario que creó la operación. kind:
+        success/danger/warning/info. No-op para censo (el botón ya avisa)."""
+        if self.op == 'census':
+            return
+        user = self.create_uid or self.env.user
+        if user and user.partner_id:
+            self.env['bus.bus']._sendone(user.partner_id, 'simple_notification', {
+                'type': kind, 'title': title, 'message': message, 'sticky': sticky})
+
+    def _error_reason(self):
+        """Línea más informativa del registro para mostrar en el toast de error."""
+        log = self.log or ''
+        for line in reversed(log.splitlines()):
+            s = line.strip()
+            if s and ('error' in s.lower() or 'abort' in s.lower() or 'rechaz' in s.lower()):
+                return s
+        lines = [l.strip() for l in log.splitlines() if l.strip()]
+        return lines[-1] if lines else ''
+
+    def _notify_outcome(self):
+        """Toast según el estado actual de la operación."""
+        label = self.display_name or ('operación #%d' % self.id)
+        if self.state == 'done':
+            self._notify('success', '✅ Operación completada', '%s: Listo.' % label)
+        elif self.state == 'error':
+            self._notify('danger', '❌ Error en la operación',
+                         self._error_reason() or ('%s falló. Revisa el Registro.' % label),
+                         sticky=True)
+        else:
+            self._notify('warning', '⏳ Operación en proceso',
+                         '%s está en proceso. Te avisaré al terminar (o revisa "Operaciones").'
+                         % label)
+
     # ------------------------------------------------------------------ acciones
     def action_provision(self):
         self.ensure_one()
@@ -140,6 +176,27 @@ class DespachoDbOperation(models.Model):
             'log': 'Solicitud enviada a la cola. El vigilante la tomará en segundos. '
                    'Usa "Actualizar estado" o espera al refresco automático.',
         })
+        # Llamada interna (p.ej. censo en lote): no esperar ni notificar por op.
+        if self.env.context.get('dpm_no_wait'):
+            return True
+        # Esperar brevemente el resultado para dar feedback inmediato en ops rápidas
+        # (censo, baja, dry-runs, respaldos chicos). Las largas (refresh/crear apply)
+        # superan la ventana: se avisa "en proceso" y el cron notifica al terminar.
+        rpath = os.path.join(SPOOL, 'result', '%d.json' % self.id)
+        for _ in range(20):  # ~10 s
+            try:
+                with open(rpath) as fh:
+                    if json.load(fh).get('state') in ('done', 'error'):
+                        break
+            except (OSError, ValueError):
+                pass
+            time.sleep(0.5)
+        self.with_context(skip_notify=True).action_refresh()  # ingiere sin doble toast
+        self._notify_outcome()
+        # Si se abrió como asistente modal, cerrarlo (el toast llega por el bus).
+        if self.env.context.get('dpm_modal'):
+            return {'type': 'ir.actions.act_window_close'}
+        return True
 
     def _build_alta_req(self):
         name = (self.db_name or '').strip().lower()
@@ -310,6 +367,7 @@ class DespachoDbOperation(models.Model):
                             '¿Existe %s y es escribible por el usuario odoo?' % (e, qdir))
 
     def action_refresh(self):
+        skip_notify = self.env.context.get('skip_notify')
         for rec in self:
             rpath = os.path.join(SPOOL, 'result', '%d.json' % rec.id)
             if not os.path.exists(rpath):
@@ -319,6 +377,7 @@ class DespachoDbOperation(models.Model):
                     res = json.load(fh)
             except (OSError, ValueError):
                 continue
+            was_terminal = rec.state in ('done', 'error')
             rec.write({'state': res.get('state', 'error'),
                        'log': res.get('log', '(sin registro)')})
             # El censo trae el inventario en la respuesta: hacer upsert.
@@ -353,6 +412,11 @@ class DespachoDbOperation(models.Model):
                 if dest and server:
                     self.env['project.project']._census_upsert(
                         [{'db_name': dest, 'server': server}])
+            # Aviso al creador cuando la operación TERMINA (cubre las largas que el
+            # poll de action_provision no alcanzó). Solo en la transición a terminal.
+            if (not skip_notify and not was_terminal
+                    and rec.state in ('done', 'error')):
+                rec._notify_outcome()
         return True
 
     @api.model

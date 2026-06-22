@@ -15,6 +15,12 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="databases.view_databases_list"/>
         <field name="arch" type="xml">
+            <!-- Al clic en una fila abrir la ficha de AJUSTES (info del censo: Servidor,
+                 Respaldos, Apps…) en vez del tablero de TAREAS del proyecto, que aquí no
+                 se usa. La lista nativa trae action="action_view_tasks"; lo cambiamos. -->
+            <list position="attributes">
+                <attribute name="action">action_open_self</attribute>
+            </list>
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
@@ -85,6 +91,10 @@
                                 class="btn-danger" icon="fa-trash"
                                 confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
                     </div>
+                    <group string="Notas">
+                        <field name="description" nolabel="1"
+                               placeholder="Notas internas de esta BD: contacto, particularidades, pendientes, accesos…"/>
+                    </group>
                     <group>
                         <group string="Inventario">
                             <field name="despacho_db_local"/>

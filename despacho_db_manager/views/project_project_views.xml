@@ -72,7 +72,12 @@
                             <field name="despacho_last_backup"/>
                         </group>
                     </group>
-                    <group string="Módulos instalados">
+                    <group string="Apps custom">
+                        <field name="despacho_custom_module_count"/>
+                        <field name="despacho_custom_modules" nolabel="1" readonly="1"
+                               placeholder="(el censo las detecta de los addons custom del servidor)"/>
+                    </group>
+                    <group string="Módulos instalados (todos)">
                         <field name="despacho_installed_modules" nolabel="1" readonly="1"/>
                     </group>
                 </page>

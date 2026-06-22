@@ -41,6 +41,9 @@
                 <field name="despacho_size_display" string="Tamaño"/>
                 <field name="despacho_total_size_gb" string="Total (GB)" sum="Total (GB)"
                        optional="show" digits="[16,2]"/>
+                <field name="despacho_custom_module_count" string="Apps custom" sum="Total apps"
+                       optional="show"/>
+                <field name="despacho_custom_modules" string="Apps custom (detalle)" optional="hide"/>
                 <field name="despacho_last_backup"/>
                 <field name="despacho_days_since_backup" string="Días sin respaldo"/>
                 <field name="despacho_backup_status" string="Respaldo" widget="badge"
@@ -59,6 +62,8 @@
             <search string="Bases de datos">
                 <field name="database_name"/>
                 <field name="despacho_server"/>
+                <field name="despacho_custom_modules" string="Tiene app custom"
+                       filter_domain="[('despacho_custom_modules', 'ilike', self)]"/>
                 <filter name="local" string="Este servidor"
                         domain="[('despacho_db_local','=',True)]"/>
                 <filter name="tests" string="BDs de prueba"

@@ -55,6 +55,13 @@ class ProjectProject(models.Model):
         ('late', 'Atrasado'),
     ], string='Estado de respaldo', compute='_compute_backup_health')
     despacho_installed_modules = fields.Text('Módulos instalados', copy=False)
+    despacho_custom_modules = fields.Text(
+        'Apps custom', copy=False,
+        help='Módulos custom instalados (los que viven en los addons custom del '
+             'servidor, no el core ni enterprise). Los llena el censo.')
+    despacho_custom_module_count = fields.Integer(
+        'Nº apps custom', copy=False, compute='_compute_custom_module_count',
+        store=True, aggregator='sum')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
     despacho_last_census = fields.Datetime('Último escaneo', copy=False)
     despacho_provision_state = fields.Selection([
@@ -74,6 +81,12 @@ class ProjectProject(models.Model):
     def _compute_is_test(self):
         for rec in self:
             rec.despacho_is_test = bool(rec.database_name and rec.database_name.startswith('test'))
+
+    @api.depends('despacho_custom_modules')
+    def _compute_custom_module_count(self):
+        for rec in self:
+            mods = (rec.despacho_custom_modules or '').strip()
+            rec.despacho_custom_module_count = len(mods.split(',')) if mods else 0
 
     @api.depends('despacho_db_size', 'despacho_filestore_size')
     def _compute_total_size(self):
@@ -273,6 +286,7 @@ class ProjectProject(models.Model):
                 'despacho_db_size': row.get('db_size') or 0,
                 'despacho_filestore_size': row.get('filestore_size') or 0,
                 'despacho_installed_modules': row.get('modules') or False,
+                'despacho_custom_modules': row.get('custom_modules') or False,
                 'despacho_last_backup': row.get('last_backup') or False,
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',

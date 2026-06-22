@@ -99,7 +99,8 @@
                     </group>
                     <notebook>
                         <page string="Registro">
-                            <field name="log" widget="text" readonly="1"/>
+                            <field name="log" widget="text" readonly="1" nolabel="1"
+                                   class="font-monospace w-100"/>
                         </page>
                     </notebook>
                 </sheet>

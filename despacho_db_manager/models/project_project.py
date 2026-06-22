@@ -308,6 +308,20 @@ class ProjectProject(models.Model):
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',
             }
+            # Poblar la sección nativa "Gestión de usuarios" (databases.user) con los
+            # usuarios internos del censo: reemplaza la lista (5,0,0) por la actual.
+            ulist = row.get('users_list')
+            if isinstance(ulist, list):
+                cmds = [(5, 0, 0)]
+                for u in ulist:
+                    login = (u.get('login') or '').strip()
+                    if not login:
+                        continue
+                    uv = {'login': login[:200], 'name': (u.get('name') or login)[:200]}
+                    if u.get('last'):
+                        uv['latest_authentication'] = u['last']
+                    cmds.append((0, 0, uv))
+                vals['database_user_ids'] = cmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

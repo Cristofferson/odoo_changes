@@ -316,6 +316,18 @@ class DespachoDbOperation(models.Model):
                 bt = res['backup'].get('backup_time')
                 if bt:
                     rec.project_id.sudo().despacho_last_backup = bt
+            # Baja aplicada de verdad: reflejar el resultado en el inventario para
+            # que el listado no siga mostrando la BD como activa.
+            #  - con drop: la BD se eliminó -> marcar 'dropped' y ARCHIVAR (sale del
+            #    listado por defecto; el registro y su historial se conservan).
+            #  - sin drop (reversible): el sitio se deshabilitó -> marcar 'suspended'.
+            if (rec.op == 'baja' and res.get('state') == 'done'
+                    and not rec.simulate and rec.project_id):
+                if rec.do_drop:
+                    rec.project_id.sudo().write({
+                        'despacho_provision_state': 'dropped', 'active': False})
+                else:
+                    rec.project_id.sudo().despacho_provision_state = 'suspended'
             # Crear BD de prueba aplicado de verdad: dar de alta el nuevo test en el
             # inventario para que aparezca de inmediato (el censo llenará tamaños).
             if (rec.op == 'crear_test' and res.get('state') == 'done'

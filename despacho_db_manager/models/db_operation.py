@@ -19,14 +19,16 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
 PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test')
 
-# Registro de servidores que el censo puede escanear. La CLAVE viaja a la cola;
-# el worker root la mapea (allowlist cerrado) a un destino SSH; Odoo nunca pasa
-# un host/usuario arbitrario. La clave DEBE ser el socket.gethostname() de cada
-# servidor para casar con el campo `server` que emite despacho-census.sh y con
-# THIS_SERVER del upsert (idempotencia por (database_name, despacho_server)).
+# Registro de servidores que el censo puede escanear. La CLAVE es un nombre LÓGICO
+# (odoo19/odoo18), NO el hostname del SO: el censo y THIS_SERVER mapean
+# socket.gethostname() -> esta clave (ver HOSTNAME_TO_KEY en project_project.py).
+# La clave viaja a la cola; el worker root la mapea (allowlist cerrado) a un destino
+# SSH; Odoo nunca pasa un host/usuario arbitrario. Debe casar con el campo `server`
+# que emite despacho-census.sh y con THIS_SERVER del upsert (idempotencia por
+# (database_name, despacho_server)).
 SERVERS = [
-    ('diamane.mx', 'Este servidor (diamane.mx)'),
-    ('vps-f101b860', 'Servidor 2 (OVH · vps-f101b860)'),
+    ('odoo19', 'odoo19 (este servidor · diamane.mx)'),
+    ('odoo18', 'odoo18 (OVH · vps-f101b860)'),
 ]
 SERVER_KEYS = tuple(k for k, _ in SERVERS)
 
@@ -97,7 +99,7 @@ class DespachoDbOperation(models.Model):
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
     target_server = fields.Selection(
-        SERVERS, string='Servidor a escanear', default='diamane.mx',
+        SERVERS, string='Servidor a escanear', default='odoo19',
         help='Servidor cuyo inventario de bases de datos se censará. Los remotos '
              'se escanean por SSH (solo lectura).')
 
@@ -161,7 +163,7 @@ class DespachoDbOperation(models.Model):
         db = (proj.database_name or '').strip()
         if not CENSUS_DB_RE.match(db):
             raise UserError('Nombre de BD inválido para baja: %r' % db)
-        server = (proj.despacho_server or 'diamane.mx').strip()
+        server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
         # Dominio para deshabilitar nginx: el host del database_url (sin ?srv=…),
@@ -191,7 +193,7 @@ class DespachoDbOperation(models.Model):
         db = (proj.database_name or '').strip()
         if not CENSUS_DB_RE.match(db):
             raise UserError('Nombre de BD inválido para respaldo: %r' % db)
-        server = (proj.despacho_server or 'diamane.mx').strip()
+        server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
         return {'id': self.id, 'op': 'respaldo', 'db': db, 'server': server,
@@ -212,7 +214,7 @@ class DespachoDbOperation(models.Model):
             raise UserError('Indica una BD de origen (producción) válida.')
         if src == dest:
             raise UserError('El origen y el destino no pueden ser la misma BD.')
-        server = (proj.despacho_server or 'diamane.mx').strip()
+        server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
         if not self.simulate and (self.confirm_name or '').strip() != dest:
@@ -242,7 +244,7 @@ class DespachoDbOperation(models.Model):
             raise UserError('Nombre de BD de prueba inválido: %r' % dest)
         if src == dest:
             raise UserError('El origen y el destino no pueden ser la misma BD.')
-        server = (proj.despacho_server or 'diamane.mx').strip()
+        server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
         if not self.simulate and (self.confirm_name or '').strip() != dest:
@@ -267,7 +269,7 @@ class DespachoDbOperation(models.Model):
         }
 
     def _build_census_req(self):
-        server = self.target_server or 'diamane.mx'
+        server = self.target_server or 'odoo19'
         if server not in SERVER_KEYS:
             raise UserError('Servidor a escanear no reconocido: %s' % server)
         return {

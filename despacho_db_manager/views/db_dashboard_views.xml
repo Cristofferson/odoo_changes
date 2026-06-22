@@ -49,7 +49,8 @@
                 <field name="despacho_last_backup"/>
                 <field name="despacho_backup_count" string="Nº respaldos" sum="Total respaldos"
                        optional="show"/>
-                <field name="despacho_backup_total_display" string="Tamaño respaldos" optional="hide"/>
+                <field name="despacho_backup_total_display" string="Tamaño en disco" optional="hide"/>
+                <field name="despacho_offsite_summary" string="Off-site (nube)" optional="show"/>
                 <field name="despacho_days_since_backup" string="Días sin respaldo"/>
                 <field name="despacho_backup_status" string="Respaldo" widget="badge"
                        decoration-success="despacho_backup_status == 'ok'"

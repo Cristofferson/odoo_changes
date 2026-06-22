@@ -115,22 +115,34 @@
                       invisible="not database_hosting"
                       groups="databases.group_databases_manager">
                     <div class="alert alert-info" role="alert">
-                        Respaldos <b>automáticos</b> (nocturnos) detectados en disco por el censo.
-                        Es solo lectura: refleja lo que existe en
-                        <code>/backup/postgres/</code> del servidor de la BD.
+                        Respaldos <b>automáticos</b> (nocturnos) detectados por el censo. La
+                        retención larga (p.ej. 30 días) vive <b>off-site</b> en la nube; el
+                        <b>disco local</b> del servidor suele conservar pocos días a propósito.
                     </div>
-                    <group>
-                        <group string="Resumen">
-                            <field name="despacho_backup_count"/>
-                            <field name="despacho_backup_total_display"/>
+                    <group string="Destinos off-site (nube)">
+                        <field name="despacho_offsite_ids" nolabel="1" readonly="1">
+                            <list string="Destinos off-site" create="0" edit="0" delete="0">
+                                <field name="remote" string="Destino"/>
+                                <field name="available" string="Verificable" widget="boolean"/>
+                                <field name="retention_days" string="Días en la nube"/>
+                                <field name="date_oldest" string="Más antiguo"/>
+                                <field name="date_newest" string="Más reciente"/>
+                                <field name="has_latest" string="Última copia presente" widget="boolean"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="En este servidor (disco local)">
+                        <group>
+                            <field name="despacho_backup_count" string="Días en disco local"/>
+                            <field name="despacho_backup_total_display" string="Tamaño en disco"/>
                         </group>
-                        <group string="Ventana">
+                        <group>
                             <field name="despacho_last_backup"/>
-                            <field name="despacho_backup_oldest"/>
+                            <field name="despacho_backup_oldest" string="Más antiguo en disco"/>
                         </group>
                     </group>
                     <field name="despacho_backup_ids" nolabel="1" readonly="1">
-                        <list string="Respaldos automáticos" default_order="backup_date desc">
+                        <list string="Respaldos en disco local" default_order="backup_date desc">
                             <field name="backup_date"/>
                             <field name="name"/>
                             <field name="size_display" string="Tamaño"/>

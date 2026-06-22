@@ -89,7 +89,14 @@ class ProjectProject(models.Model):
         'Tamaño respaldos', compute='_compute_backup_stats')
     despacho_backup_oldest = fields.Date(
         'Respaldo más antiguo', copy=False, compute='_compute_backup_stats',
-        store=True, help='Inicio de la ventana de retención conservada en disco.')
+        store=True, help='Inicio de la ventana de retención conservada EN DISCO local.')
+    # Destinos OFF-SITE (Nextcloud / OneDrive): la retención larga (30 días) vive
+    # en la nube, no en el disco local. Lo llena el censo leyendo backup-odoo.sh.
+    despacho_offsite_ids = fields.One2many('despacho.db.offsite', 'project_id',
+                                           string='Destinos off-site')
+    despacho_offsite_summary = fields.Char(
+        'Off-site', compute='_compute_offsite_summary',
+        help='Resumen de los respaldos en la nube (Nextcloud / OneDrive).')
     despacho_last_census = fields.Datetime('Último escaneo', copy=False)
     despacho_provision_state = fields.Selection([
         ('unknown', 'Desconocido'),
@@ -133,6 +140,19 @@ class ProjectProject(models.Model):
             rec.despacho_backup_total_display = _human_size(total)
             dates = [b.backup_date for b in backups if b.backup_date]
             rec.despacho_backup_oldest = min(dates) if dates else False
+
+    @api.depends('despacho_offsite_ids.remote', 'despacho_offsite_ids.available',
+                 'despacho_offsite_ids.retention_days', 'despacho_offsite_ids.has_latest')
+    def _compute_offsite_summary(self):
+        for rec in self:
+            parts = []
+            for o in rec.despacho_offsite_ids:
+                if not o.available:
+                    parts.append('%s ?' % (o.remote or ''))
+                else:
+                    mark = '' if o.has_latest else ' (sin la última)'
+                    parts.append('%s %sd%s' % (o.remote or '', o.retention_days, mark))
+            rec.despacho_offsite_summary = ' · '.join(parts)
 
     @api.model
     def _backup_thresholds(self):
@@ -368,6 +388,23 @@ class ProjectProject(models.Model):
                         'checksum_ok': bool(b.get('sha_ok')),
                     }))
                 vals['despacho_backup_ids'] = bcmds
+            # Resumen de destinos off-site (Nextcloud/OneDrive) del censo.
+            olist = row.get('offsite')
+            if isinstance(olist, list):
+                ocmds = [(5, 0, 0)]
+                for o in olist:
+                    remote = (o.get('remote') or '').strip()
+                    if not remote:
+                        continue
+                    ocmds.append((0, 0, {
+                        'remote': remote[:64],
+                        'available': bool(o.get('ok')),
+                        'retention_days': o.get('days') or 0,
+                        'date_oldest': o.get('oldest') or False,
+                        'date_newest': o.get('newest') or False,
+                        'has_latest': bool(o.get('has_latest')),
+                    }))
+                vals['despacho_offsite_ids'] = ocmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

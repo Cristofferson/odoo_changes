@@ -37,3 +37,28 @@ class DespachoDbBackup(models.Model):
     def _compute_size_display(self):
         for rec in self:
             rec.size_display = _human_size(rec.backup_size)
+
+
+class DespachoDbOffsite(models.Model):
+    """Resumen de un destino OFF-SITE de respaldo (Nextcloud / OneDrive) para una
+    BD. La llena el censo: lee los destinos del backup-odoo.sh del servidor y hace
+    un listado barato (rclone) por nube. retention_days/fechas son del servidor
+    (la nube guarda por carpeta de fecha con todas las BDs); has_latest es por BD
+    (el .sql.gz más reciente de ESTA BD figura en el destino)."""
+    _name = 'despacho.db.offsite'
+    _description = 'Destino off-site de respaldo'
+    _order = 'remote'
+
+    project_id = fields.Many2one('project.project', string='Base de datos',
+                                 required=True, ondelete='cascade', index=True)
+    remote = fields.Char('Destino', required=True, help='Nextcloud / OneDrive.')
+    available = fields.Boolean(
+        'Verificable', default=True,
+        help='El censo pudo listar el destino (rclone OK). Si no, no se pudo verificar.')
+    retention_days = fields.Integer(
+        'Días en la nube', help='Carpetas de fecha conservadas en el destino.')
+    date_oldest = fields.Date('Más antiguo')
+    date_newest = fields.Date('Más reciente')
+    has_latest = fields.Boolean(
+        'Última copia presente',
+        help='El respaldo más reciente de ESTA BD ya está en el destino.')

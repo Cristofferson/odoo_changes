@@ -3,3 +3,5 @@ access_db_operation_manager,despacho.db.operation.manager,model_despacho_db_oper
 access_db_operation_system,despacho.db.operation.system,model_despacho_db_operation,base.group_system,1,1,1,1
 access_db_backup_manager,despacho.db.backup.manager,model_despacho_db_backup,databases.group_databases_manager,1,0,0,0
 access_db_backup_system,despacho.db.backup.system,model_despacho_db_backup,base.group_system,1,1,1,1
+access_db_offsite_manager,despacho.db.offsite.manager,model_despacho_db_offsite,databases.group_databases_manager,1,0,0,0
+access_db_offsite_system,despacho.db.offsite.system,model_despacho_db_offsite,base.group_system,1,1,1,1

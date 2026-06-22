@@ -30,6 +30,23 @@
             <field name="database_nb_users" position="attributes">
                 <attribute name="column_invisible">1</attribute>
             </field>
+            <!-- "Sincronizar" nativo requiere API por BD (Odoo.sh); en premise falla.
+                 Nuestro equivalente es "Escanear servidor" (censo). Se oculta. -->
+            <button name="databases.action_synchronize_all_databases" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+        </field>
+    </record>
+
+    <!-- Ocultar el botón "Sincronizar" del formulario nativo (mismo motivo). -->
+    <record id="edit_project_databases_hide_sync" model="ir.ui.view">
+        <field name="name">despacho.databases.form.hide.sync</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="databases.edit_project"/>
+        <field name="arch" type="xml">
+            <button name="action_database_synchronize" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
         </field>
     </record>
 

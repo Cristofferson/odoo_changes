@@ -104,9 +104,27 @@
                     </group>
                     <group string="Apps custom">
                         <field name="despacho_custom_module_count"/>
-                        <field name="despacho_custom_modules" nolabel="1" readonly="1"
-                               placeholder="(el censo las detecta de los addons custom del servidor)"/>
                     </group>
+                    <field name="despacho_module_ids" nolabel="1" readonly="1">
+                        <list string="Apps custom" create="0" edit="0" delete="0">
+                            <field name="name" string="Técnico"/>
+                            <field name="shortdesc" string="Nombre"/>
+                            <field name="summary" string="Descripción" optional="show"/>
+                            <field name="author" string="Autor" optional="show"/>
+                            <field name="installed_version" string="Versión"/>
+                            <field name="application" string="App" widget="boolean" optional="hide"/>
+                            <field name="license" string="Licencia" optional="hide"/>
+                            <field name="app_store" string="apps.odoo.com" widget="badge"
+                                   decoration-success="app_store == 'yes'"
+                                   decoration-muted="app_store == 'unknown'"
+                                   decoration-warning="app_store == 'no'"/>
+                            <field name="app_store_url" string="Enlace" widget="url"
+                                   text="Ver" optional="show"/>
+                            <field name="installed_since" string="Alta" optional="show"/>
+                            <field name="updated" string="Actualizado" optional="hide"/>
+                            <field name="website" string="Sitio" widget="url" optional="hide"/>
+                        </list>
+                    </field>
                     <group string="Módulos instalados (todos)">
                         <field name="despacho_installed_modules" nolabel="1" readonly="1"/>
                     </group>

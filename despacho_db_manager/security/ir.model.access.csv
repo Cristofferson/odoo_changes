@@ -5,3 +5,5 @@ access_db_backup_manager,despacho.db.backup.manager,model_despacho_db_backup,dat
 access_db_backup_system,despacho.db.backup.system,model_despacho_db_backup,base.group_system,1,1,1,1
 access_db_offsite_manager,despacho.db.offsite.manager,model_despacho_db_offsite,databases.group_databases_manager,1,0,0,0
 access_db_offsite_system,despacho.db.offsite.system,model_despacho_db_offsite,base.group_system,1,1,1,1
+access_db_module_manager,despacho.db.module.manager,model_despacho_db_module,databases.group_databases_manager,1,0,0,0
+access_db_module_system,despacho.db.module.system,model_despacho_db_module,base.group_system,1,1,1,1

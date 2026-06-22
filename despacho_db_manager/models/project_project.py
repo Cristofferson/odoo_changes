@@ -73,6 +73,10 @@ class ProjectProject(models.Model):
     despacho_custom_module_count = fields.Integer(
         'Nº apps custom', copy=False, compute='_compute_custom_module_count',
         store=True, aggregator='sum')
+    # Tabla de apps custom con metadatos (la llena el censo). El Text de arriba se
+    # conserva para el buscador "tiene app X" del tablero; el detalle vive aquí.
+    despacho_module_ids = fields.One2many('despacho.db.module', 'project_id',
+                                          string='Apps custom (detalle)')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
     # Historial de respaldos NOCTURNOS (automáticos), uno por archivo en disco.
     # Lo llena el censo de CADA servidor; es de solo lectura (refleja /backup).
@@ -405,6 +409,29 @@ class ProjectProject(models.Model):
                         'has_latest': bool(o.get('has_latest')),
                     }))
                 vals['despacho_offsite_ids'] = ocmds
+            # Tabla de apps custom con metadatos del censo.
+            mlist = row.get('custom_modules_detail')
+            if isinstance(mlist, list):
+                mcmds = [(5, 0, 0)]
+                for m in mlist:
+                    mname = (m.get('name') or '').strip()
+                    if not mname:
+                        continue
+                    oas = m.get('on_app_store')
+                    mcmds.append((0, 0, {
+                        'name': mname[:128],
+                        'shortdesc': (m.get('shortdesc') or '')[:256] or False,
+                        'summary': m.get('summary') or False,
+                        'author': (m.get('author') or '')[:256] or False,
+                        'installed_version': (m.get('version') or '')[:64] or False,
+                        'license': (m.get('license') or '')[:64] or False,
+                        'application': bool(m.get('application')),
+                        'app_store': 'yes' if oas is True else 'no' if oas is False else 'unknown',
+                        'installed_since': m.get('installed_since') or False,
+                        'updated': m.get('updated') or False,
+                        'website': (m.get('url') or '')[:256] or False,
+                    }))
+                vals['despacho_module_ids'] = mcmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

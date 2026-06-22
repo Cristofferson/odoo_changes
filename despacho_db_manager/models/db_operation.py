@@ -222,6 +222,16 @@ class DespachoDbOperation(models.Model):
         server = (proj.despacho_server or 'odoo19').strip()
         if server not in SERVER_KEYS:
             raise UserError('Servidor de la BD no reconocido: %s' % server)
+        # Validación INMEDIATA del origen contra el inventario (mismo servidor): así
+        # un nombre mal escrito da un error al instante, en vez de fallar de forma
+        # asíncrona (el worker tardaría y el resultado solo se vería luego en el log).
+        src_rec = self.env['project.project'].sudo().with_context(active_test=False).search([
+            ('database_name', '=', src), ('despacho_server', '=', server)], limit=1)
+        if not src_rec:
+            raise UserError(
+                'No encuentro una BD de producción llamada "%s" en el servidor %s.\n'
+                'Revisa el nombre EXACTO como aparece en el inventario (p. ej. con guiones), '
+                'o escanea el servidor si es una BD nueva.' % (src, server))
         if not self.simulate and (self.confirm_name or '').strip() != dest:
             raise UserError('Vas a SOBRESCRIBIR %s. Escribe su nombre exacto en "Confirmar".' % dest)
         return {

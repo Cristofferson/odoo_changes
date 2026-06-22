@@ -366,6 +366,28 @@ class DespachoDbOperation(models.Model):
             raise UserError('No se pudo encolar la solicitud: %s\n'
                             '¿Existe %s y es escribible por el usuario odoo?' % (e, qdir))
 
+    # Ruido de psql al restaurar un volcado (un bloque por secuencia): se filtra al
+    # ingerir el log para que la pestaña Registro sea legible (también al pulsar
+    # "Actualizar estado", que re-lee el archivo de resultado).
+    _LOG_NOISE = [re.compile(p) for p in (
+        r'^\s*setval\s*$', r'^\s*set_config\s*$', r'^\s*-{3,}\s*$', r'^\s*\d+\s*$',
+        r'^\s*\(\d+ rows?\)\s*$', r'^\s*SET\s*$', r'^\s*COPY \d+\s*$')]
+
+    @api.model
+    def _clean_log(self, log):
+        out, blanks = [], 0
+        for ln in (log or '').splitlines():
+            if any(p.match(ln) for p in self._LOG_NOISE):
+                continue
+            if not ln.strip():
+                blanks += 1
+                if blanks > 1:
+                    continue
+            else:
+                blanks = 0
+            out.append(ln)
+        return '\n'.join(out).strip() or '(sin registro)'
+
     def action_refresh(self):
         skip_notify = self.env.context.get('skip_notify')
         for rec in self:
@@ -379,7 +401,7 @@ class DespachoDbOperation(models.Model):
                 continue
             was_terminal = rec.state in ('done', 'error')
             rec.write({'state': res.get('state', 'error'),
-                       'log': res.get('log', '(sin registro)')})
+                       'log': self._clean_log(res.get('log', '(sin registro)'))})
             # El censo trae el inventario en la respuesta: hacer upsert.
             if rec.op == 'census' and res.get('state') == 'done' and isinstance(res.get('census'), list):
                 self.env['project.project']._census_upsert(res['census'])

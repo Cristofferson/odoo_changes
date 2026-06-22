@@ -174,14 +174,19 @@ class DespachoDbOperation(models.Model):
             domain = m.group(1)
         if not domain:
             domain = '%s.xubax.com' % db
-        if not DOMAIN_RE.match(domain):
-            raise UserError('Dominio inválido derivado de la BD: %s' % domain)
+        # Si el dominio derivado no es un hostname válido (p.ej. BDs con guion bajo
+        # como staging_xbpos, que no tienen vhost público), se OMITE el paso de
+        # nginx; la baja respalda y (opcional) dropea igual. No es un error.
+        skip_nginx = not DOMAIN_RE.match(domain)
+        if skip_nginx:
+            domain = ''
         drop = bool(self.do_drop)
         if drop and (self.confirm_name or '').strip() != db:
             raise UserError('Para ELIMINAR la BD escribe exactamente su nombre (%s) en "Confirmar".' % db)
         return {
             'id': self.id, 'op': 'baja',
             'db': db, 'domain': domain, 'server': server,
+            'skip_nginx': skip_nginx,
             'drop': drop, 'confirm': db if drop else '',
             'simulate': bool(self.simulate),
         }

@@ -24,6 +24,12 @@
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
             </field>
+            <!-- La columna nativa de usuarios (database_nb_users) no se alimenta en
+                 este montaje premise (queda en 0): la ocultamos para no duplicar con
+                 "Usuarios" (despacho_user_count), que sí trae datos del censo. -->
+            <field name="database_nb_users" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </field>
         </field>
     </record>
 

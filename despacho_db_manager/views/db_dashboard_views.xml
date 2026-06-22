@@ -105,8 +105,10 @@
             (0, 0, {'sequence': 40, 'view_mode': 'form'})]"/>
     </record>
 
+    <!-- sequence 12: JUSTO después del listado nativo "Databases" (menu_databases=10),
+         antes de Provisionar/Tareas. La app abre en el LISTADO; el Tablero queda 2º. -->
     <menuitem id="menu_db_dashboard" name="Tablero"
               parent="databases.menu_main_databases"
-              action="action_db_dashboard" sequence="5"
+              action="action_db_dashboard" sequence="12"
               groups="databases.group_databases_manager"/>
 </odoo>

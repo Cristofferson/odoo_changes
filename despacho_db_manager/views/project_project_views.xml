@@ -42,6 +42,11 @@
             <button name="databases.action_synchronize_all_databases" position="attributes">
                 <attribute name="invisible">1</attribute>
             </button>
+            <!-- Botón "Ajustes" (action_open_self) de la fila: redundante ahora que el
+                 clic en la fila ya abre la ficha de Ajustes. Se oculta. -->
+            <button name="action_open_self" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
         </field>
     </record>
 

@@ -20,6 +20,7 @@
                         display="always" groups="databases.group_databases_manager"/>
             </header>
             <field name="database_last_synchro" position="after">
+                <field name="despacho_user_count" optional="show" string="Usuarios"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
             </field>
@@ -66,6 +67,11 @@
                             <field name="despacho_server"/>
                             <field name="despacho_provision_state"/>
                             <field name="despacho_size_display"/>
+                            <label for="despacho_user_count" string="Usuarios (internos / total)"/>
+                            <div>
+                                <field name="despacho_user_count" class="oe_inline"/> /
+                                <field name="despacho_user_total" class="oe_inline"/>
+                            </div>
                         </group>
                         <group string="Censo">
                             <field name="despacho_last_census"/>

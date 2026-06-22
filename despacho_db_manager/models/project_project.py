@@ -58,6 +58,13 @@ class ProjectProject(models.Model):
         ('warn', 'Atención'),
         ('late', 'Atrasado'),
     ], string='Estado de respaldo', compute='_compute_backup_health')
+    despacho_user_count = fields.Integer(
+        'Usuarios', copy=False, aggregator='sum',
+        help='Usuarios internos activos (personas que inician sesión, share=false). '
+             'Lo llena el censo.')
+    despacho_user_total = fields.Integer(
+        'Usuarios (total activos)', copy=False, aggregator='sum',
+        help='Todos los usuarios activos: internos + portal/externos. Lo llena el censo.')
     despacho_installed_modules = fields.Text('Módulos instalados', copy=False)
     despacho_custom_modules = fields.Text(
         'Apps custom', copy=False,
@@ -291,6 +298,8 @@ class ProjectProject(models.Model):
                 'despacho_filestore_size': row.get('filestore_size') or 0,
                 'despacho_installed_modules': row.get('modules') or False,
                 'despacho_custom_modules': row.get('custom_modules') or False,
+                'despacho_user_count': row.get('users_internal') or 0,
+                'despacho_user_total': row.get('users_total') or 0,
                 'despacho_last_backup': row.get('last_backup') or False,
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',

@@ -38,6 +38,8 @@
                 <field name="database_name" string="Base de datos"/>
                 <field name="despacho_server"/>
                 <field name="despacho_provision_state"/>
+                <field name="despacho_user_count" string="Usuarios" sum="Total usuarios" optional="show"/>
+                <field name="despacho_user_total" string="Usuarios (total)" optional="hide"/>
                 <field name="despacho_size_display" string="Tamaño"/>
                 <field name="despacho_total_size_gb" string="Total (GB)" sum="Total (GB)"
                        optional="show" digits="[16,2]"/>

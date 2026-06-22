@@ -74,6 +74,22 @@ class ProjectProject(models.Model):
         'Nº apps custom', copy=False, compute='_compute_custom_module_count',
         store=True, aggregator='sum')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
+    # Historial de respaldos NOCTURNOS (automáticos), uno por archivo en disco.
+    # Lo llena el censo de CADA servidor; es de solo lectura (refleja /backup).
+    despacho_backup_ids = fields.One2many('despacho.db.backup', 'project_id',
+                                          string='Respaldos automáticos')
+    despacho_backup_count = fields.Integer(
+        'Nº respaldos', copy=False, compute='_compute_backup_stats',
+        store=True, aggregator='sum',
+        help='Cantidad de respaldos nocturnos conservados en disco para esta BD.')
+    despacho_backup_total_size = fields.Float(
+        'Tamaño respaldos (bytes)', copy=False, compute='_compute_backup_stats',
+        store=True, aggregator='sum')
+    despacho_backup_total_display = fields.Char(
+        'Tamaño respaldos', compute='_compute_backup_stats')
+    despacho_backup_oldest = fields.Date(
+        'Respaldo más antiguo', copy=False, compute='_compute_backup_stats',
+        store=True, help='Inicio de la ventana de retención conservada en disco.')
     despacho_last_census = fields.Datetime('Último escaneo', copy=False)
     despacho_provision_state = fields.Selection([
         ('unknown', 'Desconocido'),
@@ -105,6 +121,18 @@ class ProjectProject(models.Model):
             total = (rec.despacho_db_size or 0) + (rec.despacho_filestore_size or 0)
             rec.despacho_total_size = total
             rec.despacho_total_size_gb = total / (1024.0 ** 3)
+
+    @api.depends('despacho_backup_ids', 'despacho_backup_ids.backup_size',
+                 'despacho_backup_ids.backup_date')
+    def _compute_backup_stats(self):
+        for rec in self:
+            backups = rec.despacho_backup_ids
+            rec.despacho_backup_count = len(backups)
+            total = sum(backups.mapped('backup_size'))
+            rec.despacho_backup_total_size = total
+            rec.despacho_backup_total_display = _human_size(total)
+            dates = [b.backup_date for b in backups if b.backup_date]
+            rec.despacho_backup_oldest = min(dates) if dates else False
 
     @api.model
     def _backup_thresholds(self):
@@ -322,6 +350,24 @@ class ProjectProject(models.Model):
                         uv['latest_authentication'] = u['last']
                     cmds.append((0, 0, uv))
                 vals['database_user_ids'] = cmds
+            # Historial de respaldos nocturnos del censo: reemplaza la lista entera
+            # (refleja lo que hay en disco hoy; los caducados desaparecen solos).
+            blist = row.get('backups')
+            if isinstance(blist, list):
+                bcmds = [(5, 0, 0)]
+                for b in blist:
+                    bname = (b.get('name') or '').strip()
+                    if not bname:
+                        continue
+                    bcmds.append((0, 0, {
+                        'name': bname[:255],
+                        'backup_date': b.get('date') or False,
+                        'backup_size': b.get('size') or 0,
+                        'path': (b.get('path') or '')[:255] or False,
+                        'server': server,
+                        'checksum_ok': bool(b.get('sha_ok')),
+                    }))
+                vals['despacho_backup_ids'] = bcmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

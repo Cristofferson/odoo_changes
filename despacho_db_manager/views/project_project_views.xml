@@ -23,6 +23,7 @@
                 <field name="despacho_user_count" optional="show" string="Usuarios"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
+                <field name="despacho_backup_count" optional="hide" string="Nº respaldos"/>
             </field>
             <!-- La columna nativa de usuarios (database_nb_users) no se alimenta en
                  este montaje premise (queda en 0): la ocultamos para no duplicar con
@@ -109,6 +110,36 @@
                     <group string="Módulos instalados (todos)">
                         <field name="despacho_installed_modules" nolabel="1" readonly="1"/>
                     </group>
+                </page>
+                <page name="despacho_backups" string="Respaldos"
+                      invisible="not database_hosting"
+                      groups="databases.group_databases_manager">
+                    <div class="alert alert-info" role="alert">
+                        Respaldos <b>automáticos</b> (nocturnos) detectados en disco por el censo.
+                        Es solo lectura: refleja lo que existe en
+                        <code>/backup/postgres/</code> del servidor de la BD.
+                    </div>
+                    <group>
+                        <group string="Resumen">
+                            <field name="despacho_backup_count"/>
+                            <field name="despacho_backup_total_display"/>
+                        </group>
+                        <group string="Ventana">
+                            <field name="despacho_last_backup"/>
+                            <field name="despacho_backup_oldest"/>
+                        </group>
+                    </group>
+                    <field name="despacho_backup_ids" nolabel="1" readonly="1">
+                        <list string="Respaldos automáticos" default_order="backup_date desc">
+                            <field name="backup_date"/>
+                            <field name="name"/>
+                            <field name="size_display" string="Tamaño"/>
+                            <field name="backup_size" column_invisible="1"/>
+                            <field name="checksum_ok" string="Integridad" widget="boolean"/>
+                            <field name="server" optional="hide"/>
+                            <field name="path" optional="hide"/>
+                        </list>
+                    </field>
                 </page>
             </notebook>
         </field>

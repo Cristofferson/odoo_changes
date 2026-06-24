@@ -99,6 +99,22 @@ class StockLot(models.Model):
         string="Última vista de cliente", readonly=True, copy=False,
     )
 
+    # ----- Fase 4: heatmap interés vs conversión ----------------------- #
+    dmn_sold_flag = fields.Integer(
+        string="Vendida (0/1)", compute="_compute_dmn_sold_flag", store=True,
+        help="1 si la pieza se vendió (tiene registro de propiedad). Medible en el "
+             "tablero como número de piezas convertidas.",
+    )
+    dmn_categ_id = fields.Many2one(
+        "product.category", string="Categoría", related="product_id.categ_id",
+        store=True,
+    )
+
+    @api.depends("dmn_claim_state")
+    def _compute_dmn_sold_flag(self):
+        for lot in self:
+            lot.dmn_sold_flag = 1 if lot.dmn_claim_state in ("pending", "claimed") else 0
+
     # ----- Fase 1: trampa de pieza robada ------------------------------- #
     dmn_last_theft_alert = fields.Datetime(
         string="Última alerta de robo enviada", readonly=True, copy=False,

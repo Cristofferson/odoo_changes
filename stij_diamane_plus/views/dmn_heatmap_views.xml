@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pivot: interés (vistas) vs conversión (vendidas) por categoría/producto -->
+    <record id="view_dmn_heatmap_pivot" model="ir.ui.view">
+        <field name="name">stock.lot.pivot.dmn.heatmap</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <pivot string="Interés vs conversión" sample="1">
+                <field name="dmn_categ_id" type="row"/>
+                <field name="dmn_view_count" type="measure"/>
+                <field name="dmn_sold_flag" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph: vistas de cliente por categoría -->
+    <record id="view_dmn_heatmap_graph" model="ir.ui.view">
+        <field name="name">stock.lot.graph.dmn.heatmap</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <graph string="Interés por categoría" type="bar" sample="1">
+                <field name="dmn_categ_id"/>
+                <field name="dmn_view_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Lista: muy vistas y aún sin vender -->
+    <record id="view_dmn_heatmap_list" model="ir.ui.view">
+        <field name="name">stock.lot.list.dmn.heatmap</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <list string="Interés vs conversión" create="false" default_order="dmn_view_count desc">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="dmn_categ_id" optional="show"/>
+                <field name="dmn_view_count"/>
+                <field name="dmn_last_customer_view" optional="hide"/>
+                <field name="dmn_sold_flag" string="Vendida"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search: agrupar por categoría, filtros interés/conversión -->
+    <record id="view_dmn_heatmap_search" model="ir.ui.view">
+        <field name="name">stock.lot.search.dmn.heatmap</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <search string="Interés vs conversión">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="dmn_categ_id"/>
+                <filter name="dmn_with_views" string="Con vistas" domain="[('dmn_view_count','>',0)]"/>
+                <filter name="dmn_sold" string="Vendidas" domain="[('dmn_sold_flag','=',1)]"/>
+                <filter name="dmn_not_sold" string="No vendidas" domain="[('dmn_sold_flag','=',0)]"/>
+                <separator/>
+                <filter name="dmn_hot_cold" string="Muy vistas sin vender"
+                        domain="[('dmn_view_count','>',0),('dmn_sold_flag','=',0)]"/>
+                <group>
+                    <filter name="group_categ" string="Categoría" context="{'group_by':'dmn_categ_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_dmn_heatmap" model="ir.actions.act_window">
+        <field name="name">Interés vs conversión (STIJ)</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_dmn_heatmap_search"/>
+        <field name="context">{'search_default_dmn_with_views': 1, 'search_default_group_categ': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no hay vistas de cliente registradas</p>
+            <p>Cuando los clientes abran el visor de las piezas, aquí verás qué atrae
+               más interés y cómo se compara con lo que se vende.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dmn_heatmap"
+              name="Interés vs conversión (STIJ)"
+              parent="stock.menu_stock_root"
+              action="action_dmn_heatmap"
+              sequence="96"/>
+</odoo>

@@ -14,7 +14,7 @@ Fase 1 — Trampa de pieza robada:
   (scan_alert con IP/geoip) y alerta al dueño y a la tienda. Modo señuelo o
   disuasivo configurable.
 """,
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "category": "Inventory",
     "author": "XUBAX",
     "maintainer": "XUBAX",
@@ -25,6 +25,7 @@ Fase 1 — Trampa de pieza robada:
     "data": [
         "views/res_company_views.xml",
         "views/stock_lot_views.xml",
+        "views/dmn_heatmap_views.xml",
     ],
     "installable": True,
     "application": False,

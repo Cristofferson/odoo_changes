@@ -27,6 +27,10 @@
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
+                <button name="action_autolink_subscriptions" type="object"
+                        string="Auto-ligar suscripciones" display="always"
+                        groups="databases.group_databases_manager"
+                        help="Liga automáticamente cada BD con su suscripción cuando hay una coincidencia exacta y única por nombre de cliente. Lo dudoso se deja para el selector manual."/>
                 <!-- La conversión de Pendientes (To-do) → Tareas ya NO es un botón
                      manual: la corre un cron automático (ir_cron.xml), por ser idempotente
                      y repetible. Arrastra también los pendientes nuevos. -->
@@ -212,9 +216,12 @@
                             <field name="despacho_server" readonly="1"/>
                             <field name="despacho_provision_state" readonly="1"/>
                             <!-- Liga esta BD con su suscripción (pedido recurrente que
-                                 la factura). Editable a mano; no toca la BD del cliente. -->
+                                 la factura). Se auto-liga; el selector solo muestra las
+                                 que NO están asignadas a otra BD. -->
+                            <field name="despacho_available_subscription_ids" invisible="1"/>
                             <field name="despacho_subscription_id"
-                                   options="{'no_create': True}"/>
+                                   options="{'no_create': True}"
+                                   domain="[('id', 'in', despacho_available_subscription_ids)]"/>
                             <field name="despacho_size_display" readonly="1"/>
                             <label for="despacho_user_count" string="Usuarios (internos / total)"/>
                             <div>

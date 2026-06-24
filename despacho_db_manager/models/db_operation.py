@@ -417,9 +417,10 @@ class DespachoDbOperation(models.Model):
             raise UserError('El puente MCP solo se puede activar en bases de ESTE '
                             'servidor (odoo19); la elegida está en %s.'
                             % (self.project_id.despacho_server or '¿?'))
-        if self.project_id.despacho_mcp_enabled:
-            raise UserError('Esta base ya tiene el puente MCP activo. Desactívalo '
-                            'antes de volver a activarlo.')
+        # (El MCP ahora es POR USUARIO: una BD puede tener varios puentes, uno por
+        #  usuario. El control "ya tiene puente" se hace por usuario en
+        #  databases.user.action_mcp_add_user, y la unicidad del slug la garantiza
+        #  add-client.sh. Por eso aquí ya NO se bloquea a nivel de BD.)
         slug = (self.mcp_slug or '').strip().lower()
         if not MCP_SLUG_RE.match(slug):
             raise UserError('Identificador inválido: usa minúsculas, números y '
@@ -530,23 +531,58 @@ class DespachoDbOperation(models.Model):
             if (rec.op == 'mcp_add' and res.get('state') == 'done'
                     and rec.project_id and isinstance(res.get('mcp'), dict)):
                 m = res['mcp']
+                status = 'running' if str(m.get('code')) == '200' else 'stopped'
                 rec.project_id.sudo().write({
                     'despacho_mcp_enabled': True,
-                    'despacho_mcp_status': 'running' if str(m.get('code')) == '200' else 'stopped',
+                    'despacho_mcp_status': status,
                     'despacho_mcp_url': m.get('endpoint') or False,
                     'despacho_mcp_container': ('mcp-%s' % m['slug']) if m.get('slug') else False,
                     'despacho_mcp_port': str(m['port']) if m.get('port') else False,
                     'despacho_mcp_writes': bool(m.get('writes')),
                     'despacho_mcp_health': str(m['code']) if m.get('code') else False,
                 })
-            # Desactivar MCP aplicado: limpiar el estado del puente en la ficha.
+                # Reflejar también en la fila del USUARIO de "Gestión de usuarios"
+                # (para que el botón cambie a "Quitar MCP" SIN esperar al censo).
+                login = m.get('conn_user') or (rec.mcp_as_user or '').strip()
+                if login:
+                    du = self.env['databases.user'].sudo().search([
+                        ('project_id', '=', rec.project_id.id),
+                        ('login', '=', login)], limit=1)
+                    if du:
+                        du.write({
+                            'despacho_mcp_enabled': True,
+                            'despacho_mcp_slug': m.get('slug') or False,
+                            'despacho_mcp_url': m.get('endpoint') or False,
+                            'despacho_mcp_status': status,
+                            'despacho_mcp_writes': bool(m.get('writes')),
+                            'despacho_mcp_port': str(m['port']) if m.get('port') else False,
+                            'despacho_mcp_health': str(m['code']) if m.get('code') else False,
+                        })
+            # Desactivar MCP aplicado: limpiar la fila del usuario y recalcular el
+            # resumen de la BD (queda enabled solo si AÚN hay otro usuario con puente).
             if (rec.op == 'mcp_remove' and res.get('state') == 'done' and rec.project_id):
-                rec.project_id.sudo().write({
-                    'despacho_mcp_enabled': False, 'despacho_mcp_status': False,
-                    'despacho_mcp_url': False, 'despacho_mcp_container': False,
-                    'despacho_mcp_port': False, 'despacho_mcp_writes': False,
-                    'despacho_mcp_health': False,
-                })
+                slug = (rec.mcp_slug or '').strip().lower()
+                if slug:
+                    du = self.env['databases.user'].sudo().search([
+                        ('project_id', '=', rec.project_id.id),
+                        ('despacho_mcp_slug', '=', slug)], limit=1)
+                    if du:
+                        du.write({
+                            'despacho_mcp_enabled': False, 'despacho_mcp_slug': False,
+                            'despacho_mcp_url': False, 'despacho_mcp_status': False,
+                            'despacho_mcp_writes': False, 'despacho_mcp_port': False,
+                            'despacho_mcp_health': False,
+                        })
+                any_left = bool(self.env['databases.user'].sudo().search_count([
+                    ('project_id', '=', rec.project_id.id),
+                    ('despacho_mcp_enabled', '=', True)]))
+                if not any_left:
+                    rec.project_id.sudo().write({
+                        'despacho_mcp_enabled': False, 'despacho_mcp_status': False,
+                        'despacho_mcp_url': False, 'despacho_mcp_container': False,
+                        'despacho_mcp_port': False, 'despacho_mcp_writes': False,
+                        'despacho_mcp_health': False,
+                    })
             # Aviso al creador cuando la operación TERMINA (cubre las largas que el
             # poll de action_provision no alcanzó). Solo en la transición a terminal.
             if (not skip_notify and not was_terminal

@@ -176,9 +176,74 @@ class ProjectProject(models.Model):
              'Liga los pendientes con esta base de datos sin re-etiquetarlos.')
     despacho_subscription_id = fields.Many2one(
         'sale.order', string='Suscripción', copy=False,
-        domain="[('subscription_state', '!=', False)]",
         help='Suscripción (pedido de venta recurrente) que factura esta base de '
-             'datos. Liga la BD con su cobranza para saltar a ella desde aquí.')
+             'datos. Se intenta ligar automáticamente; si no, se elige de las que '
+             'aún no están asignadas a otra BD.')
+    despacho_available_subscription_ids = fields.Many2many(
+        'sale.order', compute='_compute_available_subscriptions',
+        string='Suscripciones disponibles',
+        help='Suscripciones que NO están ya ligadas a otra BD (más la actual). '
+             'Acota el selector para no asignar la misma suscripción dos veces.')
+
+    @api.depends('despacho_subscription_id')
+    def _compute_available_subscriptions(self):
+        SO = self.env['sale.order'].sudo()
+        subs = SO.search([('subscription_state', 'not in',
+                           (False, '6_churn', '5_renewed'))])
+        taken = {}  # sub_id -> project_id que la tiene
+        for p in self.env['project.project'].sudo().search(
+                [('despacho_subscription_id', '!=', False)]):
+            taken[p.despacho_subscription_id.id] = p.id
+        for rec in self:
+            avail = subs.filtered(
+                lambda s: taken.get(s.id, rec.id) == rec.id)
+            rec.despacho_available_subscription_ids = avail
+
+    @staticmethod
+    def _norm_name(s):
+        return re.sub(r'[^a-z0-9]', '', (s or '').lower())
+
+    def _autolink_subscriptions(self):
+        """Liga AUTOMÁTICAMENTE cada BD sin suscripción con la suya, SOLO cuando hay
+        coincidencia exacta y única entre el nombre de la BD (o su primera etiqueta)
+        y el nombre normalizado del cliente de una suscripción libre. Conservador a
+        propósito: lo dudoso se deja para el selector manual."""
+        SO = self.env['sale.order'].sudo()
+        subs = SO.search([('subscription_state', 'not in',
+                           (False, '6_churn', '5_renewed'))])
+        taken = set(self.env['project.project'].sudo().search(
+            [('despacho_subscription_id', '!=', False)]
+        ).mapped('despacho_subscription_id.id'))
+        linked = 0
+        for rec in self:
+            if rec.despacho_subscription_id or not rec.database_name:
+                continue
+            keys = {self._norm_name(rec.database_name),
+                    self._norm_name(rec.database_name.split('-')[0])}
+            keys.discard('')
+            cands = subs.filtered(
+                lambda s: s.id not in taken
+                and self._norm_name(s.partner_id.name) in keys)
+            if len(cands) == 1:
+                rec.despacho_subscription_id = cands.id
+                taken.add(cands.id)
+                linked += 1
+        return linked
+
+    @api.model
+    def action_autolink_subscriptions(self):
+        """Botón/cron: intenta ligar todas las BDs sin suscripción."""
+        n = self.search([('despacho_subscription_id', '=', False),
+                         ('database_name', '!=', False)])._autolink_subscriptions()
+        return {
+            'type': 'ir.actions.client', 'tag': 'display_notification',
+            'params': {
+                'title': 'Suscripciones',
+                'message': ('Se ligaron automáticamente %d base(s) con su suscripción. '
+                            'Las demás quedan para el selector manual.' % n),
+                'type': 'success' if n else 'warning', 'sticky': False,
+            },
+        }
 
     def action_open_subscription(self):
         """Abre la suscripción ligada a esta BD."""
@@ -761,4 +826,10 @@ class ProjectProject(models.Model):
             except Exception as e:  # noqa: BLE001 — no romper el lote por una BD
                 _logger.warning('Censo: no se pudo upsert %r: %s', db, e)
         _logger.info('Censo: %d creadas, %d actualizadas', created, updated)
+        # Auto-ligar suscripciones de las BDs que aún no tengan (best-effort, seguro).
+        try:
+            self.search([('despacho_subscription_id', '=', False),
+                         ('database_name', '!=', False)])._autolink_subscriptions()
+        except Exception as e:  # noqa: BLE001
+            _logger.warning('Censo: auto-ligado de suscripciones falló: %s', e)
         return True

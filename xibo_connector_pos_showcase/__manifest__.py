@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Xibo Connector — POS Videowall Showcase',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Marketing/Digital Signage',
     'summary': 'Idle videowall content: rotating online-catalog gallery + QR to the web store, driven from the POS.',
     'description': """

@@ -103,6 +103,14 @@ class XiboShowcaseController(http.Controller):
         base_url = (env['ir.config_parameter'].sudo()
                     .get_param('web.base.url') or '').rstrip('/')
 
+        # Brand: prefer the company logo; fall back to elegant text.
+        company = config.company_id or env.company
+        if company and company.logo:
+            brand_html = ('<img class="brandlogo" src="%s/web/image/res.company/%s/logo" alt="%s"/>'
+                          % (base_url, company.id, html.escape(brand or '')))
+        else:
+            brand_html = '<span>%s</span>' % html.escape(brand or '')
+
         slides = []
         for p in products:
             img = '%s/web/image/product.template/%s/image_1024' % (base_url, p.id)
@@ -132,9 +140,12 @@ class XiboShowcaseController(http.Controller):
     justify-content:center;gap:5vw;opacity:0;transition:opacity 1.1s ease;
     padding:6vh 10vw 6vh 6vw}
   .slide.on{opacity:1}
-  .ph{height:74vh;width:54vw;display:flex;align-items:center;justify-content:center}
+  .ph{height:74vh;width:54vw;display:flex;align-items:center;justify-content:center;
+    overflow:hidden}
   .ph img{max-height:100%%;max-width:100%%;object-fit:contain;
-    border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+    border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55);transform:scale(1)}
+  .slide.on .ph img{animation:kenburns 14s ease-out forwards}
+  @keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.08)}}
   .meta{max-width:30vw}
   .name{font-size:2.6vw;line-height:1.18;color:#f6f1e7}
   .price{margin-top:2.2vh;font-size:2.1vw;color:#cda349;letter-spacing:.02em}
@@ -145,6 +156,8 @@ class XiboShowcaseController(http.Controller):
   .panel .cta{font-size:1.45vw;line-height:1.3;max-width:18vw;color:#f3efe6}
   .brand{position:absolute;left:3.2vw;top:3.6vh;letter-spacing:.4em;
     font-size:1.5vw;color:#cda349;text-transform:uppercase}
+  .brand .brandlogo{max-height:7vh;max-width:22vw;object-fit:contain;
+    filter:brightness(0) invert(1) sepia(.3) saturate(3) hue-rotate(5deg);opacity:.92}
 </style></head><body>
   <div class="brand">%s</div>
   <div class="stage">%s</div>
@@ -156,7 +169,7 @@ class XiboShowcaseController(http.Controller):
         i=(i+1)%%slides.length;slides[i].classList.add('on');},%d);}
   </script>
 </body></html>""" % (
-            html.escape(brand or ''),
+            brand_html,
             ''.join(slides),
             qr_block,
             html.escape(heading or ''),

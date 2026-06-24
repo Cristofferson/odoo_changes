@@ -9,6 +9,7 @@
 # loads — but for the idle layout instead of the post-sale layout.
 # =============================================================================
 import logging
+import random
 
 from odoo import models, fields, api
 
@@ -45,6 +46,15 @@ class PosConfigShowcase(models.Model):
         string='Call to Action', default='Escanea y arma tu selección',
         help="Text shown next to the QR code.",
     )
+    xibo_showcase_order = fields.Selection(
+        [('price_desc', 'Most exclusive first (price high → low)'),
+         ('curated', 'Curated (website order)'),
+         ('price_asc', 'Price low → high'),
+         ('newest', 'Newest first'),
+         ('random', 'Random each load')],
+        string='Showcase Order', default='price_desc',
+        help="How to pick and order the pieces on screen.",
+    )
     xibo_showcase_widget_url = fields.Char(
         string='Showcase Webpage URL', compute='_compute_xibo_showcase_widget_url',
         help="Paste this into the Xibo Webpage widget of the idle/showcase layout.",
@@ -69,9 +79,16 @@ class PosConfigShowcase(models.Model):
                     .get_param('web.base.url') or '').rstrip('/')
         return (base_url + '/shop') if base_url else ''
 
+    _SHOWCASE_ORDER_MAP = {
+        'price_desc': 'list_price desc, id desc',
+        'curated': 'website_sequence asc, id desc',
+        'price_asc': 'list_price asc, id desc',
+        'newest': 'id desc',
+    }
+
     def _xibo_showcase_products(self):
         """Pick the catalog pieces to feature: published, priced, with an image,
-        optionally limited to one eCommerce category. Curated order first."""
+        optionally limited to one eCommerce category, in the configured order."""
         self.ensure_one()
         count = max(self.xibo_showcase_count or 12, 1)
         domain = [('is_published', '=', True), ('list_price', '>', 0)]
@@ -79,9 +96,13 @@ class PosConfigShowcase(models.Model):
             domain.append(
                 ('public_categ_ids', 'child_of', self.xibo_showcase_category_id.id))
         Product = self.env['product.template'].sudo()
-        # Pull a slightly larger pool, then keep only those that actually have an
-        # image and cap to the requested count.
-        pool = Product.search(domain, order='website_sequence asc, id desc',
-                              limit=count * 3)
-        with_image = pool.filtered(lambda p: p.image_512)
-        return with_image[:count]
+        order = self.xibo_showcase_order or 'price_desc'
+        if order == 'random':
+            pool = Product.search(domain, order='id desc', limit=max(count * 6, 30))
+            ids = pool.filtered(lambda p: p.image_512).ids
+            random.shuffle(ids)
+            return Product.browse(ids[:count])
+        # Pull a slightly larger pool, keep only those with an image, then cap.
+        search_order = self._SHOWCASE_ORDER_MAP.get(order, 'list_price desc, id desc')
+        pool = Product.search(domain, order=search_order, limit=count * 3)
+        return pool.filtered(lambda p: p.image_512)[:count]

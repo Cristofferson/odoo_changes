@@ -16,6 +16,7 @@ _POS_CONFIG_COLUMNS = [
     ('xibo_showcase_count', 'INTEGER DEFAULT 12'),
     ('xibo_showcase_interval', 'INTEGER DEFAULT 6'),
     ('xibo_showcase_heading', 'VARCHAR'),
+    ('xibo_showcase_order', "VARCHAR DEFAULT 'price_desc'"),
 ]
 
 

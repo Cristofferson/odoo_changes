@@ -11,4 +11,5 @@ class ResConfigSettings(models.TransientModel):
     pos_xibo_showcase_count = fields.Integer(related='pos_config_id.xibo_showcase_count', readonly=False)
     pos_xibo_showcase_interval = fields.Integer(related='pos_config_id.xibo_showcase_interval', readonly=False)
     pos_xibo_showcase_heading = fields.Char(related='pos_config_id.xibo_showcase_heading', readonly=False)
+    pos_xibo_showcase_order = fields.Selection(related='pos_config_id.xibo_showcase_order', readonly=False)
     pos_xibo_showcase_widget_url = fields.Char(related='pos_config_id.xibo_showcase_widget_url', readonly=True)

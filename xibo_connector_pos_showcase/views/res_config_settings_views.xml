@@ -27,6 +27,10 @@
                             </div>
                         </div>
                         <div class="row mt8">
+                            <label for="pos_xibo_showcase_order" class="col-lg-4 o_light_label" string="Order"/>
+                            <field name="pos_xibo_showcase_order" class="col-lg-8"/>
+                        </div>
+                        <div class="row mt8">
                             <label for="pos_xibo_showcase_count" class="col-lg-4 o_light_label" string="Pieces to Rotate"/>
                             <field name="pos_xibo_showcase_count" class="col-lg-8"/>
                         </div>

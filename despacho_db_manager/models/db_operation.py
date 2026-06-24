@@ -18,7 +18,11 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 
 # Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
-PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test')
+PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
+              'mcp_add', 'mcp_remove')
+# slug del endpoint MCP (segmento de la URL pública /<slug>/mcp). Igual que el
+# que validan add-client.sh y el worker.
+MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
 
 # Registro de servidores que el censo puede escanear. La CLAVE es un nombre LÓGICO
 # (odoo19/odoo18), NO el hostname del SO: el censo y THIS_SERVER mapean
@@ -48,6 +52,8 @@ class DespachoDbOperation(models.Model):
         ('refresh', 'Refrescar BD de prueba'),
         ('crear_test', 'Crear BD de prueba'),
         ('census', 'Escanear servidor'),
+        ('mcp_add', 'Activar MCP'),
+        ('mcp_remove', 'Desactivar MCP'),
     ], string='Operación', required=True, default='alta')
 
     project_id = fields.Many2one(
@@ -102,6 +108,21 @@ class DespachoDbOperation(models.Model):
              '(para no pisar una BD en uso). Activa esto solo si de verdad quieres '
              'reemplazar una BD de prueba existente.')
 
+    # --- Parámetros de MCP (activar/desactivar el puente de IA del cliente) ---
+    mcp_slug = fields.Char(
+        'Identificador del endpoint',
+        help='Segmento de la URL pública: https://mcp.xubax.com/<slug>/mcp. '
+             'Minúsculas, números y guiones; corto y reconocible (ej: lamur). '
+             'Es lo que verá el cliente.')
+    mcp_writes = fields.Boolean(
+        'Permitir escrituras (no recomendado)', default=False,
+        help='Por defecto el puente es SOLO LECTURA. Actívalo solo si el cliente '
+             'necesita que su IA cree/modifique datos (riesgoso).')
+    mcp_purge_key = fields.Boolean(
+        'Revocar también la API key', default=True,
+        help='Al desactivar, elimina la API key del usuario mcp_readonly en la BD '
+             '(recomendado: deja la credencial inservible).')
+
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
     target_server = fields.Selection(
@@ -150,9 +171,35 @@ class DespachoDbOperation(models.Model):
         lines = [l.strip() for l in log.splitlines() if l.strip()]
         return lines[-1] if lines else ''
 
+    def _notify_mcp_credentials(self):
+        """Muestra UNA sola vez el endpoint + token del puente recién activado.
+        El token NO se persiste en Odoo; vive en el .bearer (root) del servidor.
+        El result que lo trae es 640 root:odoo (no world-readable)."""
+        rpath = os.path.join(SPOOL, 'result', '%d.json' % self.id)
+        endpoint = bearer = ''
+        try:
+            with open(rpath) as fh:
+                m = (json.load(fh) or {}).get('mcp') or {}
+            endpoint, bearer = m.get('endpoint') or '', m.get('bearer') or ''
+        except (OSError, ValueError):
+            pass
+        if bearer:
+            self._notify(
+                'success', '✅ MCP activado — copia el token AHORA',
+                'Entrega estos datos al cliente para su IA (el token NO se vuelve a '
+                'mostrar):\n\nEndpoint:\n%s\n\nAutenticación:\nAuthorization: Bearer %s'
+                % (endpoint, bearer), sticky=True)
+        else:
+            self._notify(
+                'warning', '✅ MCP activado',
+                'Activado, pero no pude leer el token aquí. Está en el servidor: '
+                '/opt/odoo-mcp/clients/<slug>.bearer', sticky=True)
+
     def _notify_outcome(self):
         """Toast según el estado actual de la operación."""
         label = self.display_name or ('operación #%d' % self.id)
+        if self.op == 'mcp_add' and self.state == 'done':
+            return self._notify_mcp_credentials()
         if self.state == 'done':
             self._notify('success', '✅ Operación completada', '%s: Listo.' % label)
         elif self.state == 'error':
@@ -183,7 +230,10 @@ class DespachoDbOperation(models.Model):
         # (censo, baja, dry-runs, respaldos chicos). Las largas (refresh/crear apply)
         # superan la ventana: se avisa "en proceso" y el cron notifica al terminar.
         rpath = os.path.join(SPOOL, 'result', '%d.json' % self.id)
-        for _ in range(20):  # ~10 s
+        # mcp_add tarda más (el odoo shell que crea la API key carga el registro):
+        # esperamos hasta ~30 s para entregar el token en el mismo clic.
+        n_poll = 60 if self.op == 'mcp_add' else 20
+        for _ in range(n_poll):  # ~10 s (mcp_add ~30 s)
             try:
                 with open(rpath) as fh:
                     if json.load(fh).get('state') in ('done', 'error'):
@@ -353,6 +403,39 @@ class DespachoDbOperation(models.Model):
             'with_modules': bool(self.with_modules), 'simulate': bool(self.simulate),
         }
 
+    def _build_mcp_add_req(self):
+        if not self.project_id:
+            raise UserError('Falta la base de datos.')
+        if self.project_id.despacho_server != 'odoo19':
+            raise UserError('El puente MCP solo se puede activar en bases de ESTE '
+                            'servidor (odoo19); la elegida está en %s.'
+                            % (self.project_id.despacho_server or '¿?'))
+        if self.project_id.despacho_mcp_enabled:
+            raise UserError('Esta base ya tiene el puente MCP activo. Desactívalo '
+                            'antes de volver a activarlo.')
+        slug = (self.mcp_slug or '').strip().lower()
+        if not MCP_SLUG_RE.match(slug):
+            raise UserError('Identificador inválido: usa minúsculas, números y '
+                            'guiones (2-31 caracteres). Ej: lamur')
+        db = (self.project_id.database_name or '').strip()
+        if not CENSUS_DB_RE.match(db):
+            raise UserError('Nombre de BD inválido: %s' % db)
+        return {
+            'id': self.id, 'op': 'mcp_add', 'slug': slug, 'db': db,
+            'writes': bool(self.mcp_writes),
+        }
+
+    def _build_mcp_remove_req(self):
+        if not self.project_id:
+            raise UserError('Falta la base de datos.')
+        slug = (self.mcp_slug or '').strip().lower()
+        if not MCP_SLUG_RE.match(slug):
+            raise UserError('No se pudo determinar el identificador del puente MCP.')
+        return {
+            'id': self.id, 'op': 'mcp_remove', 'slug': slug,
+            'purge_key': bool(self.mcp_purge_key),
+        }
+
     def _enqueue(self, req):
         qdir = os.path.join(SPOOL, 'queue')
         try:
@@ -434,6 +517,28 @@ class DespachoDbOperation(models.Model):
                 if dest and server:
                     self.env['project.project']._census_upsert(
                         [{'db_name': dest, 'server': server}])
+            # Activar MCP aplicado: reflejar de inmediato el estado del puente en la
+            # ficha (sin guardar el token; ese se muestra una sola vez en el aviso).
+            if (rec.op == 'mcp_add' and res.get('state') == 'done'
+                    and rec.project_id and isinstance(res.get('mcp'), dict)):
+                m = res['mcp']
+                rec.project_id.sudo().write({
+                    'despacho_mcp_enabled': True,
+                    'despacho_mcp_status': 'running' if str(m.get('code')) == '200' else 'stopped',
+                    'despacho_mcp_url': m.get('endpoint') or False,
+                    'despacho_mcp_container': ('mcp-%s' % m['slug']) if m.get('slug') else False,
+                    'despacho_mcp_port': str(m['port']) if m.get('port') else False,
+                    'despacho_mcp_writes': bool(m.get('writes')),
+                    'despacho_mcp_health': str(m['code']) if m.get('code') else False,
+                })
+            # Desactivar MCP aplicado: limpiar el estado del puente en la ficha.
+            if (rec.op == 'mcp_remove' and res.get('state') == 'done' and rec.project_id):
+                rec.project_id.sudo().write({
+                    'despacho_mcp_enabled': False, 'despacho_mcp_status': False,
+                    'despacho_mcp_url': False, 'despacho_mcp_container': False,
+                    'despacho_mcp_port': False, 'despacho_mcp_writes': False,
+                    'despacho_mcp_health': False,
+                })
             # Aviso al creador cuando la operación TERMINA (cubre las largas que el
             # poll de action_provision no alcanzó). Solo en la transición a terminal.
             if (not skip_notify and not was_terminal

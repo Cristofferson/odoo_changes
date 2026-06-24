@@ -47,6 +47,11 @@
                        widget="many2many_tags"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
                 <field name="despacho_backup_count" optional="hide" string="Nº respaldos"/>
+                <field name="despacho_mcp_status" optional="hide" string="MCP"
+                       widget="badge"
+                       decoration-success="despacho_mcp_status == 'running'"
+                       decoration-danger="despacho_mcp_status == 'stopped'"
+                       decoration-muted="despacho_mcp_status == 'absent'"/>
                 <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
             </field>
             <!-- El botón "Conectar" va hasta el final, JUSTO DESPUÉS de
@@ -149,6 +154,18 @@
                         invisible="not database_hosting"
                         groups="databases.group_databases_manager"
                         confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                <!-- Puente MCP: la IA del cliente consulta su Odoo (solo lectura).
+                     Solo en BDs de este servidor (odoo19). -->
+                <button name="action_mcp_add" type="object" string="Activar MCP"
+                        class="btn-success" icon="fa-plug"
+                        invisible="not database_hosting or not despacho_db_local or despacho_mcp_enabled"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a activar el puente MCP para que la IA del cliente consulte esta base (solo lectura). ¿Continuar?"/>
+                <button name="action_mcp_remove" type="object" string="Desactivar MCP"
+                        class="btn-secondary" icon="fa-power-off"
+                        invisible="not database_hosting or not despacho_mcp_enabled"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a desactivar el puente MCP de esta base (la IA del cliente dejará de tener acceso). ¿Continuar?"/>
             </header>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" icon="fa-tasks" type="object"
@@ -193,6 +210,33 @@
                             <field name="despacho_todo_tag_ids" widget="many2many_tags"
                                    options="{'no_create': True}"/>
                         </group>
+                    </group>
+                    <!-- Conexión MCP (la IA del cliente consulta su Odoo). Solo en
+                         este servidor (odoo19), donde viven los contenedores. -->
+                    <group string="Conexión MCP (IA del cliente)"
+                           invisible="not despacho_db_local">
+                        <field name="despacho_mcp_enabled" readonly="1"/>
+                        <field name="despacho_mcp_status" readonly="1" widget="badge"
+                               decoration-success="despacho_mcp_status == 'running'"
+                               decoration-danger="despacho_mcp_status == 'stopped'"
+                               decoration-muted="despacho_mcp_status == 'absent'"
+                               invisible="not despacho_mcp_enabled"/>
+                        <field name="despacho_mcp_url" readonly="1"
+                               widget="CopyClipboardChar"
+                               invisible="not despacho_mcp_enabled"/>
+                        <field name="despacho_mcp_health" readonly="1" string="Sondeo HTTP"
+                               invisible="not despacho_mcp_enabled"/>
+                        <field name="despacho_mcp_container" readonly="1"
+                               invisible="not despacho_mcp_enabled"/>
+                        <field name="despacho_mcp_port" readonly="1"
+                               invisible="not despacho_mcp_enabled"/>
+                        <field name="despacho_mcp_writes" readonly="1"
+                               invisible="not despacho_mcp_enabled"/>
+                        <div class="alert alert-warning" role="alert"
+                             invisible="not despacho_mcp_writes">
+                            ⚠ El puente permite ESCRITURAS en Odoo. Por seguridad
+                            debería ser solo lectura.
+                        </div>
                     </group>
                     <group string="Apps custom">
                         <field name="despacho_custom_module_count" readonly="1"/>

@@ -19,9 +19,9 @@
                         <field name="op"/>
                         <field name="project_id"
                                invisible="op in ('alta','census')"
-                               required="op in ('baja','refresh','crear_test')"
-                               readonly="op in ('baja','refresh','crear_test') and context.get('default_project_id')"/>
-                        <field name="simulate"/>
+                               required="op in ('baja','refresh','crear_test','mcp_add','mcp_remove')"
+                               readonly="op in ('baja','refresh','crear_test','mcp_add','mcp_remove') and context.get('default_project_id')"/>
+                        <field name="simulate" invisible="op in ('mcp_add','mcp_remove')"/>
                     </group>
                     <!-- ALTA -->
                     <group string="Nuevo cliente" invisible="op != 'alta'">
@@ -96,6 +96,34 @@
                     <group string="Escaneo" invisible="op != 'census'">
                         <field name="target_server"/>
                         <field name="with_modules"/>
+                    </group>
+                    <!-- ACTIVAR MCP -->
+                    <group string="Activar puente MCP" invisible="op != 'mcp_add'">
+                        <div class="alert alert-info" role="alert" colspan="2"
+                             invisible="op != 'mcp_add'">
+                            Activa un endpoint para que la IA del cliente (Claude, ChatGPT,
+                            Gemini) consulte ESTA base de datos en <b>solo lectura</b>. Al
+                            terminar verás el endpoint y el <b>token UNA sola vez</b>: cópialo
+                            para entregárselo al cliente.
+                        </div>
+                        <field name="mcp_slug" required="op == 'mcp_add'"
+                               placeholder="ej. lamur"/>
+                        <field name="mcp_writes"/>
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="not mcp_writes">
+                            ⚠️ Con escrituras activadas, la IA podrá CREAR/MODIFICAR datos
+                            en el Odoo del cliente. Úsalo solo si es estrictamente necesario.
+                        </div>
+                    </group>
+                    <!-- DESACTIVAR MCP -->
+                    <group string="Desactivar puente MCP" invisible="op != 'mcp_remove'">
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="op != 'mcp_remove'">
+                            Detiene y elimina el puente MCP de esta base. La IA del cliente
+                            dejará de tener acceso de inmediato.
+                        </div>
+                        <field name="mcp_slug" readonly="1"/>
+                        <field name="mcp_purge_key"/>
                     </group>
                     <notebook>
                         <page string="Registro">

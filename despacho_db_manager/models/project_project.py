@@ -9,6 +9,7 @@ import socket
 import time
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 from .db_operation import CENSUS_DB_RE, SERVER_KEYS
 
@@ -136,6 +137,34 @@ class ProjectProject(models.Model):
         help='Usuario (login) con el que "Conectar" iniciará sesión en esta BD. '
              'Lo resuelve el censo: el admin canónico (uid 2) si está activo y es '
              'del grupo Ajustes; si no, el administrador activo de menor id.')
+    # Bridge MCP: cada cliente puede conectar su IA (Claude/ChatGPT/Gemini) a SU
+    # base Odoo en solo-lectura, vía un contenedor puente dedicado (tuanle96/
+    # mcp-odoo) en loopback tras Nginx, con un endpoint y Bearer por cliente.
+    # Los contenedores viven SOLO en este servidor (odoo19); el censo detecta su
+    # estado por BD. Ver memoria mcp-bridge-clientes.
+    despacho_mcp_enabled = fields.Boolean(
+        'MCP configurado', default=False, copy=False,
+        help='Existe un contenedor puente MCP para esta BD: la IA del cliente '
+             'puede consultar su Odoo (solo lectura) por un endpoint dedicado.')
+    despacho_mcp_status = fields.Selection([
+        ('running', 'En línea'),
+        ('stopped', 'Detenido'),
+        ('absent', 'Sin contenedor'),
+    ], 'Estado MCP', copy=False,
+        help='Estado del contenedor puente: en línea (vivo y responde), detenido '
+             '(existe pero apagado) o sin contenedor.')
+    despacho_mcp_url = fields.Char(
+        'Endpoint MCP', copy=False,
+        help='URL que el cliente configura en su IA (requiere su Bearer).')
+    despacho_mcp_container = fields.Char('Contenedor MCP', copy=False)
+    despacho_mcp_port = fields.Char('Puerto loopback MCP', copy=False)
+    despacho_mcp_writes = fields.Boolean(
+        'MCP permite escrituras', default=False, copy=False,
+        help='El puente permite escribir en Odoo. Por seguridad debe estar en '
+             'falso (solo lectura).')
+    despacho_mcp_health = fields.Char(
+        'Sondeo MCP', copy=False,
+        help='Código HTTP del último handshake del endpoint (200 = sano).')
     # Pendientes (To-do): se ligan reusando las etiquetas que ya usas para
     # agrupar tus to-dos por cliente. Cada BD apunta a SU etiqueta; la ficha
     # muestra los pendientes (abiertos) de esa etiqueta.
@@ -445,6 +474,58 @@ class ProjectProject(models.Model):
             },
         }
 
+    def _mcp_slug_suggestion(self):
+        """Sugerencia de slug para el endpoint MCP: primera etiqueta del nombre de
+        la BD, limpia (novadiam-anello-… -> novadiam; lamur-lamorini -> lamur)."""
+        base = (self.database_name or self.name or '').lower()
+        base = re.split(r'[-_]', base)[0]
+        base = re.sub(r'[^a-z0-9-]', '', base)[:31]
+        return base or 'cliente'
+
+    def action_mcp_add(self):
+        """Abre el asistente para ACTIVAR el puente MCP de esta BD (la IA del
+        cliente podrá consultar su Odoo en solo lectura). Solo BDs de este servidor."""
+        self.ensure_one()
+        if self.despacho_server != 'odoo19':
+            raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
+                            '(odoo19). Esta está en %s.' % (self.despacho_server or '¿?'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Activar MCP: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'mcp_add',
+                'default_project_id': self.id,
+                'default_mcp_slug': self._mcp_slug_suggestion(),
+                'default_mcp_writes': False,
+                'default_simulate': False,
+                'dpm_modal': True,
+            },
+        }
+
+    def action_mcp_remove(self):
+        """Abre el asistente para DESACTIVAR el puente MCP de esta BD."""
+        self.ensure_one()
+        slug = (self.despacho_mcp_container or '').replace('mcp-', '', 1) \
+            or self._mcp_slug_suggestion()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Desactivar MCP: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'mcp_remove',
+                'default_project_id': self.id,
+                'default_mcp_slug': slug,
+                'default_mcp_purge_key': True,
+                'default_simulate': False,
+                'dpm_modal': True,
+            },
+        }
+
     def action_view_operations(self):
         self.ensure_one()
         return {
@@ -506,6 +587,29 @@ class ProjectProject(models.Model):
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',
             }
+            # Estado del puente MCP de esta BD (solo lo trae el censo local; en
+            # remoto mcp viene None y se limpia). enabled=True solo si hay contenedor.
+            mcp = row.get('mcp')
+            if mcp:
+                vals.update({
+                    'despacho_mcp_enabled': True,
+                    'despacho_mcp_status': mcp.get('status') or False,
+                    'despacho_mcp_url': mcp.get('url') or False,
+                    'despacho_mcp_container': mcp.get('container') or False,
+                    'despacho_mcp_port': str(mcp['port']) if mcp.get('port') else False,
+                    'despacho_mcp_writes': bool(mcp.get('writes')),
+                    'despacho_mcp_health': str(mcp['health']) if mcp.get('health') else False,
+                })
+            else:
+                vals.update({
+                    'despacho_mcp_enabled': False,
+                    'despacho_mcp_status': False,
+                    'despacho_mcp_url': False,
+                    'despacho_mcp_container': False,
+                    'despacho_mcp_port': False,
+                    'despacho_mcp_writes': False,
+                    'despacho_mcp_health': False,
+                })
             # Poblar la sección nativa "Gestión de usuarios" (databases.user) con los
             # usuarios internos del censo: reemplaza la lista (5,0,0) por la actual.
             ulist = row.get('users_list')

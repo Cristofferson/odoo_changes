@@ -131,6 +131,11 @@ class ProjectProject(models.Model):
         'Auto-login listo', default=False, copy=False,
         help='El módulo despacho_autologin está instalado en esta BD y su '
              'secreto sembrado: el botón "Conectar" inicia sesión sin pedir clave.')
+    despacho_autologin_user = fields.Char(
+        'Conectar como', copy=False,
+        help='Usuario (login) con el que "Conectar" iniciará sesión en esta BD. '
+             'Lo resuelve el censo: el admin canónico (uid 2) si está activo y es '
+             'del grupo Ajustes; si no, el administrador activo de menor id.')
 
     @api.depends('database_name')
     def _compute_is_test(self):
@@ -234,7 +239,6 @@ class ProjectProject(models.Model):
     # el de una BD, no revela el maestro (HMAC es de un solo sentido). El módulo
     # compañero guarda en cada BD destino su `despacho_autologin.secret` =
     # _despacho_autologin_secret() de esa BD.
-    AUTOLOGIN_UID = 2   # admin (superusuario administrador) de la BD destino
     AUTOLOGIN_TTL = 30  # segundos de vida del token
 
     @api.model
@@ -265,8 +269,10 @@ class ProjectProject(models.Model):
         if not m:
             return None
         base = m.group(1)
+        # Sin 'uid': el controlador de la BD destino RESUELVE su admin real
+        # (uid 2 no siempre sirve: puede estar inactivo o no ser del grupo
+        # Ajustes). El campo despacho_autologin_user muestra de antemano quién.
         payload = {
-            'uid': self.AUTOLOGIN_UID,
             'exp': int(time.time()) + self.AUTOLOGIN_TTL,
             'nonce': secrets.token_urlsafe(12),
         }
@@ -438,6 +444,7 @@ class ProjectProject(models.Model):
                 'despacho_db_size': row.get('db_size') or 0,
                 'despacho_filestore_size': row.get('filestore_size') or 0,
                 'despacho_autologin_ready': 'despacho_autologin' in mod_set,
+                'despacho_autologin_user': row.get('autologin_user') or False,
                 'despacho_installed_modules': row.get('modules') or False,
                 'despacho_custom_modules': row.get('custom_modules') or False,
                 'despacho_user_count': row.get('users_internal') or 0,

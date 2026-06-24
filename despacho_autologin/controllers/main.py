@@ -30,6 +30,38 @@ class DespachoAutologin(http.Controller):
     invalido.
     """
 
+    def _resolve_user(self, uid=0):
+        """Devuelve el usuario con el que iniciar sesión, o un recordset vacío.
+
+        Orden (compatible Odoo 18 y 19 vía ``has_group``):
+        1. ``uid`` explícito del token (si activo e interno).
+        2. ``base.user_admin`` (el admin canónico, normalmente uid 2) si está
+           activo, es interno y pertenece al grupo Ajustes (``group_system``).
+        3. El usuario interno activo de MENOR id que sea admin (group_system).
+        4. El usuario interno activo de menor id (último recurso).
+        """
+        # Entorno sudo: el usuario público no puede leer res.users / grupos /
+        # ir.model.data, así que toda la resolución va con privilegios.
+        env = request.env(su=True)
+        Users = env['res.users']
+        if uid:
+            u = Users.browse(uid)
+            return u if (u.exists() and u.active and u._is_internal()) else Users.browse()
+
+        candidates = Users.search(
+            [('active', '=', True), ('id', '>', 1)], order='id'
+        ).filtered(lambda u: u._is_internal())
+        if not candidates:
+            return Users.browse()
+
+        admin = env.ref('base.user_admin', raise_if_not_found=False)
+        if admin and admin.id in candidates.ids and admin.has_group('base.group_system'):
+            return admin
+        for u in candidates:
+            if u.has_group('base.group_system'):
+                return u
+        return candidates[:1]
+
     @http.route('/despacho/autologin', type='http', auth='public',
                 methods=['GET'], csrf=False, sitemap=False)
     def autologin(self, token=None, **kw):
@@ -62,7 +94,7 @@ class DespachoAutologin(http.Controller):
             return login_page
         nonce = payload.get('nonce')
         uid = int(payload.get('uid') or 0)
-        if not nonce or not uid:
+        if not nonce:
             return login_page
 
         # 3) Un solo uso: purga vencidos y rechaza nonce repetido.
@@ -76,9 +108,11 @@ class DespachoAutologin(http.Controller):
                 int(payload.get('exp', now)), timezone.utc).replace(tzinfo=None),
         })
 
-        # 4) Usuario destino valido e interno.
-        user = request.env['res.users'].sudo().browse(uid)
-        if not user.exists() or not user.active or not user._is_internal():
+        # 4) Usuario destino: si el token trae uid explícito se respeta; si no,
+        #    se RESUELVE el administrador real de ESTA BD (uid 2 no siempre es el
+        #    admin: puede estar inactivo o no pertenecer al grupo Ajustes).
+        user = self._resolve_user(uid)
+        if not user:
             return login_page
 
         # 5) Abrir sesion sin contraseña (mismo camino que el login normal

@@ -116,6 +116,8 @@
                             <field name="despacho_last_census"/>
                             <field name="despacho_last_backup"/>
                             <field name="despacho_autologin_ready"/>
+                            <field name="despacho_autologin_user"
+                                   invisible="not despacho_autologin_ready"/>
                         </group>
                     </group>
                     <group string="Apps custom">

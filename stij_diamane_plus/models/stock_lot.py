@@ -44,6 +44,52 @@ class StockLot(models.Model):
             else:
                 lot.dmn_warranty_until = False
 
+    # ----- Fase 3: dedicatoria secreta (regalo) ------------------------ #
+    dmn_dedication_text = fields.Text(
+        string="Dedicatoria", copy=False,
+        help="Mensaje que aparece al abrir el visor de la pieza (regalo).",
+    )
+    dmn_dedication_from = fields.Char(string="Dedicatoria de", copy=False)
+    dmn_dedication_image = fields.Image(
+        string="Imagen de dedicatoria", max_width=1024, max_height=1024, copy=False,
+    )
+    dmn_dedication_visibility = fields.Selection(
+        [("owner", "Solo el dueño"), ("public", "Pública")],
+        string="Visibilidad de la dedicatoria", default="owner", copy=False,
+    )
+
+    def _dmn_has_dedication(self):
+        self.ensure_one()
+        return bool(self.dmn_dedication_text or self.dmn_dedication_image)
+
+    def _dmn_dedication_is_visible_to(self, user, lot_in_session):
+        """Reglas de gating: pública la ve quien tenga la pieza en sesión; privada
+        solo el dueño logueado. Así un regalo íntimo no se filtra a desconocidos."""
+        self.ensure_one()
+        if not self._dmn_has_dedication():
+            return False
+        if self.dmn_dedication_visibility == "public":
+            return bool(lot_in_session)
+        # 'owner': solo el dueño autenticado
+        if user and not user._is_public():
+            owner = self.x_studio_beneficiario
+            if owner and user.partner_id and owner.id == user.partner_id.id:
+                return True
+        return False
+
+    def _dmn_dedication_payload(self):
+        self.ensure_one()
+        image = None
+        if self.dmn_dedication_image:
+            raw = self.dmn_dedication_image
+            b64 = raw.decode() if isinstance(raw, bytes) else raw
+            image = "data:image/png;base64,%s" % b64
+        return {
+            "text": self.dmn_dedication_text or "",
+            "from": self.dmn_dedication_from or "",
+            "image": image,
+        }
+
     # ----- Fase 0: vista de cliente por pieza --------------------------- #
     dmn_view_count = fields.Integer(
         string="Vistas de cliente", readonly=True, copy=False, default=0,

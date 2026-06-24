@@ -66,3 +66,19 @@ class StijWebsitePlus(StijWebsite):
         impreso en su ticket y lo asigna como dueño. Sin token válido no se asigna
         nada (cierra la toma de posesión por enumeración, C1)."""
         return request.env["stock.lot"].sudo()._dmn_try_claim(token, name, email, phone)
+
+    @http.route("/dmn/dedication", type="jsonrpc", auth="public", website=True)
+    def dmn_dedication(self, **kw):
+        """Devuelve la dedicatoria de la pieza en sesión, respetando su visibilidad
+        (pública o solo el dueño). El front del visor la pinta si visible=True."""
+        lot_id = request.session.get("active_stij_lot_id")
+        if not lot_id:
+            return {"visible": False}
+        lot = request.env["stock.lot"].sudo().browse(int(lot_id))
+        if not lot.exists():
+            return {"visible": False}
+        if not lot._dmn_dedication_is_visible_to(request.env.user, True):
+            return {"visible": False}
+        payload = lot._dmn_dedication_payload()
+        payload["visible"] = True
+        return payload

@@ -23,6 +23,12 @@
                         <field name="dmn_warranty_until"/>
                         <field name="dmn_claim_token" groups="base.group_system"/>
                     </group>
+                    <group string="Dedicatoria (regalo)" name="dmn_dedication">
+                        <field name="dmn_dedication_visibility"/>
+                        <field name="dmn_dedication_from"/>
+                        <field name="dmn_dedication_text"/>
+                        <field name="dmn_dedication_image" widget="image" class="oe_avatar"/>
+                    </group>
                 </group>
             </xpath>
         </field>

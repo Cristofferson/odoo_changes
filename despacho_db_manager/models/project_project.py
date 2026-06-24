@@ -145,42 +145,45 @@ class ProjectProject(models.Model):
         help='Etiquetas de la app Pendientes (To-do) que corresponden a este '
              'cliente (una BD puede tener varias marcas → varias etiquetas). '
              'Liga los pendientes con esta base de datos sin re-etiquetarlos.')
-    despacho_todo_count = fields.Integer(
-        'Pendientes abiertos', compute='_compute_todo_count')
-
-    @api.depends('despacho_todo_tag_ids')
-    def _compute_todo_count(self):
-        Task = self.env['project.task']
-        for rec in self:
-            rec.despacho_todo_count = Task.search_count(
-                rec._despacho_todo_domain()) if rec.despacho_todo_tag_ids else 0
-
-    def _despacho_todo_domain(self, only_open=True):
-        """To-dos (project_id/parent vacíos) con alguna etiqueta del cliente."""
-        self.ensure_one()
-        dom = [
-            ('project_id', '=', False),
-            ('parent_id', '=', False),
-            ('tag_ids', 'in', self.despacho_todo_tag_ids.ids),
-        ]
-        if only_open:
-            dom.append(('state', '!=', '1_done'))
-        return dom
-
-    def action_view_todos(self):
-        """Abre los pendientes del cliente DENTRO de la acción nativa "Tareas"
-        del app Bases de datos (misma vista/navegación), filtrada por sus
-        etiquetas."""
-        self.ensure_one()
-        action = self.env['ir.actions.act_window']._for_xml_id(
-            'databases.action_view_tasks_all')
-        action['domain'] = self._despacho_todo_domain(only_open=False)
-        action['context'] = {
-            'default_tag_ids': [(4, t) for t in self.despacho_todo_tag_ids.ids],
-            'search_default_open_tasks': 1,
+    @api.model
+    def action_convert_todos_to_tasks(self):
+        """Convierte los Pendientes (To-do: project_id vacío) en TAREAS del
+        proyecto de su cliente, según el mapeo BD↔etiqueta. Así aparecen en
+        "Tareas" de forma nativa. Idempotente y repetible: solo toca los to-dos
+        cuyas etiquetas apuntan a UNA sola BD; deja los ambiguos/sin-mapear.
+        Botón del listado para arrastrar también los pendientes NUEVOS."""
+        P = self.sudo().with_context(active_test=False)
+        tag2db = {}
+        for p in P.search([('despacho_todo_tag_ids', '!=', False)]):
+            for t in p.despacho_todo_tag_ids:
+                tag2db.setdefault(t.id, set()).add(p.id)
+        Task = self.env['project.task'].sudo().with_context(active_test=False)
+        todos = Task.search([('project_id', '=', False), ('parent_id', '=', False)])
+        conv = ambig = unmap = 0
+        for t in todos:
+            dbs = set()
+            for tg in t.tag_ids:
+                dbs |= tag2db.get(tg.id, set())
+            if len(dbs) == 1:
+                t.project_id = list(dbs)[0]
+                conv += 1
+            elif len(dbs) > 1:
+                ambig += 1
+            else:
+                unmap += 1
+        msg = ('Convertidos %d pendiente(s) a tareas. '
+               'Sin convertir: %d ambiguo(s) (varias etiquetas de distinto cliente) '
+               'y %d sin etiqueta de cliente.' % (conv, ambig, unmap))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Pendientes → Tareas',
+                'message': msg,
+                'type': 'success' if conv else 'warning',
+                'sticky': False,
+            },
         }
-        action['name'] = 'Pendientes: %s' % self.display_name
-        return action
 
     @api.depends('database_name')
     def _compute_is_test(self):

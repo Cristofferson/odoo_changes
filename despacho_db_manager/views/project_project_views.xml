@@ -27,6 +27,10 @@
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
+                <button name="action_convert_todos_to_tasks" type="object"
+                        string="Convertir pendientes → tareas" display="always"
+                        groups="databases.group_databases_manager"
+                        help="Convierte los Pendientes (To-do) etiquetados por cliente en tareas del proyecto de cada BD, para que aparezcan en Tareas."/>
             </header>
             <!-- El botón "Conectar" nativo (action_database_connect, ya overridden a
                  auto-login) solo se mostraba si el operador era usuario de esa BD
@@ -118,12 +122,6 @@
                         invisible="not database_hosting"
                         groups="databases.group_databases_manager">
                     <field name="despacho_operation_count" widget="statinfo" string="Operaciones"/>
-                </button>
-                <button class="oe_stat_button" icon="fa-check-square-o" type="object"
-                        name="action_view_todos"
-                        invisible="not despacho_todo_tag_ids"
-                        groups="databases.group_databases_manager">
-                    <field name="despacho_todo_count" widget="statinfo" string="Pendientes"/>
                 </button>
             </div>
             <notebook position="inside">

@@ -625,6 +625,26 @@ class ProjectProject(models.Model):
                     uv = {'login': login[:200], 'name': (u.get('name') or login)[:200]}
                     if u.get('last'):
                         uv['latest_authentication'] = u['last']
+                    # Puente MCP propio de este usuario (un contenedor por usuario);
+                    # el censo lo trae por (BD, login) leyendo /opt/odoo-mcp/clients.
+                    mu = u.get('mcp')
+                    if mu:
+                        uv.update({
+                            'despacho_mcp_enabled': True,
+                            'despacho_mcp_slug': mu.get('slug') or False,
+                            'despacho_mcp_url': mu.get('url') or False,
+                            'despacho_mcp_status': mu.get('status') or False,
+                            'despacho_mcp_writes': bool(mu.get('writes')),
+                            'despacho_mcp_port': mu.get('port') or False,
+                            'despacho_mcp_health': mu.get('health') or False,
+                        })
+                    else:
+                        uv.update({
+                            'despacho_mcp_enabled': False,
+                            'despacho_mcp_slug': False, 'despacho_mcp_url': False,
+                            'despacho_mcp_status': False, 'despacho_mcp_writes': False,
+                            'despacho_mcp_port': False, 'despacho_mcp_health': False,
+                        })
                     cmds.append((0, 0, uv))
                 vals['database_user_ids'] = cmds
             # Historial de respaldos nocturnos del censo: reemplaza la lista entera

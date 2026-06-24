@@ -113,6 +113,20 @@
             <xpath expr="//field[@name='database_user_ids']/list/button[@name='action_remove_users']" position="after">
                 <button name="action_autologin_as_user" type="object" string="Conectar"
                         icon="fa-sign-in" groups="databases.group_databases_manager"/>
+                <!-- Puente MCP PROPIO de este usuario (la IA del usuario consulta su
+                     Odoo con sus mismos privilegios). Un contenedor por usuario. -->
+                <button name="action_mcp_add_user" type="object" string="Activar MCP"
+                        icon="fa-plug" groups="databases.group_databases_manager"
+                        invisible="despacho_mcp_enabled"/>
+                <button name="action_mcp_remove_user" type="object" string="Quitar MCP"
+                        icon="fa-power-off" groups="databases.group_databases_manager"
+                        invisible="not despacho_mcp_enabled"/>
+            </xpath>
+            <!-- Columna de estatus MCP por usuario (la llena el censo). -->
+            <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">
+                <field name="despacho_mcp_enabled" string="MCP" optional="show"/>
+                <field name="despacho_mcp_url" optional="hide"/>
+                <field name="despacho_mcp_writes" string="MCP escribe" optional="hide"/>
             </xpath>
         </field>
     </record>
@@ -154,18 +168,9 @@
                         invisible="not database_hosting"
                         groups="databases.group_databases_manager"
                         confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
-                <!-- Puente MCP: la IA del cliente consulta su Odoo (solo lectura).
-                     Solo en BDs de este servidor (odoo19). -->
-                <button name="action_mcp_add" type="object" string="Activar MCP"
-                        class="btn-success" icon="fa-plug"
-                        invisible="not database_hosting or not despacho_db_local or despacho_mcp_enabled"
-                        groups="databases.group_databases_manager"
-                        confirm="Vas a activar el puente MCP para que la IA del cliente consulte esta base (solo lectura). ¿Continuar?"/>
-                <button name="action_mcp_remove" type="object" string="Desactivar MCP"
-                        class="btn-secondary" icon="fa-power-off"
-                        invisible="not database_hosting or not despacho_mcp_enabled"
-                        groups="databases.group_databases_manager"
-                        confirm="Vas a desactivar el puente MCP de esta base (la IA del cliente dejará de tener acceso). ¿Continuar?"/>
+                <!-- El puente MCP ya NO se activa a nivel de la BD: ahora es POR USUARIO
+                     (botón "Activar MCP" en cada fila de Gestión de usuarios), para que
+                     cada quien conecte su IA con sus propios privilegios. -->
             </header>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" icon="fa-tasks" type="object"

@@ -26,10 +26,16 @@
                         display="always" groups="databases.group_databases_manager"/>
             </header>
             <field name="database_last_synchro" position="after">
+                <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
                 <field name="despacho_user_count" optional="show" string="Usuarios"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
                 <field name="despacho_backup_count" optional="hide" string="Nº respaldos"/>
+            </field>
+            <!-- Versión nativa (database_version): vacía en premise; el censo la
+                 llena con la versión del módulo base. La mostramos por defecto. -->
+            <field name="database_version" position="attributes">
+                <attribute name="optional">show</attribute>
             </field>
             <!-- La columna nativa de usuarios (database_nb_users) no se alimenta en
                  este montaje premise (queda en 0): la ocultamos para no duplicar con

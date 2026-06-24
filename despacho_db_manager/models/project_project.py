@@ -445,6 +445,7 @@ class ProjectProject(models.Model):
                 'despacho_filestore_size': row.get('filestore_size') or 0,
                 'despacho_autologin_ready': 'despacho_autologin' in mod_set,
                 'despacho_autologin_user': row.get('autologin_user') or False,
+                'database_version': row.get('version') or False,
                 'despacho_installed_modules': row.get('modules') or False,
                 'despacho_custom_modules': row.get('custom_modules') or False,
                 'despacho_user_count': row.get('users_internal') or 0,

@@ -52,7 +52,7 @@
                 <field name="despacho_user_count" optional="show" string="Usuarios"
                        class="text-center"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
-                <field name="despacho_subscription_id" optional="hide" string="Suscripción"/>
+                <field name="despacho_subscription_display" optional="hide" string="Suscripción"/>
                 <field name="despacho_todo_tag_ids" optional="show" string="Etiquetas"
                        widget="many2many_tags"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
@@ -191,7 +191,7 @@
                 </button>
                 <button class="oe_stat_button" icon="fa-refresh" type="object"
                         name="action_open_subscription"
-                        invisible="not database_hosting or not despacho_subscription_id"
+                        invisible="not database_hosting or not despacho_subscription_display"
                         groups="databases.group_databases_manager">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Suscripción</span>
@@ -215,13 +215,19 @@
                             <field name="despacho_db_local" readonly="1"/>
                             <field name="despacho_server" readonly="1"/>
                             <field name="despacho_provision_state" readonly="1"/>
-                            <!-- Liga esta BD con su suscripción (pedido recurrente que
-                                 la factura). Se auto-liga; el selector solo muestra las
-                                 que NO están asignadas a otra BD. -->
-                            <field name="despacho_available_subscription_ids" invisible="1"/>
-                            <field name="despacho_subscription_id"
-                                   options="{'no_create': True}"
-                                   domain="[('id', 'in', despacho_available_subscription_ids)]"/>
+                            <!-- Suscripción que factura esta BD. Se muestra con un Char
+                                 calculado en sudo (seguro en cualquier compañía); para
+                                 ligar/cambiar a mano, el botón abre un asistente que exige
+                                 tener XUBAX activa. El auto-ligado funciona en cualquier
+                                 compañía. -->
+                            <label for="despacho_subscription_display" string="Suscripción"/>
+                            <div class="o_row">
+                                <field name="despacho_subscription_display" class="oe_inline"
+                                       readonly="1" placeholder="(sin ligar)"/>
+                                <button name="action_open_subscription_link" type="object"
+                                        string="Ligar / cambiar" class="btn-link oe_inline"
+                                        groups="databases.group_databases_manager"/>
+                            </div>
                             <field name="despacho_size_display" readonly="1"/>
                             <label for="despacho_user_count" string="Usuarios (internos / total)"/>
                             <div>
@@ -359,5 +365,25 @@
          "Project" (group_by project_id) de la búsqueda de tareas. -->
     <record id="databases.action_view_tasks_all" model="ir.actions.act_window">
         <field name="context">{'search_default_project': 1}</field>
+    </record>
+
+    <!-- Mini-asistente para ligar una BD con su suscripción (solo con XUBAX activa). -->
+    <record id="view_subscription_link_wizard_form" model="ir.ui.view">
+        <field name="name">despacho.subscription.link.wizard.form</field>
+        <field name="model">despacho.subscription.link.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ligar suscripción">
+                <group>
+                    <field name="available_ids" invisible="1"/>
+                    <field name="project_id" invisible="1"/>
+                    <field name="subscription_id" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Ligar"
+                            class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
     </record>
 </odoo>

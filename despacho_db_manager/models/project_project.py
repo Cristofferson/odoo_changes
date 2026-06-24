@@ -181,19 +181,38 @@ class ProjectProject(models.Model):
              'aún no están asignadas a otra BD.')
     despacho_available_subscription_ids = fields.Many2many(
         'sale.order', compute='_compute_available_subscriptions',
-        string='Suscripciones disponibles',
+        compute_sudo=True, string='Suscripciones disponibles',
         help='Suscripciones que NO están ya ligadas a otra BD (más la actual). '
              'Acota el selector para no asignar la misma suscripción dos veces.')
+    # Nombre de la suscripción para MOSTRAR (calculado en sudo). Las suscripciones
+    # viven en la compañía XUBAX; mostrar el Many2one crudo en cualquier otra
+    # compañía rompe con AccessError. Por eso las vistas usan este Char seguro.
+    despacho_subscription_display = fields.Char(
+        compute='_compute_subscription_display', compute_sudo=True,
+        string='Suscripción')
+
+    @api.depends('despacho_subscription_id', 'despacho_subscription_id.display_name')
+    def _compute_subscription_display(self):
+        for rec in self:
+            s = rec.despacho_subscription_id
+            rec.despacho_subscription_display = (
+                '%s — %s' % (s.name, s.partner_id.name)) if s else False
 
     @api.depends('despacho_subscription_id')
     def _compute_available_subscriptions(self):
+        # compute_sudo=True: las suscripciones viven en la compañía XUBAX y el
+        # inventario es company-agnóstico (company_id=False); sin sudo, calcular
+        # esto en otra compañía activa rompía con AccessError de sale.order.
         SO = self.env['sale.order'].sudo()
-        subs = SO.search([('subscription_state', 'not in',
-                           (False, '6_churn', '5_renewed'))])
-        taken = {}  # sub_id -> project_id que la tiene
-        for p in self.env['project.project'].sudo().search(
-                [('despacho_subscription_id', '!=', False)]):
-            taken[p.despacho_subscription_id.id] = p.id
+        try:
+            subs = SO.search([('subscription_state', 'not in',
+                               (False, '6_churn', '5_renewed'))])
+            taken = {}  # sub_id -> project_id que la tiene
+            for p in self.env['project.project'].sudo().search(
+                    [('despacho_subscription_id', '!=', False)]):
+                taken[p.despacho_subscription_id.id] = p.id
+        except Exception:  # noqa: BLE001 — nunca romper el formulario por esto
+            subs, taken = SO.browse(), {}
         for rec in self:
             avail = subs.filtered(
                 lambda s: taken.get(s.id, rec.id) == rec.id)
@@ -246,17 +265,43 @@ class ProjectProject(models.Model):
         }
 
     def action_open_subscription(self):
-        """Abre la suscripción ligada a esta BD."""
+        """Abre la suscripción ligada a esta BD (forzando la compañía de la
+        suscripción en el contexto para que no choque la regla multiempresa)."""
         self.ensure_one()
-        if not self.despacho_subscription_id:
+        sub = self.sudo().despacho_subscription_id
+        if not sub:
             raise UserError('Esta base de datos no tiene una suscripción ligada.')
+        companies = (self.env.companies.ids + sub.company_id.ids) if sub.company_id else self.env.companies.ids
         return {
             'type': 'ir.actions.act_window',
             'name': 'Suscripción: %s' % (self.database_name or self.name),
             'res_model': 'sale.order',
-            'res_id': self.despacho_subscription_id.id,
+            'res_id': sub.id,
             'view_mode': 'form',
             'target': 'current',
+            'context': {'allowed_company_ids': companies},
+        }
+
+    def action_open_subscription_link(self):
+        """Abre el mini-asistente para ligar/cambiar la suscripción a mano. Exige
+        tener la compañía XUBAX activa (las suscripciones viven ahí); si no, lo dice."""
+        self.ensure_one()
+        if not self.env['sale.order'].search_count(
+                [('subscription_state', 'not in', (False, '6_churn', '5_renewed'))]):
+            raise UserError(
+                'Para elegir la suscripción manualmente necesitas tener activa la '
+                'compañía XUBAX (donde viven las suscripciones). Actívala en el '
+                'selector de compañías (arriba a la derecha) y vuelve a intentar.\n\n'
+                '(El auto-ligado y el botón "Auto-ligar suscripciones" sí funcionan '
+                'en cualquier compañía.)')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Ligar suscripción: %s' % (self.database_name or self.name),
+            'res_model': 'despacho.subscription.link.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_project_id': self.id,
+                        'default_subscription_id': self.despacho_subscription_id.id},
         }
 
     @api.model

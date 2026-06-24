@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_category_form_xibo" model="ir.ui.view">
+        <field name="name">product.category.form.xibo</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Xibo Signage" name="xibo_signage">
+                    <field name="xibo_recommendation_tags"
+                           placeholder="tv,electronics,accessories"/>
+                    <div colspan="2" class="text-muted">
+                        Comma-separated tags. When a product of this category is added to the POS cart,
+                        Xibo media with matching tags will be broadcast (if the POS has Contextual Recommendations enabled).
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

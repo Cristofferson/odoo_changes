@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Xibo Connector — Point of Sale</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2c3e50; margin: 0; line-height: 1.6; }
+        .hero { background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); color: #fff; padding: 60px 40px; text-align: center; }
+        .hero h1 { font-size: 44px; margin: 0 0 12px; font-weight: 300; }
+        .hero p { font-size: 19px; opacity: 0.95; max-width: 760px; margin: 0 auto; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 50px 30px; }
+        h2 { font-size: 30px; color: #16a085; border-bottom: 3px solid #714B67; padding-bottom: 10px; font-weight: 400; }
+        .scenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin: 30px 0; }
+        .scenario { padding: 26px; background: #f8f9fa; border-top: 4px solid #1abc9c; border-radius: 4px; }
+        .scenario .num { display: inline-block; width: 36px; height: 36px; line-height: 36px; text-align: center; background: #1abc9c; color: #fff; border-radius: 50%; font-weight: 700; margin-bottom: 14px; }
+        .scenario h4 { margin: 0 0 10px; color: #2c3e50; font-size: 19px; }
+        .scenario p { margin: 0; color: #5a6c7d; font-size: 15px; }
+        .scenario.featured { border-top-color: #714B67; }
+        .scenario.featured .num { background: #714B67; }
+        .section { padding: 40px 0; border-bottom: 1px solid #ecf0f1; }
+        ol li, ul li { margin-bottom: 8px; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 13px; }
+        .warn { padding: 16px; background: #fef9e7; border-left: 4px solid #f1c40f; margin: 20px 0; border-radius: 4px; }
+        .req { padding: 16px; background: #f0f4f8; border-left: 4px solid #714B67; margin: 20px 0; border-radius: 4px; }
+        .footer { background: #2c3e50; color: #bdc3c7; padding: 30px 40px; text-align: center; }
+        .footer a { color: #1abc9c; text-decoration: none; }
+        .new { display: inline-block; padding: 2px 8px; background: #e74c3c; color: white; font-size: 11px; font-weight: 700; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <h1>Xibo Connector — Point of Sale</h1>
+    <p>Thank-you messages, cart updates, customer display mirror and contextual upselling on Xibo screens — driven by your Odoo POS.</p>
+</div>
+
+<div class="container">
+
+<div class="section">
+    <h2>Four retail scenarios</h2>
+    <div class="scenarios">
+        <div class="scenario">
+            <div class="num">1</div>
+            <h4>Thank-you on paid order</h4>
+            <p>Personalized greeting on the screen when the order is paid. Falls back to a generic message if the customer hasn't opted in.</p>
+        </div>
+        <div class="scenario">
+            <div class="num">2</div>
+            <h4>Cart-add notifications</h4>
+            <p>Overlay or ticker appears the moment a product is added to the cart, showing name, price and quantity.</p>
+        </div>
+        <div class="scenario">
+            <div class="num">3</div>
+            <h4>Customer Display mirror</h4>
+            <p>One-click setup: pick a screen and the connector auto-creates the Xibo layout and schedules it. The Odoo POS Customer Display appears on Xibo.</p>
+        </div>
+        <div class="scenario featured">
+            <div class="num">4</div>
+            <h4>Contextual recommendations<span class="new">NEW</span></h4>
+            <p>Cashier adds a TV — the screen shows extended warranties, accessories, larger models. Driven by tags on product categories.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>How contextual recommendations work</h2>
+    <ol>
+        <li>Upload videos to your Xibo Library with descriptive tags (e.g. <code>tv,electronics,accessories</code>).</li>
+        <li>Set the same tags on your <b>Product Categories</b> in Odoo.</li>
+        <li>(Optional) Override on specific products that need different recommendations.</li>
+        <li>Enable scenario <b>④ Contextual Recommendations</b> on the POS configuration.</li>
+        <li>As the cashier adds tagged products to the cart, matching Xibo media plays automatically on the screens.</li>
+    </ol>
+    <p>A configurable <b>cool-down</b> (default 60 s) prevents screen spam. Choose how the system picks content when multiple tagged products are in the cart: latest added, most expensive, or accumulate all.</p>
+</div>
+
+<div class="section">
+    <h2>Privacy by design</h2>
+    <p>Each contact has a "<b>Show on Public Screens</b>" toggle (default off). When disabled, the screen shows a generic message such as "valued customer" instead of the real name. Cashiers don't need to remember privacy preferences — the system handles it.</p>
+</div>
+
+<div class="section">
+    <h2>Setup in 3 minutes</h2>
+    <ol>
+        <li>Install the base <b>Xibo Connector</b> module and configure your CMS server.</li>
+        <li>Install this module.</li>
+        <li>Open <b>Point of Sale → Configuration → Settings</b> and scroll to the <b>Xibo Signage</b> block.</li>
+        <li>Pick your CMS server, default displays and the layouts/datasets per scenario.</li>
+        <li>Save. Done.</li>
+    </ol>
+</div>
+
+<div class="section">
+    <h2>Customer Display mirror — player compatibility</h2>
+    <div class="warn">
+        <p style="margin: 0;"><strong>The Customer Display mirror works best on Xibo Player for Windows and Linux.</strong> Android, webOS and Tizen players have stricter cookie policies that may break the session-scoped Odoo Customer Display URL.</p>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Requirements</h2>
+    <div class="req">
+        <ul style="margin: 0;">
+            <li>Odoo 19.0</li>
+            <li>Point of Sale</li>
+            <li>Xibo Connector (base module) — sold separately at $18 USD</li>
+        </ul>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Support</h2>
+    <p>Email: <a href="mailto:soporte@xubax.com">soporte@xubax.com</a><br/>
+       Website: <a href="https://www.xubax.com">www.xubax.com</a></p>
+</div>
+
+</div>
+
+<div class="footer">
+    <p>Xibo Connector — Point of Sale &mdash; built by <a href="https://www.xubax.com">XUBAX</a></p>
+    <p style="font-size: 13px; opacity: 0.7;">© 2026 Cristofferson Reyes Rodriguez · OPL-1</p>
+</div>
+
+</body>
+</html>

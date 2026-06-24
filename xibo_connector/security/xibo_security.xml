@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_xibo" model="ir.module.category">
+        <field name="name">Xibo Connector</field>
+        <field name="description">Digital Signage with Xibo CMS</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="privilege_xibo" model="res.groups.privilege">
+        <field name="name">Xibo Connector</field>
+        <field name="category_id" ref="module_category_xibo"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="group_xibo_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="privilege_id" ref="privilege_xibo"/>
+        <field name="comment">Browse displays, upload media, view datasets and event log.</field>
+    </record>
+
+    <record id="group_xibo_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="privilege_id" ref="privilege_xibo"/>
+        <field name="implied_ids" eval="[(4, ref('group_xibo_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="comment">Full administration: servers, credentials, deletions.</field>
+    </record>
+
+    <record id="rule_xibo_server_company" model="ir.rule">
+        <field name="name">Xibo Server: multi-company</field>
+        <field name="model_id" ref="model_xibo_server"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_display_company" model="ir.rule">
+        <field name="name">Xibo Display: multi-company</field>
+        <field name="model_id" ref="model_xibo_display"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_display_group_company" model="ir.rule">
+        <field name="name">Xibo Display Group: multi-company</field>
+        <field name="model_id" ref="model_xibo_display_group"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_media_company" model="ir.rule">
+        <field name="name">Xibo Media: multi-company</field>
+        <field name="model_id" ref="model_xibo_media"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_dataset_company" model="ir.rule">
+        <field name="name">Xibo DataSet: multi-company</field>
+        <field name="model_id" ref="model_xibo_dataset"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_event_log_company" model="ir.rule">
+        <field name="name">Xibo Event Log: multi-company</field>
+        <field name="model_id" ref="model_xibo_event_log"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_layout_company" model="ir.rule">
+        <field name="name">Xibo Layout: multi-company</field>
+        <field name="model_id" ref="model_xibo_layout"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="rule_xibo_broadcast_company" model="ir.rule">
+        <field name="name">Xibo Broadcast: multi-company</field>
+        <field name="model_id" ref="model_xibo_broadcast"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

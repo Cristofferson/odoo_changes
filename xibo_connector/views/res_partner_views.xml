@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_form_xibo" model="ir.ui.view">
+        <field name="name">res.partner.form.xibo</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Privacy &amp; Signage" name="xibo_privacy">
+                    <group>
+                        <group>
+                            <field name="xibo_show_in_public_screens"/>
+                            <label for="xibo_display_nickname" invisible="is_company"/>
+                            <div class="o_row" invisible="is_company">
+                                <field name="xibo_display_nickname"
+                                       placeholder="Auto-filled by AI"
+                                       nolabel="1"/>
+                                <button name="%(xibo_connector.action_xibo_detect_nickname_ai)d"
+                                        type="action"
+                                        string="🤖"
+                                        class="btn btn-link"
+                                        help="Re-run AI nickname detection"
+                                        invisible="not name"/>
+                            </div>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <p style="margin: 0 0 6px 0;">
+                            <strong>Show on Public Screens:</strong> when enabled, this customer's
+                            name may appear on Xibo digital signage screens. When disabled, a generic
+                            fallback such as "valued customer" is shown instead.
+                        </p>
+                        <p style="margin: 0;" invisible="is_company">
+                            <strong>Display Nickname:</strong> the friendly short name shown on
+                            screens. Example: "Paco" instead of "Francisco Pérez Cruz". The system
+                            automatically asks Odoo's native AI to suggest a natural nickname when
+                            this contact is created or its name is edited. You can also override
+                            it manually, or click 🤖 to re-run the detection.
+                        </p>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

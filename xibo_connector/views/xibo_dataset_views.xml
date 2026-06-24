@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_dataset_list" model="ir.ui.view">
+        <field name="name">xibo.dataset.list</field>
+        <field name="model">xibo.dataset</field>
+        <field name="arch" type="xml">
+            <list string="DataSets">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="server_id"/>
+                <field name="xibo_dataset_id"/>
+                <field name="row_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xibo_dataset_form" model="ir.ui.view">
+        <field name="name">xibo.dataset.form</field>
+        <field name="model">xibo.dataset</field>
+        <field name="arch" type="xml">
+            <form string="DataSet">
+                <header>
+                    <button name="action_sync_columns" type="object" string="Sync Columns" class="btn-secondary"/>
+                    <button name="action_view_rows" type="object" string="View Pushed Rows" class="btn-secondary"
+                            invisible="not row_count"/>
+                    <button name="action_open_in_cms" type="object" string="Open in Xibo"
+                            class="btn-secondary" icon="fa-external-link"
+                            invisible="not xibo_dataset_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="server_id"/>
+                            <field name="xibo_dataset_id" readonly="1"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="row_count"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Columns">
+                            <field name="column_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="heading"/>
+                                    <field name="code"/>
+                                    <field name="data_type"/>
+                                    <field name="xibo_dataset_column_id" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_dataset" model="ir.actions.act_window">
+        <field name="name">DataSets</field>
+        <field name="res_model">xibo.dataset</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_xibo_dataset_row_list" model="ir.ui.view">
+        <field name="name">xibo.dataset.row.list</field>
+        <field name="model">xibo.dataset.row</field>
+        <field name="arch" type="xml">
+            <list string="Pushed Rows" create="false" edit="false">
+                <field name="create_date"/>
+                <field name="dataset_id"/>
+                <field name="xibo_row_id"/>
+                <field name="payload"/>
+            </list>
+        </field>
+    </record>
+</odoo>

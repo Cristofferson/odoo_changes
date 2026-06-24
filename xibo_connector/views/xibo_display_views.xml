@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_display_list" model="ir.ui.view">
+        <field name="name">xibo.display.list</field>
+        <field name="model">xibo.display</field>
+        <field name="arch" type="xml">
+            <list string="Displays" decoration-success="logged_in" decoration-muted="not active">
+                <field name="name"/>
+                <field name="server_id"/>
+                <field name="purpose"/>
+                <field name="client_type"/>
+                <field name="logged_in" widget="boolean_toggle" readonly="1"/>
+                <field name="last_accessed"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xibo_display_form" model="ir.ui.view">
+        <field name="name">xibo.display.form</field>
+        <field name="model">xibo.display</field>
+        <field name="arch" type="xml">
+            <form string="Display">
+                <header>
+                    <button name="action_refresh" type="object" string="Refresh from Xibo" class="btn-secondary"/>
+                    <button name="action_collect_now" type="object" string="Trigger XMR Refresh"
+                            class="btn-primary" invisible="not own_display_group_id"/>
+                    <button name="action_open_in_cms" type="object" string="Open in Xibo"
+                            class="btn-secondary" icon="fa-external-link"
+                            invisible="not xibo_display_id"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Online" bg_color="bg-success" invisible="not logged_in"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="server_id"/>
+                            <field name="xibo_display_id" readonly="1"/>
+                            <field name="own_display_group_id" readonly="1"/>
+                            <field name="client_type" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="purpose"/>
+                            <field name="logged_in" readonly="1"/>
+                            <field name="last_accessed" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" nolabel="1"/>
+                        </page>
+                        <page string="Groups">
+                            <field name="group_ids">
+                                <list><field name="name"/></list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_display" model="ir.actions.act_window">
+        <field name="name">Displays</field>
+        <field name="res_model">xibo.display</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

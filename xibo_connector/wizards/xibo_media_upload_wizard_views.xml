@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_media_upload_wizard_form" model="ir.ui.view">
+        <field name="name">xibo.media.upload.wizard.form</field>
+        <field name="model">xibo.media.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Upload to Xibo">
+                <group>
+                    <group>
+                        <field name="server_id" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="default_duration"/>
+                        <field name="default_tags" placeholder="welcome,recepcion"/>
+                    </group>
+                </group>
+                <field name="line_ids">
+                    <list editable="bottom">
+                        <field name="file_data" filename="file_name" widget="binary"/>
+                        <field name="file_name" invisible="1"/>
+                        <field name="name" placeholder="Optional display name"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_do_upload" type="object" string="Upload All" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_media_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Bulk Upload</field>
+        <field name="res_model">xibo.media.upload.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_xibo_bulk_upload"
+              name="Bulk Upload"
+              parent="menu_xibo_operations"
+              action="action_xibo_media_upload_wizard"
+              sequence="15"/>
+</odoo>

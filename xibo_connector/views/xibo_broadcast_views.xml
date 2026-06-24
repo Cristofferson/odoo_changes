@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_broadcast_list" model="ir.ui.view">
+        <field name="name">xibo.broadcast.list</field>
+        <field name="model">xibo.broadcast</field>
+        <field name="arch" type="xml">
+            <list string="Broadcasts"
+                  decoration-info="state == 'draft'"
+                  decoration-warning="state == 'scheduled'"
+                  decoration-success="state == 'active'"
+                  decoration-muted="state in ('done', 'cancelled')"
+                  decoration-danger="state == 'error'">
+                <field name="name"/>
+                <field name="display_mode"/>
+                <field name="layout_id"/>
+                <field name="from_dt"/>
+                <field name="to_dt"/>
+                <field name="duration_seconds"/>
+                <field name="recurrence_type"/>
+                <field name="server_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xibo_broadcast_form" model="ir.ui.view">
+        <field name="name">xibo.broadcast.form</field>
+        <field name="model">xibo.broadcast</field>
+        <field name="arch" type="xml">
+            <form string="Broadcast">
+                <header>
+                    <button name="action_send" type="object" string="Send to Xibo"
+                            class="btn-primary"
+                            invisible="state in ('active', 'scheduled', 'done')"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            class="btn-warning"
+                            invisible="state in ('cancelled', 'done', 'draft')"
+                            confirm="This will remove the scheduled event from Xibo. Continue?"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft"
+                            class="btn-secondary"
+                            invisible="state not in ('cancelled', 'error')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,scheduled,active,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Welcome — Reception 1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="server_id" options="{'no_create': True}"/>
+                            <field name="display_mode" widget="radio"/>
+                            <field name="layout_id" options="{'no_create': True}"
+                                   invisible="display_mode == 'ticker'"
+                                   required="display_mode in ('fullscreen', 'overlay')"/>
+                            <field name="dataset_id" options="{'no_create': True}"
+                                   invisible="display_mode != 'ticker'"
+                                   required="display_mode == 'ticker'"/>
+                            <field name="dataset_values_json"
+                                   invisible="display_mode != 'ticker'"
+                                   placeholder='{"name": "Alice", "message": "Welcome!"}'/>
+                        </group>
+                        <group>
+                            <field name="duration_seconds"/>
+                            <field name="is_priority"/>
+                            <field name="instant_push"/>
+                            <field name="xibo_event_id" readonly="1" invisible="not xibo_event_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Schedule">
+                            <group>
+                                <group string="Date Range">
+                                    <field name="from_dt"/>
+                                    <field name="to_dt"/>
+                                </group>
+                                <group string="Daily Time Window">
+                                    <label for="time_from"/>
+                                    <div class="o_row">
+                                        <field name="time_from" widget="float_time"/>
+                                        <span>to</span>
+                                        <field name="time_to" widget="float_time"/>
+                                    </div>
+                                </group>
+                            </group>
+                            <group string="Days of the Week">
+                                <div>
+                                    <field name="dow_mon"/><label for="dow_mon" string="Mon"/>
+                                    <field name="dow_tue"/><label for="dow_tue" string="Tue"/>
+                                    <field name="dow_wed"/><label for="dow_wed" string="Wed"/>
+                                    <field name="dow_thu"/><label for="dow_thu" string="Thu"/>
+                                    <field name="dow_fri"/><label for="dow_fri" string="Fri"/>
+                                    <field name="dow_sat"/><label for="dow_sat" string="Sat"/>
+                                    <field name="dow_sun"/><label for="dow_sun" string="Sun"/>
+                                </div>
+                            </group>
+                            <group string="Recurrence">
+                                <group>
+                                    <field name="recurrence_type"/>
+                                    <field name="recurrence_detail"
+                                           invisible="recurrence_type == 'none'"/>
+                                </group>
+                                <group>
+                                    <field name="recurrence_until"
+                                           invisible="recurrence_type == 'none'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Where">
+                            <group>
+                                <group string="Display Groups">
+                                    <field name="display_group_ids" nolabel="1" widget="many2many_tags"/>
+                                </group>
+                                <group string="Individual Displays">
+                                    <field name="display_ids" nolabel="1" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Origin" invisible="not origin_model">
+                            <group>
+                                <field name="origin_model" readonly="1"/>
+                                <field name="origin_res_id" readonly="1"/>
+                                <field name="origin_description" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Error" invisible="not last_error">
+                            <field name="last_error" nolabel="1" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_broadcast" model="ir.actions.act_window">
+        <field name="name">Broadcasts</field>
+        <field name="res_model">xibo.broadcast</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

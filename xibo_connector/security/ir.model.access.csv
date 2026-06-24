@@ -1,0 +1,24 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xibo_server_user,xibo.server user,model_xibo_server,group_xibo_user,1,0,0,0
+access_xibo_server_manager,xibo.server manager,model_xibo_server,group_xibo_manager,1,1,1,1
+access_xibo_display_user,xibo.display user,model_xibo_display,group_xibo_user,1,1,0,0
+access_xibo_display_manager,xibo.display manager,model_xibo_display,group_xibo_manager,1,1,1,1
+access_xibo_display_group_user,xibo.display.group user,model_xibo_display_group,group_xibo_user,1,1,0,0
+access_xibo_display_group_manager,xibo.display.group manager,model_xibo_display_group,group_xibo_manager,1,1,1,1
+access_xibo_media_user,xibo.media user,model_xibo_media,group_xibo_user,1,1,1,0
+access_xibo_media_manager,xibo.media manager,model_xibo_media,group_xibo_manager,1,1,1,1
+access_xibo_dataset_user,xibo.dataset user,model_xibo_dataset,group_xibo_user,1,1,0,0
+access_xibo_dataset_manager,xibo.dataset manager,model_xibo_dataset,group_xibo_manager,1,1,1,1
+access_xibo_dataset_column_user,xibo.dataset.column user,model_xibo_dataset_column,group_xibo_user,1,0,0,0
+access_xibo_dataset_column_manager,xibo.dataset.column manager,model_xibo_dataset_column,group_xibo_manager,1,1,1,1
+access_xibo_dataset_row_user,xibo.dataset.row user,model_xibo_dataset_row,group_xibo_user,1,0,0,0
+access_xibo_dataset_row_manager,xibo.dataset.row manager,model_xibo_dataset_row,group_xibo_manager,1,1,1,1
+access_xibo_event_log_user,xibo.event.log user,model_xibo_event_log,group_xibo_user,1,0,0,0
+access_xibo_event_log_manager,xibo.event.log manager,model_xibo_event_log,group_xibo_manager,1,1,1,1
+access_xibo_layout_user,xibo.layout user,model_xibo_layout,group_xibo_user,1,1,0,0
+access_xibo_layout_manager,xibo.layout manager,model_xibo_layout,group_xibo_manager,1,1,1,1
+access_xibo_broadcast_user,xibo.broadcast user,model_xibo_broadcast,group_xibo_user,1,1,1,0
+access_xibo_broadcast_manager,xibo.broadcast manager,model_xibo_broadcast,group_xibo_manager,1,1,1,1
+access_xibo_media_upload_wizard_user,xibo.media.upload.wizard user,model_xibo_media_upload_wizard,group_xibo_user,1,1,1,1
+access_xibo_media_upload_wizard_line_user,xibo.media.upload.wizard.line user,model_xibo_media_upload_wizard_line,group_xibo_user,1,1,1,1
+access_xibo_quick_display_wizard_user,xibo.quick.display.wizard user,model_xibo_quick_display_wizard,group_xibo_user,1,1,1,1

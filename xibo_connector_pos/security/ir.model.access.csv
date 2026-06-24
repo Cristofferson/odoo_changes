@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xibo_thanks_render_pos_user,xibo.thanks.render pos user,model_xibo_thanks_render,point_of_sale.group_pos_user,1,0,0,0
+access_xibo_thanks_render_pos_manager,xibo.thanks.render pos manager,model_xibo_thanks_render,point_of_sale.group_pos_manager,1,1,1,1
+access_xibo_server_pos_user,xibo.server pos user,xibo_connector.model_xibo_server,point_of_sale.group_pos_user,1,0,0,0
+access_xibo_display_pos_user,xibo.display pos user,xibo_connector.model_xibo_display,point_of_sale.group_pos_user,1,0,0,0
+access_xibo_display_group_pos_user,xibo.display.group pos user,xibo_connector.model_xibo_display_group,point_of_sale.group_pos_user,1,0,0,0
+access_xibo_layout_pos_user,xibo.layout pos user,xibo_connector.model_xibo_layout,point_of_sale.group_pos_user,1,0,0,0
+access_xibo_dataset_pos_user,xibo.dataset pos user,xibo_connector.model_xibo_dataset,point_of_sale.group_pos_user,1,0,0,0

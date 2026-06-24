@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_server_list" model="ir.ui.view">
+        <field name="name">xibo.server.list</field>
+        <field name="model">xibo.server</field>
+        <field name="arch" type="xml">
+            <list string="Xibo Servers" decoration-success="state == 'connected'" decoration-danger="state == 'error'">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="state" widget="badge"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="display_count"/>
+                <field name="media_count"/>
+                <field name="xmr_enabled" widget="boolean_toggle"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xibo_server_form" model="ir.ui.view">
+        <field name="name">xibo.server.form</field>
+        <field name="model">xibo.server</field>
+        <field name="arch" type="xml">
+            <form string="Xibo Server">
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection" class="btn-primary"/>
+                    <button name="action_sync_all" type="object" string="Sync All" class="btn-secondary"
+                            invisible="state != 'connected'"/>
+                    <button name="action_open_in_cms" type="object" string="Open Xibo CMS"
+                            class="btn-secondary" icon="fa-external-link"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_displays" type="object" class="oe_stat_button" icon="fa-television">
+                            <field name="display_count" widget="statinfo" string="Displays"/>
+                        </button>
+                        <button name="action_open_display_groups" type="object" class="oe_stat_button" icon="fa-object-group">
+                            <field name="display_group_count" widget="statinfo" string="Groups"/>
+                        </button>
+                        <button name="action_open_media" type="object" class="oe_stat_button" icon="fa-photo">
+                            <field name="media_count" widget="statinfo" string="Media"/>
+                        </button>
+                        <button name="action_open_layouts" type="object" class="oe_stat_button" icon="fa-th-large">
+                            <field name="layout_count" widget="statinfo" string="Layouts"/>
+                        </button>
+                        <button name="action_open_datasets" type="object" class="oe_stat_button" icon="fa-database">
+                            <field name="dataset_count" widget="statinfo" string="DataSets"/>
+                        </button>
+                        <button name="action_open_broadcasts" type="object" class="oe_stat_button" icon="fa-bullhorn">
+                            <field name="broadcast_count" widget="statinfo" string="Broadcasts"/>
+                        </button>
+                        <button name="action_open_event_log" type="object" class="oe_stat_button" icon="fa-list">
+                            <span class="o_stat_text">Event Log</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Xibo Production"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group>
+                                    <field name="url" placeholder="https://xibo.example.com"/>
+                                    <field name="client_id"/>
+                                    <field name="client_secret" password="True"/>
+                                </group>
+                                <group>
+                                    <field name="active"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="xmr_enabled"/>
+                                    <field name="log_api_calls"/>
+                                </group>
+                            </group>
+                            <group col="1">
+                                <div class="alert alert-info" role="alert">
+                                    <p><b>How to get the Client ID and Secret:</b></p>
+                                    <ol>
+                                        <li>Open your Xibo CMS as super-admin.</li>
+                                        <li>Go to <b>Administration → Applications</b>.</li>
+                                        <li>Click <b>Add Application</b>.</li>
+                                        <li>Activate <b>Client Credentials</b>; leave Authorization Code off.</li>
+                                        <li>Assign scope <b>all</b> (or granular).</li>
+                                        <li>Set the <b>Owner</b> field to your super-admin user.</li>
+                                        <li>Save and copy both values into the fields above.</li>
+                                    </ol>
+                                </div>
+                            </group>
+                        </page>
+                        <page string="Token Cache" invisible="not access_token" groups="xibo_connector.group_xibo_manager">
+                            <group>
+                                <field name="access_token" password="True"/>
+                                <field name="token_expiry"/>
+                            </group>
+                        </page>
+                        <page string="Last Error" invisible="not last_error">
+                            <field name="last_error" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_server" model="ir.actions.act_window">
+        <field name="name">Servers</field>
+        <field name="res_model">xibo.server</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

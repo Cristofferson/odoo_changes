@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_media_list" model="ir.ui.view">
+        <field name="name">xibo.media.list</field>
+        <field name="model">xibo.media</field>
+        <field name="arch" type="xml">
+            <list string="Media"
+                  decoration-success="state == 'uploaded'"
+                  decoration-info="state == 'xibo_only'"
+                  decoration-danger="state == 'error'">
+                <field name="name"/>
+                <field name="file_type"/>
+                <field name="origin" widget="badge"/>
+                <field name="file_name"/>
+                <field name="duration"/>
+                <field name="size_bytes" widget="float_factor" sum="Total"/>
+                <field name="tags"/>
+                <field name="server_id"/>
+                <field name="state" widget="badge"/>
+                <field name="xibo_media_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xibo_media_kanban" model="ir.ui.view">
+        <field name="name">xibo.media.kanban</field>
+        <field name="model">xibo.media</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="file_type"/>
+                <field name="state"/>
+                <field name="origin"/>
+                <field name="duration"/>
+                <field name="tags"/>
+                <field name="file_data"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_image text-center" style="height: 120px;">
+                                <field name="file_data" widget="image"
+                                       t-if="record.file_type.raw_value == 'image' and record.origin.raw_value == 'odoo'"
+                                       options="{'size': [120, 120]}"/>
+                                <i t-if="record.file_type.raw_value == 'image' and record.origin.raw_value == 'xibo'"
+                                   class="fa fa-image fa-3x text-info" style="margin-top: 40px;"/>
+                                <i t-if="record.file_type.raw_value == 'video'"
+                                   class="fa fa-film fa-3x text-muted" style="margin-top: 40px;"/>
+                                <i t-if="record.file_type.raw_value == 'audio'"
+                                   class="fa fa-music fa-3x text-muted" style="margin-top: 40px;"/>
+                                <i t-if="record.file_type.raw_value == 'other'"
+                                   class="fa fa-file fa-3x text-muted" style="margin-top: 40px;"/>
+                            </div>
+                            <div class="oe_kanban_details mt-2">
+                                <strong><field name="name"/></strong>
+                                <div class="text-muted small"><field name="file_name"/></div>
+                                <div class="mt-1">
+                                    <span class="badge text-bg-secondary"><field name="file_type"/></span>
+                                    <span t-if="record.duration.raw_value" class="badge text-bg-info">
+                                        <field name="duration"/>s
+                                    </span>
+                                    <span t-if="record.state.raw_value == 'uploaded'" class="badge text-bg-success">Uploaded</span>
+                                    <span t-if="record.state.raw_value == 'xibo_only'" class="badge text-bg-info">In Xibo</span>
+                                    <span t-if="record.state.raw_value == 'error'" class="badge text-bg-danger">Error</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_xibo_media_form" model="ir.ui.view">
+        <field name="name">xibo.media.form</field>
+        <field name="model">xibo.media</field>
+        <field name="arch" type="xml">
+            <form string="Media">
+                <header>
+                    <button name="action_upload_to_xibo" type="object" string="Upload to Xibo"
+                            class="btn-primary"
+                            invisible="state in ('uploaded', 'xibo_only')"/>
+                    <button name="action_update_in_xibo" type="object" string="Update Metadata"
+                            class="btn-secondary"
+                            invisible="state not in ('uploaded', 'xibo_only')"/>
+                    <button name="action_open_quick_display_wizard" type="object"
+                            string="Quick Display" class="btn-success"
+                            icon="fa-bullhorn"
+                            invisible="state not in ('uploaded', 'xibo_only')"/>
+                    <button name="action_open_in_cms" type="object" string="Open in Xibo"
+                            class="btn-secondary" icon="fa-external-link"
+                            invisible="not xibo_media_id"/>
+                    <button name="action_delete_from_xibo" type="object" string="Delete from Xibo"
+                            class="btn-danger"
+                            invisible="state not in ('uploaded', 'xibo_only')"
+                            confirm="This will delete the media from both Odoo and Xibo. Continue?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Display name in Xibo Library"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="server_id" options="{'no_create': True}"/>
+                            <field name="origin" readonly="1"/>
+                            <field name="file_data" filename="file_name" widget="binary"
+                                   invisible="origin == 'xibo'"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="file_type" readonly="1"/>
+                            <field name="size_bytes" readonly="1" widget="float_factor"
+                                   invisible="not size_bytes"/>
+                        </group>
+                        <group>
+                            <field name="duration"/>
+                            <field name="tags" placeholder="welcome,promo2025"/>
+                            <field name="xibo_media_id" readonly="1" invisible="not xibo_media_id"/>
+                        </group>
+                    </group>
+                    <group string="Preview"
+                           invisible="file_type != 'image' or origin != 'odoo' or not file_data">
+                        <field name="file_data" widget="image" nolabel="1"
+                               options="{'size': [400, 400]}"/>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <group string="Last Error" invisible="not last_error">
+                        <field name="last_error" nolabel="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xibo_media" model="ir.actions.act_window">
+        <field name="name">Media Library</field>
+        <field name="res_model">xibo.media</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>

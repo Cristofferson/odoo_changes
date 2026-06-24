@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Automated Action: detect nickname with AI on partner create/edit.
+
+            Triggers `action_xibo_detect_nickname_ai` whenever:
+            - A new individual partner is created with a name, OR
+            - An existing individual partner's name changes,
+            AND the nickname field is still empty.
+
+            Companies are excluded via filter_domain.
+        -->
+        <record id="automation_xibo_autofill_nickname" model="base.automation">
+            <field name="name">Auto-detect Nickname for Contacts</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="trigger">on_create_or_write</field>
+            <field name="trigger_field_ids" eval="[(6, 0, [ref('base.field_res_partner__name')])]"/>
+            <field name="filter_domain">[('is_company', '=', False), ('xibo_display_nickname', 'in', [False, '']), ('name', '!=', False)]</field>
+            <field name="active" eval="True"/>
+            <field name="action_server_ids" eval="[(6, 0, [ref('action_xibo_detect_nickname_ai')])]"/>
+            <field name="description" type="html">
+                <p>When an individual contact is created or has its name edited, this rule asks Odoo's native AI to suggest a friendly short form / nickname and writes it to the xibo_display_nickname field. Companies are skipped via the filter domain.</p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xibo_quick_display_wizard_form" model="ir.ui.view">
+        <field name="name">xibo.quick.display.wizard.form</field>
+        <field name="model">xibo.quick.display.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Quick Display">
+                <div class="alert alert-info" role="alert">
+                    This creates a new full-screen Xibo Layout containing this media and
+                    schedules it for immediate display on the selected screens.
+                    For more complex layouts, design them directly in your Xibo CMS.
+                </div>
+                <group>
+                    <group>
+                        <field name="media_id" readonly="1"/>
+                        <field name="server_id" readonly="1"/>
+                        <field name="layout_name"/>
+                        <field name="display_mode" widget="radio"/>
+                    </group>
+                    <group>
+                        <field name="duration_seconds"/>
+                        <field name="show_until"/>
+                        <field name="instant_push"/>
+                        <field name="resolution_id"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Target Displays">
+                        <field name="display_ids" nolabel="1" widget="many2many_tags"
+                               options="{'no_create': True}"/>
+                    </group>
+                    <group string="Target Display Groups">
+                        <field name="display_group_ids" nolabel="1" widget="many2many_tags"
+                               options="{'no_create': True}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_create_and_broadcast" type="object"
+                            string="Create &amp; Broadcast" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

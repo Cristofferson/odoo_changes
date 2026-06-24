@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Server action: Update res.partner.xibo_display_nickname using Odoo's
+            native AI infrastructure (evaluation_type='ai_computed').
+
+            This is the WORKING pattern: state='object_write' + evaluation_type='ai_computed'
+            + ai_update_prompt with <span data-ai-field="..."> markers for record context.
+
+            The IA reads the partner's `name` field (referenced via the span marker),
+            computes the nickname, and writes it directly to xibo_display_nickname.
+        -->
+        <record id="action_xibo_detect_nickname_ai" model="ir.actions.server">
+            <field name="name">Detect Nickname with AI</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="state">object_write</field>
+            <field name="evaluation_type">ai_computed</field>
+            <field name="update_field_id" search="[('model', '=', 'res.partner'), ('name', '=', 'xibo_display_nickname')]"/>
+            <field name="update_path">xibo_display_nickname</field>
+            <field name="binding_model_id" ref="base.model_res_partner"/>
+            <field name="binding_view_types">form,list</field>
+            <field name="ai_update_prompt" type="html">
+                <p>You are a helper that returns ONLY a short friendly name for addressing a person warmly. Given <span data-ai-field="name" data-oe-protected="true">Name</span>, return the most natural friendly short form - typically the first given name, OR a common diminutive if one exists in the person's likely language/culture.</p>
+                <p>Examples (Spanish): Francisco Perez Cruz -&gt; Paco; Jose Lopez -&gt; Pepe; Maria Guadalupe Sanchez -&gt; Lupita; Jesus Hernandez -&gt; Chuy; Ana Martinez -&gt; Ana; Cristofferson Reyes Rodriguez -&gt; Cris.</p>
+                <p>Examples (English): Robert Smith -&gt; Bob; William Johnson -&gt; Bill; Margaret Davis -&gt; Maggie.</p>
+                <p>Rules: Output ONLY the short name. No surnames, no punctuation, no commentary. Keep it under 20 characters. If the partner is a company or you cannot determine a first name, return an empty string.</p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

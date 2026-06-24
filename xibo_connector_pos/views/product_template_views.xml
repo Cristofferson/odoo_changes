@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_xibo" model="ir.ui.view">
+        <field name="name">product.template.form.xibo</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Xibo Signage" name="xibo_signage">
+                    <group>
+                        <field name="xibo_recommendation_tags"
+                               placeholder="Leave empty to inherit from category"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <p style="margin: 0;">
+                            Override the Xibo recommendation tags inherited from this product's category.
+                            Leave empty to use the category's tags.
+                            When this product is added to the POS cart, Xibo media matching ANY of these
+                            tags will be broadcast on the configured screens (if Contextual Recommendations
+                            is enabled in the POS settings).
+                        </p>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

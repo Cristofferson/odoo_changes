@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_xibo_root"
+              name="Xibo Signage"
+              web_icon="xibo_connector,static/description/icon.png"
+              sequence="80"
+              groups="group_xibo_user"/>
+
+    <menuitem id="menu_xibo_operations" name="Operations" parent="menu_xibo_root" sequence="10"/>
+    <menuitem id="menu_xibo_media" name="Media Library" parent="menu_xibo_operations"
+              action="action_xibo_media" sequence="10"/>
+    <menuitem id="menu_xibo_broadcast" name="Broadcasts" parent="menu_xibo_operations"
+              action="action_xibo_broadcast" sequence="20"/>
+    <menuitem id="menu_xibo_display" name="Displays" parent="menu_xibo_operations"
+              action="action_xibo_display" sequence="30"/>
+    <menuitem id="menu_xibo_display_group" name="Display Groups" parent="menu_xibo_operations"
+              action="action_xibo_display_group" sequence="40"/>
+    <menuitem id="menu_xibo_layout" name="Layouts" parent="menu_xibo_operations"
+              action="action_xibo_layout" sequence="50"/>
+    <menuitem id="menu_xibo_dataset" name="DataSets" parent="menu_xibo_operations"
+              action="action_xibo_dataset" sequence="60"/>
+
+    <menuitem id="menu_xibo_reporting" name="Reporting" parent="menu_xibo_root" sequence="50"/>
+    <menuitem id="menu_xibo_event_log" name="Event Log" parent="menu_xibo_reporting"
+              action="action_xibo_event_log" sequence="10"/>
+
+    <menuitem id="menu_xibo_config" name="Configuration" parent="menu_xibo_root"
+              sequence="90" groups="group_xibo_manager"/>
+    <menuitem id="menu_xibo_servers" name="Servers" parent="menu_xibo_config"
+              action="action_xibo_server" sequence="10"/>
+</odoo>

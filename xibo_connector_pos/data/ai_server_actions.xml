@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Native AI server action for the POS Thank-You scenario (Camino B).
+
+    Mechanics: when ``ir.actions.server.run()`` is called and the action has
+    ``state='object_write'`` + ``evaluation_type='ai_computed'``, Odoo's
+    native AI engine takes over:
+
+      1. Renders ``ai_update_prompt`` resolving every
+         ``<span data-ai-field="X">`` placeholder with the value of field X
+         on the active record (from active_id / active_model in the context).
+      2. Routes the prompt to the LLM provider the customer has configured
+         (OpenAI today, more providers as Odoo adds them).
+      3. Writes the model's response into ``update_field_id`` on that record.
+
+    The action is invoked from ``pos.order._xibo_call_ai`` after pre-filling
+    the context fields ``xibo_thanks_summary``, ``xibo_thanks_customer``,
+    and ``xibo_thanks_top_product`` on the order.
+-->
+<odoo>
+    <data noupdate="0">
+
+        <record id="action_pos_thanks_ai_compute" model="ir.actions.server">
+            <field name="name">Xibo POS: Compute Thank-You Message with AI</field>
+            <field name="model_id" ref="point_of_sale.model_pos_order"/>
+            <field name="state">object_write</field>
+            <field name="evaluation_type">ai_computed</field>
+            <field name="update_field_id"
+                   ref="xibo_connector_pos.field_pos_order__xibo_thanks_ai_message"/>
+            <field name="update_path">xibo_thanks_ai_message</field>
+            <field name="ai_update_prompt"><![CDATA[<p>You are writing a short Thank-You message to display on a public store screen right after a sale closes.</p>
+<p>Use these inputs from the order:</p>
+<ul>
+    <li>Customer name (may be empty for guests): <span data-ai-field="xibo_thanks_customer" data-oe-protected="true">Customer</span></li>
+    <li>Most expensive product purchased: <span data-ai-field="xibo_thanks_top_product" data-oe-protected="true">Top Product</span></li>
+    <li>Cashier's custom prompt and full order context: <span data-ai-field="xibo_thanks_summary" data-oe-protected="true">Summary</span></li>
+</ul>
+<p>Rules:</p>
+<ul>
+    <li>Follow the cashier's custom prompt above.</li>
+    <li>Output ONLY the message text - no quotes, no commentary, no labels, no "Message:" prefix.</li>
+    <li>Keep it under 30 words. One or two short sentences.</li>
+    <li>If the customer name is empty or "valued customer", address them generically and warmly.</li>
+    <li>If the top product belongs to a meaningful life-moment category (engagement, wedding, baby), acknowledge it briefly.</li>
+    <li>Otherwise, express simple genuine appreciation.</li>
+    <li>Match the language of the cashier's prompt (English, Spanish, etc.).</li>
+</ul>]]></field>
+        </record>
+
+    </data>
+</odoo>

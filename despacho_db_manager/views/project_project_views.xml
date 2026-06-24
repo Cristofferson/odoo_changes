@@ -117,6 +117,12 @@
                         groups="databases.group_databases_manager">
                     <field name="despacho_operation_count" widget="statinfo" string="Operaciones"/>
                 </button>
+                <button class="oe_stat_button" icon="fa-check-square-o" type="object"
+                        name="action_view_todos"
+                        invisible="not despacho_todo_tag_ids"
+                        groups="databases.group_databases_manager">
+                    <field name="despacho_todo_count" widget="statinfo" string="Pendientes"/>
+                </button>
             </div>
             <notebook position="inside">
                 <page name="despacho_server" string="Servidor"
@@ -160,6 +166,8 @@
                             <field name="despacho_autologin_ready" readonly="1"/>
                             <field name="despacho_autologin_user" readonly="1"
                                    invisible="not despacho_autologin_ready"/>
+                            <field name="despacho_todo_tag_ids" widget="many2many_tags"
+                                   options="{'no_create': True}"/>
                         </group>
                     </group>
                     <group string="Apps custom">
@@ -239,5 +247,12 @@
                 </page>
             </notebook>
         </field>
+    </record>
+
+    <!-- "Reportes" del app Bases de datos = menú nativo de Proyecto heredado
+         (databases.menu_reporting), apunta a la misma acción que "Tareas" y queda
+         vacío/sin uso aquí. Se oculta. -->
+    <record id="databases.menu_reporting" model="ir.ui.menu">
+        <field name="active" eval="False"/>
     </record>
 </odoo>

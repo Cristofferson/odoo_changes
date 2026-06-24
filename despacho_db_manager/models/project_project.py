@@ -136,6 +136,50 @@ class ProjectProject(models.Model):
         help='Usuario (login) con el que "Conectar" iniciará sesión en esta BD. '
              'Lo resuelve el censo: el admin canónico (uid 2) si está activo y es '
              'del grupo Ajustes; si no, el administrador activo de menor id.')
+    # Pendientes (To-do): se ligan reusando las etiquetas que ya usas para
+    # agrupar tus to-dos por cliente. Cada BD apunta a SU etiqueta; la ficha
+    # muestra los pendientes (abiertos) de esa etiqueta.
+    despacho_todo_tag_ids = fields.Many2many(
+        'project.tags', 'despacho_db_todo_tag_rel', 'project_id', 'tag_id',
+        string='Etiquetas de Pendientes', copy=False,
+        help='Etiquetas de la app Pendientes (To-do) que corresponden a este '
+             'cliente (una BD puede tener varias marcas → varias etiquetas). '
+             'Liga los pendientes con esta base de datos sin re-etiquetarlos.')
+    despacho_todo_count = fields.Integer(
+        'Pendientes abiertos', compute='_compute_todo_count')
+
+    @api.depends('despacho_todo_tag_ids')
+    def _compute_todo_count(self):
+        Task = self.env['project.task']
+        for rec in self:
+            rec.despacho_todo_count = Task.search_count(
+                rec._despacho_todo_domain()) if rec.despacho_todo_tag_ids else 0
+
+    def _despacho_todo_domain(self, only_open=True):
+        """To-dos (project_id/parent vacíos) con alguna etiqueta del cliente."""
+        self.ensure_one()
+        dom = [
+            ('project_id', '=', False),
+            ('parent_id', '=', False),
+            ('tag_ids', 'in', self.despacho_todo_tag_ids.ids),
+        ]
+        if only_open:
+            dom.append(('state', '!=', '1_done'))
+        return dom
+
+    def action_view_todos(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Pendientes: %s' % self.display_name,
+            'res_model': 'project.task',
+            'view_mode': 'list,form',
+            'domain': self._despacho_todo_domain(only_open=False),
+            'context': {
+                'default_tag_ids': [(4, t) for t in self.despacho_todo_tag_ids.ids],
+                'search_default_open_tasks': 1,
+            },
+        }
 
     @api.depends('database_name')
     def _compute_is_test(self):

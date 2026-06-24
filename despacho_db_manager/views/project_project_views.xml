@@ -255,4 +255,11 @@
     <record id="databases.menu_reporting" model="ir.ui.menu">
         <field name="active" eval="False"/>
     </record>
+
+    <!-- "Tareas" agrupado por Proyecto por defecto (cada tarea pertenece al
+         proyecto de su BD → agrupa por cliente). Activa el filtro nativo
+         "Project" (group_by project_id) de la búsqueda de tareas. -->
+    <record id="databases.action_view_tasks_all" model="ir.actions.act_window">
+        <field name="context">{'search_default_project': 1}</field>
+    </record>
 </odoo>

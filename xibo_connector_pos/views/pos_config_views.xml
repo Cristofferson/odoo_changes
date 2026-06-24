@@ -79,7 +79,25 @@
                                 <div class="col-lg-8">
                                     <field name="pos_xibo_thanks_display_ids" widget="many2many_tags" options="{'no_create': True}"/>
                                     <div class="text-muted small mt-1">
-                                        The Thank-You Layout on each screen must contain a single Webpage widget pointing to <code>/xibo/thanks/&lt;config_id&gt;</code> on this server.
+                                        The Thank-You Layout on each screen must contain a single Webpage widget pointing to the URL below on this server.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_xibo_thanks_url" class="col-lg-4 o_light_label" string="Webpage URL (with key)"/>
+                                <div class="col-lg-8">
+                                    <field name="pos_xibo_thanks_url" readonly="1" class="text-break"/>
+                                    <div class="text-muted small mt-1">
+                                        Paste this into the Xibo Webpage widget. It already includes the secret key.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_xibo_thanks_require_token" class="col-lg-4 o_light_label" string="Require key"/>
+                                <div class="col-lg-8">
+                                    <field name="pos_xibo_thanks_require_token"/>
+                                    <div class="text-muted small mt-1">
+                                        Leave OFF until every screen above uses the URL with the key. Turn ON to stop outsiders who guess the id from reading the Thank-You page.
                                     </div>
                                 </div>
                             </div>

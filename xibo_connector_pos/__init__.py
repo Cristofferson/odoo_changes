@@ -62,6 +62,12 @@ _POS_CONFIG_COLUMNS = [
      'xibo_thanks_audio_preset = custom.'),
     ('xibo_thanks_audio_volume', 'INTEGER DEFAULT 80',
      'Audio volume 0-100. Default 80.'),
+    # ---- Thank-You URL access key (since v1.5.33) ----
+    ('xibo_thanks_token', 'VARCHAR',
+     'Secret key embedded in the Thank-You URL when require_token is on.'),
+    ('xibo_thanks_require_token', 'BOOLEAN DEFAULT FALSE',
+     'When TRUE, /xibo/thanks/<id> requires ?key=<token>. Default FALSE so '
+     'existing screens keep working until their URL is updated.'),
 ]
 
 

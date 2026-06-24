@@ -22,6 +22,7 @@ import logging
 
 from odoo import http, fields
 from odoo.http import request, Response
+from odoo.tools import consteq
 
 _logger = logging.getLogger(__name__)
 
@@ -355,6 +356,26 @@ class XiboThanksController(http.Controller):
         never looks broken.
         """
         env = request.env
+
+        # --- Optional access-key gate (OFF by default; backward compatible) ---
+        # When the cashier turns ON "Require key" for this POS, the Xibo
+        # Webpage widget URL must carry ?key=<token>. Configs left with the
+        # switch OFF (the default) behave exactly as before — no key needed —
+        # so deploying this code changes nothing until an admin opts in per
+        # screen. On a bad/missing key we serve the same neutral fallback page
+        # (never an error, never any data) so a misconfigured screen degrades
+        # gracefully and an outsider learns nothing.
+        config = env['pos.config'].sudo().browse(config_id)
+        if config.exists() and config.xibo_thanks_require_token:
+            provided = kwargs.get('key') or ''
+            expected = config.xibo_thanks_token or ''
+            if not expected or not consteq(provided, expected):
+                _logger.info(
+                    "[XIBO POS THANKS] /xibo/thanks/%s: key required but "
+                    "missing/invalid — serving fallback", config_id,
+                )
+                return Response(FALLBACK_HTML, headers=_no_cache_headers())
+
         Render = env['xibo.thanks.render'].sudo()
         now = fields.Datetime.now()
         render = Render.search(
@@ -468,12 +489,26 @@ class XiboThanksController(http.Controller):
           * ai_available: whether the Odoo 'ai' module is installed
           * fresh_render_count: count of non-expired renders right now
 
-        Public (no auth) but reveals NO sensitive data. Safe to expose
-        to a monitoring tool, an uptime checker, or a support engineer
-        looking at the URL from a different network.
+        Closed by default (404). To use it, set the secret
+        ir.config_parameter 'xibo_connector_pos.healthcheck_token' and call
+        /xibo/healthcheck?token=<secret> — e.g. from a monitoring tool that
+        can carry the secret. Without the secret nothing is revealed.
         """
         import json
         env = request.env
+
+        # --- Access gate: CLOSED by default --------------------------------
+        # This endpoint used to be public and leaked module version, Xibo
+        # connectivity, AI availability and render counts to anyone. Now it is
+        # closed unless an admin sets a secret in ir.config_parameter
+        # 'xibo_connector_pos.healthcheck_token' and calls
+        # /xibo/healthcheck?token=<secret>. With no secret configured, every
+        # request gets a bare 404 (we don't even confirm the route exists).
+        secret = env['ir.config_parameter'].sudo().get_param(
+            'xibo_connector_pos.healthcheck_token')
+        provided = kwargs.get('token') or ''
+        if not secret or not consteq(provided, secret):
+            return Response('Not Found', status=404)
 
         # 1) Module version (read from manifest — single source of truth).
         try:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Xibo Connector — Point of Sale',
-    'version': '19.0.1.5.32',
+    'version': '19.0.1.5.33',
     'category': 'Marketing/Digital Signage',
     'summary': 'AI thank-you with audio, dynamic customer display mirror, and contextual product recommendations on Xibo from your POS.',
     'description': """
@@ -13,6 +13,22 @@ Contextual Recommendations for POS via Xibo CMS.
 
 Changelog
 ---------
+19.0.1.5.33 (2026-06)
+~~~~~~~~~~~~~~~~~~~~~
+* **Privacy — optional access key on the Thank-You page**. The public
+  ``/xibo/thanks/<id>`` endpoint was keyed only by a guessable integer, so
+  anyone could read the last customer name + product. A per-POS secret key
+  is now supported via ``?key=<token>``. Enforcement is **OFF by default**
+  (``xibo_thanks_require_token``) so upgrading breaks nothing: update each
+  screen's Webpage widget URL to the one shown in Settings (it includes the
+  key), then turn the switch ON. Bad/missing key serves the neutral fallback
+  page — never data, never an error.
+* **Security — healthcheck closed by default**. ``/xibo/healthcheck`` no
+  longer leaks module version, Xibo connectivity, AI availability or render
+  counts to the public internet. It returns 404 unless the secret
+  ir.config_parameter ``xibo_connector_pos.healthcheck_token`` is set and
+  passed as ``?token=<secret>``.
+
 19.0.1.5.31 (2026-05)
 ~~~~~~~~~~~~~~~~~~~~~
 * **New feature — optional audio notification on Thank-You**. Configurable

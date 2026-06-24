@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import secrets
 import uuid
 
 from odoo import models, fields, api, _
@@ -215,6 +216,50 @@ class PosConfig(models.Model):
                 )
             else:
                 rec.xibo_customer_display_url = False
+
+    # ------------------------------------------------------------------
+    # Thank-You URL access key (since v1.5.33)
+    # ------------------------------------------------------------------
+    # The public Thank-You endpoint /xibo/thanks/<id> is keyed only by the
+    # (guessable) integer id. To stop anyone from reading the last customer
+    # name + product, we add an OPTIONAL secret key. Enforcement is OFF by
+    # default (xibo_thanks_require_token = False) so simply deploying this
+    # code changes nothing: existing screens keep working with their old
+    # URL. The admin updates each screen's URL to include ?key=<token>,
+    # confirms it still renders, and only then flips the switch ON.
+    xibo_thanks_token = fields.Char(
+        string='Thank-You URL Key', readonly=True, copy=False,
+        help="Secret key embedded in the Thank-You URL when 'Require key' is on.",
+    )
+    xibo_thanks_require_token = fields.Boolean(
+        string='Require key on Thank-You URL', default=False,
+        help="OFF (default): the Thank-You page works with the old URL — nothing "
+             "breaks on upgrade. Turn ON only after every screen's Xibo Webpage "
+             "widget URL has been updated to the one shown below (with the key); "
+             "then outsiders who guess the id can no longer read it.",
+    )
+    xibo_thanks_url = fields.Char(
+        string='Thank-You Webpage URL', compute='_compute_xibo_thanks_url',
+        help="Paste this into the Xibo Webpage widget for the Thank-You screen. "
+             "It already includes the access key.",
+    )
+
+    @api.depends('xibo_thanks_token')
+    def _compute_xibo_thanks_url(self):
+        base_url = (self.env['ir.config_parameter'].sudo()
+                    .get_param('web.base.url') or '').rstrip('/')
+        for rec in self:
+            # Lazily allocate a stable secret key the first time the URL is
+            # read (mirrors the device_uuid pattern above).
+            if rec.id and not rec.xibo_thanks_token:
+                rec.xibo_thanks_token = secrets.token_urlsafe(24)
+            if base_url and rec.id:
+                url = "%s/xibo/thanks/%s" % (base_url, rec.id)
+                if rec.xibo_thanks_token:
+                    url += "?key=%s" % rec.xibo_thanks_token
+                rec.xibo_thanks_url = url
+            else:
+                rec.xibo_thanks_url = False
 
     # Auto-apply Customer Display Mirror on save
     def write(self, vals):

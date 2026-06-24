@@ -25,6 +25,8 @@ class ResConfigSettings(models.TransientModel):
     pos_xibo_thanks_preset = fields.Selection(related='pos_config_id.xibo_thanks_preset', readonly=False)
     pos_xibo_thanks_custom_html = fields.Html(related='pos_config_id.xibo_thanks_custom_html', readonly=False, sanitize=False)
     pos_xibo_thanks_show_product_image = fields.Boolean(related='pos_config_id.xibo_thanks_show_product_image', readonly=False)
+    pos_xibo_thanks_url = fields.Char(related='pos_config_id.xibo_thanks_url', readonly=True)
+    pos_xibo_thanks_require_token = fields.Boolean(related='pos_config_id.xibo_thanks_require_token', readonly=False)
 
     # ④ Thank-You Audio (since v19.0.1.5.31)
     pos_xibo_thanks_audio_enabled = fields.Boolean(related='pos_config_id.xibo_thanks_audio_enabled', readonly=False)

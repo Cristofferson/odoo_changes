@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_despacho_autologin_used_system,despacho.autologin.used system,model_despacho_autologin_used,base.group_system,1,1,1,1

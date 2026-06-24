@@ -1,6 +1,12 @@
+import base64
+import hashlib
+import hmac
+import json
 import logging
 import re
+import secrets
 import socket
+import time
 
 from odoo import api, fields, models
 
@@ -117,6 +123,14 @@ class ProjectProject(models.Model):
     despacho_operation_count = fields.Integer(compute='_compute_operation_count')
     despacho_is_test = fields.Boolean(compute='_compute_is_test', store=True,
                                       help='La BD parece de prueba (su nombre empieza con "test").')
+    # Auto-login ("Conectar" entra ya logueado). Solo se activa por BD una vez
+    # que el módulo compañero `despacho_autologin` está instalado y su secreto
+    # sembrado en esa BD. Si está en False, "Conectar" usa el comportamiento
+    # nativo (abre el login).
+    despacho_autologin_ready = fields.Boolean(
+        'Auto-login listo', default=False, copy=False,
+        help='El módulo despacho_autologin está instalado en esta BD y su '
+             'secreto sembrado: el botón "Conectar" inicia sesión sin pedir clave.')
 
     @api.depends('database_name')
     def _compute_is_test(self):
@@ -210,6 +224,68 @@ class ProjectProject(models.Model):
         """Compañía XUBAX para los registros del inventario (multi-compañía)."""
         company = self.env['res.company'].sudo().search([('name', '=ilike', 'XUBAX')], limit=1)
         return company or self.env.company
+
+    # ------------------------------------------------------------------
+    # Auto-login ("Conectar" entra ya logueado)
+    # ------------------------------------------------------------------
+    # El secreto de CADA BD se deriva de un secreto maestro guardado solo en la
+    # BD del despacho (ir.config_parameter `despacho_autologin.master_secret`,
+    # sudo). Así el manager no almacena un secreto por cada BD y, si se filtra
+    # el de una BD, no revela el maestro (HMAC es de un solo sentido). El módulo
+    # compañero guarda en cada BD destino su `despacho_autologin.secret` =
+    # _despacho_autologin_secret() de esa BD.
+    AUTOLOGIN_UID = 2   # admin (superusuario administrador) de la BD destino
+    AUTOLOGIN_TTL = 30  # segundos de vida del token
+
+    @api.model
+    def _despacho_autologin_master(self):
+        return self.env['ir.config_parameter'].sudo().get_param(
+            'despacho_autologin.master_secret')
+
+    def _despacho_autologin_secret(self):
+        """Secreto por-BD = HMAC(maestro, nombre_bd). Debe coincidir con el
+        sembrado en la BD destino."""
+        self.ensure_one()
+        master = self._despacho_autologin_master()
+        if not master or not self.database_name:
+            return None
+        return hmac.new(master.encode(), self.database_name.encode(),
+                        hashlib.sha256).hexdigest()
+
+    def _despacho_autologin_url(self):
+        """URL magic-link `/despacho/autologin?token=...` para esta BD, o None
+        si no se puede firmar (sin maestro, sin URL, etc.)."""
+        self.ensure_one()
+        secret = self._despacho_autologin_secret()
+        if not secret or not self.database_url:
+            return None
+        # Base limpia: esquema+host, sin path ni `?srv=` (las BDs duplicadas
+        # entre servidores guardan database_url con sufijo ?srv=<server>).
+        m = re.match(r'(https?://[^/?#]+)', self.database_url.strip())
+        if not m:
+            return None
+        base = m.group(1)
+        payload = {
+            'uid': self.AUTOLOGIN_UID,
+            'exp': int(time.time()) + self.AUTOLOGIN_TTL,
+            'nonce': secrets.token_urlsafe(12),
+        }
+        raw = json.dumps(payload, separators=(',', ':'), sort_keys=True).encode()
+        p_b64 = base64.urlsafe_b64encode(raw).decode().rstrip('=')
+        sig = hmac.new(secret.encode(), p_b64.encode(), hashlib.sha256).digest()
+        s_b64 = base64.urlsafe_b64encode(sig).decode().rstrip('=')
+        return '%s/despacho/autologin?token=%s.%s' % (base, p_b64, s_b64)
+
+    def action_database_connect(self):
+        """Override del "Conectar" nativo: si esta BD tiene el auto-login listo,
+        redirige al magic-link (entra ya logueado); si no, comportamiento
+        nativo (abre el login)."""
+        self.ensure_one()
+        if self.despacho_autologin_ready:
+            url = self._despacho_autologin_url()
+            if url:
+                return {'type': 'ir.actions.act_url', 'url': url, 'target': 'new'}
+        return super().action_database_connect()
 
     @api.model
     def action_scan_server(self):
@@ -349,12 +425,19 @@ class ProjectProject(models.Model):
             holder = Project.search([('database_url', '=', url)], limit=1)
             if holder and holder != rec:
                 url = '%s?srv=%s' % (url, server)
+            # Auto-login listo = el módulo compañero está instalado en esa BD
+            # (el secreto lo siembra el alta o el despliegue). Source of truth =
+            # presencia del módulo, así el alta no requiere paso manual.
+            mods = row.get('modules') or ''
+            mod_set = ({m.strip() for m in mods.split(',')}
+                       if isinstance(mods, str) else set(mods or []))
             vals = {
                 'database_url': url,
                 'despacho_db_local': server == THIS_SERVER,
                 'despacho_server': server,
                 'despacho_db_size': row.get('db_size') or 0,
                 'despacho_filestore_size': row.get('filestore_size') or 0,
+                'despacho_autologin_ready': 'despacho_autologin' in mod_set,
                 'despacho_installed_modules': row.get('modules') or False,
                 'despacho_custom_modules': row.get('custom_modules') or False,
                 'despacho_user_count': row.get('users_internal') or 0,

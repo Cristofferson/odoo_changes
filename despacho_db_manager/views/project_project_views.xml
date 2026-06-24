@@ -40,8 +40,11 @@
                 <attribute name="invisible">not database_hosting</attribute>
             </button>
             <field name="database_last_synchro" position="after">
-                <field name="despacho_user_count" optional="show" string="Usuarios"/>
+                <field name="despacho_user_count" optional="show" string="Usuarios"
+                       class="text-center"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
+                <field name="despacho_todo_tag_ids" optional="show" string="Etiquetas"
+                       widget="many2many_tags"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
                 <field name="despacho_backup_count" optional="hide" string="Nº respaldos"/>
                 <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
@@ -90,9 +93,18 @@
             <form position="attributes">
                 <attribute name="create">0</attribute>
             </form>
+            <!-- "Add a user" y el bote de basura "Remove User" son funciones
+                 nativas por API (Odoo.sh) que en premise NO funcionan (abren un
+                 asistente vacío). La lista de usuarios aquí es reflejo del censo;
+                 para gestionar usuarios reales se entra con "Conectar". Se ocultan. -->
+            <xpath expr="//field[@name='database_user_ids']/list/control/button[@name='action_invite_users']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='database_user_ids']/list/button[@name='action_remove_users']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
             <!-- Botón "Conectar" por usuario en Gestión de usuarios: inicia sesión
-                 COMO ese usuario concreto de la BD (no solo el admin). Va al final
-                 (última posición a la derecha), tras el botón de quitar usuario. -->
+                 COMO ese usuario concreto de la BD (no solo el admin). Va al final. -->
             <xpath expr="//field[@name='database_user_ids']/list/button[@name='action_remove_users']" position="after">
                 <button name="action_autologin_as_user" type="object" string="Conectar"
                         icon="fa-sign-in" groups="databases.group_databases_manager"/>
@@ -115,6 +127,28 @@
                         class="btn-primary" icon="fa-sign-in"
                         invisible="not database_hosting"
                         groups="databases.group_databases_manager"/>
+                <!-- Operaciones de BD: movidas aquí (antes en la pestaña Servidor),
+                     junto a "Conectar". despacho_is_test viene del campo (invisible)
+                     que sigue en la pestaña. -->
+                <button name="action_respaldo" type="object" string="Respaldar ahora"
+                        class="btn-secondary" icon="fa-download"
+                        invisible="not database_hosting"
+                        groups="databases.group_databases_manager"/>
+                <button name="action_refresh_test" type="object" string="Refrescar desde prod"
+                        class="btn-warning" icon="fa-refresh"
+                        invisible="not database_hosting or not despacho_is_test"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a refrescar esta BD de prueba desde producción (la sobrescribe). Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                <button name="action_create_test" type="object" string="Crear BD de prueba"
+                        class="btn-info" icon="fa-flask"
+                        invisible="not database_hosting or despacho_is_test"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a crear una BD de prueba como copia de ESTA BD de producción. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                <button name="action_baja" type="object" string="Dar de baja"
+                        class="btn-danger" icon="fa-trash"
+                        invisible="not database_hosting"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
             </header>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" icon="fa-tasks" type="object"
@@ -129,49 +163,39 @@
                       invisible="not database_hosting"
                       groups="databases.group_databases_manager">
                     <field name="despacho_is_test" invisible="1"/>
-                    <div class="oe_button_box" name="despacho_baja_box">
-                        <button name="action_respaldo" type="object" string="Respaldar ahora"
-                                class="btn-secondary" icon="fa-download"/>
-                        <button name="action_refresh_test" type="object" string="Refrescar desde prod"
-                                class="btn-warning" icon="fa-refresh"
-                                invisible="not despacho_is_test"
-                                confirm="Vas a refrescar esta BD de prueba desde producción (la sobrescribe). Se abrirá el asistente en modo simulación. ¿Continuar?"/>
-                        <button name="action_create_test" type="object" string="Crear BD de prueba"
-                                class="btn-info" icon="fa-flask"
-                                invisible="despacho_is_test"
-                                confirm="Vas a crear una BD de prueba como copia de ESTA BD de producción. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
-                        <button name="action_baja" type="object" string="Dar de baja"
-                                class="btn-danger" icon="fa-trash"
-                                confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
-                    </div>
                     <group string="Notas">
                         <field name="description" nolabel="1"
                                placeholder="Notas internas de esta BD: contacto, particularidades, pendientes, accesos…"/>
                     </group>
                     <group>
+                        <!-- Campos del CENSO: solo lectura. Editarlos a mano no afecta
+                             la BD real del cliente (solo el dato local, que el censo
+                             sobrescribe); los pongo readonly para no confundir. -->
                         <group string="Inventario">
-                            <field name="despacho_db_local"/>
-                            <field name="despacho_server"/>
-                            <field name="despacho_provision_state"/>
-                            <field name="despacho_size_display"/>
+                            <field name="despacho_db_local" readonly="1"/>
+                            <field name="despacho_server" readonly="1"/>
+                            <field name="despacho_provision_state" readonly="1"/>
+                            <field name="despacho_size_display" readonly="1"/>
                             <label for="despacho_user_count" string="Usuarios (internos / total)"/>
                             <div>
-                                <field name="despacho_user_count" class="oe_inline"/> /
-                                <field name="despacho_user_total" class="oe_inline"/>
+                                <field name="despacho_user_count" class="oe_inline" readonly="1"/> /
+                                <field name="despacho_user_total" class="oe_inline" readonly="1"/>
                             </div>
                         </group>
                         <group string="Censo">
-                            <field name="despacho_last_census"/>
-                            <field name="despacho_last_backup"/>
+                            <field name="despacho_last_census" readonly="1"/>
+                            <field name="despacho_last_backup" readonly="1"/>
                             <field name="despacho_autologin_ready" readonly="1"/>
                             <field name="despacho_autologin_user" readonly="1"
                                    invisible="not despacho_autologin_ready"/>
+                            <!-- Editable a propósito: es el MAPEO etiqueta↔cliente
+                                 (no toca la BD del cliente). -->
                             <field name="despacho_todo_tag_ids" widget="many2many_tags"
                                    options="{'no_create': True}"/>
                         </group>
                     </group>
                     <group string="Apps custom">
-                        <field name="despacho_custom_module_count"/>
+                        <field name="despacho_custom_module_count" readonly="1"/>
                     </group>
                     <field name="despacho_module_ids" nolabel="1" readonly="1">
                         <list string="Apps custom" create="0" edit="0" delete="0">

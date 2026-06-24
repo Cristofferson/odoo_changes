@@ -1,0 +1,7 @@
+/* Centrar la columna "Usuarios" (despacho_user_count) en el listado de Databases.
+   Los campos numéricos van alineados a la derecha por defecto (o_list_number);
+   esto fuerza el centrado de esa celda concreta. */
+.o_list_table td[name="despacho_user_count"],
+.o_list_table th[data-name="despacho_user_count"] {
+    text-align: center !important;
+}

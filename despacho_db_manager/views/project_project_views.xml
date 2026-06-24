@@ -28,15 +28,19 @@
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
             </header>
-            <!-- Botón "Conectar" por fila (entra logueado vía auto-login). En lugar
-                 del "Nuevo" desactivado, esta es la acción útil del listado. -->
-            <field name="name" position="before">
-                <button name="action_database_connect" type="object" string="Conectar"
-                        icon="fa-sign-in" invisible="not database_hosting"
-                        groups="databases.group_databases_manager"/>
-            </field>
-            <field name="database_last_synchro" position="after">
+            <!-- El botón "Conectar" nativo (action_database_connect, ya overridden a
+                 auto-login) solo se mostraba si el operador era usuario de esa BD
+                 (database_can_access). Lo hacemos visible para TODA BD del inventario
+                 (un solo botón: usamos el nativo, no agregamos otro). -->
+            <button name="action_database_connect" position="attributes">
+                <attribute name="invisible">not database_hosting</attribute>
+            </button>
+            <!-- "Conectar como" va INMEDIATAMENTE después del botón Conectar, como
+                 últimas columnas visibles del listado. -->
+            <button name="action_database_connect" position="after">
                 <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
+            </button>
+            <field name="database_last_synchro" position="after">
                 <field name="despacho_user_count" optional="show" string="Usuarios"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
@@ -81,6 +85,12 @@
             <form position="attributes">
                 <attribute name="create">0</attribute>
             </form>
+            <!-- Botón "Conectar" por usuario en Gestión de usuarios: inicia sesión
+                 COMO ese usuario concreto de la BD (no solo el admin). -->
+            <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">
+                <button name="action_autologin_as_user" type="object" string="Conectar"
+                        icon="fa-sign-in" groups="databases.group_databases_manager"/>
+            </xpath>
         </field>
     </record>
 
@@ -147,8 +157,8 @@
                         <group string="Censo">
                             <field name="despacho_last_census"/>
                             <field name="despacho_last_backup"/>
-                            <field name="despacho_autologin_ready"/>
-                            <field name="despacho_autologin_user"
+                            <field name="despacho_autologin_ready" readonly="1"/>
+                            <field name="despacho_autologin_user" readonly="1"
                                    invisible="not despacho_autologin_ready"/>
                         </group>
                     </group>

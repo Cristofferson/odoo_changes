@@ -1,6 +1,6 @@
 {
     'name': 'Despacho - Auto-login (magic link)',
-    'version': '1.0.4',
+    'version': '1.0.5',
     'summary': 'Inicio de sesion por magic-link firmado para el "Conectar" del despacho XUBAX',
     'description': """
 Auto-login del despacho (compañero de despacho_db_manager)

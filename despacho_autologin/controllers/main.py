@@ -30,10 +30,12 @@ class DespachoAutologin(http.Controller):
     invalido.
     """
 
-    def _resolve_user(self, uid=0):
+    def _resolve_user(self, uid=0, login=None):
         """Devuelve el usuario con el que iniciar sesión, o un recordset vacío.
 
         Orden (compatible Odoo 18 y 19 vía ``has_group``):
+        0. ``login`` explícito del token (conectar como un usuario concreto de la
+           lista de la BD); debe estar activo e interno.
         1. ``uid`` explícito del token (si activo e interno).
         2. ``base.user_admin`` (el admin canónico, normalmente uid 2) si está
            activo, es interno y pertenece al grupo Ajustes (``group_system``).
@@ -44,6 +46,9 @@ class DespachoAutologin(http.Controller):
         # ir.model.data, así que toda la resolución va con privilegios.
         env = request.env(su=True)
         Users = env['res.users']
+        if login:
+            u = Users.search([('login', '=', login), ('active', '=', True)], limit=1)
+            return u if (u and u._is_internal()) else Users.browse()
         if uid:
             u = Users.browse(uid)
             return u if (u.exists() and u.active and u._is_internal()) else Users.browse()
@@ -94,6 +99,7 @@ class DespachoAutologin(http.Controller):
             return login_page
         nonce = payload.get('nonce')
         uid = int(payload.get('uid') or 0)
+        login = payload.get('login') or None
         if not nonce:
             return login_page
 
@@ -111,7 +117,7 @@ class DespachoAutologin(http.Controller):
         # 4) Usuario destino: si el token trae uid explícito se respeta; si no,
         #    se RESUELVE el administrador real de ESTA BD (uid 2 no siempre es el
         #    admin: puede estar inactivo o no pertenecer al grupo Ajustes).
-        user = self._resolve_user(uid)
+        user = self._resolve_user(uid=uid, login=login)
         if not user:
             return login_page
 

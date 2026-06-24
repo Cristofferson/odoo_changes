@@ -256,9 +256,11 @@ class ProjectProject(models.Model):
         return hmac.new(master.encode(), self.database_name.encode(),
                         hashlib.sha256).hexdigest()
 
-    def _despacho_autologin_url(self):
+    def _despacho_autologin_url(self, login=None):
         """URL magic-link `/despacho/autologin?token=...` para esta BD, o None
-        si no se puede firmar (sin maestro, sin URL, etc.)."""
+        si no se puede firmar (sin maestro, sin URL, etc.). Si se pasa `login`,
+        el token pide entrar como ESE usuario; si no, el controlador resuelve el
+        admin de la BD."""
         self.ensure_one()
         secret = self._despacho_autologin_secret()
         if not secret or not self.database_url:
@@ -269,13 +271,15 @@ class ProjectProject(models.Model):
         if not m:
             return None
         base = m.group(1)
-        # Sin 'uid': el controlador de la BD destino RESUELVE su admin real
+        # Sin 'login'/'uid': el controlador de la BD destino RESUELVE su admin real
         # (uid 2 no siempre sirve: puede estar inactivo o no ser del grupo
         # Ajustes). El campo despacho_autologin_user muestra de antemano quién.
         payload = {
             'exp': int(time.time()) + self.AUTOLOGIN_TTL,
             'nonce': secrets.token_urlsafe(12),
         }
+        if login:
+            payload['login'] = login
         raw = json.dumps(payload, separators=(',', ':'), sort_keys=True).encode()
         p_b64 = base64.urlsafe_b64encode(raw).decode().rstrip('=')
         sig = hmac.new(secret.encode(), p_b64.encode(), hashlib.sha256).digest()

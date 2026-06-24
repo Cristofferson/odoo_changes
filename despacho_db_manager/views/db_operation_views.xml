@@ -102,17 +102,22 @@
                         <div class="alert alert-info" role="alert" colspan="2"
                              invisible="op != 'mcp_add'">
                             Activa un endpoint para que la IA del cliente (Claude, ChatGPT,
-                            Gemini) consulte ESTA base de datos en <b>solo lectura</b>. Al
-                            terminar verás el endpoint y el <b>token UNA sola vez</b>: cópialo
-                            para entregárselo al cliente.
+                            Gemini) consulte ESTA base de datos. Por defecto conecta con el
+                            usuario administrador (mismos privilegios que logueado) y con
+                            escrituras. Al terminar verás el endpoint y el <b>token UNA sola
+                            vez</b>: cópialo para entregárselo al cliente.
                         </div>
                         <field name="mcp_slug" required="op == 'mcp_add'"
                                placeholder="ej. lamur"/>
+                        <field name="mcp_as_user"
+                               placeholder="vacío = usuario solo-lectura dedicado"/>
                         <field name="mcp_writes"/>
                         <div class="alert alert-warning" role="alert" colspan="2"
                              invisible="not mcp_writes">
-                            ⚠️ Con escrituras activadas, la IA podrá CREAR/MODIFICAR datos
-                            en el Odoo del cliente. Úsalo solo si es estrictamente necesario.
+                            ⚠️ Con escrituras activadas, la IA (y quien tenga el token) podrá
+                            CREAR/MODIFICAR/BORRAR datos en el Odoo del cliente, con los
+                            permisos del usuario de conexión. El token equivale a ese acceso:
+                            entrégalo de forma segura.
                         </div>
                     </group>
                     <!-- DESACTIVAR MCP -->

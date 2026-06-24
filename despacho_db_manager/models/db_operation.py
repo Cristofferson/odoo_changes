@@ -114,10 +114,17 @@ class DespachoDbOperation(models.Model):
         help='Segmento de la URL pública: https://mcp.xubax.com/<slug>/mcp. '
              'Minúsculas, números y guiones; corto y reconocible (ej: lamur). '
              'Es lo que verá el cliente.')
+    mcp_as_user = fields.Char(
+        'Conectar como (usuario)',
+        help='Login del usuario de Odoo con el que la IA se conectará. Por defecto es '
+             'el administrador de la BD (el mismo de "Conectar como"), para que la IA '
+             'tenga LOS MISMOS PRIVILEGIOS que ese usuario logueado. Si lo dejas vacío '
+             'se usa un usuario dedicado de solo lectura (mcp_readonly).')
     mcp_writes = fields.Boolean(
-        'Permitir escrituras (no recomendado)', default=False,
-        help='Por defecto el puente es SOLO LECTURA. Actívalo solo si el cliente '
-             'necesita que su IA cree/modifique datos (riesgoso).')
+        'Permitir escrituras', default=True,
+        help='Si está activo, la IA puede crear/modificar/borrar según los permisos '
+             'del usuario de conexión (coherente con "mismos privilegios que logueado"). '
+             'Desactívalo para limitar la IA a solo consulta.')
     mcp_purge_key = fields.Boolean(
         'Revocar también la API key', default=True,
         help='Al desactivar, elimina la API key del usuario mcp_readonly en la BD '
@@ -423,6 +430,7 @@ class DespachoDbOperation(models.Model):
         return {
             'id': self.id, 'op': 'mcp_add', 'slug': slug, 'db': db,
             'writes': bool(self.mcp_writes),
+            'as_user': (self.mcp_as_user or '').strip(),
         }
 
     def _build_mcp_remove_req(self):

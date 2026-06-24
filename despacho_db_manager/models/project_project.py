@@ -483,8 +483,10 @@ class ProjectProject(models.Model):
         return base or 'cliente'
 
     def action_mcp_add(self):
-        """Abre el asistente para ACTIVAR el puente MCP de esta BD (la IA del
-        cliente podrá consultar su Odoo en solo lectura). Solo BDs de este servidor."""
+        """Abre el asistente para ACTIVAR el puente MCP de esta BD. Por defecto la IA
+        del cliente conecta con los MISMOS privilegios que su usuario administrador
+        (el mismo 'Conectar como') y con escrituras habilitadas. Solo BDs de este
+        servidor."""
         self.ensure_one()
         if self.despacho_server != 'odoo19':
             raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
@@ -499,7 +501,8 @@ class ProjectProject(models.Model):
                 'default_op': 'mcp_add',
                 'default_project_id': self.id,
                 'default_mcp_slug': self._mcp_slug_suggestion(),
-                'default_mcp_writes': False,
+                'default_mcp_as_user': self.despacho_autologin_user or '',
+                'default_mcp_writes': True,
                 'default_simulate': False,
                 'dpm_modal': True,
             },

@@ -27,10 +27,9 @@
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
-                <button name="action_convert_todos_to_tasks" type="object"
-                        string="Convertir pendientes → tareas" display="always"
-                        groups="databases.group_databases_manager"
-                        help="Convierte los Pendientes (To-do) etiquetados por cliente en tareas del proyecto de cada BD, para que aparezcan en Tareas."/>
+                <!-- La conversión de Pendientes (To-do) → Tareas ya NO es un botón
+                     manual: la corre un cron automático (ir_cron.xml), por ser idempotente
+                     y repetible. Arrastra también los pendientes nuevos. -->
             </header>
             <!-- El botón "Conectar" nativo (action_database_connect, ya overridden a
                  auto-login) solo se mostraba si el operador era usuario de esa BD
@@ -39,10 +38,17 @@
             <button name="action_database_connect" position="attributes">
                 <attribute name="invisible">not database_hosting</attribute>
             </button>
+            <!-- Evitar DOS columnas de "Etiquetas": ocultamos por defecto la nativa
+                 'tag_ids' (Tags) y dejamos la del mapeo cliente (despacho_todo_tag_ids).
+                 Sigue disponible en el menú de columnas opcionales. -->
+            <field name="tag_ids" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
             <field name="database_last_synchro" position="after">
                 <field name="despacho_user_count" optional="show" string="Usuarios"
                        class="text-center"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
+                <field name="despacho_subscription_id" optional="hide" string="Suscripción"/>
                 <field name="despacho_todo_tag_ids" optional="show" string="Etiquetas"
                        widget="many2many_tags"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
@@ -179,6 +185,14 @@
                         groups="databases.group_databases_manager">
                     <field name="despacho_operation_count" widget="statinfo" string="Operaciones"/>
                 </button>
+                <button class="oe_stat_button" icon="fa-refresh" type="object"
+                        name="action_open_subscription"
+                        invisible="not database_hosting or not despacho_subscription_id"
+                        groups="databases.group_databases_manager">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Suscripción</span>
+                    </div>
+                </button>
             </div>
             <notebook position="inside">
                 <page name="despacho_server" string="Servidor"
@@ -197,6 +211,10 @@
                             <field name="despacho_db_local" readonly="1"/>
                             <field name="despacho_server" readonly="1"/>
                             <field name="despacho_provision_state" readonly="1"/>
+                            <!-- Liga esta BD con su suscripción (pedido recurrente que
+                                 la factura). Editable a mano; no toca la BD del cliente. -->
+                            <field name="despacho_subscription_id"
+                                   options="{'no_create': True}"/>
                             <field name="despacho_size_display" readonly="1"/>
                             <label for="despacho_user_count" string="Usuarios (internos / total)"/>
                             <div>

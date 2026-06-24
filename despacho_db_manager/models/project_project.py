@@ -174,6 +174,26 @@ class ProjectProject(models.Model):
         help='Etiquetas de la app Pendientes (To-do) que corresponden a este '
              'cliente (una BD puede tener varias marcas → varias etiquetas). '
              'Liga los pendientes con esta base de datos sin re-etiquetarlos.')
+    despacho_subscription_id = fields.Many2one(
+        'sale.order', string='Suscripción', copy=False,
+        domain="[('subscription_state', '!=', False)]",
+        help='Suscripción (pedido de venta recurrente) que factura esta base de '
+             'datos. Liga la BD con su cobranza para saltar a ella desde aquí.')
+
+    def action_open_subscription(self):
+        """Abre la suscripción ligada a esta BD."""
+        self.ensure_one()
+        if not self.despacho_subscription_id:
+            raise UserError('Esta base de datos no tiene una suscripción ligada.')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Suscripción: %s' % (self.database_name or self.name),
+            'res_model': 'sale.order',
+            'res_id': self.despacho_subscription_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
     @api.model
     def action_convert_todos_to_tasks(self):
         """Convierte los Pendientes (To-do: project_id vacío) en TAREAS del

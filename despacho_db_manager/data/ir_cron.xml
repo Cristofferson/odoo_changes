@@ -21,4 +21,18 @@
         <field name="interval_type">days</field>
         <field name="active" eval="False"/>
     </record>
+
+    <!-- Convierte automáticamente los Pendientes (To-do) etiquetados por cliente en
+         Tareas del proyecto de cada BD. Reemplaza el botón manual: el método es
+         idempotente y repetible (solo toca los to-dos con UNA sola BD; arrastra los
+         nuevos). Diario. -->
+    <record id="cron_convert_todos_to_tasks" model="ir.cron">
+        <field name="name">Despacho: convertir Pendientes (To-do) en Tareas</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="state">code</field>
+        <field name="code">model.action_convert_todos_to_tasks()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
 </odoo>

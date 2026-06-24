@@ -196,7 +196,7 @@ class ProjectProject(models.Model):
         for rec in self:
             s = rec.despacho_subscription_id
             rec.despacho_subscription_display = (
-                '%s — %s' % (s.name, s.partner_id.name)) if s else False
+                '%s — %s' % (s.partner_id.name or '(sin cliente)', s.name)) if s else False
 
     @api.depends('despacho_subscription_id')
     def _compute_available_subscriptions(self):
@@ -301,7 +301,9 @@ class ProjectProject(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_project_id': self.id,
-                        'default_subscription_id': self.despacho_subscription_id.id},
+                        'default_subscription_id': self.despacho_subscription_id.id,
+                        # El selector muestra/busca por nombre de cliente, no por folio.
+                        'despacho_sub_label': 1},
         }
 
     @api.model

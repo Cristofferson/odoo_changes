@@ -376,7 +376,8 @@
                 <group>
                     <field name="available_ids" invisible="1"/>
                     <field name="project_id" invisible="1"/>
-                    <field name="subscription_id" options="{'no_create': True}"/>
+                    <field name="subscription_id" options="{'no_create': True}"
+                           context="{'despacho_sub_label': 1}"/>
                 </group>
                 <footer>
                     <button name="action_confirm" type="object" string="Ligar"

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_dmn" model="ir.ui.view">
+        <field name="name">res.company.form.dmn.theft</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="DIAMANE — Trampa de pieza robada (STIJ)">
+                    <field name="dmn_theft_mode"/>
+                    <field name="dmn_theft_alert_email"/>
+                    <field name="dmn_theft_alert_extra_emails"
+                           invisible="not dmn_theft_alert_email"/>
+                    <field name="dmn_theft_alert_throttle_minutes"
+                           invisible="not dmn_theft_alert_email"/>
+                    <field name="dmn_view_dedup_minutes"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

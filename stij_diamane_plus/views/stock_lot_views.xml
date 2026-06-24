@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Campos DIAMANE Plus en la ficha del lote/pieza -->
+    <record id="view_production_lot_form_dmn" model="ir.ui.view">
+        <field name="name">stock.lot.form.dmn</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='main_group']" position="after">
+                <group string="DIAMANE — Trazabilidad STIJ" name="dmn_group">
+                    <group string="Interés del cliente">
+                        <field name="dmn_view_count"/>
+                        <field name="dmn_last_customer_view"/>
+                    </group>
+                    <group string="Seguridad">
+                        <field name="dmn_theft_sighting_count"/>
+                        <field name="dmn_last_theft_alert"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista para el panel de piezas buscadas -->
+    <record id="view_dmn_theft_lot_list" model="ir.ui.view">
+        <field name="name">stock.lot.list.dmn.theft</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <list string="Piezas robadas / extraviadas" create="false">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="x_studio_estatus"/>
+                <field name="x_studio_beneficiario"/>
+                <field name="dmn_theft_sighting_count"/>
+                <field name="dmn_last_theft_alert"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Acción: piezas robadas activas -->
+    <record id="action_dmn_theft_lots" model="ir.actions.act_window">
+        <field name="name">Piezas robadas activas</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('x_studio_estatus', 'in', ['Robado', 'Extraviado'])]</field>
+        <field name="view_id" ref="view_dmn_theft_lot_list"/>
+        <field name="context">{'search_default_group_estatus': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No hay piezas reportadas como robadas o extraviadas</p>
+            <p>Cuando una pieza buscada sea escaneada, su avistamiento aparecerá en su trazabilidad.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dmn_theft_lots"
+              name="Piezas robadas (STIJ)"
+              parent="stock.menu_stock_root"
+              action="action_dmn_theft_lots"
+              sequence="95"/>
+</odoo>

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
+import uuid
 
-from odoo import _, fields, models
+from dateutil.relativedelta import relativedelta
+
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -11,6 +14,35 @@ DMN_THEFT_STATES = ("Robado", "Extraviado")
 
 class StockLot(models.Model):
     _inherit = "stock.lot"
+
+    # ----- Fase 2: registro de propiedad + garantía -------------------- #
+    dmn_claim_token = fields.Char(
+        string="Código de registro de propiedad", copy=False, readonly=True, index=True,
+        help="Código de un solo uso, impreso en el ticket, con el que el comprador "
+             "reclama la propiedad de la pieza en el visor.",
+    )
+    dmn_claim_state = fields.Selection(
+        [("none", "Sin venta"), ("pending", "Pendiente de reclamar"), ("claimed", "Reclamada")],
+        string="Estado de registro", default="none", copy=False, readonly=True,
+    )
+    dmn_claim_partner_id = fields.Many2one(
+        "res.partner", string="Comprador (esperado)", copy=False, readonly=True,
+    )
+    dmn_purchase_date = fields.Date(
+        string="Fecha de compra", copy=False, readonly=True,
+    )
+    dmn_warranty_until = fields.Date(
+        string="Garantía hasta", compute="_compute_dmn_warranty", store=True,
+    )
+
+    @api.depends("dmn_purchase_date", "company_id.dmn_warranty_months")
+    def _compute_dmn_warranty(self):
+        for lot in self:
+            if lot.dmn_purchase_date:
+                months = lot.company_id.dmn_warranty_months or 12
+                lot.dmn_warranty_until = lot.dmn_purchase_date + relativedelta(months=months)
+            else:
+                lot.dmn_warranty_until = False
 
     # ----- Fase 0: vista de cliente por pieza --------------------------- #
     dmn_view_count = fields.Integer(
@@ -190,3 +222,56 @@ class StockLot(models.Model):
             self.sudo().write({"dmn_last_theft_alert": now})
         except Exception:  # pragma: no cover
             _logger.exception("DMN: no se pudo enviar la alerta de robo del lote %s", self.id)
+
+    # ------------------------------------------------------------------- #
+    #  Fase 2 — registro de propiedad
+    # ------------------------------------------------------------------- #
+    def _dmn_generate_claim(self, partner):
+        """Genera el código de registro de propiedad para la pieza recién vendida.
+        Atar la propiedad a la COMPRA (este token impreso en el ticket), no a quien
+        toque la pieza, es lo que cierra el viejo agujero de toma de posesión (C1)."""
+        self.ensure_one()
+        self.sudo().write({
+            "dmn_claim_token": uuid.uuid4().hex,
+            "dmn_claim_state": "pending",
+            "dmn_claim_partner_id": partner.id if partner else False,
+            "dmn_purchase_date": fields.Date.context_today(self),
+        })
+
+    @api.model
+    def _dmn_try_claim(self, token, name, email=None, phone=None):
+        """Registra al comprador como dueño validando el token de un solo uso.
+        Llamado por el controlador público /dmn/claim."""
+        token = (token or "").strip()
+        name = (name or "").strip()
+        if not token:
+            return {"ok": False, "error": _("Falta el código de registro.")}
+        if not name:
+            return {"ok": False, "error": _("Falta tu nombre.")}
+        lot = self.sudo().search(
+            [("dmn_claim_token", "=", token), ("dmn_claim_state", "=", "pending")], limit=1
+        )
+        if not lot:
+            return {"ok": False, "error": _("Código inválido o ya utilizado.")}
+
+        partner = self.env["res.partner"]
+        email = (email or "").strip()
+        if email:
+            partner = partner.sudo().search([("email", "=ilike", email)], limit=1)
+        if not partner:
+            partner = self.env["res.partner"].sudo().create({
+                "name": name,
+                "email": email or False,
+                "phone": (phone or "").strip() or False,
+            })
+        # El write de x_studio_beneficiario dispara el hook de STIJ -> owner_changed.
+        lot.sudo().with_context(stij_event_source="visor_web").write({
+            "x_studio_beneficiario": partner.id,
+            "x_studio_estatus": "Activo",
+            "dmn_claim_state": "claimed",
+        })
+        return {
+            "ok": True,
+            "partner": partner.name,
+            "warranty_until": fields.Date.to_string(lot.dmn_warranty_until) if lot.dmn_warranty_until else None,
+        }

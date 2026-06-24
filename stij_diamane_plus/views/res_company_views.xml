@@ -14,6 +14,7 @@
                     <field name="dmn_theft_alert_throttle_minutes"
                            invisible="not dmn_theft_alert_email"/>
                     <field name="dmn_view_dedup_minutes"/>
+                    <field name="dmn_warranty_months"/>
                 </group>
             </xpath>
         </field>

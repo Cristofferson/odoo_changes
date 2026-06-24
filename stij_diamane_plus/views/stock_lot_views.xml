@@ -16,6 +16,13 @@
                         <field name="dmn_theft_sighting_count"/>
                         <field name="dmn_last_theft_alert"/>
                     </group>
+                    <group string="Propiedad y garantía">
+                        <field name="dmn_claim_state"/>
+                        <field name="dmn_claim_partner_id"/>
+                        <field name="dmn_purchase_date"/>
+                        <field name="dmn_warranty_until"/>
+                        <field name="dmn_claim_token" groups="base.group_system"/>
+                    </group>
                 </group>
             </xpath>
         </field>

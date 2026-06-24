@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from odoo import http
 from odoo.http import request
 from odoo.addons.stij_website.controllers.main import StijWebsite
 
@@ -58,3 +59,10 @@ class StijWebsitePlus(StijWebsite):
         except Exception:  # pragma: no cover
             _logger.exception("DMN: fallo al contar vista del lote %s", lot.id if lot else "?")
         return resp
+
+    @http.route("/dmn/claim", type="jsonrpc", auth="public", website=True)
+    def dmn_claim(self, token=None, name=None, email=None, phone=None, **kw):
+        """Registro de propiedad por el comprador: valida el código de un solo uso
+        impreso en su ticket y lo asigna como dueño. Sin token válido no se asigna
+        nada (cierra la toma de posesión por enumeración, C1)."""
+        return request.env["stock.lot"].sudo()._dmn_try_claim(token, name, email, phone)

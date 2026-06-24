@@ -26,3 +26,7 @@ class ResCompany(models.Model):
     dmn_view_dedup_minutes = fields.Integer(
         string="Minutos para no recontar una vista (misma sesión)", default=30,
     )
+    dmn_warranty_months = fields.Integer(
+        string="Meses de garantía", default=12,
+        help="Vigencia de garantía a partir de la fecha de compra de la pieza.",
+    )

@@ -168,18 +168,19 @@ class ProjectProject(models.Model):
         return dom
 
     def action_view_todos(self):
+        """Abre los pendientes del cliente DENTRO de la acción nativa "Tareas"
+        del app Bases de datos (misma vista/navegación), filtrada por sus
+        etiquetas."""
         self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Pendientes: %s' % self.display_name,
-            'res_model': 'project.task',
-            'view_mode': 'list,form',
-            'domain': self._despacho_todo_domain(only_open=False),
-            'context': {
-                'default_tag_ids': [(4, t) for t in self.despacho_todo_tag_ids.ids],
-                'search_default_open_tasks': 1,
-            },
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'databases.action_view_tasks_all')
+        action['domain'] = self._despacho_todo_domain(only_open=False)
+        action['context'] = {
+            'default_tag_ids': [(4, t) for t in self.despacho_todo_tag_ids.ids],
+            'search_default_open_tasks': 1,
         }
+        action['name'] = 'Pendientes: %s' % self.display_name
+        return action
 
     @api.depends('database_name')
     def _compute_is_test(self):

@@ -35,17 +35,18 @@
             <button name="action_database_connect" position="attributes">
                 <attribute name="invisible">not database_hosting</attribute>
             </button>
-            <!-- "Conectar como" va INMEDIATAMENTE después del botón Conectar, como
-                 últimas columnas visibles del listado. -->
-            <button name="action_database_connect" position="after">
-                <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
-            </button>
             <field name="database_last_synchro" position="after">
                 <field name="despacho_user_count" optional="show" string="Usuarios"/>
                 <field name="despacho_size_display" optional="show" string="Tamaño"/>
                 <field name="despacho_last_backup" optional="hide" string="Último respaldo"/>
                 <field name="despacho_backup_count" optional="hide" string="Nº respaldos"/>
+                <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
             </field>
+            <!-- El botón "Conectar" va hasta el final, JUSTO DESPUÉS de
+                 "Conectar como" (última columna a la derecha). -->
+            <xpath expr="//field[@name='despacho_autologin_user']" position="after">
+                <button name="action_database_connect" position="move"/>
+            </xpath>
             <!-- Versión nativa (database_version): vacía en premise; el censo la
                  llena con la versión del módulo base. La mostramos por defecto. -->
             <field name="database_version" position="attributes">
@@ -86,8 +87,9 @@
                 <attribute name="create">0</attribute>
             </form>
             <!-- Botón "Conectar" por usuario en Gestión de usuarios: inicia sesión
-                 COMO ese usuario concreto de la BD (no solo el admin). -->
-            <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">
+                 COMO ese usuario concreto de la BD (no solo el admin). Va al final
+                 (última posición a la derecha), tras el botón de quitar usuario. -->
+            <xpath expr="//field[@name='database_user_ids']/list/button[@name='action_remove_users']" position="after">
                 <button name="action_autologin_as_user" type="object" string="Conectar"
                         icon="fa-sign-in" groups="databases.group_databases_manager"/>
             </xpath>

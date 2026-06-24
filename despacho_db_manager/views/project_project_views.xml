@@ -20,11 +20,21 @@
                  se usa. La lista nativa trae action="action_view_tasks"; lo cambiamos. -->
             <list position="attributes">
                 <attribute name="action">action_open_self</attribute>
+                <!-- "Nuevo" crea un project.project a mano: aquí no aplica (las BDs
+                     entran por censo/alta). Se desactiva el alta manual. -->
+                <attribute name="create">0</attribute>
             </list>
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
             </header>
+            <!-- Botón "Conectar" por fila (entra logueado vía auto-login). En lugar
+                 del "Nuevo" desactivado, esta es la acción útil del listado. -->
+            <field name="name" position="before">
+                <button name="action_database_connect" type="object" string="Conectar"
+                        icon="fa-sign-in" invisible="not database_hosting"
+                        groups="databases.group_databases_manager"/>
+            </field>
             <field name="database_last_synchro" position="after">
                 <field name="despacho_autologin_user" optional="show" string="Conectar como"/>
                 <field name="despacho_user_count" optional="show" string="Usuarios"/>
@@ -65,6 +75,12 @@
             <button name="action_database_synchronize" position="attributes">
                 <attribute name="invisible">1</attribute>
             </button>
+            <!-- "Nuevo" no aplica en Databases (las BDs entran por censo/alta).
+                 Seguro hacerlo aquí: databases.edit_project es el form de Databases,
+                 NO el form global de Proyectos. -->
+            <form position="attributes">
+                <attribute name="create">0</attribute>
+            </form>
         </field>
     </record>
 
@@ -74,6 +90,16 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
+            <!-- Botón "Conectar" (entra logueado) en el encabezado. Invisible sin
+                 database_hosting → no aparece en proyectos normales de la app Proyecto.
+                 (NO tocar `create` aquí: project.edit_project es el form global de
+                 Proyectos; desactivar Nuevo se hace solo en el form de Databases.) -->
+            <header position="inside">
+                <button name="action_database_connect" type="object" string="Conectar"
+                        class="btn-primary" icon="fa-sign-in"
+                        invisible="not database_hosting"
+                        groups="databases.group_databases_manager"/>
+            </header>
             <div name="button_box" position="inside">
                 <button class="oe_stat_button" icon="fa-tasks" type="object"
                         name="action_view_operations"

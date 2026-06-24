@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_self_service" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.xb_self_service</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='website']" position="inside">
+                <block id="xb_self_service_section" title="Self-Service (Reserve / Book by Value)"
+                       help="On the web store, route the customer by basket value: reserve low-value pieces for counter pickup, or book an advisor for high-value ones.">
+                    <setting string="Enable Self-Service Reserve/Book"
+                             help="Show the reserve / book-an-advisor call-to-action on the cart.">
+                        <field name="self_service_enabled"/>
+                    </setting>
+                    <setting string="Assisted-Sale Threshold"
+                             help="Baskets at/above this amount route to 'Book an advisor'; below it, to 'Reserve in store'."
+                             invisible="not self_service_enabled">
+                        <field name="self_service_threshold"/>
+                    </setting>
+                    <setting string="Advisor Booking URL"
+                             help="Where the 'Book an advisor' button sends the customer."
+                             invisible="not self_service_enabled">
+                        <field name="self_service_appointment_url" placeholder="/appointment"/>
+                    </setting>
+                    <setting string="Reservations Sales Team"
+                             help="Optional: reservations are assigned to this sales team."
+                             invisible="not self_service_enabled">
+                        <field name="self_service_team_id" options="{'no_create': True}"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

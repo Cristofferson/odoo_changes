@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Cart panel: route by basket value (reserve vs. book an advisor) -->
+    <template id="cart_self_service" inherit_id="website_sale.cart"
+              name="Self-Service: reserve or book by value">
+        <xpath expr="//t[@t-call='website_sale.cart_lines']" position="after">
+            <t t-if="website.self_service_enabled and website_sale_order and website_sale_order.order_line">
+                <t t-set="ss_total" t-value="website_sale_order.amount_total"/>
+                <t t-set="ss_threshold" t-value="website.self_service_threshold or 0.0"/>
+                <div class="card border-0 shadow-sm mt-4 xb-selfservice">
+                    <div class="card-body text-center py-4">
+                        <t t-if="ss_total &lt; ss_threshold">
+                            <h4 class="mb-2">¿Te enamoraste de tu selección?</h4>
+                            <p class="text-muted mb-3">Apártala sin pago y recógela en el mostrador.</p>
+                            <form action="/jewelry/reserve" method="post" class="mb-0">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-bookmark me-2"/>Apartar en tienda
+                                </button>
+                            </form>
+                        </t>
+                        <t t-else="">
+                            <h4 class="mb-2">Una pieza especial merece atención especial</h4>
+                            <p class="text-muted mb-3">Te acompañamos con un asesor experto para tu pieza de alto valor.</p>
+                            <a t-att-href="website.self_service_appointment_url or '/appointment'"
+                               class="btn btn-primary btn-lg">
+                                <i class="fa fa-calendar me-2"/>Agendar asesoría
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Confirmation page after reserving -->
+    <template id="reserve_confirmation" name="Self-Service Reservation Confirmed">
+        <t t-call="website.layout">
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7 text-center">
+                        <div class="display-4 mb-3">💎</div>
+                        <h1 class="mb-3">¡Selección apartada!</h1>
+                        <p class="lead mb-1">Tu referencia es
+                            <strong t-esc="order_ref"/>.
+                        </p>
+                        <p class="text-muted">
+                            Pasa al mostrador y un asesor cerrará tu compra. Te esperamos.
+                        </p>
+                        <a href="/shop" class="btn btn-outline-primary mt-3">
+                            Seguir explorando el catálogo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

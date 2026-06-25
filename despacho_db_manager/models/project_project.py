@@ -769,6 +769,9 @@ class ProjectProject(models.Model):
                             'despacho_mcp_writes': bool(mu.get('writes')),
                             'despacho_mcp_port': mu.get('port') or False,
                             'despacho_mcp_health': mu.get('health') or False,
+                            # Preservar el flag OAuth: si no, la baja usaría el teardown
+                            # Bearer y dejaría huérfanos la app Access/DNS/subdominio.
+                            'despacho_mcp_oauth': bool(mu.get('oauth')),
                         })
                     else:
                         uv.update({
@@ -776,6 +779,7 @@ class ProjectProject(models.Model):
                             'despacho_mcp_slug': False, 'despacho_mcp_url': False,
                             'despacho_mcp_status': False, 'despacho_mcp_writes': False,
                             'despacho_mcp_port': False, 'despacho_mcp_health': False,
+                            'despacho_mcp_oauth': False,
                         })
                     cmds.append((0, 0, uv))
                 vals['database_user_ids'] = cmds

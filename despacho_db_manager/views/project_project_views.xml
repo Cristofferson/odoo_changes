@@ -125,9 +125,14 @@
                         icon="fa-sign-in" groups="databases.group_databases_manager"/>
                 <!-- Puente MCP PROPIO de este usuario (la IA del usuario consulta su
                      Odoo con sus mismos privilegios). Un contenedor por usuario. -->
-                <button name="action_mcp_add_user" type="object" string="Activar MCP"
+                <button name="action_mcp_oauth_add_user" type="object" string="MCP (OAuth/ChatGPT)"
                         icon="fa-plug" groups="databases.group_databases_manager"
-                        invisible="despacho_mcp_enabled"/>
+                        invisible="despacho_mcp_enabled"
+                        help="Activa el puente con login por correo (Cloudflare Access). Compatible con ChatGPT y Claude web."/>
+                <button name="action_mcp_add_user" type="object" string="MCP (token)"
+                        icon="fa-key" groups="databases.group_databases_manager"
+                        invisible="despacho_mcp_enabled"
+                        help="Activa el puente clásico con token Bearer (para apps que aceptan token, p.ej. Claude escritorio)."/>
                 <button name="action_mcp_remove_user" type="object" string="Quitar MCP"
                         icon="fa-power-off" groups="databases.group_databases_manager"
                         invisible="not despacho_mcp_enabled"/>

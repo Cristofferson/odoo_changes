@@ -23,6 +23,7 @@ PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
 # slug del endpoint MCP (segmento de la URL pública /<slug>/mcp). Igual que el
 # que validan add-client.sh y el worker.
 MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
+EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 
 # Registro de servidores que el censo puede escanear. La CLAVE es un nombre LÓGICO
 # (odoo19/odoo18), NO el hostname del SO: el censo y THIS_SERVER mapean
@@ -129,6 +130,16 @@ class DespachoDbOperation(models.Model):
         'Revocar también la API key', default=True,
         help='Al desactivar, elimina la API key del usuario mcp_readonly en la BD '
              '(recomendado: deja la credencial inservible).')
+    mcp_oauth = fields.Boolean(
+        'Login por OAuth (ChatGPT)', default=False,
+        help='Activo: el puente se publica en su propio subdominio mcp-<id>.xubax.com '
+             'protegido por Cloudflare Access. El cliente entra con su CORREO (login '
+             'OAuth), compatible con ChatGPT y Claude web. Apagado: endpoint clásico '
+             'con token Bearer (solo apps que aceptan token, p.ej. Claude escritorio).')
+    mcp_email = fields.Char(
+        'Correo del cliente (login)',
+        help='Correo con el que el cliente iniciará sesión (Cloudflare le manda un '
+             'código). Solo ese correo podrá entrar a su endpoint.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -183,14 +194,23 @@ class DespachoDbOperation(models.Model):
         El token NO se persiste en Odoo; vive en el .bearer (root) del servidor.
         El result que lo trae es 640 root:odoo (no world-readable)."""
         rpath = os.path.join(SPOOL, 'result', '%d.json' % self.id)
-        endpoint = bearer = ''
+        endpoint = bearer = email = ''
         try:
             with open(rpath) as fh:
                 m = (json.load(fh) or {}).get('mcp') or {}
-            endpoint, bearer = m.get('endpoint') or '', m.get('bearer') or ''
+            endpoint = m.get('endpoint') or ''
+            bearer = m.get('bearer') or ''
+            email = m.get('email') or ''
         except (OSError, ValueError):
             pass
-        if bearer:
+        if email:  # puente por OAuth (Cloudflare Access): no hay token, login por correo
+            self._notify(
+                'success', '✅ MCP (OAuth) activado',
+                'Entrega al cliente para conectar su IA (ChatGPT/Claude):\n\n'
+                'Endpoint:\n%s\n\nInicia sesión con el correo:\n%s\n\n(Cloudflare le '
+                'mandará un código a ese correo; solo ese correo puede entrar.)'
+                % (endpoint, email), sticky=True)
+        elif bearer:
             self._notify(
                 'success', '✅ MCP activado — copia el token AHORA',
                 'Entrega estos datos al cliente para su IA (el token NO se vuelve a '
@@ -428,11 +448,20 @@ class DespachoDbOperation(models.Model):
         db = (self.project_id.database_name or '').strip()
         if not CENSUS_DB_RE.match(db):
             raise UserError('Nombre de BD inválido: %s' % db)
-        return {
+        req = {
             'id': self.id, 'op': 'mcp_add', 'slug': slug, 'db': db,
             'writes': bool(self.mcp_writes),
             'as_user': (self.mcp_as_user or '').strip(),
         }
+        if self.mcp_oauth:
+            email = (self.mcp_email or '').strip()
+            if not EMAIL_RE.match(email):
+                raise UserError('Para el login por OAuth necesitas el correo del '
+                                'cliente (con él iniciará sesión). Correo inválido: %s'
+                                % (email or '(vacío)'))
+            req['oauth'] = True
+            req['email'] = email
+        return req
 
     def _build_mcp_remove_req(self):
         if not self.project_id:
@@ -443,6 +472,7 @@ class DespachoDbOperation(models.Model):
         return {
             'id': self.id, 'op': 'mcp_remove', 'slug': slug,
             'purge_key': bool(self.mcp_purge_key),
+            'oauth': bool(self.mcp_oauth),
         }
 
     def _enqueue(self, req):
@@ -531,15 +561,18 @@ class DespachoDbOperation(models.Model):
             if (rec.op == 'mcp_add' and res.get('state') == 'done'
                     and rec.project_id and isinstance(res.get('mcp'), dict)):
                 m = res['mcp']
-                status = 'running' if str(m.get('code')) == '200' else 'stopped'
+                is_oauth = bool(m.get('email'))
+                # OAuth no sondea (el endpoint pide login); si vino ok lo damos por arriba.
+                status = 'running' if (is_oauth or str(m.get('code')) == '200') else 'stopped'
+                cprefix = 'mcp-oauth-' if is_oauth else 'mcp-'
                 rec.project_id.sudo().write({
                     'despacho_mcp_enabled': True,
                     'despacho_mcp_status': status,
                     'despacho_mcp_url': m.get('endpoint') or False,
-                    'despacho_mcp_container': ('mcp-%s' % m['slug']) if m.get('slug') else False,
+                    'despacho_mcp_container': (cprefix + m['slug']) if m.get('slug') else False,
                     'despacho_mcp_port': str(m['port']) if m.get('port') else False,
                     'despacho_mcp_writes': bool(m.get('writes')),
-                    'despacho_mcp_health': str(m['code']) if m.get('code') else False,
+                    'despacho_mcp_health': str(m['code']) if m.get('code') else ('OAuth' if is_oauth else False),
                 })
                 # Reflejar también en la fila del USUARIO de "Gestión de usuarios"
                 # (para que el botón cambie a "Quitar MCP" SIN esperar al censo).
@@ -551,12 +584,13 @@ class DespachoDbOperation(models.Model):
                     if du:
                         du.write({
                             'despacho_mcp_enabled': True,
+                            'despacho_mcp_oauth': is_oauth,
                             'despacho_mcp_slug': m.get('slug') or False,
                             'despacho_mcp_url': m.get('endpoint') or False,
                             'despacho_mcp_status': status,
                             'despacho_mcp_writes': bool(m.get('writes')),
                             'despacho_mcp_port': str(m['port']) if m.get('port') else False,
-                            'despacho_mcp_health': str(m['code']) if m.get('code') else False,
+                            'despacho_mcp_health': str(m['code']) if m.get('code') else ('OAuth' if is_oauth else False),
                         })
             # Desactivar MCP aplicado: limpiar la fila del usuario y recalcular el
             # resumen de la BD (queda enabled solo si AÚN hay otro usuario con puente).
@@ -571,7 +605,7 @@ class DespachoDbOperation(models.Model):
                             'despacho_mcp_enabled': False, 'despacho_mcp_slug': False,
                             'despacho_mcp_url': False, 'despacho_mcp_status': False,
                             'despacho_mcp_writes': False, 'despacho_mcp_port': False,
-                            'despacho_mcp_health': False,
+                            'despacho_mcp_health': False, 'despacho_mcp_oauth': False,
                         })
                 any_left = bool(self.env['databases.user'].sudo().search_count([
                     ('project_id', '=', rec.project_id.id),

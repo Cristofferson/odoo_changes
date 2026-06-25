@@ -109,6 +109,10 @@
                         </div>
                         <field name="mcp_slug" required="op == 'mcp_add'"
                                placeholder="ej. lamur"/>
+                        <field name="mcp_oauth"/>
+                        <field name="mcp_email" required="op == 'mcp_add' and mcp_oauth"
+                               invisible="not mcp_oauth"
+                               placeholder="correo del cliente (con él inicia sesión)"/>
                         <field name="mcp_as_user"
                                placeholder="vacío = usuario solo-lectura dedicado"/>
                         <field name="mcp_writes"/>

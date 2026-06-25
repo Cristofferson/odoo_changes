@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fase 2: página de registro de propiedad (la ve el comprador) -->
+    <template id="page_dmn_register" name="Registrar propiedad STIJ">
+        <t t-call="website.layout">
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6 col-lg-5">
+                        <h2 class="mb-3">Registra tu joya</h2>
+                        <p class="text-muted">Pieza: <strong t-esc="piece_name"/></p>
+                        <p>Ingresa el código de registro impreso en tu ticket para activar
+                           tu garantía y la protección anti-robo.</p>
+                        <div id="dmn_reg_alert"/>
+                        <form id="dmn_reg_form">
+                            <input class="form-control mb-2" name="token" placeholder="Código de registro" required="required"/>
+                            <input class="form-control mb-2" name="name" placeholder="Tu nombre" required="required"/>
+                            <input class="form-control mb-2" name="email" type="email" placeholder="Correo (opcional)"/>
+                            <input class="form-control mb-3" name="phone" placeholder="Teléfono (opcional)"/>
+                            <button class="btn btn-primary w-100" type="submit">Registrar mi propiedad</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript"><![CDATA[
+              (function(){
+                var f = document.getElementById('dmn_reg_form');
+                var box = document.getElementById('dmn_reg_alert');
+                f.addEventListener('submit', function(e){
+                  e.preventDefault();
+                  var p = {token: f.token.value, name: f.name.value, email: f.email.value, phone: f.phone.value};
+                  fetch('/dmn/claim', {method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({jsonrpc:'2.0', method:'call', params:p, id:1})})
+                  .then(function(r){return r.json();})
+                  .then(function(d){
+                    var res = d.result || {};
+                    if(res.ok){
+                      var g = res.warranty_until ? (' Garantia hasta ' + res.warranty_until + '.') : '';
+                      box.innerHTML = '<div class="alert alert-success">Listo, ' + res.partner + '. Tu joya quedo registrada a tu nombre.' + g + '</div>';
+                      f.style.display = 'none';
+                      setTimeout(function(){ window.location.href='/visor'; }, 2500);
+                    } else {
+                      box.innerHTML = '<div class="alert alert-danger">' + (res.error || 'No se pudo registrar.') + '</div>';
+                    }
+                  })
+                  .catch(function(){ box.innerHTML = '<div class="alert alert-danger">Error de conexion.</div>'; });
+                });
+              })();
+            ]]></script>
+        </t>
+    </template>
+
+    <!-- Fase 3: dedicatoria pintada dentro del visor (gating server-side) -->
+    <template id="dmn_visor_dedication" inherit_id="stij_website.page_visor_stij">
+        <xpath expr="//t[@t-call='stij_website.button_submit']" position="after">
+            <div id="dmn_dedication_block" class="row mt-3" style="display:none">
+                <div class="col-12">
+                    <div class="card shadow-sm" style="border-left:4px solid #d4af37">
+                        <div class="card-body">
+                            <h5 class="card-title">💌 Dedicatoria</h5>
+                            <p id="dmn_ded_text" class="mb-1" style="white-space:pre-line"/>
+                            <p id="dmn_ded_from" class="text-muted mb-2"/>
+                            <img id="dmn_ded_img" class="img-fluid rounded" style="max-height:240px;display:none" alt="dedicatoria"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript"><![CDATA[
+              (function(){
+                fetch('/dmn/dedication', {method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({jsonrpc:'2.0', method:'call', params:{}, id:1})})
+                .then(function(r){return r.json();})
+                .then(function(d){
+                  var res = d.result || {};
+                  if(!res.visible){return;}
+                  document.getElementById('dmn_ded_text').textContent = res.text || '';
+                  document.getElementById('dmn_ded_from').textContent = res.from ? ('- ' + res.from) : '';
+                  if(res.image){ var im = document.getElementById('dmn_ded_img'); im.src = res.image; im.style.display='block'; }
+                  document.getElementById('dmn_dedication_block').style.display = 'flex';
+                }).catch(function(){});
+              })();
+            ]]></script>
+        </xpath>
+    </template>
+</odoo>

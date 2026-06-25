@@ -45,6 +45,18 @@ class StijWebsitePlus(StijWebsite):
                 return request.redirect("/visor")
             # Disuasivo: cae al flujo normal de STIJ (redirige a /report).
 
+        # --- Fase 2: pieza vendida sin reclamar -> formulario de registro --- #
+        if lot and lot.dmn_claim_state == "pending":
+            user = request.env.user
+            is_owner = (
+                not user._is_public()
+                and lot.x_studio_beneficiario
+                and user.partner_id.id == lot.x_studio_beneficiario.id
+            )
+            if not is_owner:
+                request.session["active_stij_lot_id"] = lot.id
+                return request.redirect("/dmn/register")
+
         # --- flujo original de STIJ (Gerardo) --- #
         resp = super().stij_entry(**kw)
 
@@ -66,6 +78,21 @@ class StijWebsitePlus(StijWebsite):
         impreso en su ticket y lo asigna como dueño. Sin token válido no se asigna
         nada (cierra la toma de posesión por enumeración, C1)."""
         return request.env["stock.lot"].sudo()._dmn_try_claim(token, name, email, phone)
+
+    @http.route("/dmn/register", type="http", auth="public", website=True)
+    def dmn_register_page(self, **kw):
+        """Página de registro de propiedad: la ve el comprador al escanear su pieza
+        recién comprada. Pide el código del ticket + sus datos y llama a /dmn/claim."""
+        lot_id = request.session.get("active_stij_lot_id")
+        lot = request.env["stock.lot"].sudo().browse(int(lot_id)) if lot_id else None
+        if not lot or not lot.exists():
+            return request.redirect("/")
+        if lot.dmn_claim_state != "pending":
+            return request.redirect("/visor")
+        return request.render(
+            "stij_diamane_plus.page_dmn_register",
+            {"piece_name": lot.product_id.display_name or (lot.name or "")},
+        )
 
     @http.route("/dmn/dedication", type="jsonrpc", auth="public", website=True)
     def dmn_dedication(self, **kw):

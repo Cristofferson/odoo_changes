@@ -101,20 +101,22 @@
                     <group string="Activar puente MCP" invisible="op != 'mcp_add'">
                         <div class="alert alert-info" role="alert" colspan="2"
                              invisible="op != 'mcp_add'">
-                            Activa un endpoint para que la IA del cliente (Claude, ChatGPT,
-                            Gemini) consulte ESTA base de datos. Por defecto conecta con el
-                            usuario administrador (mismos privilegios que logueado) y con
-                            escrituras. Al terminar verás el endpoint y el <b>token UNA sola
-                            vez</b>: cópialo para entregárselo al cliente.
+                            Activa un endpoint para que la IA del cliente consulte ESTA base
+                            de datos, conectando como el usuario elegido (mismos privilegios
+                            que logueado). Elige el <b>método</b> abajo:
+                            <b>Login por OAuth</b> (predeterminado) = el cliente entra con su
+                            <b>correo</b>; sirve para <b>ChatGPT, Claude web y escritorio</b>.
+                            Desmárcalo para usar <b>token Bearer</b> (gratis, solo Claude
+                            escritorio/CLI): en ese caso verás el <b>token UNA sola vez</b>.
                         </div>
                         <field name="mcp_slug" required="op == 'mcp_add'"
                                placeholder="ej. lamur"/>
-                        <field name="mcp_oauth"/>
+                        <field name="mcp_oauth" string="Login por correo (OAuth — ChatGPT/Claude)"/>
                         <field name="mcp_email" required="op == 'mcp_add' and mcp_oauth"
                                invisible="not mcp_oauth"
                                placeholder="correo del cliente (con él inicia sesión)"/>
-                        <field name="mcp_as_user"
-                               placeholder="vacío = usuario solo-lectura dedicado"/>
+                        <field name="mcp_as_user" required="op == 'mcp_add'"
+                               placeholder="login del usuario de la BD (conecta como él)"/>
                         <field name="mcp_writes"/>
                         <div class="alert alert-warning" role="alert" colspan="2"
                              invisible="not mcp_writes">

@@ -592,6 +592,16 @@ class DespachoDbOperation(models.Model):
                             'despacho_mcp_port': str(m['port']) if m.get('port') else False,
                             'despacho_mcp_health': str(m['code']) if m.get('code') else ('OAuth' if is_oauth else False),
                         })
+                # Cobro: asegurar la línea recurrente 'Conexión IA (MCP)' en la
+                # suscripción de esta BD (cuota plana por cliente). Si la BD no
+                # tiene suscripción ligada, avisar en el chatter para que el
+                # gestor la ligue (una sola vez, al volverse terminal).
+                billing = rec.project_id.sudo()._sync_mcp_subscription_line()
+                if billing == 'no_subscription' and not was_terminal:
+                    rec.project_id.sudo().message_post(body=(
+                        '⚠️ Se activó un puente MCP, pero esta base no tiene una '
+                        'suscripción ligada: no se agregó el cobro de "Conexión IA '
+                        '(MCP)". Liga la suscripción en la ficha y se sumará sola.'))
             # Desactivar MCP aplicado: limpiar la fila del usuario y recalcular el
             # resumen de la BD (queda enabled solo si AÚN hay otro usuario con puente).
             if (rec.op == 'mcp_remove' and res.get('state') == 'done' and rec.project_id):
@@ -617,6 +627,9 @@ class DespachoDbOperation(models.Model):
                         'despacho_mcp_port': False, 'despacho_mcp_writes': False,
                         'despacho_mcp_health': False,
                     })
+                # Cobro: re-sincronizar la línea de la suscripción (la deja en 0
+                # si ya no queda ningún puente en la BD; en >=1 la conserva).
+                rec.project_id.sudo()._sync_mcp_subscription_line()
             # Aviso al creador cuando la operación TERMINA (cubre las largas que el
             # poll de action_provision no alcanzó). Solo en la transición a terminal.
             if (not skip_notify and not was_terminal

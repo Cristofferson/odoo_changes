@@ -306,6 +306,45 @@ class ProjectProject(models.Model):
                         'despacho_sub_label': 1},
         }
 
+    # --- Cobro del puente MCP (línea recurrente en la suscripción) ---------
+    def _mcp_billing_product(self):
+        """Producto recurrente que factura el MCP. None si alguien lo borró."""
+        tmpl = self.env.ref('despacho_db_manager.product_mcp_connection',
+                            raise_if_not_found=False)
+        return tmpl.product_variant_id if tmpl else False
+
+    def _sync_mcp_subscription_line(self):
+        """Mantiene en la suscripción de esta BD UNA línea recurrente
+        'Conexión IA (MCP)' (cuota PLANA por cliente): cantidad 1 mientras haya
+        >=1 puente MCP activo en la BD; 0 cuando no queda ninguno. NO borra la
+        línea (puede estar ya facturada) — la deja en 0 para frenar el cobro y
+        conservar el histórico. Idempotente.
+
+        Devuelve: 'ok' | 'no_subscription' (hay puente pero falta ligar la
+        suscripción) | 'no_product'."""
+        self.ensure_one()
+        product = self._mcp_billing_product()
+        if not product:
+            return 'no_product'
+        n = self.env['databases.user'].sudo().search_count([
+            ('project_id', '=', self.id), ('despacho_mcp_enabled', '=', True)])
+        sub = self.sudo().despacho_subscription_id
+        if not sub:
+            return 'no_subscription' if n else 'ok'
+        sub = sub.sudo()
+        lines = sub.order_line.filtered(lambda l: l.product_id.id == product.id)
+        want = 1.0 if n else 0.0
+        if lines:
+            if lines[0].product_uom_qty != want:
+                lines[0].product_uom_qty = want
+            for extra in lines[1:]:  # higiene: si por error hubiera duplicados
+                if extra.product_uom_qty:
+                    extra.product_uom_qty = 0.0
+        elif n:
+            sub.write({'order_line': [(0, 0, {
+                'product_id': product.id, 'product_uom_qty': 1.0})]})
+        return 'ok'
+
     @api.model
     def action_convert_todos_to_tasks(self):
         """Convierte los Pendientes (To-do: project_id vacío) en TAREAS del

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate: el precio y los textos los puede ajustar el despacho en Odoo sin
+         que un upgrade del módulo los pise. -->
+    <data noupdate="1">
+        <!-- Producto recurrente que factura el puente MCP (IA del cliente sobre su
+             Odoo). Cuota PLANA por cliente: una sola línea en la suscripción de la
+             BD, exista 1 o varios puentes. Compañía vacía = disponible en XUBAX
+             (donde viven las suscripciones) y cualquier otra. -->
+        <record id="product_mcp_connection" model="product.template">
+            <field name="name">Conexión IA (MCP)</field>
+            <field name="type">service</field>
+            <field name="recurring_invoice" eval="True"/>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">499.0</field>
+            <field name="company_id" eval="False"/>
+            <field name="description_sale">Conexión del asistente de IA (ChatGPT / Claude) a su Odoo mediante MCP. La IA consulta y opera su base con los privilegios del usuario conectado.</field>
+        </record>
+    </data>
+</odoo>

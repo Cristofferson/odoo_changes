@@ -545,6 +545,21 @@ class DespachoDbOperation(models.Model):
                         'despacho_provision_state': 'dropped', 'active': False})
                 else:
                     rec.project_id.sudo().despacho_provision_state = 'suspended'
+                # Cobranza: al dar de baja la BD, CERRAR (churn) su suscripción para
+                # dejar de facturar al cliente. Solo si está en un estado activo (no
+                # tocar borradores ni las ya cerradas). Reversible con "Reabrir" si
+                # fue una baja temporal. set_close() pone end_date + estado churn.
+                sub = rec.project_id.sudo().despacho_subscription_id
+                if sub and sub.subscription_state in (
+                        '2_renewal', '3_progress', '4_paused', '7_upsell'):
+                    try:
+                        sub.set_close()
+                    except Exception:  # noqa: BLE001 — nunca romper el ingest por esto
+                        sub.subscription_state = '6_churn'
+                    sub.message_post(body=(
+                        '🚫 Suscripción cerrada automáticamente al dar de baja la '
+                        'base "%s". Si fue una baja temporal/reversible, puedes '
+                        'reabrirla.' % (rec.project_id.database_name or '')))
             # Crear BD de prueba aplicado de verdad: dar de alta el nuevo test en el
             # inventario para que aparezca de inmediato (el censo llenará tamaños).
             if (rec.op == 'crear_test' and res.get('state') == 'done'

@@ -38,6 +38,11 @@ SERVERS = [
 ]
 SERVER_KEYS = tuple(k for k, _ in SERVERS)
 
+# Servidores cuyas BDs NO viven en este box: el puente MCP corre igual en odoo19
+# pero apunta al Odoo remoto por IP directa (xmlrpc). El VALOR es el nombre que
+# entiende add-client.sh --remote (allowlist en el worker root). Solo método token.
+MCP_REMOTE_SERVERS = {'odoo18': 'ovh'}
+
 
 class DespachoDbOperation(models.Model):
     _name = 'despacho.db.operation'
@@ -435,10 +440,15 @@ class DespachoDbOperation(models.Model):
     def _build_mcp_add_req(self):
         if not self.project_id:
             raise UserError('Falta la base de datos.')
-        if self.project_id.despacho_server != 'odoo19':
+        # El contenedor del puente SIEMPRE corre en ESTE servidor (odoo19). Para BDs
+        # locales habla con el Odoo local (json2); para BDs de OVH (odoo18) apunta al
+        # Odoo remoto por IP directa (xmlrpc) — ver MCP_REMOTE_SERVERS.
+        server = self.project_id.despacho_server or '¿?'
+        remote = MCP_REMOTE_SERVERS.get(server)
+        if server != 'odoo19' and not remote:
             raise UserError('El puente MCP solo se puede activar en bases de ESTE '
-                            'servidor (odoo19); la elegida está en %s.'
-                            % (self.project_id.despacho_server or '¿?'))
+                            'servidor (odoo19) o de OVH (odoo18); la elegida está '
+                            'en %s.' % server)
         # (El MCP ahora es POR USUARIO: una BD puede tener varios puentes, uno por
         #  usuario. El control "ya tiene puente" se hace por usuario en
         #  databases.user.action_mcp_add_user, y la unicidad del slug la garantiza
@@ -455,6 +465,14 @@ class DespachoDbOperation(models.Model):
             'writes': bool(self.mcp_writes),
             'as_user': (self.mcp_as_user or '').strip(),
         }
+        if remote:
+            # OVH (odoo18) solo soporta el método por token (Bearer). El método
+            # OAuth/ChatGPT (Cloudflare Access) todavía no tiene modo remoto.
+            if self.mcp_oauth:
+                raise UserError('El método OAuth/ChatGPT aún no está disponible para '
+                                'bases de OVH (odoo18). Desmarca "Login por correo '
+                                '(OAuth)" y usa el método por token (Bearer).')
+            req['remote'] = remote
         if self.mcp_oauth:
             email = (self.mcp_email or '').strip()
             if not EMAIL_RE.match(email):

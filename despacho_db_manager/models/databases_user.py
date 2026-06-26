@@ -61,9 +61,10 @@ class DatabasesUser(models.Model):
         proj = self.project_id
         if not proj:
             raise UserError('Este usuario no está ligado a una base de datos.')
-        if proj.despacho_server != 'odoo19':
+        if proj.despacho_server not in ('odoo19', 'odoo18'):
             raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
-                            '(odoo19). Esta está en %s.' % (proj.despacho_server or '¿?'))
+                            '(odoo19) o de OVH (odoo18). Esta está en %s.'
+                            % (proj.despacho_server or '¿?'))
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '
                             'de volver a activarlo.')
@@ -112,15 +113,21 @@ class DatabasesUser(models.Model):
         proj = self.project_id
         if not proj:
             raise UserError('Este usuario no está ligado a una base de datos.')
-        if proj.despacho_server != 'odoo19':
+        if proj.despacho_server not in ('odoo19', 'odoo18'):
             raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
-                            '(odoo19). Esta está en %s.' % (proj.despacho_server or '¿?'))
+                            '(odoo19) o de OVH (odoo18). Esta está en %s.'
+                            % (proj.despacho_server or '¿?'))
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '
                             'de volver a activarlo.')
+        # Las BDs de OVH (odoo18) solo soportan el método por token (Bearer): el
+        # contenedor corre aquí pero apunta al Odoo remoto por xmlrpc. OAuth/ChatGPT
+        # (Cloudflare Access) todavía no tiene modo remoto -> se pre-marca según el
+        # servidor (token en OVH, OAuth en local).
+        is_remote = proj.despacho_server != 'odoo19'
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Activar MCP (OAuth) para %s' % (self.login or self.name),
+            'name': 'Activar MCP para %s' % (self.login or self.name),
             'res_model': 'despacho.db.operation',
             'view_mode': 'form',
             'target': 'new',
@@ -130,8 +137,8 @@ class DatabasesUser(models.Model):
                 'default_mcp_slug': self._mcp_user_slug(),
                 'default_mcp_as_user': self.login,
                 'default_mcp_writes': True,
-                'default_mcp_oauth': True,
-                'default_mcp_email': self._mcp_user_email(),
+                'default_mcp_oauth': not is_remote,
+                'default_mcp_email': '' if is_remote else self._mcp_user_email(),
                 'default_simulate': False,
                 'dpm_modal': True,
             },

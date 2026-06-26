@@ -119,6 +119,13 @@ class ProjectProject(models.Model):
         ('suspended', 'Suspendida'),
         ('dropped', 'Eliminada'),
     ], string='Estado de provisión', default='unknown', copy=False)
+    despacho_site_suspend_kind = fields.Selection([
+        ('churn', 'Por cobranza (auto)'),
+        ('manual', 'Manual'),
+    ], 'Motivo de suspensión del sitio', copy=False,
+        help='Por qué se suspendió el sitio web del cliente. "churn" se reactiva '
+             'automáticamente cuando la suscripción vuelve a estar al corriente; '
+             '"manual" solo se reactiva con el botón.')
     despacho_operation_ids = fields.One2many('despacho.db.operation', 'project_id',
                                              string='Operaciones')
     despacho_operation_count = fields.Integer(compute='_compute_operation_count')
@@ -373,23 +380,114 @@ class ProjectProject(models.Model):
                 % (n, reason or 'suscripción cancelada/vencida')))
         return n
 
+    # --- Suspensión del SITIO web por cobranza (vhost nginx) ---------------
+    # Estados de suscripción "vivos" en los que el sitio debe estar ARRIBA. Si una
+    # BD quedó suspendida por churn y la suscripción vuelve a uno de estos, se
+    # reactiva sola.
+    _ACTIVE_SUB_STATES = ('1_draft', '2_renewal', '3_progress', '4_paused', '7_upsell')
+
+    def _enqueue_site_op(self, action):
+        """Encola site_suspend / site_resume para el sitio (vhost) de esta BD.
+        Solo BDs locales (el guard de nginx vive en ESTE servidor). Devuelve la
+        operación o False si no aplica."""
+        self.ensure_one()
+        if not self.despacho_db_local or not self.database_name:
+            return False
+        op = self.env['despacho.db.operation'].sudo().create({
+            'op': 'site_%s' % action, 'project_id': self.id})
+        op.with_context(dpm_no_wait=True, skip_notify=True).action_provision()
+        return op
+
+    def _suspend_site(self, reason='', kind='churn'):
+        """Suspende el sitio web del cliente (503 con certificado intacto). `kind`
+        distingue 'churn' (se reactiva solo) de 'manual' (solo con el botón)."""
+        self.ensure_one()
+        if self.despacho_provision_state == 'suspended':
+            return False
+        if not self._enqueue_site_op('suspend'):
+            return False
+        self.despacho_provision_state = 'suspended'
+        self.despacho_site_suspend_kind = kind
+        self.message_post(body=(
+            '⛔ Sitio SUSPENDIDO (%s). El dominio del cliente responde una página '
+            'de "servicio suspendido" (503) conservando el certificado. %s'
+            % (reason or 'suscripción cancelada/vencida',
+               'Se reactiva solo cuando la suscripción vuelva a estar al corriente.'
+               if kind == 'churn' else 'Reactivar es manual (botón "Reactivar sitio").')))
+        return True
+
+    def _resume_site(self, reason=''):
+        """Reactiva el sitio web del cliente (quita el flag de suspensión)."""
+        self.ensure_one()
+        if self.despacho_provision_state != 'suspended':
+            return False
+        if not self._enqueue_site_op('resume'):
+            return False
+        self.despacho_provision_state = 'active'
+        self.despacho_site_suspend_kind = False
+        self.message_post(body=(
+            '✅ Sitio REACTIVADO (%s). El dominio del cliente vuelve a servir Odoo '
+            'normalmente.' % (reason or 'suscripción regularizada')))
+        return True
+
+    def action_suspend_site(self):
+        """Botón manual: suspende el sitio web del cliente (marca 'manual', NO se
+        reactiva solo)."""
+        self.ensure_one()
+        if not self.despacho_db_local:
+            raise UserError('Solo se puede suspender el sitio de una BD que vive en '
+                            'este servidor (%s).' % THIS_SERVER)
+        if not self._suspend_site(reason='suspensión manual', kind='manual'):
+            raise UserError('El sitio ya está suspendido o esta BD no tiene sitio '
+                            'local que suspender.')
+        return {
+            'type': 'ir.actions.client', 'tag': 'display_notification',
+            'params': {'title': 'Sitio suspendido',
+                       'message': 'El dominio del cliente ya responde la página de '
+                                  'suspensión. Reactívalo con "Reactivar sitio".',
+                       'type': 'warning', 'sticky': False}}
+
+    def action_resume_site(self):
+        """Botón manual: reactiva el sitio web del cliente."""
+        self.ensure_one()
+        if not self._resume_site(reason='reactivación manual'):
+            raise UserError('El sitio no está suspendido.')
+        return {
+            'type': 'ir.actions.client', 'tag': 'display_notification',
+            'params': {'title': 'Sitio reactivado',
+                       'message': 'El dominio del cliente vuelve a servir Odoo.',
+                       'type': 'success', 'sticky': False}}
+
+    @api.model
+    def _cron_lifecycle_subscriptions(self):
+        """Cada poco, alinea el estado operativo de cada BD con el de su suscripción:
+          • churn (cancelada/vencida) → desmonta los puentes MCP activos y SUSPENDE
+            el sitio (503 con certificado intacto). El cliente que deja de pagar
+            pierde el servicio sin intervención manual.
+          • al corriente otra vez (salió de churn) → REACTIVA el sitio si quedó
+            suspendido POR churn (no toca los suspendidos a mano). El MCP NO se
+            reactiva solo: re-aprovisionar contenedor/llave es manual, por diseño.
+        Idempotente y desacoplado de la escritura de la suscripción (evalúa el
+        estado actual en cada pasada; no corta por un cambio efímero)."""
+        Du = self.env['databases.user'].sudo()
+        for proj in self.sudo().search([('despacho_subscription_id', '!=', False)]):
+            state = proj.despacho_subscription_id.subscription_state
+            if state == '6_churn':
+                if Du.search_count([('project_id', '=', proj.id),
+                                    ('despacho_mcp_enabled', '=', True)]):
+                    proj._suspend_mcp_bridges(reason='suscripción cancelada/vencida')
+                proj._suspend_site(reason='suscripción cancelada/vencida', kind='churn')
+            elif (proj.despacho_provision_state == 'suspended'
+                  and proj.despacho_site_suspend_kind == 'churn'
+                  and state in self._ACTIVE_SUB_STATES):
+                proj._resume_site(reason='suscripción regularizada')
+        return True
+
     @api.model
     def _cron_suspend_mcp_for_churned(self):
-        """Cada poco: si la suscripción ligada a una BD está CANCELADA/VENCIDA
-        (subscription_state '6_churn') y la BD aún tiene puentes MCP activos, los
-        desmonta. Así, cuando un cliente deja de pagar, su IA pierde el acceso a su
-        Odoo sin intervención manual. Idempotente (al desmontar, deja de cumplir la
-        condición). Desacoplado de la escritura de la suscripción (sin riesgo de
-        cortar por un cambio que luego se revierte)."""
-        projs = self.sudo().search([
-            ('despacho_subscription_id', '!=', False),
-            ('despacho_subscription_id.subscription_state', '=', '6_churn')])
-        for proj in projs:
-            if self.env['databases.user'].sudo().search_count([
-                    ('project_id', '=', proj.id),
-                    ('despacho_mcp_enabled', '=', True)]):
-                proj._suspend_mcp_bridges(reason='suscripción cancelada/vencida')
-        return True
+        """Compat: nombre anterior del cron (1.37). Reenvía al ciclo de vida nuevo
+        por si alguna instalación quedó apuntando aquí."""
+        return self._cron_lifecycle_subscriptions()
 
     @api.model
     def action_convert_todos_to_tasks(self):

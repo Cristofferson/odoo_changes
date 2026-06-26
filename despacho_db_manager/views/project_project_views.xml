@@ -182,6 +182,19 @@
                         invisible="not database_hosting"
                         groups="databases.group_databases_manager"
                         confirm="Vas a iniciar la BAJA de esta base de datos. Se abrirá el asistente en modo simulación. ¿Continuar?"/>
+                <!-- Suspender / reactivar el SITIO web del cliente (vhost nginx) por
+                     cobranza. El churn lo hace solo; estos botones son el control
+                     manual. Suspender muestra una página 503 conservando el cert. -->
+                <field name="despacho_db_local" invisible="1"/>
+                <button name="action_suspend_site" type="object" string="Suspender sitio"
+                        class="btn-warning" icon="fa-ban"
+                        invisible="not database_hosting or not despacho_db_local or despacho_provision_state == 'suspended'"
+                        groups="databases.group_databases_manager"
+                        confirm="Vas a SUSPENDER el sitio web del cliente: su dominio responderá una página de 'servicio suspendido' (503), conservando el certificado. Reactivarlo es manual. ¿Continuar?"/>
+                <button name="action_resume_site" type="object" string="Reactivar sitio"
+                        class="btn-success" icon="fa-play"
+                        invisible="despacho_provision_state != 'suspended'"
+                        groups="databases.group_databases_manager"/>
                 <!-- El puente MCP ya NO se activa a nivel de la BD: ahora es POR USUARIO
                      (botón "Activar MCP" en cada fila de Gestión de usuarios), para que
                      cada quien conecte su IA con sus propios privilegios. -->

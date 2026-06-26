@@ -19,7 +19,7 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
 PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
-              'mcp_add', 'mcp_remove')
+              'mcp_add', 'mcp_remove', 'site_suspend', 'site_resume')
 # slug del endpoint MCP (segmento de la URL pública /<slug>/mcp). Igual que el
 # que validan add-client.sh y el worker.
 MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
@@ -55,6 +55,8 @@ class DespachoDbOperation(models.Model):
         ('census', 'Escanear servidor'),
         ('mcp_add', 'Activar MCP'),
         ('mcp_remove', 'Desactivar MCP'),
+        ('site_suspend', 'Suspender sitio'),
+        ('site_resume', 'Reactivar sitio'),
     ], string='Operación', required=True, default='alta')
 
     project_id = fields.Many2one(
@@ -474,6 +476,28 @@ class DespachoDbOperation(models.Model):
             'purge_key': bool(self.mcp_purge_key),
             'oauth': bool(self.mcp_oauth),
         }
+
+    def _build_site_op_req(self, op):
+        """Suspender/reactivar el SITIO web (vhost nginx) de la BD por cobranza.
+        Solo BDs locales: el flag de suspensión vive en ESTE servidor (el worker
+        crea/borra /etc/nginx/xubax-suspended/<db>.flag y el guard del snippet
+        compartido responde 503). No reinicia nginx."""
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('Esta operación requiere seleccionar una base de datos.')
+        if not proj.despacho_db_local:
+            raise UserError('Solo se puede suspender/reactivar el sitio de una BD '
+                            'que vive en este servidor.')
+        db = (proj.database_name or '').strip()
+        if not CENSUS_DB_RE.match(db):
+            raise UserError('Nombre de BD inválido: %r' % db)
+        return {'id': self.id, 'op': op, 'db': db}
+
+    def _build_site_suspend_req(self):
+        return self._build_site_op_req('site_suspend')
+
+    def _build_site_resume_req(self):
+        return self._build_site_op_req('site_resume')
 
     def _enqueue(self, req):
         qdir = os.path.join(SPOOL, 'queue')

@@ -345,6 +345,52 @@ class ProjectProject(models.Model):
                 'product_id': product.id, 'product_uom_qty': 1.0})]})
         return 'ok'
 
+    def _suspend_mcp_bridges(self, reason=''):
+        """Desmonta TODOS los puentes MCP activos de esta BD reusando la op
+        mcp_remove (mata el contenedor, revoca la API key y, si es OAuth, borra la
+        app Access + DNS). Lo usa el corte automático cuando la suscripción del
+        cliente se cancela/vence. Devuelve cuántos puentes encoló."""
+        self.ensure_one()
+        bridges = self.env['databases.user'].sudo().search([
+            ('project_id', '=', self.id), ('despacho_mcp_enabled', '=', True)])
+        Op = self.env['despacho.db.operation'].sudo()
+        n = 0
+        for du in bridges:
+            slug = (du.despacho_mcp_slug or '').strip()
+            if not slug:
+                continue
+            op = Op.create({
+                'op': 'mcp_remove', 'project_id': self.id, 'mcp_slug': slug,
+                'mcp_purge_key': True, 'mcp_oauth': bool(du.despacho_mcp_oauth),
+            })
+            op.with_context(dpm_no_wait=True, skip_notify=True).action_provision()
+            n += 1
+        if n:
+            self.message_post(body=(
+                '🔌 Corte automático: se suspendieron %d puente(s) MCP de esta '
+                'base (%s). El contenedor se desmonta y la API key se revoca; si '
+                'el cliente regulariza el pago, hay que volver a activar el MCP.'
+                % (n, reason or 'suscripción cancelada/vencida')))
+        return n
+
+    @api.model
+    def _cron_suspend_mcp_for_churned(self):
+        """Cada poco: si la suscripción ligada a una BD está CANCELADA/VENCIDA
+        (subscription_state '6_churn') y la BD aún tiene puentes MCP activos, los
+        desmonta. Así, cuando un cliente deja de pagar, su IA pierde el acceso a su
+        Odoo sin intervención manual. Idempotente (al desmontar, deja de cumplir la
+        condición). Desacoplado de la escritura de la suscripción (sin riesgo de
+        cortar por un cambio que luego se revierte)."""
+        projs = self.sudo().search([
+            ('despacho_subscription_id', '!=', False),
+            ('despacho_subscription_id.subscription_state', '=', '6_churn')])
+        for proj in projs:
+            if self.env['databases.user'].sudo().search_count([
+                    ('project_id', '=', proj.id),
+                    ('despacho_mcp_enabled', '=', True)]):
+                proj._suspend_mcp_bridges(reason='suscripción cancelada/vencida')
+        return True
+
     @api.model
     def action_convert_todos_to_tasks(self):
         """Convierte los Pendientes (To-do: project_id vacío) en TAREAS del

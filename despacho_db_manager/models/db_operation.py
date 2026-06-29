@@ -466,12 +466,9 @@ class DespachoDbOperation(models.Model):
             'as_user': (self.mcp_as_user or '').strip(),
         }
         if remote:
-            # OVH (odoo18) solo soporta el método por token (Bearer). El método
-            # OAuth/ChatGPT (Cloudflare Access) todavía no tiene modo remoto.
-            if self.mcp_oauth:
-                raise UserError('El método OAuth/ChatGPT aún no está disponible para '
-                                'bases de OVH (odoo18). Desmarca "Login por correo '
-                                '(OAuth)" y usa el método por token (Bearer).')
+            # OVH (odoo18): el contenedor corre en este box pero apunta al Odoo remoto
+            # por xmlrpc. Soporta AMBOS métodos: token (add-client.sh --remote ovh) y
+            # OAuth/ChatGPT (oauth-enable.sh --remote ovh).
             req['remote'] = remote
         if self.mcp_oauth:
             email = (self.mcp_email or '').strip()

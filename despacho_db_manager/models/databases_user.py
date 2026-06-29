@@ -120,11 +120,9 @@ class DatabasesUser(models.Model):
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '
                             'de volver a activarlo.')
-        # Las BDs de OVH (odoo18) solo soportan el método por token (Bearer): el
-        # contenedor corre aquí pero apunta al Odoo remoto por xmlrpc. OAuth/ChatGPT
-        # (Cloudflare Access) todavía no tiene modo remoto -> se pre-marca según el
-        # servidor (token en OVH, OAuth en local).
-        is_remote = proj.despacho_server != 'odoo19'
+        # Tanto local (odoo19) como OVH (odoo18) soportan OAuth: el contenedor corre
+        # en este box; para OVH apunta al Odoo remoto por xmlrpc (oauth-enable.sh
+        # --remote ovh). Se pre-marca OAuth (compatible con ChatGPT/Claude web) en ambos.
         return {
             'type': 'ir.actions.act_window',
             'name': 'Activar MCP para %s' % (self.login or self.name),
@@ -137,8 +135,8 @@ class DatabasesUser(models.Model):
                 'default_mcp_slug': self._mcp_user_slug(),
                 'default_mcp_as_user': self.login,
                 'default_mcp_writes': True,
-                'default_mcp_oauth': not is_remote,
-                'default_mcp_email': '' if is_remote else self._mcp_user_email(),
+                'default_mcp_oauth': True,
+                'default_mcp_email': self._mcp_user_email(),
                 'default_simulate': False,
                 'dpm_modal': True,
             },

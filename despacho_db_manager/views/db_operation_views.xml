@@ -187,9 +187,8 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_db_operation_alta" name="Provisionar cliente"
-              parent="databases.menu_main_databases"
-              action="action_db_operation_alta" sequence="15"/>
+    <!-- "Provisionar cliente" ya NO vive en el menú principal: el botón está en la
+         cabecera del listado de Databases (project_project_views.xml). -->
     <menuitem id="menu_db_operation_all" name="Operaciones"
               parent="databases.menu_main_databases"
               action="action_db_operation_all" sequence="25"/>

@@ -27,10 +27,10 @@
             <header position="inside">
                 <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
                         display="always" groups="databases.group_databases_manager"/>
-                <button name="action_autolink_subscriptions" type="object"
-                        string="Auto-ligar suscripciones" display="always"
+                <button name="%(action_db_operation_alta)d" type="action"
+                        string="Provisionar cliente" display="always"
                         groups="databases.group_databases_manager"
-                        help="Liga automáticamente cada BD con su suscripción cuando hay una coincidencia exacta y única por nombre de cliente. Lo dudoso se deja para el selector manual."/>
+                        help="Abre el asistente de alta para provisionar una base de datos de cliente nueva."/>
                 <!-- La conversión de Pendientes (To-do) → Tareas ya NO es un botón
                      manual: la corre un cron automático (ir_cron.xml), por ser idempotente
                      y repetible. Arrastra también los pendientes nuevos. -->

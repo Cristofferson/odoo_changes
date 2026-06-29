@@ -80,6 +80,16 @@ class DespachoDbOperation(models.Model):
     with_dns = fields.Boolean('Crear DNS en Cloudflare', default=True)
     with_ssl = fields.Boolean('Emitir certificado SSL', default=True)
     with_mail = fields.Boolean('Configurar correo (DKIM/SPF/DMARC)', default=True)
+    with_incoming_mail = fields.Boolean(
+        'Recibir correo en Odoo', default=False,
+        help='Crea un buzón odoo@<dominio> y un servidor de correo entrante (fetchmail) '
+             'confirmado, para que las respuestas y los correos a sus alias entren a Odoo. '
+             'Requiere que el MX del dominio apunte a nuestro servidor.')
+    incoming_bcc_all = fields.Boolean(
+        'Capturar TODO el correo del dominio', default=False,
+        help='Además, copia a Odoo TODO el correo del dominio (incl. buzones humanos '
+             'como ventas@). Útil para registrar toda la correspondencia; el correo no '
+             'enrutable Odoo lo descarta (no rebota).')
     wants_cfdi = fields.Boolean('El cliente quiere CFDI',
                                 help='Recordatorio para cuando crees su suscripción.')
 
@@ -299,7 +309,10 @@ class DespachoDbOperation(models.Model):
             'id': self.id, 'op': 'alta',
             'db': name, 'domain': domain, 'mail_domain': mail_domain, 'modules': modules,
             'with_dns': bool(self.with_dns), 'with_ssl': bool(self.with_ssl),
-            'with_mail': bool(self.with_mail), 'simulate': bool(self.simulate),
+            'with_mail': bool(self.with_mail),
+            'with_incoming_mail': bool(self.with_incoming_mail),
+            'incoming_bcc_all': bool(self.incoming_bcc_all),
+            'simulate': bool(self.simulate),
         }
 
     def _build_baja_req(self):

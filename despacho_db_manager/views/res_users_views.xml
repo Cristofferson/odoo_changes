@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Botón "Crear buzón" en la ficha del usuario, justo después del botón
+         "Crear empleado" que agrega el módulo hr en el header de res.users.
+         Crea la bandeja humana de correo (cuenta@dominio, según login/correo del
+         usuario) + webmail opcional, reutilizando el asistente de db.operation. -->
+    <record id="view_users_form_despacho_mailbox" model="ir.ui.view">
+        <field name="name">res.users.form.despacho.mailbox</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_create_employee']" position="after">
+                <button string="Crear buzón" type="object"
+                        name="action_mailbox_create_user"
+                        invisible="not id"
+                        groups="databases.group_databases_manager"
+                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login/correo) y, opcionalmente, el webmail mail.&lt;dominio&gt;. La contraseña se muestra una sola vez."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

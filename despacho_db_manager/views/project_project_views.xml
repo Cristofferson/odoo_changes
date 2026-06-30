@@ -140,13 +140,16 @@
                      Reutiliza la misma maquinaria que el alta. -->
                 <button name="action_mailbox_create_user" type="object" string="Crear buzón"
                         icon="fa-envelope" groups="databases.group_databases_manager"
-                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login) y, opcionalmente, el webmail mail.&lt;dominio&gt; para leerla por navegador. La contraseña se muestra una sola vez."/>
+                        invisible="despacho_mailbox_state != 'can'"
+                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login) y, opcionalmente, el webmail mail.&lt;dominio&gt; para leerla por navegador. La contraseña se muestra una sola vez. Solo aparece si el buzón no existe y hospedamos su dominio."/>
             </xpath>
             <!-- Columna de estatus MCP por usuario (la llena el censo). -->
             <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">
                 <field name="despacho_mcp_enabled" string="MCP" optional="show"/>
                 <field name="despacho_mcp_url" optional="hide"/>
                 <field name="despacho_mcp_writes" string="MCP escribe" optional="hide"/>
+                <!-- Estado del buzón (controla la visibilidad del botón "Crear buzón"). -->
+                <field name="despacho_mailbox_state" column_invisible="1"/>
             </xpath>
         </field>
     </record>

@@ -1,7 +1,9 @@
 import re
 
-from odoo import models, fields
+from odoo import api, models, fields
 from odoo.exceptions import UserError
+
+from . import mailbox_util
 
 
 class DatabasesUser(models.Model):
@@ -42,15 +44,26 @@ class DatabasesUser(models.Model):
         slug = ('%s-%s' % (base, local))[:31].strip('-')
         return slug or 'cliente-user'
 
+    despacho_mailbox_state = fields.Char(
+        compute='_compute_despacho_mailbox_state',
+        help="Estado del buzón de correo de este usuario en nuestro servidor: "
+             "'exists' (ya existe), 'can' (se puede crear), 'cannot' (no hay dominio "
+             "que hospedemos para él).")
+
+    @api.depends('login')
+    def _compute_despacho_mailbox_state(self):
+        domains = mailbox_util.hosted_domains()
+        boxes = mailbox_util.existing_mailboxes()
+        for user in self:
+            local, dom = mailbox_util.mailbox_parts(user.login)
+            user.despacho_mailbox_state = mailbox_util.mailbox_state(
+                local, dom, domains, boxes)
+
     def _mailbox_parts(self):
         """De un login josette@divana.mx -> ('josette', 'divana.mx'). Si el login no
         es un correo, devuelve ('', '') y el gestor escribe cuenta/dominio a mano."""
         self.ensure_one()
-        login = (self.login or '').strip().lower()
-        if '@' in login:
-            local, _, dom = login.partition('@')
-            return local, dom
-        return '', ''
+        return mailbox_util.mailbox_parts(self.login)
 
     def action_mailbox_create_user(self):
         """Crea el buzón humano de ESTE usuario (<cuenta>@<dominio>, derivado de su
@@ -59,6 +72,14 @@ class DatabasesUser(models.Model):
         self.ensure_one()
         proj = self.project_id
         local, dom = self._mailbox_parts()
+        state = mailbox_util.mailbox_state(local, dom)
+        if state == 'exists':
+            raise UserError('Este usuario ya tiene el buzón %s@%s en el servidor. '
+                            'No hay nada que crear.' % (local, dom))
+        if state == 'cannot':
+            raise UserError(
+                'No hay manera de crear un buzón para este usuario: su login no '
+                'apunta a un dominio de correo que hospedemos en el servidor.')
         return {
             'type': 'ir.actions.act_window',
             'name': 'Crear buzón para %s' % (self.login or self.name),

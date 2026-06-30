@@ -10,11 +10,14 @@
         <field name="inherit_id" ref="base.view_users_form"/>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='action_create_employee']" position="after">
+                <field name="despacho_mailbox_state" invisible="1"/>
+                <!-- Solo se ofrece si el buzón NO existe y SÍ hospedamos su dominio
+                     (state == 'can'). Si ya existe o no hay dominio nuestro, se oculta. -->
                 <button string="Crear buzón" type="object"
                         name="action_mailbox_create_user"
-                        invisible="not id"
+                        invisible="not id or despacho_mailbox_state != 'can'"
                         groups="databases.group_databases_manager"
-                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login/correo) y, opcionalmente, el webmail mail.&lt;dominio&gt;. La contraseña se muestra una sola vez."/>
+                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login/correo) y, opcionalmente, el webmail mail.&lt;dominio&gt;. La contraseña se muestra una sola vez. Solo aparece si el buzón no existe y hospedamos su dominio."/>
             </xpath>
         </field>
     </record>

@@ -1,5 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Fase 5: alta rápida de pieza STIJ (mostrador, solo staff) -->
+    <template id="page_dmn_quick" name="Alta rápida STIJ">
+        <t t-call="website.layout">
+            <div class="container py-4" style="max-width:520px">
+                <h2 class="mb-1">Alta rápida de pieza STIJ</h2>
+                <p class="text-muted mb-4">Llena lo indispensable y la pieza queda lista para escanear.</p>
+                <div id="dmn_q_alert"/>
+
+                <form id="dmn_q_form">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Joya / descripción <span class="text-danger">*</span></label>
+                        <input class="form-control form-control-lg" name="joya" placeholder="Ej. Anillo de oro blanco 14kt" required="required"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Metal</label>
+                            <input class="form-control form-control-lg" name="metal" placeholder="Ej. Oro blanco 14kt"/>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Medidas</label>
+                            <input class="form-control form-control-lg" name="medidas" placeholder="Ej. 7"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Número de pieza</label>
+                        <input class="form-control form-control-lg" name="pieza" placeholder="Lote/serie (si lo dejas vacío usa el plástico)"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Número de plástico <span class="text-danger">*</span></label>
+                        <input class="form-control form-control-lg" name="plastico" placeholder="El código del plástico que se escanea" required="required"/>
+                        <div class="form-text">Es lo que liga el QR del plástico con el visor.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Foto de la pieza</label>
+                        <input class="form-control form-control-lg" name="foto" type="file" accept="image/*" capture="environment"/>
+                    </div>
+                    <button class="btn btn-primary btn-lg w-100" type="submit" id="dmn_q_submit">Crear pieza</button>
+                </form>
+
+                <div id="dmn_q_result" style="display:none" class="text-center mt-4">
+                    <div class="alert alert-success">Pieza creada. Escanea o comparte este código:</div>
+                    <img id="dmn_q_qr" alt="QR del visor" class="img-fluid border rounded p-2" style="max-width:260px"/>
+                    <p class="mt-2"><a id="dmn_q_link" href="#" target="_blank" class="btn btn-outline-secondary w-100">Ver visor</a></p>
+                    <button id="dmn_q_again" class="btn btn-link w-100">Registrar otra pieza</button>
+                </div>
+            </div>
+
+            <script type="text/javascript"><![CDATA[
+              (function(){
+                var f = document.getElementById('dmn_q_form');
+                var box = document.getElementById('dmn_q_alert');
+                var btn = document.getElementById('dmn_q_submit');
+                var result = document.getElementById('dmn_q_result');
+
+                function readFile(input){
+                  return new Promise(function(resolve){
+                    var file = input.files && input.files[0];
+                    if(!file){ resolve(null); return; }
+                    var r = new FileReader();
+                    r.onload = function(){ resolve(r.result); };
+                    r.onerror = function(){ resolve(null); };
+                    r.readAsDataURL(file);
+                  });
+                }
+
+                f.addEventListener('submit', function(e){
+                  e.preventDefault();
+                  box.innerHTML = '';
+                  btn.disabled = true; btn.textContent = 'Creando...';
+                  readFile(f.foto).then(function(foto){
+                    var p = {
+                      joya: f.joya.value, metal: f.metal.value, medidas: f.medidas.value,
+                      pieza: f.pieza.value, plastico: f.plastico.value, foto: foto
+                    };
+                    return fetch('/dmn/alta/crear', {method:'POST', headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify({jsonrpc:'2.0', method:'call', params:p, id:1})});
+                  })
+                  .then(function(r){return r.json();})
+                  .then(function(d){
+                    btn.disabled = false; btn.textContent = 'Crear pieza';
+                    var res = d.result || {};
+                    if(res.ok){
+                      f.style.display = 'none';
+                      var qr = document.getElementById('dmn_q_qr');
+                      qr.src = '/report/barcode?barcode_type=QR&value=' + encodeURIComponent(res.visor_url) + '&width=260&height=260';
+                      var link = document.getElementById('dmn_q_link');
+                      link.href = res.visor_url;
+                      result.style.display = 'block';
+                      result.scrollIntoView({behavior:'smooth'});
+                    } else {
+                      box.innerHTML = '<div class="alert alert-danger">' + (res.error || 'No se pudo crear la pieza.') + '</div>';
+                    }
+                  })
+                  .catch(function(){
+                    btn.disabled = false; btn.textContent = 'Crear pieza';
+                    box.innerHTML = '<div class="alert alert-danger">Error de conexión.</div>';
+                  });
+                });
+
+                document.getElementById('dmn_q_again').addEventListener('click', function(){
+                  f.reset(); f.style.display = 'block'; result.style.display = 'none'; box.innerHTML = '';
+                  window.scrollTo({top:0, behavior:'smooth'});
+                });
+              })();
+            ]]></script>
+        </t>
+    </template>
+
     <!-- Fase 2: página de registro de propiedad (la ve el comprador) -->
     <template id="page_dmn_register" name="Registrar propiedad STIJ">
         <t t-call="website.layout">

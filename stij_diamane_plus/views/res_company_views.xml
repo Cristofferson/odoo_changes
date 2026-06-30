@@ -15,6 +15,7 @@
                            invisible="not dmn_theft_alert_email"/>
                     <field name="dmn_view_dedup_minutes"/>
                     <field name="dmn_warranty_months"/>
+                    <field name="dmn_quick_categ_id"/>
                 </group>
             </xpath>
         </field>

@@ -94,6 +94,28 @@ class StijWebsitePlus(StijWebsite):
             {"piece_name": lot.product_id.display_name or (lot.name or "")},
         )
 
+    # ------------------------------------------------------------------- #
+    #  Fase 5 — alta rápida de pieza STIJ (mostrador, solo staff)
+    # ------------------------------------------------------------------- #
+    def _dmn_is_staff(self):
+        user = request.env.user
+        return bool(user) and not user._is_public() and not user.share
+
+    @http.route("/dmn/alta", type="http", auth="user", website=True)
+    def dmn_quick_page(self, **kw):
+        """Formulario de alta rápida de una pieza STIJ (uso de mostrador). Con los
+        datos mínimos crea la joya + el lote escaneable y muestra el QR del visor."""
+        if not self._dmn_is_staff():
+            return request.redirect("/web/login")
+        return request.render("stij_diamane_plus.page_dmn_quick", {})
+
+    @http.route("/dmn/alta/crear", type="jsonrpc", auth="user")
+    def dmn_quick_create(self, **kw):
+        """Crea la pieza desde el alta rápida. Solo personal interno."""
+        if not self._dmn_is_staff():
+            return {"ok": False, "error": "No autorizado."}
+        return request.env["stock.lot"].sudo()._dmn_quick_create(kw)
+
     @http.route("/dmn/dedication", type="jsonrpc", auth="public", website=True)
     def dmn_dedication(self, **kw):
         """Devuelve la dedicatoria de la pieza en sesión, respetando su visibilidad

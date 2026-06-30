@@ -337,3 +337,119 @@ class StockLot(models.Model):
             "partner": partner.name,
             "warranty_until": fields.Date.to_string(lot.dmn_warranty_until) if lot.dmn_warranty_until else None,
         }
+
+    # ------------------------------------------------------------------- #
+    #  Fase 5 — alta rápida de pieza STIJ (registro de mostrador)
+    # ------------------------------------------------------------------- #
+    @api.model
+    def _dmn_quick_categ(self):
+        """Categoría para la joya recién creada: la configurada en la compañía o,
+        en su defecto, la primera categoría que NO sea 'Gema' (para que el visor la
+        trate como joya y muestre Metal/Medida, no como diamante)."""
+        categ = self.env.company.dmn_quick_categ_id
+        if categ and "gema" not in (categ.name or "").lower():
+            return categ
+        return self.env["product.category"].sudo().search(
+            [("name", "not ilike", "gema")], order="id", limit=1
+        )
+
+    @staticmethod
+    def _dmn_clean_b64(data):
+        """Quita el prefijo data-url (data:image/png;base64,) si viene del front."""
+        if data and isinstance(data, str) and "," in data and data[:5] == "data:":
+            return data.split(",", 1)[1]
+        return data
+
+    @api.model
+    def _dmn_quick_create(self, vals):
+        """Alta rápida de una pieza STIJ desde el mostrador: con los datos mínimos
+        crea la joya (producto) + el lote ya escaneable (visor activo, Activo) y le
+        liga la foto. Devuelve la URL del visor y el id para el QR.
+
+        vals: {joya, metal, medidas, pieza, plastico, foto}
+        - joya     -> nombre del producto (obligatorio)
+        - plastico -> x_studio_url_stij = lo que se escanea (obligatorio, único)
+        - pieza    -> número de lote/serie (si falta, se usa el plástico)
+        - metal/medidas/foto -> opcionales
+        """
+        joya = (vals.get("joya") or "").strip()
+        plastico = (vals.get("plastico") or "").strip()
+        pieza = (vals.get("pieza") or "").strip()
+        metal = (vals.get("metal") or "").strip()
+        medidas = (vals.get("medidas") or "").strip()
+        foto_raw = vals.get("foto")
+        foto_mime = "image/png"
+        if foto_raw and isinstance(foto_raw, str) and foto_raw[:5] == "data:" and ";" in foto_raw:
+            foto_mime = foto_raw[5:foto_raw.index(";")] or "image/png"
+        foto = self._dmn_clean_b64(foto_raw)
+
+        if not joya:
+            return {"ok": False, "error": _("Falta el nombre/descripción de la joya.")}
+        if not plastico:
+            return {"ok": False, "error": _("Falta el número de plástico (el código que se escanea).")}
+
+        # El número de plástico debe ser único: es la llave del visor.
+        dup = self.sudo().search([("x_studio_url_stij", "=", plastico)], limit=1)
+        if dup:
+            return {"ok": False, "error": _("Ese número de plástico ya está registrado en otra pieza.")}
+
+        Product = self.env["product.template"].sudo()
+        prod_vals = {
+            "name": joya,
+            "categ_id": (self._dmn_quick_categ().id or False),
+            "is_storable": True,
+            "tracking": "serial",
+        }
+        # Campos Studio de la joya (guardados: pueden no existir en otra BD).
+        if metal and "x_studio_metal_1" in Product._fields:
+            prod_vals["x_studio_metal_1"] = metal
+        if medidas and "x_studio_medida_joya" in Product._fields:
+            prod_vals["x_studio_medida_joya"] = medidas
+        # La descripción (= la joya) la pinta el visor en "Información de la Joya".
+        if "x_studio_descripcion" in Product._fields:
+            prod_vals["x_studio_descripcion"] = joya
+        if foto:
+            prod_vals["image_1920"] = foto
+        product = Product.create(prod_vals)
+
+        lot_vals = {
+            "name": pieza or plastico,
+            "product_id": product.product_variant_id.id,
+            "company_id": self.env.company.id,
+        }
+        for fname, fval in (
+            ("x_studio_url_stij", plastico),
+            ("x_studio_estatus", "Activo"),
+            ("x_studio_visor_activo", True),
+            # Encender los módulos del visor para que se vea completo.
+            ("x_studio_informacion_general", True),
+            ("x_studio_galeria", True),
+            ("x_studio_publicar_imagenes_1", True),
+        ):
+            if fname in self._fields:
+                lot_vals[fname] = fval
+        lot = self.sudo().create(lot_vals)
+
+        # Foto en la galería del visor (stij.lot.image) para que se muestre.
+        if foto and "stij.lot.image" in self.env:
+            try:
+                self.env["stij.lot.image"].sudo().create({
+                    "lot_id": lot.id,
+                    "image": foto,
+                    "name": joya,
+                    "mimetype": foto_mime,
+                    "sequence": 1,
+                })
+            except Exception:  # pragma: no cover
+                _logger.exception("DMN: no se pudo ligar la foto al lote %s", lot.id)
+
+        base = self.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
+        from urllib.parse import quote
+        visor_url = "%s/stijid?id=%s" % (base, quote(plastico, safe=""))
+        return {
+            "ok": True,
+            "lot_id": lot.id,
+            "plastico": plastico,
+            "visor_url": visor_url,
+            "joya": joya,
+        }

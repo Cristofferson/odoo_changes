@@ -30,3 +30,9 @@ class ResCompany(models.Model):
         string="Meses de garantía", default=12,
         help="Vigencia de garantía a partir de la fecha de compra de la pieza.",
     )
+    dmn_quick_categ_id = fields.Many2one(
+        "product.category", string="Categoría para alta rápida STIJ",
+        help="Categoría que se asigna a la joya creada desde el alta rápida del "
+             "visor (/dmn/alta). NO debe contener 'Gema' para que el visor la "
+             "muestre como joya. Si se deja vacía, se usa la primera categoría no-Gema.",
+    )

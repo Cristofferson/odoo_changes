@@ -8,7 +8,7 @@
                 <header>
                     <button name="action_provision" type="object" string="Ejecutar"
                             class="oe_highlight"
-                            invisible="state not in ('draft','done','error')"/>
+                            invisible="state not in ('draft','error')"/>
                     <button name="action_refresh" type="object" string="Actualizar estado"
                             invisible="state == 'draft'"/>
                     <field name="state" widget="statusbar"

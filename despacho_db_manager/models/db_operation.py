@@ -90,6 +90,16 @@ class DespachoDbOperation(models.Model):
         help='Además, copia a Odoo TODO el correo del dominio (incl. buzones humanos '
              'como ventas@). Útil para registrar toda la correspondencia; el correo no '
              'enrutable Odoo lo descarta (no rebota).')
+    mailbox_accounts = fields.Char(
+        'Cuentas de correo (bandejas)', default='contacto,ventas',
+        help='Lista EDITABLE separada por comas de los buzones humanos a crear '
+             '(p.ej. contacto,ventas,administracion). Déjalo vacío para no crear ninguno. '
+             'A cada buzón nuevo se le asigna una contraseña aleatoria que se muestra una '
+             'sola vez al terminar. Publica el MX del dominio a nuestro servidor.')
+    with_webmail = fields.Boolean(
+        'Crear webmail (mail.<dominio>)', default=True,
+        help='Habilita el webmail mail.<dominio> (RainLoop) para que el cliente lea esas '
+             'bandejas por navegador. Solo aplica si se crean cuentas.')
     wants_cfdi = fields.Boolean('El cliente quiere CFDI',
                                 help='Recordatorio para cuando crees su suscripción.')
 
@@ -239,11 +249,43 @@ class DespachoDbOperation(models.Model):
                 'Activado, pero no pude leer el token aquí. Está en el servidor: '
                 '/opt/odoo-mcp/clients/<slug>.bearer', sticky=True)
 
+    def _notify_alta_mailboxes(self):
+        """Tras un alta con buzones: muestra UNA sola vez las cuentas + contraseñas
+        recién creadas + el webmail. Las contraseñas NO se persisten en Odoo (el
+        result que las trae es 640 root:odoo, fuera del campo Registro)."""
+        rpath = os.path.join(SPOOL, 'result', '%d.json' % self.id)
+        data = {}
+        try:
+            with open(rpath) as fh:
+                data = (json.load(fh) or {}).get('mailboxes') or {}
+        except (OSError, ValueError):
+            pass
+        boxes = data.get('mailboxes') or []
+        if not boxes:
+            return self._notify('success', '✅ Cliente provisionado',
+                                '%s: Listo.' % (self.display_name or 'Alta'))
+        dom = data.get('domain') or ''
+        lines = []
+        for b in boxes:
+            acct = b.get('account') or ''
+            if b.get('created') and b.get('password'):
+                lines.append('%s\n   contraseña: %s' % (acct, b['password']))
+            else:
+                lines.append('%s (ya existía, sin cambios)' % acct)
+        msg = ('Entrega estas bandejas al cliente (las contraseñas NO se vuelven a '
+               'mostrar):\n\n%s' % '\n'.join(lines))
+        if self.with_webmail and dom:
+            msg += '\n\nWebmail: https://mail.%s' % dom
+        self._notify('success', '✅ Cliente provisionado — copia las contraseñas AHORA',
+                     msg, sticky=True)
+
     def _notify_outcome(self):
         """Toast según el estado actual de la operación."""
         label = self.display_name or ('operación #%d' % self.id)
         if self.op == 'mcp_add' and self.state == 'done':
             return self._notify_mcp_credentials()
+        if self.op == 'alta' and self.state == 'done':
+            return self._notify_alta_mailboxes()
         if self.state == 'done':
             self._notify('success', '✅ Operación completada', '%s: Listo.' % label)
         elif self.state == 'error':
@@ -305,6 +347,13 @@ class DespachoDbOperation(models.Model):
             raise UserError('Dominio de correo inválido.')
         if not MODULES_RE.match(modules):
             raise UserError('Lista de módulos inválida (solo minúsculas, números, _ y comas).')
+        # Cuentas de correo: lista editable; normaliza y valida (letras/números/._- y comas).
+        mailboxes = ','.join(
+            p.strip().lower() for p in (self.mailbox_accounts or '').split(',') if p.strip()
+        )
+        if mailboxes and not re.match(r'^[a-z0-9._-]+(,[a-z0-9._-]+)*$', mailboxes):
+            raise UserError('Cuentas de correo inválidas. Usa nombres simples separados por comas, '
+                            'p.ej. contacto,ventas,administracion.')
         return {
             'id': self.id, 'op': 'alta',
             'db': name, 'domain': domain, 'mail_domain': mail_domain, 'modules': modules,
@@ -312,6 +361,8 @@ class DespachoDbOperation(models.Model):
             'with_mail': bool(self.with_mail),
             'with_incoming_mail': bool(self.with_incoming_mail),
             'incoming_bcc_all': bool(self.incoming_bcc_all),
+            'mailboxes': mailboxes,
+            'with_webmail': bool(self.with_webmail) and bool(mailboxes),
             'simulate': bool(self.simulate),
         }
 

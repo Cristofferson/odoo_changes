@@ -40,6 +40,10 @@
                             <field name="with_incoming_mail"/>
                             <field name="incoming_bcc_all"
                                    invisible="not with_incoming_mail"/>
+                            <field name="mailbox_accounts"
+                                   placeholder="contacto,ventas  (vacío = ninguna)"/>
+                            <field name="with_webmail"
+                                   invisible="not mailbox_accounts"/>
                             <field name="wants_cfdi"/>
                         </group>
                     </group>

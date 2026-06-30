@@ -42,6 +42,40 @@ class DatabasesUser(models.Model):
         slug = ('%s-%s' % (base, local))[:31].strip('-')
         return slug or 'cliente-user'
 
+    def _mailbox_parts(self):
+        """De un login josette@divana.mx -> ('josette', 'divana.mx'). Si el login no
+        es un correo, devuelve ('', '') y el gestor escribe cuenta/dominio a mano."""
+        self.ensure_one()
+        login = (self.login or '').strip().lower()
+        if '@' in login:
+            local, _, dom = login.partition('@')
+            return local, dom
+        return '', ''
+
+    def action_mailbox_create_user(self):
+        """Crea el buzón humano de ESTE usuario (<cuenta>@<dominio>, derivado de su
+        login) + webmail opcional, reutilizando la maquinaria del alta. Abre el
+        asistente prellenado para revisar antes de aplicar."""
+        self.ensure_one()
+        proj = self.project_id
+        local, dom = self._mailbox_parts()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Crear buzón para %s' % (self.login or self.name),
+            'res_model': 'despacho.db.operation',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_op': 'mailbox_create',
+                'default_project_id': proj.id if proj else False,
+                'default_mail_domain': dom,
+                'default_mailbox_accounts': local,
+                'default_with_webmail': True,
+                'default_simulate': False,
+                'dpm_modal': True,
+            },
+        }
+
     def action_autologin_as_user(self):
         self.ensure_one()
         proj = self.project_id

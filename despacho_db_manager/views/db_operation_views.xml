@@ -47,6 +47,25 @@
                             <field name="wants_cfdi"/>
                         </group>
                     </group>
+                    <!-- CREAR BUZÓN -->
+                    <group string="Crear buzón de correo" invisible="op != 'mailbox_create'">
+                        <div class="alert alert-info" role="alert" colspan="2"
+                             invisible="op != 'mailbox_create'">
+                            Crea la bandeja humana &lt;cuenta&gt;@&lt;dominio&gt; en el correo del
+                            servidor (Postfix/Dovecot) y, si marcas Webmail, habilita
+                            mail.&lt;dominio&gt; (RainLoop) para leerla por navegador.
+                            No pisa el buzón si ya existe; la contraseña nueva se muestra UNA
+                            sola vez al terminar. Requiere que el MX del dominio apunte a nuestro
+                            servidor. Deja "Simular" para ver el plan sin crear nada.
+                        </div>
+                        <field name="mail_domain" string="Dominio de correo"
+                               required="op == 'mailbox_create'" placeholder="divana.mx"/>
+                        <field name="mailbox_accounts" string="Cuenta(s) del buzón"
+                               required="op == 'mailbox_create'"
+                               placeholder="josette  (o varias: josette,ventas)"/>
+                        <field name="with_webmail"
+                               string="Habilitar webmail (mail.&lt;dominio&gt;)"/>
+                    </group>
                     <!-- BAJA -->
                     <group string="Baja de cliente" invisible="op != 'baja'">
                         <div class="alert alert-warning" role="alert" colspan="2"

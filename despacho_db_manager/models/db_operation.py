@@ -19,7 +19,7 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
 PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
-              'mcp_add', 'mcp_remove', 'site_suspend', 'site_resume')
+              'mcp_add', 'mcp_remove', 'mailbox_create', 'site_suspend', 'site_resume')
 # slug del endpoint MCP (segmento de la URL pública /<slug>/mcp). Igual que el
 # que validan add-client.sh y el worker.
 MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
@@ -60,6 +60,7 @@ class DespachoDbOperation(models.Model):
         ('census', 'Escanear servidor'),
         ('mcp_add', 'Activar MCP'),
         ('mcp_remove', 'Desactivar MCP'),
+        ('mailbox_create', 'Crear buzón de correo'),
         ('site_suspend', 'Suspender sitio'),
         ('site_resume', 'Reactivar sitio'),
     ], string='Operación', required=True, default='alta')
@@ -284,7 +285,7 @@ class DespachoDbOperation(models.Model):
         label = self.display_name or ('operación #%d' % self.id)
         if self.op == 'mcp_add' and self.state == 'done':
             return self._notify_mcp_credentials()
-        if self.op == 'alta' and self.state == 'done':
+        if self.op in ('alta', 'mailbox_create') and self.state == 'done':
             return self._notify_alta_mailboxes()
         if self.state == 'done':
             self._notify('success', '✅ Operación completada', '%s: Listo.' % label)
@@ -363,6 +364,30 @@ class DespachoDbOperation(models.Model):
             'incoming_bcc_all': bool(self.incoming_bcc_all),
             'mailboxes': mailboxes,
             'with_webmail': bool(self.with_webmail) and bool(mailboxes),
+            'simulate': bool(self.simulate),
+        }
+
+    def _build_mailbox_create_req(self):
+        """Crear buzón humano (<cuenta>@<dominio>) + webmail opcional, sin alta de BD.
+        Reutiliza la misma maquinaria que el alta (mailbox-create.sh + webmail-enable.sh
+        en el worker root). Pensado para el botón "Crear buzón" de la lista de usuarios."""
+        dom = (self.mail_domain or '').strip().lower()
+        if not DOMAIN_RE.match(dom):
+            raise UserError('Dominio de correo inválido (ej: divana.mx).')
+        mailboxes = ','.join(
+            p.strip().lower() for p in (self.mailbox_accounts or '').split(',') if p.strip()
+        )
+        if not mailboxes:
+            raise UserError('Indica al menos una cuenta (el nombre del buzón antes de @), '
+                            'p.ej. josette.')
+        if not re.match(r'^[a-z0-9._-]+(,[a-z0-9._-]+)*$', mailboxes):
+            raise UserError('Cuentas inválidas. Usa nombres simples separados por comas, '
+                            'p.ej. josette,ventas.')
+        return {
+            'id': self.id, 'op': 'mailbox_create',
+            'mail_domain': dom,
+            'mailboxes': mailboxes,
+            'with_webmail': bool(self.with_webmail),
             'simulate': bool(self.simulate),
         }
 

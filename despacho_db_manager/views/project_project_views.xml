@@ -135,6 +135,12 @@
                 <button name="action_mcp_remove_user" type="object" string="Quitar MCP"
                         icon="fa-power-off" groups="databases.group_databases_manager"
                         invisible="not despacho_mcp_enabled"/>
+                <!-- Crear el buzón humano de correo de este usuario (cuenta@dominio,
+                     según su login) + webmail opcional, para que entre por navegador.
+                     Reutiliza la misma maquinaria que el alta. -->
+                <button name="action_mailbox_create_user" type="object" string="Crear buzón"
+                        icon="fa-envelope" groups="databases.group_databases_manager"
+                        help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login) y, opcionalmente, el webmail mail.&lt;dominio&gt; para leerla por navegador. La contraseña se muestra una sola vez."/>
             </xpath>
             <!-- Columna de estatus MCP por usuario (la llena el censo). -->
             <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">

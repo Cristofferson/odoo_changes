@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 import uuid
 
 from dateutil.relativedelta import relativedelta
@@ -341,11 +342,48 @@ class StockLot(models.Model):
     # ------------------------------------------------------------------- #
     #  Fase 5 — alta rápida de pieza STIJ (registro de mostrador)
     # ------------------------------------------------------------------- #
+    # Categorías que NO son joya: no deben ofrecerse como "tipo de pieza".
+    _DMN_NON_JEWEL = ("Gasto", "Servicio", "Envíos", "Envios", "XUBAX",
+                      "Reparación", "Reparacion")
+
+    @api.model
+    def _dmn_categ_is_ring(self, categ):
+        """La Medida (talla) solo aplica a la familia 'Anillo' (incluye argolla,
+        churumbela, montadura..., que cuelgan de Anillo)."""
+        if not categ:
+            return False
+        return (categ.complete_name or categ.name or "").strip().lower().startswith("anillo")
+
+    @api.model
+    def _dmn_attr_values(self, attr_name):
+        """Valores del atributo de producto canónico (Metal, Medida) para los
+        desplegables; resuelto por NOMBRE (los ids difieren entre BDs)."""
+        attr = self.env["product.attribute"].sudo().search(
+            [("name", "=", attr_name)], limit=1)
+        return [{"id": v.id, "name": v.name} for v in attr.value_ids] if attr else []
+
+    @api.model
+    def _dmn_quick_form_options(self):
+        """Opciones de los desplegables del alta rápida: tipos de joya
+        (categorías, marcando cuáles son anillo para mostrar la Medida), metales
+        y medidas (de los atributos de producto)."""
+        Categ = self.env["product.category"].sudo()
+        tipos = []
+        for c in Categ.search([], order="complete_name"):
+            cn = c.complete_name or c.name or ""
+            if c.name in self._DMN_NON_JEWEL or "gema" in cn.lower():
+                continue
+            tipos.append({"id": c.id, "name": cn, "is_ring": self._dmn_categ_is_ring(c)})
+        return {
+            "tipos": tipos,
+            "metales": self._dmn_attr_values("Metal"),
+            "medidas": self._dmn_attr_values("Medida"),
+        }
+
     @api.model
     def _dmn_quick_categ(self):
-        """Categoría para la joya recién creada: la configurada en la compañía o,
-        en su defecto, la primera categoría que NO sea 'Gema' (para que el visor la
-        trate como joya y muestre Metal/Medida, no como diamante)."""
+        """Fallback de categoría cuando no se eligió tipo: la configurada en la
+        compañía o la primera no-'Gema'."""
         categ = self.env.company.dmn_quick_categ_id
         if categ and "gema" not in (categ.name or "").lower():
             return categ
@@ -354,71 +392,252 @@ class StockLot(models.Model):
         )
 
     @staticmethod
-    def _dmn_clean_b64(data):
-        """Quita el prefijo data-url (data:image/png;base64,) si viene del front."""
-        if data and isinstance(data, str) and "," in data and data[:5] == "data:":
-            return data.split(",", 1)[1]
-        return data
+    def _dmn_split_b64(data):
+        """De un data-url (data:image/png;base64,...) saca (mimetype, base64 limpio)."""
+        mime = "image/png"
+        if data and isinstance(data, str) and data[:5] == "data:":
+            if ";" in data:
+                mime = data[5:data.index(";")] or "image/png"
+            if "," in data:
+                data = data.split(",", 1)[1]
+        return mime, data
+
+    # Ley (pureza) por kilataje, según la convención histórica de Anello.
+    _DMN_LEY_BY_KT = {"24": 1.0, "22": 0.917, "21": 0.9, "18": 0.75,
+                      "14": 0.585, "10": 0.417, "8": 0.333}
+
+    @api.model
+    def _dmn_parse_metal(self, value_name):
+        """Descompone el valor del atributo Metal (ej. 'Oro blanco 14Kt') en
+        base/color/kilataje/ley, igual que el alta tradicional captura a mano.
+        Devuelve {base, color, kilataje, ley}."""
+        name = (value_name or "").strip()
+        low = name.lower()
+        res = {"base": "", "color": "", "kilataje": "", "ley": 0.0}
+        if not name:
+            return res
+        # Metal base.
+        if low.startswith("oro") or "imitación oro" in low or "imitacion oro" in low:
+            res["base"] = "Oro"
+        elif low.startswith("plata") or "imitación plata" in low or "imitacion plata" in low:
+            res["base"] = "Plata"
+        elif low.startswith("platino"):
+            res["base"] = "Platino"
+        else:
+            res["base"] = name.split()[0].capitalize()
+        # Color del metal.
+        for key, val in (("amarillo", "Amarillo"), ("blanco", "Blanco"),
+                         ("rosa", "Rosa"), ("bitono", "Bitono"),
+                         ("tricolor", "Tricolor"), ("florentino", "Florentino")):
+            if key in low:
+                res["color"] = val
+                break
+        if not res["color"] and res["base"] in ("Plata", "Platino"):
+            res["color"] = "Plateado"
+        # Kilataje + ley.
+        mk = re.search(r"(\d+)\s*kt", low)
+        if mk:
+            res["kilataje"] = "%sKt" % mk.group(1)
+            res["ley"] = self._DMN_LEY_BY_KT.get(mk.group(1), 0.0)
+        if not res["ley"]:
+            mp = re.search(r"\((\d{3})\)", low)  # ej. Plata (925), Platino (999)
+            if mp:
+                res["ley"] = int(mp.group(1)) / 1000.0
+            elif res["base"] == "Plata":
+                res["ley"] = 0.925
+            elif res["base"] == "Platino":
+                res["ley"] = 0.999
+        return res
+
+    @api.model
+    def _dmn_ai_describe(self, vals):
+        """Sugiere la 'Descripción STIJ' a partir de la primera foto usando visión
+        de OpenAI (reusa la clave `ai.openai_key` de Odoo). Solo PROPONE texto: el
+        staff lo revisa y edita antes de guardar. Nunca crea nada."""
+        imagenes = vals.get("imagenes") or []
+        if not imagenes and vals.get("foto"):
+            imagenes = [vals.get("foto")]
+        if not imagenes:
+            return {"ok": False, "error": _("Sube al menos una foto para describir la pieza.")}
+        key = self.env["ir.config_parameter"].sudo().get_param("ai.openai_key")
+        if not key:
+            return {"ok": False, "error": _("No hay clave de IA configurada (ai.openai_key).")}
+
+        raw = imagenes[0]
+        if not (isinstance(raw, str) and raw[:5] == "data:"):
+            raw = "data:image/png;base64," + (raw or "")
+
+        contexto = (
+            "Datos conocidos de la pieza -> Tipo: %s; Metal: %s; Peso: %s; "
+            "Medida: %s; Nombre interno: %s."
+            % (vals.get("tipo") or "?", vals.get("metal") or "?",
+               vals.get("peso") or "?", vals.get("medida") or "?",
+               vals.get("joya") or "?")
+        )
+        system = (
+            "Eres un catalogador de joyería que redacta una descripción OBJETIVA y "
+            "FACTUAL para la ficha técnica (pasaporte STIJ) de una pieza. A partir de la "
+            "FOTO y de los datos conocidos, describe únicamente lo observable: tipo de "
+            "pieza, metal y color, forma/estructura, gemas o aplicaciones visibles, "
+            "acabado y disposición. Español neutro, en tercera persona, 2 a 3 frases en "
+            "prosa (sin listas). PROHIBIDO usar lenguaje publicitario o de venta, "
+            "superlativos, juicios de valor o emociones (evita palabras como 'elegante', "
+            "'hermosa', 'exquisita', 'única', 'lujo', 'perfecta', 'ideal para'). NO "
+            "inventes quilatajes, pesos, leyes, materiales ni certificados; si un dato no "
+            "es visible ni conocido, omítelo. Respeta los datos conocidos que te doy."
+        )
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": [
+                    {"type": "text", "text": contexto + " Describe objetivamente esta pieza para su ficha técnica."},
+                    {"type": "image_url", "image_url": {"url": raw, "detail": "low"}},
+                ]},
+            ],
+            "max_tokens": 320,
+            "temperature": 0.2,
+        }
+        try:
+            import requests as _rq
+            resp = _rq.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": "Bearer %s" % key,
+                         "Content-Type": "application/json"},
+                json=payload, timeout=30,
+            )
+            data = resp.json()
+            if resp.status_code != 200:
+                msg = (data.get("error") or {}).get("message") or ("HTTP %s" % resp.status_code)
+                return {"ok": False, "error": _("IA: %s") % msg}
+            text = (data["choices"][0]["message"]["content"] or "").strip()
+            return {"ok": True, "descripcion": text}
+        except Exception:  # pragma: no cover
+            _logger.exception("DMN: fallo al describir con IA")
+            return {"ok": False, "error": _("No se pudo conectar con la IA.")}
 
     @api.model
     def _dmn_quick_create(self, vals):
         """Alta rápida de una pieza STIJ desde el mostrador: con los datos mínimos
         crea la joya (producto) + el lote ya escaneable (visor activo, Activo) y le
-        liga la foto. Devuelve la URL del visor y el id para el QR.
+        liga las imágenes. Devuelve la URL del visor y el id para el QR.
 
-        vals: {joya, metal, medidas, pieza, plastico, foto}
-        - joya     -> nombre del producto (obligatorio)
-        - plastico -> x_studio_url_stij = lo que se escanea (obligatorio, único)
-        - pieza    -> número de lote/serie (si falta, se usa el plástico)
-        - metal/medidas/foto -> opcionales
+        vals: {joya, categ_id, metal_value_id, medida_value_id, peso, codigo, imagenes[]}
+        - joya            -> nombre/descripción del producto (obligatorio)
+        - codigo          -> nº de pieza = nº de plástico = x_studio_url_stij (obligatorio, único)
+        - categ_id        -> tipo de joya (categoría); si falta, fallback no-Gema
+        - metal_value_id  -> valor del atributo Metal (dropdown)
+        - medida_value_id -> valor del atributo Medida (solo anillos)
+        - peso            -> texto libre (ej. "4.7 gr")
+        - imagenes        -> lista de data-urls (varias)
         """
         joya = (vals.get("joya") or "").strip()
-        plastico = (vals.get("plastico") or "").strip()
-        pieza = (vals.get("pieza") or "").strip()
-        metal = (vals.get("metal") or "").strip()
-        medidas = (vals.get("medidas") or "").strip()
-        foto_raw = vals.get("foto")
-        foto_mime = "image/png"
-        if foto_raw and isinstance(foto_raw, str) and foto_raw[:5] == "data:" and ";" in foto_raw:
-            foto_mime = foto_raw[5:foto_raw.index(";")] or "image/png"
-        foto = self._dmn_clean_b64(foto_raw)
+        codigo = (vals.get("codigo") or vals.get("plastico") or "").strip()
+        peso = (vals.get("peso") or "").strip()
+        metal_value_id = vals.get("metal_value_id") or False
+        medida_value_id = vals.get("medida_value_id") or False
+        medida_text = (vals.get("medida_text") or "").strip()
+        ancho = (vals.get("ancho") or "").strip()
+        grosor = (vals.get("grosor") or "").strip()
+        descripcion = (vals.get("descripcion") or "").strip()
+        categ_id = vals.get("categ_id") or False
+        imagenes = vals.get("imagenes") or []
+        if not imagenes and vals.get("foto"):  # compat: una sola foto
+            imagenes = [vals.get("foto")]
 
         if not joya:
             return {"ok": False, "error": _("Falta el nombre/descripción de la joya.")}
-        if not plastico:
-            return {"ok": False, "error": _("Falta el número de plástico (el código que se escanea).")}
+        if not codigo:
+            return {"ok": False, "error": _("Falta el número de pieza (el código del plástico que se escanea).")}
 
-        # El número de plástico debe ser único: es la llave del visor.
-        dup = self.sudo().search([("x_studio_url_stij", "=", plastico)], limit=1)
+        # El número (plástico) es la llave del visor: debe ser único.
+        dup = self.sudo().search([("x_studio_url_stij", "=", codigo)], limit=1)
         if dup:
-            return {"ok": False, "error": _("Ese número de plástico ya está registrado en otra pieza.")}
+            return {"ok": False, "error": _("Ese número ya está registrado en otra pieza.")}
+
+        Categ = self.env["product.category"].sudo()
+        categ = Categ.browse(int(categ_id)) if categ_id else Categ
+        if not categ or not categ.exists():
+            categ = self._dmn_quick_categ()
+        is_ring = self._dmn_categ_is_ring(categ)
+
+        AttrVal = self.env["product.attribute.value"].sudo()
+        metal_val = AttrVal.browse(int(metal_value_id)) if metal_value_id else AttrVal
+        medida_val = AttrVal.browse(int(medida_value_id)) if (medida_value_id and is_ring) else AttrVal
+
+        # Imágenes: data-url -> (mimetype, base64).
+        imgs = []
+        for raw in imagenes:
+            mime, clean = self._dmn_split_b64(raw)
+            if clean:
+                imgs.append((mime, clean))
 
         Product = self.env["product.template"].sudo()
         prod_vals = {
             "name": joya,
-            "categ_id": (self._dmn_quick_categ().id or False),
+            "categ_id": categ.id,
             "is_storable": True,
             "tracking": "serial",
         }
-        # Campos Studio de la joya (guardados: pueden no existir en otra BD).
-        if metal and "x_studio_metal_1" in Product._fields:
-            prod_vals["x_studio_metal_1"] = metal
-        if medidas and "x_studio_medida_joya" in Product._fields:
-            prod_vals["x_studio_medida_joya"] = medidas
-        # La descripción (= la joya) la pinta el visor en "Información de la Joya".
-        if "x_studio_descripcion" in Product._fields:
-            prod_vals["x_studio_descripcion"] = joya
-        if foto:
-            prod_vals["image_1920"] = foto
+        # --- Descomposición del Metal (como el alta tradicional) --- #
+        metal_info = self._dmn_parse_metal(metal_val.name if (metal_val and metal_val.exists()) else "")
+        ley = metal_info["ley"]
+
+        # --- Peso de oro puro = peso * ley --- #
+        peso_num = 0.0
+        mnum = re.search(r"\d+(?:\.\d+)?", (peso or "").replace(",", "."))
+        if mnum:
+            peso_num = float(mnum.group())
+        peso_oro = ("%.3f gr" % (peso_num * ley)) if (peso_num and ley) else ""
+
+        # Campos del producto que rellena el alta tradicional (guardados si existen).
+        studio = {
+            "x_studio_metal_1": metal_info["base"],        # visor: Metal base (ej. "Oro")
+            "x_studio_color_metal": metal_info["color"],
+            "x_studio_kilataje_metal": metal_info["kilataje"],
+            "x_studio_ley": (("%g" % ley) if ley else ""),
+            "x_studio_ley_float": ley,
+            "x_studio_tipo_joya": (categ.name or ""),       # = categoría
+            "x_studio_peso_joya": peso,
+            "x_studio_peso_de_oro_puro": peso_oro,
+            "x_studio_descripcion": (descripcion or joya),  # IA (revisada) o el nombre
+            "x_studio_ancho_joya": ancho,
+            "x_studio_grosor_joya": grosor,
+        }
+        # Medida: anillo -> valor del atributo; otro tipo -> texto libre. Mismo campo.
+        if is_ring and medida_val and medida_val.exists():
+            studio["x_studio_medida_joya"] = medida_val.name
+        elif medida_text:
+            studio["x_studio_medida_joya"] = medida_text
+        for fname, fval in studio.items():
+            if fval not in (None, "", False) and fname in Product._fields:
+                prod_vals[fname] = fval
+        # Id de joya: secuencia automática.
+        if "x_studio_id_joya" in Product._fields:
+            id_joya = self.env["ir.sequence"].sudo().next_by_code("dmn.stij.id_joya")
+            if id_joya:
+                prod_vals["x_studio_id_joya"] = id_joya
+        if imgs:
+            prod_vals["image_1920"] = imgs[0][1]
+        # Atributo real (como el alta tradicional) -> genera la variante.
+        attr_lines = []
+        for val in (metal_val, medida_val):
+            if val and val.exists() and val.attribute_id:
+                attr_lines.append((0, 0, {
+                    "attribute_id": val.attribute_id.id,
+                    "value_ids": [(6, 0, [val.id])],
+                }))
+        if attr_lines:
+            prod_vals["attribute_line_ids"] = attr_lines
         product = Product.create(prod_vals)
 
         lot_vals = {
-            "name": pieza or plastico,
+            "name": codigo,
             "product_id": product.product_variant_id.id,
             "company_id": self.env.company.id,
         }
         for fname, fval in (
-            ("x_studio_url_stij", plastico),
+            ("x_studio_url_stij", codigo),
             ("x_studio_estatus", "Activo"),
             ("x_studio_visor_activo", True),
             # Encender los módulos del visor para que se vea completo.
@@ -430,26 +649,27 @@ class StockLot(models.Model):
                 lot_vals[fname] = fval
         lot = self.sudo().create(lot_vals)
 
-        # Foto en la galería del visor (stij.lot.image) para que se muestre.
-        if foto and "stij.lot.image" in self.env:
-            try:
-                self.env["stij.lot.image"].sudo().create({
-                    "lot_id": lot.id,
-                    "image": foto,
-                    "name": joya,
-                    "mimetype": foto_mime,
-                    "sequence": 1,
-                })
-            except Exception:  # pragma: no cover
-                _logger.exception("DMN: no se pudo ligar la foto al lote %s", lot.id)
+        # Galería del visor: una stij.lot.image por imagen.
+        if imgs and "stij.lot.image" in self.env:
+            for seq, (mime, clean) in enumerate(imgs, start=1):
+                try:
+                    self.env["stij.lot.image"].sudo().create({
+                        "lot_id": lot.id,
+                        "image": clean,
+                        "name": ("%s %s" % (joya, seq)) if len(imgs) > 1 else joya,
+                        "mimetype": mime,
+                        "sequence": seq,
+                    })
+                except Exception:  # pragma: no cover
+                    _logger.exception("DMN: no se pudo ligar imagen %s al lote %s", seq, lot.id)
 
         base = self.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
         from urllib.parse import quote
-        visor_url = "%s/stijid?id=%s" % (base, quote(plastico, safe=""))
+        visor_url = "%s/stijid?id=%s" % (base, quote(codigo, safe=""))
         return {
             "ok": True,
             "lot_id": lot.id,
-            "plastico": plastico,
+            "plastico": codigo,
             "visor_url": visor_url,
             "joya": joya,
         }

@@ -107,7 +107,16 @@ class StijWebsitePlus(StijWebsite):
         datos mínimos crea la joya + el lote escaneable y muestra el QR del visor."""
         if not self._dmn_is_staff():
             return request.redirect("/web/login")
-        return request.render("stij_diamane_plus.page_dmn_quick", {})
+        opts = request.env["stock.lot"].sudo()._dmn_quick_form_options()
+        return request.render("stij_diamane_plus.page_dmn_quick", {"opts": opts})
+
+    @http.route("/dmn/alta/describir", type="jsonrpc", auth="user")
+    def dmn_quick_describe(self, **kw):
+        """Sugiere la Descripción STIJ por IA a partir de la(s) foto(s). Solo staff;
+        no crea nada, solo devuelve texto para que el staff lo revise/edite."""
+        if not self._dmn_is_staff():
+            return {"ok": False, "error": "No autorizado."}
+        return request.env["stock.lot"].sudo()._dmn_ai_describe(kw)
 
     @http.route("/dmn/alta/crear", type="jsonrpc", auth="user")
     def dmn_quick_create(self, **kw):

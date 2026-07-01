@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Secuencia para el "Id de joya" del alta rápida STIJ (Fase 5). -->
+    <record id="seq_dmn_id_joya" model="ir.sequence">
+        <field name="name">DIAMANE — Id de joya (alta rápida STIJ)</field>
+        <field name="code">dmn.stij.id_joya</field>
+        <field name="prefix">J</field>
+        <field name="padding">6</field>
+        <field name="number_increment">1</field>
+        <field name="implementation">standard</field>
+    </record>
+</odoo>

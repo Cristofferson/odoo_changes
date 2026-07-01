@@ -13,28 +13,71 @@
                         <label class="form-label fw-bold">Joya / descripción <span class="text-danger">*</span></label>
                         <input class="form-control form-control-lg" name="joya" placeholder="Ej. Anillo de oro blanco 14kt" required="required"/>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo de joya <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-lg" name="categ_id" id="dmn_q_tipo" required="required">
+                            <option value="">— Selecciona —</option>
+                            <t t-foreach="opts['tipos']" t-as="tp">
+                                <option t-att-value="tp['id']" t-att-data-ring="'1' if tp['is_ring'] else '0'" t-esc="tp['name']"/>
+                            </t>
+                        </select>
+                    </div>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">Metal</label>
-                            <input class="form-control form-control-lg" name="metal" placeholder="Ej. Oro blanco 14kt"/>
+                            <select class="form-select form-select-lg" name="metal_value_id" id="dmn_q_metal">
+                                <option value="">— Metal —</option>
+                                <t t-foreach="opts['metales']" t-as="m">
+                                    <option t-att-value="m['id']" t-esc="m['name']"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3" id="dmn_q_medida_wrap" style="display:none">
+                            <label class="form-label fw-bold">Medida (talla)</label>
+                            <select class="form-select form-select-lg" name="medida_value_id" id="dmn_q_medida">
+                                <option value="">— Medida —</option>
+                                <t t-foreach="opts['medidas']" t-as="md">
+                                    <option t-att-value="md['id']" t-esc="md['name']"/>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3" id="dmn_q_medida_text_wrap">
+                            <label class="form-label fw-bold">Medida</label>
+                            <input class="form-control form-control-lg" name="medida_text" id="dmn_q_medida_text" placeholder="Ej. 45 cm"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Ancho</label>
+                            <input class="form-control form-control-lg" name="ancho" placeholder="Ej. 3 mm"/>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">Medidas</label>
-                            <input class="form-control form-control-lg" name="medidas" placeholder="Ej. 7"/>
+                            <label class="form-label fw-bold">Grosor</label>
+                            <input class="form-control form-control-lg" name="grosor" placeholder="Ej. 1.5 mm"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Peso</label>
+                            <input class="form-control form-control-lg" name="peso" placeholder="Ej. 4.7 gr"/>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Nº de pieza / plástico <span class="text-danger">*</span></label>
+                            <input class="form-control form-control-lg" name="codigo" placeholder="Código que se escanea" required="required"/>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Número de pieza</label>
-                        <input class="form-control form-control-lg" name="pieza" placeholder="Lote/serie (si lo dejas vacío usa el plástico)"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Número de plástico <span class="text-danger">*</span></label>
-                        <input class="form-control form-control-lg" name="plastico" placeholder="El código del plástico que se escanea" required="required"/>
-                        <div class="form-text">Es lo que liga el QR del plástico con el visor.</div>
+                        <label class="form-label fw-bold">Fotos de la pieza</label>
+                        <input class="form-control form-control-lg" name="imagenes" id="dmn_q_imgs" type="file" accept="image/*" multiple="multiple" capture="environment"/>
+                        <div class="form-text">Puedes elegir varias.</div>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Foto de la pieza</label>
-                        <input class="form-control form-control-lg" name="foto" type="file" accept="image/*" capture="environment"/>
+                        <label class="form-label fw-bold">Descripción STIJ</label>
+                        <textarea class="form-control" name="descripcion" id="dmn_q_desc" rows="3" placeholder="Descripción de la pieza. Puedes generarla con IA a partir de la foto y editarla."/>
+                        <div class="d-flex align-items-center mt-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="dmn_q_ai">✨ Describir con IA</button>
+                            <span id="dmn_q_ai_status" class="ms-2 small text-muted"/>
+                        </div>
                     </div>
                     <button class="btn btn-primary btn-lg w-100" type="submit" id="dmn_q_submit">Crear pieza</button>
                 </form>
@@ -53,26 +96,47 @@
                 var box = document.getElementById('dmn_q_alert');
                 var btn = document.getElementById('dmn_q_submit');
                 var result = document.getElementById('dmn_q_result');
+                var tipo = document.getElementById('dmn_q_tipo');
+                var medWrap = document.getElementById('dmn_q_medida_wrap');
+                var medSel = document.getElementById('dmn_q_medida');
+                var medTextWrap = document.getElementById('dmn_q_medida_text_wrap');
+                var medText = document.getElementById('dmn_q_medida_text');
 
-                function readFile(input){
-                  return new Promise(function(resolve){
-                    var file = input.files && input.files[0];
-                    if(!file){ resolve(null); return; }
-                    var r = new FileReader();
-                    r.onload = function(){ resolve(r.result); };
-                    r.onerror = function(){ resolve(null); };
-                    r.readAsDataURL(file);
-                  });
+                // Anillo -> Medida es talla (dropdown del atributo); otro tipo -> texto libre.
+                function toggleMedida(){
+                  var o = tipo.options[tipo.selectedIndex];
+                  var ring = !!(o && o.getAttribute('data-ring') === '1');
+                  medWrap.style.display = ring ? 'block' : 'none';
+                  medTextWrap.style.display = ring ? 'none' : 'block';
+                  if(ring){ medText.value = ''; } else { medSel.value = ''; }
+                }
+                tipo.addEventListener('change', toggleMedida);
+                toggleMedida();
+
+                function readFiles(input){
+                  var files = input.files ? Array.prototype.slice.call(input.files) : [];
+                  return Promise.all(files.map(function(file){
+                    return new Promise(function(resolve){
+                      var r = new FileReader();
+                      r.onload = function(){ resolve(r.result); };
+                      r.onerror = function(){ resolve(null); };
+                      r.readAsDataURL(file);
+                    });
+                  })).then(function(arr){ return arr.filter(Boolean); });
                 }
 
                 f.addEventListener('submit', function(e){
                   e.preventDefault();
                   box.innerHTML = '';
                   btn.disabled = true; btn.textContent = 'Creando...';
-                  readFile(f.foto).then(function(foto){
+                  readFiles(f.imagenes).then(function(imgs){
                     var p = {
-                      joya: f.joya.value, metal: f.metal.value, medidas: f.medidas.value,
-                      pieza: f.pieza.value, plastico: f.plastico.value, foto: foto
+                      joya: f.joya.value, categ_id: f.categ_id.value,
+                      metal_value_id: f.metal_value_id.value,
+                      medida_value_id: medSel.value, medida_text: medText.value,
+                      ancho: f.ancho.value, grosor: f.grosor.value,
+                      descripcion: document.getElementById('dmn_q_desc').value,
+                      peso: f.peso.value, codigo: f.codigo.value, imagenes: imgs
                     };
                     return fetch('/dmn/alta/crear', {method:'POST', headers:{'Content-Type':'application/json'},
                       body: JSON.stringify({jsonrpc:'2.0', method:'call', params:p, id:1})});
@@ -99,8 +163,40 @@
                   });
                 });
 
+                // Botón "Describir con IA": manda la(s) foto(s) + contexto y rellena el textarea.
+                document.getElementById('dmn_q_ai').addEventListener('click', function(){
+                  var st = document.getElementById('dmn_q_ai_status');
+                  var aiBtn = document.getElementById('dmn_q_ai');
+                  var metalSel = document.getElementById('dmn_q_metal');
+                  readFiles(f.imagenes).then(function(imgs){
+                    if(!imgs.length){ st.textContent = 'Sube una foto primero.'; return; }
+                    aiBtn.disabled = true; st.textContent = 'Generando…';
+                    var tOpt = tipo.options[tipo.selectedIndex];
+                    var mOpt = metalSel.options[metalSel.selectedIndex];
+                    var medidaTxt = (medWrap.style.display !== 'none')
+                      ? ((medSel.options[medSel.selectedIndex]||{}).text || '')
+                      : medText.value;
+                    var p = {
+                      imagenes: imgs, joya: f.joya.value,
+                      tipo: (tOpt ? tOpt.text : ''),
+                      metal: (mOpt ? mOpt.text : ''),
+                      peso: f.peso.value, medida: medidaTxt
+                    };
+                    return fetch('/dmn/alta/describir', {method:'POST', headers:{'Content-Type':'application/json'},
+                      body: JSON.stringify({jsonrpc:'2.0', method:'call', params:p, id:1})})
+                    .then(function(r){return r.json();})
+                    .then(function(d){
+                      aiBtn.disabled = false;
+                      var res = d.result || {};
+                      if(res.ok){ document.getElementById('dmn_q_desc').value = res.descripcion || ''; st.textContent = 'Listo, revisa y edita.'; }
+                      else { st.textContent = res.error || 'No se pudo generar.'; }
+                    });
+                  }).catch(function(){ aiBtn.disabled = false; st.textContent = 'Error de conexión.'; });
+                });
+
                 document.getElementById('dmn_q_again').addEventListener('click', function(){
-                  f.reset(); f.style.display = 'block'; result.style.display = 'none'; box.innerHTML = '';
+                  f.reset(); toggleMedida(); document.getElementById('dmn_q_ai_status').textContent = '';
+                  f.style.display = 'block'; result.style.display = 'none'; box.innerHTML = '';
                   window.scrollTo({top:0, behavior:'smooth'});
                 });
               })();

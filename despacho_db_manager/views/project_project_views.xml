@@ -164,11 +164,15 @@
             <xpath expr="//page[@name='database']" position="attributes">
                 <attribute name="string">Usuarios</attribute>
             </xpath>
+            <!-- OJO: position="move" solo se procesa como HIJO DIRECTO del spec
+                 (template_inheritance.py), por eso va en dos pasos: crear el
+                 grupo y luego mover dentro. -->
             <xpath expr="//page[@name='despacho_server']" position="inside">
                 <group string="Conexión y sincronización (app Databases)"
-                       name="despacho_native_conn">
-                    <xpath expr="//page[@name='database']/group[1]" position="move"/>
-                </group>
+                       name="despacho_native_conn"/>
+            </xpath>
+            <xpath expr="//group[@name='despacho_native_conn']" position="inside">
+                <xpath expr="//page[@name='database']/group[1]" position="move"/>
             </xpath>
         </field>
     </record>

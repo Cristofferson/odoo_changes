@@ -762,12 +762,9 @@ class ProjectProject(models.Model):
 
     def _backup_auto_toggle(self, enable):
         """Encola el encendido/apagado del respaldo automático nocturno de esta BD
-        (edita la lista de exclusión que honra backup-odoo.sh). Solo BDs locales."""
+        (edita la lista de exclusión que honra el backup-odoo.sh de su servidor:
+        odoo19 local u odoo18/OVH por SSH)."""
         self.ensure_one()
-        if (self.despacho_server or 'odoo19') != 'odoo19':
-            raise UserError('El respaldo automático solo se administra para BDs de '
-                            'ESTE servidor (odoo19). Esta vive en %s.'
-                            % (self.despacho_server or '¿?'))
         op = self.env['despacho.db.operation'].create({
             'op': 'backup_auto', 'project_id': self.id,
             'backup_auto_enable': enable, 'simulate': False,

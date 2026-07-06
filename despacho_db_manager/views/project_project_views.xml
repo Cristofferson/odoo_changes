@@ -165,13 +165,13 @@
                 <attribute name="string">Usuarios</attribute>
             </xpath>
             <!-- OJO: position="move" solo se procesa como HIJO DIRECTO del spec
-                 (template_inheritance.py), por eso va en dos pasos: crear el
-                 grupo y luego mover dentro. -->
+                 (template_inheritance.py). El grupo movido va DIRECTO a la página
+                 (no dentro de otro <group>: anidarlo lo comprime a una celda y los
+                 campos salen cortados); el título de la sección lo da el separator. -->
             <xpath expr="//page[@name='despacho_server']" position="inside">
-                <group string="Conexión y sincronización (app Databases)"
-                       name="despacho_native_conn"/>
+                <separator string="Conexión y sincronización (app Databases)"/>
             </xpath>
-            <xpath expr="//group[@name='despacho_native_conn']" position="inside">
+            <xpath expr="//page[@name='despacho_server']" position="inside">
                 <xpath expr="//page[@name='database']/group[1]" position="move"/>
             </xpath>
         </field>
@@ -374,13 +374,13 @@
                             <button name="action_backup_auto_off" type="object"
                                     string="Apagar respaldo automático"
                                     class="btn-warning ms-2" icon="fa-power-off"
-                                    invisible="despacho_backup_auto != 'on' or despacho_server != 'odoo19'"
+                                    invisible="despacho_backup_auto != 'on'"
                                     groups="databases.group_databases_manager"
                                     confirm="Vas a EXCLUIR esta BD del respaldo nocturno: dejará de generar copias nuevas (las existentes se conservan). ¿Continuar?"/>
                             <button name="action_backup_auto_on" type="object"
                                     string="Encender respaldo automático"
                                     class="btn-success ms-2" icon="fa-plug"
-                                    invisible="despacho_backup_auto != 'off' or despacho_server != 'odoo19'"
+                                    invisible="despacho_backup_auto != 'off'"
                                     groups="databases.group_databases_manager"/>
                         </div>
                         <div colspan="2" class="text-muted"
@@ -396,7 +396,10 @@
                         </div>
                     </group>
                     <group string="Destinos off-site (nube)">
-                        <field name="despacho_offsite_ids" nolabel="1" readonly="1">
+                        <!-- colspan=2: sin él, el o2m ocupa una sola columna del
+                             group y la tabla sale angosta/cortada. -->
+                        <field name="despacho_offsite_ids" nolabel="1" readonly="1"
+                               colspan="2">
                             <list string="Destinos off-site" create="0" edit="0" delete="0">
                                 <field name="remote" string="Destino"/>
                                 <field name="available" string="Verificable" widget="boolean"/>

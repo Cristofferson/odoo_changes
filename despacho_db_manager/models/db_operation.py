@@ -466,9 +466,8 @@ class DespachoDbOperation(models.Model):
         if not CENSUS_DB_RE.match(db):
             raise UserError('Nombre de BD inválido: %r' % db)
         server = (proj.despacho_server or 'odoo19').strip()
-        if server != 'odoo19':
-            raise UserError('El respaldo automático solo se administra para BDs de '
-                            'ESTE servidor (odoo19). Esta vive en %s.' % server)
+        if server not in SERVER_KEYS:
+            raise UserError('Servidor de la BD no reconocido: %s' % server)
         return {'id': self.id, 'op': 'backup_auto', 'db': db, 'server': server,
                 'enable': bool(self.backup_auto_enable), 'simulate': False}
 

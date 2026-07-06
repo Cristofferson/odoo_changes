@@ -1,6 +1,6 @@
 {
     'name': 'Despacho - Administración de Bases de Datos',
-    'version': '19.0.1.51.0',
+    'version': '19.0.1.53.0',
     'summary': 'Inventario y operaciones (alta, censo multi-servidor, baja, respaldo, refresh de prueba) de las bases de datos de clientes, sobre la app nativa Databases',
     'description': """
 Administración de bases de datos de clientes (XUBAX)
@@ -24,6 +24,7 @@ Fase 1: alta + censo. Fase 2 (posterior): baja, respaldo, correo, refresh de tes
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
         'data/mcp_product.xml',
+        'data/task_stages.xml',
         'views/db_operation_views.xml',
         'views/project_project_views.xml',
         'views/res_users_views.xml',

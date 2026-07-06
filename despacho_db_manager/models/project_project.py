@@ -88,6 +88,17 @@ class ProjectProject(models.Model):
     despacho_installed_module_ids = fields.One2many(
         'despacho.db.installed.module', 'project_id', string='Módulos instalados')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
+    # Estado del respaldo automático NOCTURNO de esta BD. Lo llena el censo
+    # leyendo /backup/exclude-dbs.txt (archivo que edita la op backup_auto y que
+    # honra backup-odoo.sh). Vacío = desconocido (servidor sin script de respaldo
+    # o censo anterior a esta función).
+    despacho_backup_auto = fields.Selection([
+        ('on', 'Activado'),
+        ('off', 'Apagado'),
+    ], string='Respaldo automático', copy=False,
+        help='Si el respaldo nocturno del servidor incluye esta BD. Se apaga/'
+             'enciende con los botones de la pestaña Respaldos (agrega o quita '
+             'la BD de la lista de exclusión del servidor).')
     # Historial de respaldos NOCTURNOS (automáticos), uno por archivo en disco.
     # Lo llena el censo de CADA servidor; es de solo lectura (refleja /backup).
     despacho_backup_ids = fields.One2many('despacho.db.backup', 'project_id',
@@ -749,6 +760,41 @@ class ProjectProject(models.Model):
             },
         }
 
+    def _backup_auto_toggle(self, enable):
+        """Encola el encendido/apagado del respaldo automático nocturno de esta BD
+        (edita la lista de exclusión que honra backup-odoo.sh). Solo BDs locales."""
+        self.ensure_one()
+        if (self.despacho_server or 'odoo19') != 'odoo19':
+            raise UserError('El respaldo automático solo se administra para BDs de '
+                            'ESTE servidor (odoo19). Esta vive en %s.'
+                            % (self.despacho_server or '¿?'))
+        op = self.env['despacho.db.operation'].create({
+            'op': 'backup_auto', 'project_id': self.id,
+            'backup_auto_enable': enable, 'simulate': False,
+        })
+        op.action_provision()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Respaldo automático %s' % ('encendido' if enable else 'APAGADO'),
+                'message': ('%s vuelve a entrar al respaldo nocturno.'
+                            if enable else
+                            '%s quedó EXCLUIDA del respaldo nocturno. Sus respaldos '
+                            'en disco/nube existentes se conservan, pero no habrá '
+                            'copias nuevas hasta volver a encenderlo.')
+                           % (self.database_name or self.name),
+                'type': 'success' if enable else 'warning',
+                'sticky': not enable,
+            },
+        }
+
+    def action_backup_auto_off(self):
+        return self._backup_auto_toggle(False)
+
+    def action_backup_auto_on(self):
+        return self._backup_auto_toggle(True)
+
     def action_refresh_test(self):
         """Abre el asistente para refrescar ESTA BD de prueba desde producción
         (dry-run por defecto). Solo tiene sentido en BDs cuyo nombre empieza con 'test'."""
@@ -902,6 +948,7 @@ class ProjectProject(models.Model):
                 'despacho_user_count': row.get('users_internal') or 0,
                 'despacho_user_total': row.get('users_total') or 0,
                 'despacho_last_backup': row.get('last_backup') or False,
+                'despacho_backup_auto': row.get('backup_auto') or False,
                 'despacho_last_census': now,
                 'despacho_provision_state': 'active',
             }
@@ -1066,4 +1113,33 @@ class ProjectProject(models.Model):
                          ('database_name', '!=', False)])._autolink_subscriptions()
         except Exception as e:  # noqa: BLE001
             _logger.warning('Censo: auto-ligado de suscripciones falló: %s', e)
+        # Etapas de tareas del despacho: cada proyecto-BD debe tenerlas ligadas
+        # para que el kanban del smart button "Tareas" muestre columnas.
+        try:
+            self._despacho_ensure_task_stages()
+        except Exception as e:  # noqa: BLE001
+            _logger.warning('Censo: ligado de etapas de tareas falló: %s', e)
         return True
+
+    def _despacho_ensure_task_stages(self):
+        """Liga las 4 etapas de tareas del módulo (Pendiente/En curso/En espera/
+        Hecho, data/task_stages.xml) a TODOS los proyectos-BD que aún no las
+        tengan. Idempotente y barato; corre al final de cada censo, así las BDs
+        nuevas quedan con etapas sin paso manual."""
+        refs = ('despacho_db_manager.stage_task_pendiente',
+                'despacho_db_manager.stage_task_en_curso',
+                'despacho_db_manager.stage_task_espera',
+                'despacho_db_manager.stage_task_hecho')
+        stages = self.env['project.task.type'].sudo()
+        for ref in refs:
+            st = self.env.ref(ref, raise_if_not_found=False)
+            if st:
+                stages |= st
+        if not stages:
+            return
+        projs = self.sudo().with_context(active_test=False).search([
+            ('database_hosting', '!=', False)])
+        for proj in projs:
+            missing = stages - proj.type_ids
+            if missing:
+                proj.type_ids = [(4, s.id) for s in missing]

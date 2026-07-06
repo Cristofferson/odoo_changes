@@ -19,7 +19,8 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # Operaciones habilitadas (Fase 1: alta+censo; Fase 2: baja, respaldo, refresh).
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
 PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
-              'mcp_add', 'mcp_remove', 'mailbox_create', 'site_suspend', 'site_resume')
+              'mcp_add', 'mcp_remove', 'mailbox_create', 'site_suspend',
+              'site_resume', 'backup_auto')
 # slug del endpoint MCP (segmento del nombre en la URL secreta
 # /<slug>-<secreto>/mcp). Igual que el que validan add-client.sh y el worker.
 MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
@@ -63,6 +64,7 @@ class DespachoDbOperation(models.Model):
         ('mailbox_create', 'Crear buzón de correo'),
         ('site_suspend', 'Suspender sitio'),
         ('site_resume', 'Reactivar sitio'),
+        ('backup_auto', 'Respaldo automático (on/off)'),
     ], string='Operación', required=True, default='alta')
 
     project_id = fields.Many2one(
@@ -169,6 +171,12 @@ class DespachoDbOperation(models.Model):
         'Correo del cliente (login)',
         help='Correo con el que el cliente iniciará sesión (Cloudflare le manda un '
              'código). Solo ese correo podrá entrar a su endpoint.')
+
+    # --- Parámetros de RESPALDO AUTOMÁTICO (op backup_auto) ---
+    backup_auto_enable = fields.Boolean(
+        'Encender respaldo automático', default=True,
+        help='Activo: la BD vuelve a entrar al respaldo nocturno. Apagado: la BD '
+             'se agrega a la lista de exclusión y el respaldo nocturno la omite.')
 
     # --- Parámetros de CENSO ---
     with_modules = fields.Boolean('Incluir módulos instalados', default=True)
@@ -450,6 +458,20 @@ class DespachoDbOperation(models.Model):
         return {'id': self.id, 'op': 'respaldo', 'db': db, 'server': server,
                 'simulate': False}
 
+    def _build_backup_auto_req(self):
+        proj = self.project_id
+        if not proj or not proj.database_name:
+            raise UserError('Selecciona una base de datos del inventario.')
+        db = (proj.database_name or '').strip()
+        if not CENSUS_DB_RE.match(db):
+            raise UserError('Nombre de BD inválido: %r' % db)
+        server = (proj.despacho_server or 'odoo19').strip()
+        if server != 'odoo19':
+            raise UserError('El respaldo automático solo se administra para BDs de '
+                            'ESTE servidor (odoo19). Esta vive en %s.' % server)
+        return {'id': self.id, 'op': 'backup_auto', 'db': db, 'server': server,
+                'enable': bool(self.backup_auto_enable), 'simulate': False}
+
     def _build_refresh_req(self):
         proj = self.project_id
         if not proj or not proj.database_name:
@@ -672,6 +694,12 @@ class DespachoDbOperation(models.Model):
                 bt = res['backup'].get('backup_time')
                 if bt:
                     rec.project_id.sudo().despacho_last_backup = bt
+            # Toggle de respaldo automático aplicado: reflejarlo al instante en la
+            # ficha (el censo lo confirmará después leyendo el archivo real).
+            if (rec.op == 'backup_auto' and res.get('state') == 'done'
+                    and rec.project_id):
+                rec.project_id.sudo().despacho_backup_auto = (
+                    'on' if rec.backup_auto_enable else 'off')
             # Baja aplicada de verdad: reflejar el resultado en el inventario para
             # que el listado no siga mostrando la BD como activa.
             #  - con drop: la BD se eliminó -> marcar 'dropped' y ARCHIVAR (sale del

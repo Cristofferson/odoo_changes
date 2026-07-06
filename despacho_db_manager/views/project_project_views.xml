@@ -142,6 +142,12 @@
                         icon="fa-envelope" groups="databases.group_databases_manager"
                         invisible="despacho_mailbox_state != 'can'"
                         help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login) y, opcionalmente, el webmail mail.&lt;dominio&gt; para leerla por navegador. La contraseña se muestra una sola vez. Solo aparece si el buzón no existe y hospedamos su dominio."/>
+                <!-- Buzón ya creado: botón para ENTRAR al webmail (mail.<dominio>).
+                     Complementa a "Crear buzón", que solo se ve mientras NO existe. -->
+                <button name="action_open_webmail_user" type="object" string="Abrir buzón"
+                        icon="fa-envelope-open" groups="databases.group_databases_manager"
+                        invisible="despacho_mailbox_state != 'exists'"
+                        help="Abre el webmail (mail.&lt;dominio&gt;) donde vive el buzón de este usuario. Solo aparece si el buzón ya existe en nuestro servidor."/>
             </xpath>
             <!-- Columna de estatus MCP por usuario (la llena el censo). -->
             <xpath expr="//field[@name='database_user_ids']/list/field[@name='login']" position="after">
@@ -150,6 +156,19 @@
                 <field name="despacho_mcp_writes" string="MCP escribe" optional="hide"/>
                 <!-- Estado del buzón (controla la visibilidad del botón "Crear buzón"). -->
                 <field name="despacho_mailbox_state" column_invisible="1"/>
+            </xpath>
+            <!-- La pestaña nativa "Base de datos" pasa a llamarse "Usuarios" y se
+                 queda SOLO con Gestión de usuarios; sus campos de conexión y
+                 sincronización (hosting, URL, API, fetch) se mueven a la pestaña
+                 Servidor como sección propia. -->
+            <xpath expr="//page[@name='database']" position="attributes">
+                <attribute name="string">Usuarios</attribute>
+            </xpath>
+            <xpath expr="//page[@name='despacho_server']" position="inside">
+                <group string="Conexión y sincronización (app Databases)"
+                       name="despacho_native_conn">
+                    <xpath expr="//page[@name='database']/group[1]" position="move"/>
+                </group>
             </xpath>
         </field>
     </record>
@@ -172,10 +191,8 @@
                 <!-- Operaciones de BD: movidas aquí (antes en la pestaña Servidor),
                      junto a "Conectar". despacho_is_test viene del campo (invisible)
                      que sigue en la pestaña. -->
-                <button name="action_respaldo" type="object" string="Respaldar ahora"
-                        class="btn-secondary" icon="fa-download"
-                        invisible="not database_hosting"
-                        groups="databases.group_databases_manager"/>
+                <!-- "Respaldar ahora" vive en la pestaña Respaldos (junto al estado
+                     del respaldo automático), ya no en el encabezado. -->
                 <button name="action_refresh_test" type="object" string='Refrescar "TEST"'
                         class="btn-warning" icon="fa-refresh"
                         invisible="not database_hosting or not despacho_is_test"
@@ -341,6 +358,39 @@
                         retención larga (p.ej. 30 días) vive <b>off-site</b> en la nube; el
                         <b>disco local</b> del servidor suele conservar pocos días a propósito.
                     </div>
+                    <group string="Respaldo automático (nocturno)">
+                        <field name="despacho_backup_auto" readonly="1" widget="badge"
+                               decoration-success="despacho_backup_auto == 'on'"
+                               decoration-danger="despacho_backup_auto == 'off'"/>
+                        <div colspan="2">
+                            <button name="action_respaldo" type="object"
+                                    string="Respaldar ahora" class="btn-secondary"
+                                    icon="fa-download"
+                                    groups="databases.group_databases_manager"/>
+                            <button name="action_backup_auto_off" type="object"
+                                    string="Apagar respaldo automático"
+                                    class="btn-warning ms-2" icon="fa-power-off"
+                                    invisible="despacho_backup_auto != 'on' or despacho_server != 'odoo19'"
+                                    groups="databases.group_databases_manager"
+                                    confirm="Vas a EXCLUIR esta BD del respaldo nocturno: dejará de generar copias nuevas (las existentes se conservan). ¿Continuar?"/>
+                            <button name="action_backup_auto_on" type="object"
+                                    string="Encender respaldo automático"
+                                    class="btn-success ms-2" icon="fa-plug"
+                                    invisible="despacho_backup_auto != 'off' or despacho_server != 'odoo19'"
+                                    groups="databases.group_databases_manager"/>
+                        </div>
+                        <div colspan="2" class="text-muted"
+                             invisible="despacho_backup_auto">
+                            Estado del respaldo automático desconocido: corre "Escanear
+                            servidor" para detectarlo (o esta BD vive en un servidor sin
+                            respaldo nocturno gestionado).
+                        </div>
+                        <div class="alert alert-warning" role="alert" colspan="2"
+                             invisible="despacho_backup_auto != 'off'">
+                            ⚠️ Esta BD está EXCLUIDA del respaldo automático nocturno:
+                            no se están generando copias nuevas.
+                        </div>
+                    </group>
                     <group string="Destinos off-site (nube)">
                         <field name="despacho_offsite_ids" nolabel="1" readonly="1">
                             <list string="Destinos off-site" create="0" edit="0" delete="0">

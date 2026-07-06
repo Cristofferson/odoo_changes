@@ -65,6 +65,16 @@ class DatabasesUser(models.Model):
         self.ensure_one()
         return mailbox_util.mailbox_parts(self.login)
 
+    def action_open_webmail_user(self):
+        """Abre el webmail (mail.<dominio>) donde vive el buzón de este usuario.
+        Solo tiene sentido cuando el buzón ya existe (state == 'exists')."""
+        self.ensure_one()
+        _local, dom = self._mailbox_parts()
+        if not dom:
+            raise UserError('El login de este usuario no es un correo con dominio.')
+        return {'type': 'ir.actions.act_url',
+                'url': 'https://mail.%s' % dom, 'target': 'new'}
+
     def action_mailbox_create_user(self):
         """Crea el buzón humano de ESTE usuario (<cuenta>@<dominio>, derivado de su
         login) + webmail opcional, reutilizando la maquinaria del alta. Abre el

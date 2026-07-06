@@ -30,6 +30,15 @@ class ResUsers(models.Model):
         self.ensure_one()
         return mailbox_util.mailbox_parts(self.login, self.email)
 
+    def action_open_webmail_user(self):
+        """Abre el webmail (mail.<dominio>) donde vive el buzón de este usuario."""
+        self.ensure_one()
+        _local, dom = self._mailbox_parts()
+        if not dom:
+            raise UserError('El login/correo de este usuario no trae un dominio.')
+        return {'type': 'ir.actions.act_url',
+                'url': 'https://mail.%s' % dom, 'target': 'new'}
+
     def action_mailbox_create_user(self):
         """Abre el asistente de "Crear buzón" prellenado desde este usuario."""
         self.ensure_one()

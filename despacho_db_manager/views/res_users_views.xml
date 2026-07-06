@@ -18,6 +18,12 @@
                         invisible="not id or despacho_mailbox_state != 'can'"
                         groups="databases.group_databases_manager"
                         help="Crea la bandeja de correo de este usuario (cuenta@dominio, tomada de su login/correo) y, opcionalmente, el webmail mail.&lt;dominio&gt;. La contraseña se muestra una sola vez. Solo aparece si el buzón no existe y hospedamos su dominio."/>
+                <!-- Buzón ya creado: entrar al webmail. -->
+                <button string="Abrir buzón" type="object"
+                        name="action_open_webmail_user"
+                        invisible="not id or despacho_mailbox_state != 'exists'"
+                        groups="databases.group_databases_manager"
+                        help="Abre el webmail (mail.&lt;dominio&gt;) donde vive el buzón de este usuario."/>
             </xpath>
         </field>
     </record>

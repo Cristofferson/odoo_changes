@@ -26,7 +26,12 @@ class IrActionsReport(models.Model):
                 'El reporte %s es de tipo %s; solo se soporta qweb-pdf.'
                 % (report_ref, report.report_type))
         if report.model and res_ids:
-            self.env[report.model].browse(res_ids).check_access('read')
+            records = self.env[report.model].browse(res_ids)
+            if hasattr(records, 'check_access'):
+                records.check_access('read')
+            else:  # Odoo <= 17
+                records.check_access_rights('read')
+                records.check_access_rule('read')
         pdf, _rtype = self._render_qweb_pdf(
             report_ref, res_ids or None, data=dict(data) if data else None)
         if len(pdf) > MAX_RENDER_BYTES:

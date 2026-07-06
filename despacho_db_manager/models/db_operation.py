@@ -306,6 +306,19 @@ class DespachoDbOperation(models.Model):
             return self._notify_mcp_credentials()
         if self.op in ('alta', 'mailbox_create') and self.state == 'done':
             return self._notify_alta_mailboxes()
+        # backup_auto: UN solo toast, el del resultado (el botón ya no notifica
+        # por su cuenta para no duplicar), con el texto informativo completo.
+        if self.op == 'backup_auto' and self.state == 'done':
+            db = self.project_id.database_name or self.project_id.name or '¿?'
+            if self.backup_auto_enable:
+                return self._notify(
+                    'success', '✅ Respaldo automático encendido',
+                    '%s vuelve a entrar al respaldo nocturno.' % db)
+            return self._notify(
+                'warning', '⚠️ Respaldo automático APAGADO',
+                '%s quedó EXCLUIDA del respaldo nocturno. Sus copias existentes '
+                'se conservan, pero no habrá nuevas hasta volver a encenderlo.'
+                % db, sticky=True)
         if self.state == 'done':
             self._notify('success', '✅ Operación completada', '%s: Listo.' % label)
         elif self.state == 'error':

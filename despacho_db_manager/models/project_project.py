@@ -769,22 +769,10 @@ class ProjectProject(models.Model):
             'op': 'backup_auto', 'project_id': self.id,
             'backup_auto_enable': enable, 'simulate': False,
         })
+        # El toast lo emite la operación al terminar (_notify_outcome, caso
+        # backup_auto): UN solo mensaje, y solo cuando el cambio ya se aplicó.
         op.action_provision()
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': 'Respaldo automático %s' % ('encendido' if enable else 'APAGADO'),
-                'message': ('%s vuelve a entrar al respaldo nocturno.'
-                            if enable else
-                            '%s quedó EXCLUIDA del respaldo nocturno. Sus respaldos '
-                            'en disco/nube existentes se conservan, pero no habrá '
-                            'copias nuevas hasta volver a encenderlo.')
-                           % (self.database_name or self.name),
-                'type': 'success' if enable else 'warning',
-                'sticky': not enable,
-            },
-        }
+        return True
 
     def action_backup_auto_off(self):
         return self._backup_auto_toggle(False)

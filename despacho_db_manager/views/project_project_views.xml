@@ -25,12 +25,16 @@
                 <attribute name="create">0</attribute>
             </list>
             <header position="inside">
-                <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
-                        display="always" groups="databases.group_databases_manager"/>
+                <!-- "Provisionar cliente" = LA acción principal de la app: primario
+                     con ícono; "Escanear servidor" queda como utilidad secundaria. -->
                 <button name="%(action_db_operation_alta)d" type="action"
                         string="Provisionar cliente" display="always"
+                        class="btn-primary" icon="fa-user-plus"
                         groups="databases.group_databases_manager"
                         help="Abre el asistente de alta para provisionar una base de datos de cliente nueva."/>
+                <button name="%(action_scan_server)d" type="action" string="Escanear servidor"
+                        class="btn-secondary" icon="fa-wifi"
+                        display="always" groups="databases.group_databases_manager"/>
                 <!-- La conversión de Pendientes (To-do) → Tareas ya NO es un botón
                      manual: la corre un cron automático (ir_cron.xml), por ser idempotente
                      y repetible. Arrastra también los pendientes nuevos. -->

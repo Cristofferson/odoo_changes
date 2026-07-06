@@ -164,16 +164,6 @@
             <xpath expr="//page[@name='database']" position="attributes">
                 <attribute name="string">Usuarios</attribute>
             </xpath>
-            <!-- OJO: position="move" solo se procesa como HIJO DIRECTO del spec
-                 (template_inheritance.py). El grupo movido va DIRECTO a la página
-                 (no dentro de otro <group>: anidarlo lo comprime a una celda y los
-                 campos salen cortados); el título de la sección lo da el separator. -->
-            <xpath expr="//page[@name='despacho_server']" position="inside">
-                <separator string="Conexión y sincronización (app Databases)"/>
-            </xpath>
-            <xpath expr="//page[@name='despacho_server']" position="inside">
-                <xpath expr="//page[@name='database']/group[1]" position="move"/>
-            </xpath>
         </field>
     </record>
 
@@ -321,7 +311,7 @@
                             debería ser solo lectura.
                         </div>
                     </group>
-                    <group string="Apps custom">
+                    <group string="Apps custom" name="despacho_apps_custom">
                         <field name="despacho_custom_module_count" readonly="1"/>
                     </group>
                     <field name="despacho_module_ids" nolabel="1" readonly="1">
@@ -451,6 +441,28 @@
     </record>
 
     <!-- Mini-asistente para ligar una BD con su suscripción (solo con XUBAX activa). -->
+    <!-- Sección "Conexión y sincronización" movida de la pestaña Usuarios a
+         Servidor, JUSTO ANTES de "Apps custom". Va en un record APARTE y
+         DESPUÉS de edit_project_despacho en el archivo: (1) el ancla
+         name=despacho_apps_custom la escribe edit_project_despacho y este
+         record debe validarse DESPUÉS de esa reescritura (los records se
+         procesan en orden de archivo); (2) string está prohibido como selector;
+         (3) position="move" solo se procesa como HIJO DIRECTO del spec
+         (template_inheritance.py); (4) el grupo movido va DIRECTO a la página,
+         no dentro de otro <group> (lo comprime a una celda y los campos salen
+         cortados) — el título lo da el separator. -->
+    <record id="edit_project_databases_conn_reorg" model="ir.ui.view">
+        <field name="name">despacho.databases.form.conn.reorg</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="databases.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='despacho_apps_custom']" position="before">
+                <separator string="Conexión y sincronización (app Databases)"/>
+                <xpath expr="//page[@name='database']/group[1]" position="move"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="view_subscription_link_wizard_form" model="ir.ui.view">
         <field name="name">despacho.subscription.link.wizard.form</field>
         <field name="model">despacho.subscription.link.wizard</field>

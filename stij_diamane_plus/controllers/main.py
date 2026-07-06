@@ -27,6 +27,11 @@ class StijWebsitePlus(StijWebsite):
             return None
         return lot
 
+    # Re-decorar el override es obligatorio: sin @http.route el endpoint queda
+    # como functools.partial sin original_endpoint y el /sitemap.xml revienta
+    # con AttributeError al enumerar rutas. sitemap=False porque el visor
+    # requiere ?id= y no debe indexarse.
+    @http.route("/stijid", type="http", auth="public", website=True, sitemap=False)
     def stij_entry(self, **kw):
         lot = self._dmn_resolve_lot(kw)
 

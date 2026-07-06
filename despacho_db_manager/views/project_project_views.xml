@@ -434,10 +434,11 @@
     </record>
 
     <!-- "Tareas" agrupado por Proyecto por defecto (cada tarea pertenece al
-         proyecto de su BD → agrupa por cliente). Activa el filtro nativo
-         "Project" (group_by project_id) de la búsqueda de tareas. -->
+         proyecto de su BD → agrupa por cliente) y mostrando SOLO tareas
+         abiertas (filtro nativo "Open": is_closed=False — quita Hecho y
+         Cancelada). Quitando el filtro en la búsqueda se ven las cerradas. -->
     <record id="databases.action_view_tasks_all" model="ir.actions.act_window">
-        <field name="context">{'search_default_project': 1}</field>
+        <field name="context">{'search_default_project': 1, 'search_default_open_tasks': 1}</field>
     </record>
 
     <!-- Mini-asistente para ligar una BD con su suscripción (solo con XUBAX activa). -->

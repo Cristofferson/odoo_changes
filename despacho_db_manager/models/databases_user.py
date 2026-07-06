@@ -162,8 +162,10 @@ class DatabasesUser(models.Model):
         }
 
     def action_mcp_oauth_add_user(self):
-        """Activa un puente MCP por OAuth (Cloudflare Access) para este usuario:
-        subdominio propio + login por correo, compatible con ChatGPT y Claude web."""
+        """Activa el puente MCP de este usuario por URL SECRETA (método único desde
+        2026-07: sirve para Claude web/escritorio/Code y ChatGPT modo desarrollador,
+        sin login ni re-autenticación). El nombre del método conserva 'oauth' por
+        compatibilidad con la vista; la infra OAuth (CF Access) fue retirada."""
         self.ensure_one()
         proj = self.project_id
         if not proj:
@@ -175,9 +177,8 @@ class DatabasesUser(models.Model):
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '
                             'de volver a activarlo.')
-        # Tanto local (odoo19) como OVH (odoo18) soportan OAuth: el contenedor corre
-        # en este box; para OVH apunta al Odoo remoto por xmlrpc (oauth-enable.sh
-        # --remote ovh). Se pre-marca OAuth (compatible con ChatGPT/Claude web) en ambos.
+        # Tanto local (odoo19) como OVH (odoo18) usan URL secreta: el contenedor corre
+        # en este box; para OVH apunta al Odoo remoto por xmlrpc.
         return {
             'type': 'ir.actions.act_window',
             'name': 'Activar MCP para %s' % (self.login or self.name),
@@ -190,8 +191,7 @@ class DatabasesUser(models.Model):
                 'default_mcp_slug': self._mcp_user_slug(),
                 'default_mcp_as_user': self.login,
                 'default_mcp_writes': True,
-                'default_mcp_oauth': True,
-                'default_mcp_email': self._mcp_user_email(),
+                'default_mcp_oauth': False,
                 'default_simulate': False,
                 'dpm_modal': True,
             },

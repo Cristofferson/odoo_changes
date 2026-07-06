@@ -147,8 +147,7 @@ class DespachoDbOperation(models.Model):
         'Conectar como (usuario)',
         help='Login del usuario de Odoo con el que la IA se conectará. Por defecto es '
              'el administrador de la BD (el mismo de "Conectar como"), para que la IA '
-             'tenga LOS MISMOS PRIVILEGIOS que ese usuario logueado. Si lo dejas vacío '
-             'se usa un usuario dedicado de solo lectura (mcp_readonly).')
+             'tenga LOS MISMOS PRIVILEGIOS que ese usuario logueado.')
     mcp_writes = fields.Boolean(
         'Permitir escrituras', default=True,
         help='Si está activo, la IA puede crear/modificar/borrar según los permisos '
@@ -156,16 +155,16 @@ class DespachoDbOperation(models.Model):
              'Desactívalo para limitar la IA a solo consulta.')
     mcp_purge_key = fields.Boolean(
         'Revocar también la API key', default=True,
-        help='Al desactivar, elimina la API key del usuario mcp_readonly en la BD '
+        help='Al desactivar, elimina la API key del usuario de conexión en la BD '
              '(recomendado: deja la credencial inservible).')
     mcp_oauth = fields.Boolean(
-        'Login por OAuth (ChatGPT)', default=False,
-        help='Activo: el puente se publica en su propio subdominio mcp-<id>.xubax.com '
-             'protegido por Cloudflare Access; el cliente entra con su CORREO (login '
-             'OAuth, re-autenticación cada ~30 días). Apagado (default): URL SECRETA en '
-             'mcp.xubax.com — sin login ni re-autenticación; la URL es la llave. '
-             'Funciona en Claude web/escritorio; usa OAuth solo si el cliente '
-             'necesita ChatGPT.')
+        'Login por OAuth (RETIRADO)', default=False,
+        help='LEGADO — no usar: la infraestructura OAuth (Cloudflare Access) fue '
+             'retirada en 2026-07; un puente OAuth nuevo quedaría inservible. El '
+             'método vigente es la URL SECRETA en mcp.xubax.com: sin login ni '
+             're-autenticación, funciona en Claude (web/escritorio/Code) y en '
+             'ChatGPT (modo desarrollador, conector "sin autenticación"). El campo '
+             'se conserva para rutear la baja de puentes OAuth antiguos.')
     mcp_email = fields.Char(
         'Correo del cliente (login)',
         help='Correo con el que el cliente iniciará sesión (Cloudflare le manda un '
@@ -243,8 +242,9 @@ class DespachoDbOperation(models.Model):
         elif m.get('auth') == 'url_secret' and endpoint:
             self._notify(
                 'success', '✅ MCP activado — URL secreta',
-                'Entrega esta URL al cliente para conectar su IA (Claude web, '
-                'escritorio o Code; agregar como conector "sin autenticación"):\n\n%s\n\n'
+                'Entrega esta URL al cliente para conectar su IA — Claude (web, '
+                'escritorio o Code) y ChatGPT (modo desarrollador); en ambos se '
+                'agrega como conector "sin autenticación":\n\n%s\n\n'
                 'LA URL ES LA LLAVE: trátala como una contraseña y compártela por un '
                 'canal seguro. No pide login ni caduca. Para revocar el acceso, '
                 'desactiva el MCP y vuelve a activarlo (se genera un secreto nuevo).'

@@ -125,13 +125,13 @@
                         icon="fa-sign-in" groups="databases.group_databases_manager"/>
                 <!-- Puente MCP PROPIO de este usuario (la IA del usuario consulta su
                      Odoo con sus mismos privilegios). Un contenedor por usuario.
-                     UN solo botón: el método (OAuth/ChatGPT por correo, o token Bearer)
-                     se elige en el asistente — OAuth viene pre-marcado por ser el más
-                     compatible (ChatGPT + Claude web + escritorio); desmárcalo para token. -->
+                     Método único: URL SECRETA (Claude web/escritorio/Code y ChatGPT
+                     modo desarrollador, conector "sin autenticación"). El name del
+                     botón conserva 'oauth' por herencia histórica del método Python. -->
                 <button name="action_mcp_oauth_add_user" type="object" string="Activar MCP"
                         icon="fa-plug" groups="databases.group_databases_manager"
                         invisible="despacho_mcp_enabled"
-                        help="Levanta el puente MCP de este usuario. En el asistente eliges el método: login por correo (OAuth — ChatGPT/Claude web, predeterminado) o token Bearer (Claude escritorio/CLI)."/>
+                        help="Levanta el puente MCP de este usuario con URL secreta: se agrega como conector &quot;sin autenticación&quot; en Claude (web/escritorio/Code) y ChatGPT (modo desarrollador). La URL se muestra una sola vez."/>
                 <button name="action_mcp_remove_user" type="object" string="Quitar MCP"
                         icon="fa-power-off" groups="databases.group_databases_manager"
                         invisible="not despacho_mcp_enabled"/>

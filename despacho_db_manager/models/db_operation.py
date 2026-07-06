@@ -20,8 +20,8 @@ MODULES_RE = re.compile(r'^[a-z0-9_,]+$')
 # El resto vive en la selección; action_provision rechaza lo no habilitado.
 PHASE1_OPS = ('alta', 'census', 'baja', 'respaldo', 'refresh', 'crear_test',
               'mcp_add', 'mcp_remove', 'mailbox_create', 'site_suspend', 'site_resume')
-# slug del endpoint MCP (segmento de la URL pública /<slug>/mcp). Igual que el
-# que validan add-client.sh y el worker.
+# slug del endpoint MCP (segmento del nombre en la URL secreta
+# /<slug>-<secreto>/mcp). Igual que el que validan add-client.sh y el worker.
 MCP_SLUG_RE = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
 EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 
@@ -140,9 +140,9 @@ class DespachoDbOperation(models.Model):
     # --- Parámetros de MCP (activar/desactivar el puente de IA del cliente) ---
     mcp_slug = fields.Char(
         'Identificador del endpoint',
-        help='Segmento de la URL pública: https://mcp.xubax.com/<slug>/mcp. '
-             'Minúsculas, números y guiones; corto y reconocible (ej: lamur). '
-             'Es lo que verá el cliente.')
+        help='Nombre del endpoint: https://mcp.xubax.com/<slug>-<secreto>/mcp '
+             '(el secreto lo genera el servidor). Minúsculas, números y guiones; '
+             'corto y reconocible (ej: lamur).')
     mcp_as_user = fields.Char(
         'Conectar como (usuario)',
         help='Login del usuario de Odoo con el que la IA se conectará. Por defecto es '
@@ -161,9 +161,11 @@ class DespachoDbOperation(models.Model):
     mcp_oauth = fields.Boolean(
         'Login por OAuth (ChatGPT)', default=False,
         help='Activo: el puente se publica en su propio subdominio mcp-<id>.xubax.com '
-             'protegido por Cloudflare Access. El cliente entra con su CORREO (login '
-             'OAuth), compatible con ChatGPT y Claude web. Apagado: endpoint clásico '
-             'con token Bearer (solo apps que aceptan token, p.ej. Claude escritorio).')
+             'protegido por Cloudflare Access; el cliente entra con su CORREO (login '
+             'OAuth, re-autenticación cada ~30 días). Apagado (default): URL SECRETA en '
+             'mcp.xubax.com — sin login ni re-autenticación; la URL es la llave. '
+             'Funciona en Claude web/escritorio; usa OAuth solo si el cliente '
+             'necesita ChatGPT.')
     mcp_email = fields.Char(
         'Correo del cliente (login)',
         help='Correo con el que el cliente iniciará sesión (Cloudflare le manda un '
@@ -238,6 +240,15 @@ class DespachoDbOperation(models.Model):
                 'Endpoint:\n%s\n\nInicia sesión con el correo:\n%s\n\n(Cloudflare le '
                 'mandará un código a ese correo; solo ese correo puede entrar.)'
                 % (endpoint, email), sticky=True)
+        elif m.get('auth') == 'url_secret' and endpoint:
+            self._notify(
+                'success', '✅ MCP activado — URL secreta',
+                'Entrega esta URL al cliente para conectar su IA (Claude web, '
+                'escritorio o Code; agregar como conector "sin autenticación"):\n\n%s\n\n'
+                'LA URL ES LA LLAVE: trátala como una contraseña y compártela por un '
+                'canal seguro. No pide login ni caduca. Para revocar el acceso, '
+                'desactiva el MCP y vuelve a activarlo (se genera un secreto nuevo).'
+                % endpoint, sticky=True)
         elif bearer:
             self._notify(
                 'success', '✅ MCP activado — copia el token AHORA',

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="cst_show_pos_product_price.ProductInfoPopup" t-inherit="point_of_sale.ProductInfoPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('section-financials')]/h3[hasclass('section-title')]" position="replace">
+            <h3 class="section-title">Precios</h3>
+        </xpath>
+        <xpath expr="//div[hasclass('section-order')]/h3[hasclass('section-title')]" position="replace">
+            <h3 class="section-title">Venta actual</h3>
+        </xpath>
+    </t>
+</templates>

@@ -88,7 +88,15 @@
                                     <textarea class="form-control" name="story" rows="2" placeholder="Si quieres, comparte en una línea la historia que esta pieza busca continuar."/>
                                     <div class="form-text">Muchos compradores valoran saber que la pieza fue querida. Siempre se publica sin tu nombre.</div>
                                 </div>
-                                <div class="col-12 d-flex justify-content-between align-items-center pt-3 border-top">
+                                <div class="col-12 pt-3 border-top">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="contrato" id="nv_contrato" value="1" required="required"/>
+                                        <label class="form-check-label" for="nv_contrato">
+                                            Acepto el <a href="/terminos" target="_blank">contrato de comisión mercantil</a> de Novadiam: comisión única del 18% solo si la pieza se vende, con verificación en taller incluida.
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex justify-content-between align-items-center">
                                     <span class="text-muted small" style="max-width:46ch">Al enviar aceptas nuestra revisión previa: ningún anuncio se publica sin pasar por el equipo Novadiam.</span>
                                     <button type="submit" class="btn btn-primary btn-lg">Enviar a revisión →</button>
                                 </div>
@@ -115,6 +123,52 @@
                 </section>
             </div>
         </t>
+    </template>
+
+    <!-- ==================== Portal: orden del comprador ==================== -->
+    <template id="sale_order_portal_marketplace" name="Marketplace en portal de orden"
+              inherit_id="sale.sale_order_portal_content">
+        <xpath expr="//div[@id='introduction']" position="after">
+            <t t-set="nv_listings" t-value="sale_order.sudo().order_line.product_id.product_tmpl_id.filtered(lambda l: l.nv_is_listing)"/>
+            <t t-set="nv_labels" t-value="dict(sale_order.env['product.template']._fields['nv_state']._description_selection(sale_order.env))"/>
+            <div t-if="nv_listings" class="card mb-4">
+                <div class="card-header fw-bold">Tu pieza, paso a paso</div>
+                <div class="card-body">
+                    <div t-foreach="nv_listings" t-as="listing" class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <span class="fw-semibold" t-esc="listing.name"/>
+                                <span class="badge text-bg-light border ms-2" t-esc="nv_labels.get(listing.nv_state, listing.nv_state)"/>
+                                <span t-if="listing.nv_disputed" class="badge text-bg-warning ms-1">En revisión por tu reporte</span>
+                            </div>
+                            <div t-if="listing.nv_state == 'inspection' and listing.nv_inspection_deadline and not listing.nv_disputed" class="text-muted small">
+                                Si no reportas nada, el <t t-esc="listing.nv_inspection_deadline.strftime('%d/%m/%Y %H:%M')"/> (UTC) damos la entrega por buena.
+                            </div>
+                        </div>
+                        <div t-if="listing.nv_state in ('shipped', 'inspection') and not listing.nv_disputed" class="d-flex gap-2 mt-2 flex-wrap">
+                            <form t-attf-action="/marketplace/orden/#{sale_order.id}/recibido" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="access_token" t-att-value="request.params.get('access_token') or ''"/>
+                                <button type="submit" class="btn btn-primary btn-sm"
+                                        onclick="return confirm('¿Confirmas que recibiste la pieza y todo está en orden? Se liberará el pago.')">
+                                    Recibí mi pieza y todo está en orden
+                                </button>
+                            </form>
+                            <form t-attf-action="/marketplace/orden/#{sale_order.id}/disputa" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="access_token" t-att-value="request.params.get('access_token') or ''"/>
+                                <input type="text" class="form-control form-control-sm" name="motivo" placeholder="Cuéntanos qué pasó"/>
+                                <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap">Reportar un problema</button>
+                            </form>
+                        </div>
+                        <div t-if="listing.nv_state == 'released'" class="text-success small mt-1">
+                            Entrega confirmada. Gracias por darle una nueva historia a esta pieza.
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">Tu pago está protegido: Novadiam lo resguarda y solo se libera cuando confirmas la entrega (o al vencer la inspección de 72 h sin reportes).</p>
+                </div>
+            </div>
+        </xpath>
     </template>
 
     <!-- ==================== Portal: mis anuncios ==================== -->

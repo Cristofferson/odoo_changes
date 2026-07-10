@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Personalizaciones del comprador: servicios de taller con costo,
+             se ofrecen como productos opcionales en cada anuncio. Nacen sin
+             publicar y en $0: el equipo les pone precio y los publica. -->
+        <record id="svc_ajuste_talla" model="product.template">
+            <field name="name">Ajuste de talla · taller Novadiam</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <field name="is_published" eval="False"/>
+            <field name="description_sale">Ajustamos la talla del anillo en nuestro taller antes de enviártelo, en el mismo paso de verificación.</field>
+        </record>
+
+        <record id="svc_restauracion" model="product.template">
+            <field name="name">Restauración adicional · taller Novadiam</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <field name="is_published" eval="False"/>
+            <field name="description_sale">Restauración más allá de la limpieza incluida: pulido profundo, retensado de garras, rodinado.</field>
+        </record>
+
+        <record id="svc_grabado_joya" model="product.template">
+            <field name="name">Grabado personalizado en la joya</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <field name="is_published" eval="False"/>
+            <field name="description_sale">Grabamos tu dedicatoria en el interior del anillo antes del envío.</field>
+        </record>
+
+        <record id="svc_inscripcion_piedra" model="product.template">
+            <field name="name">Inscripción personalizada en el diamante</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <field name="is_published" eval="False"/>
+            <field name="description_sale">Inscripción láser personalizada en el borde del diamante, además del número de serie del certificado.</field>
+        </record>
+
+    </data>
+</odoo>

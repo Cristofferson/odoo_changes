@@ -148,7 +148,13 @@
                         invisible="not nv_is_listing or nv_state != 'shipped'"/>
                 <button name="action_release" type="object" string="Liberar pago"
                         class="btn-primary"
-                        invisible="not nv_is_listing or nv_state != 'inspection'"/>
+                        invisible="not nv_is_listing or nv_state not in ('shipped', 'inspection') or nv_disputed"
+                        confirm="Se registra el asiento de escrow: payout al vendedor + comisión. ¿Continuar?"/>
+                <button name="action_dispute" type="object" string="Abrir disputa"
+                        invisible="not nv_is_listing or nv_state not in ('shipped', 'inspection') or nv_disputed"/>
+                <button name="action_resolve_dispute" type="object" string="Disputa resuelta"
+                        class="btn-warning"
+                        invisible="not nv_is_listing or not nv_disputed"/>
                 <button name="action_mark_returned" type="object" string="Devuelta"
                         invisible="not nv_is_listing or nv_state not in ('inspection', 'cancelled_verif')"/>
                 </header>
@@ -173,6 +179,21 @@
                         </group>
                     </group>
                     <group>
+                        <group string="Venta y escrow">
+                            <field name="nv_sale_order_id" readonly="1"/>
+                            <field name="nv_sold_price"/>
+                            <field name="nv_commission_amount"/>
+                            <field name="nv_payout_amount"/>
+                            <field name="nv_inspection_deadline"/>
+                            <field name="nv_disputed" readonly="1"/>
+                            <field name="nv_release_move_id"/>
+                        </group>
+                        <group string="Contrato">
+                            <field name="nv_contract_accept_date"/>
+                            <field name="nv_contract_version"/>
+                        </group>
+                    </group>
+                    <group>
                         <field name="nv_story" placeholder="Nota personal del vendedor (anónima)…"/>
                         <field name="nv_workshop_notes" placeholder="Notas del paso por taller…"/>
                     </group>
@@ -193,6 +214,14 @@
             (0, 0, {'view_mode': 'form'})]"/>
     </record>
 
+    <!-- ============================ Órdenes ============================ -->
+    <record id="action_marketplace_orders" model="ir.actions.act_window">
+        <field name="name">Órdenes marketplace</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('nv_has_listing', '=', True)]</field>
+    </record>
+
     <!-- ============================ Menú ============================ -->
     <menuitem id="menu_marketplace_root" name="Marketplace"
               web_icon="xb_marketplace,static/description/icon.png"
@@ -201,5 +230,7 @@
               parent="menu_marketplace_root" action="action_marketplace_listings" sequence="10"/>
     <menuitem id="menu_marketplace_sellers" name="Vendedores"
               parent="menu_marketplace_root" action="action_marketplace_sellers" sequence="20"/>
+    <menuitem id="menu_marketplace_orders" name="Órdenes"
+              parent="menu_marketplace_root" action="action_marketplace_orders" sequence="30"/>
 
 </odoo>

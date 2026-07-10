@@ -1,7 +1,9 @@
 import base64
 
-from odoo import http, _
+from odoo import fields, http, _
+from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import request
+from odoo.addons.portal.controllers.portal import CustomerPortal
 
 
 class MarketplacePortal(http.Controller):
@@ -47,6 +49,13 @@ class MarketplacePortal(http.Controller):
     @http.route('/marketplace/vender', type='http', auth='user', website=True,
                 methods=['POST'], csrf=True)
     def vender_submit(self, **post):
+        if not post.get('contrato'):
+            return request.render('xb_marketplace.vender_form', {
+                'seller': self._get_seller(),
+                'error': _('Para publicar necesitas aceptar el contrato de '
+                           'comisión mercantil.'),
+                'values': post,
+            })
         seller = self._get_seller(create=True)
         if post.get('city'):
             seller.write({'city': post['city']})
@@ -114,6 +123,9 @@ class MarketplacePortal(http.Controller):
             'is_published': False,
             'description_sale': post.get('description'),
             'attribute_line_ids': attr_lines,
+            'nv_contract_accept_date': fields.Datetime.now(),
+            'nv_contract_version': request.env['ir.config_parameter'].sudo(
+                ).get_param('xb_marketplace.contract_version', '2026-07'),
         }
 
         photos = request.httprequest.files.getlist('photos')
@@ -160,3 +172,53 @@ class MarketplacePortal(http.Controller):
             'state_labels': state_labels,
             'page_name': 'anuncios',
         })
+
+
+class MarketplaceBuyerPortal(CustomerPortal):
+    """Botones del comprador en el portal de su orden: confirmar recepción
+    (libera el escrow de inmediato) o reportar un problema (retiene)."""
+
+    def _nv_order_listings(self, order_id, access_token):
+        order = self._document_check_access(
+            'sale.order', order_id, access_token)
+        listings = order.sudo().order_line.product_id.product_tmpl_id.filtered(
+            lambda l: l.nv_is_listing
+            and l.nv_state in ('shipped', 'inspection'))
+        return order, listings
+
+    @http.route('/marketplace/orden/<int:order_id>/recibido', type='http',
+                auth='public', website=True, methods=['POST'], csrf=True)
+    def nv_buyer_confirm(self, order_id, access_token=None, **kw):
+        try:
+            order, listings = self._nv_order_listings(order_id, access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+        for listing in listings.filtered(lambda l: not l.nv_disputed):
+            try:
+                listing.sudo().action_release()
+            except UserError as exc:
+                # p. ej. factura sin registrar el pago: arranca/da por
+                # buena la inspección y el equipo libera manualmente.
+                if listing.nv_state == 'shipped':
+                    listing.sudo().action_start_inspection()
+                listing.sudo().activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=_('Comprador confirmó recepción: liberar manualmente'),
+                    note=str(exc))
+        order.sudo().message_post(body=_(
+            'El comprador confirmó la recepción conforme desde el portal.'))
+        return request.redirect(order.get_portal_url())
+
+    @http.route('/marketplace/orden/<int:order_id>/disputa', type='http',
+                auth='public', website=True, methods=['POST'], csrf=True)
+    def nv_buyer_dispute(self, order_id, access_token=None, motivo=None, **kw):
+        try:
+            order, listings = self._nv_order_listings(order_id, access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+        if listings:
+            listings.sudo().action_dispute()
+            order.sudo().message_post(body=_(
+                'El comprador reportó un problema desde el portal: %s',
+                motivo or _('(sin detalle)')))
+        return request.redirect(order.get_portal_url())

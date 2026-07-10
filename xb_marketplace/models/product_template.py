@@ -60,7 +60,10 @@ class ProductTemplate(models.Model):
     @api.model
     def _get_marketplace_website(self):
         website = self.env['website'].sudo().search(
-            [('name', 'ilike', 'novadiam')], limit=1)
+            [('nv_is_marketplace', '=', True)], limit=1)
+        if not website:
+            website = self.env['website'].sudo().search(
+                [('name', 'ilike', 'novadiam')], limit=1)
         return website or self.env['website'].sudo().search([], limit=1)
 
     def _bind_to_marketplace(self):

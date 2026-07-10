@@ -3,16 +3,17 @@
     <data noupdate="1">
 
         <!-- Personalizaciones del comprador: servicios de taller con costo,
-             se ofrecen como productos opcionales en cada anuncio. Nacen sin
-             publicar y en $0: el equipo les pone precio y los publica. -->
+             se ofrecen como productos opcionales en cada anuncio. Precios
+             "desde" tomados del catálogo SERV real del taller; nacen sin
+             publicar: el equipo revisa y publica. -->
         <record id="svc_ajuste_talla" model="product.template">
             <field name="name">Ajuste de talla · taller Novadiam</field>
             <field name="type">service</field>
             <field name="sale_ok" eval="True"/>
             <field name="purchase_ok" eval="False"/>
-            <field name="list_price">0</field>
+            <field name="list_price">480</field>
             <field name="is_published" eval="False"/>
-            <field name="description_sale">Ajustamos la talla del anillo en nuestro taller antes de enviártelo, en el mismo paso de verificación.</field>
+            <field name="description_sale">Ajustamos la talla del anillo en nuestro taller antes de enviártelo, en el mismo paso de verificación. Precio desde $480; el costo exacto depende del modelo (solitario, varias piedras o argolla) y te lo confirmamos antes de hacerlo.</field>
         </record>
 
         <record id="svc_restauracion" model="product.template">
@@ -20,9 +21,9 @@
             <field name="type">service</field>
             <field name="sale_ok" eval="True"/>
             <field name="purchase_ok" eval="False"/>
-            <field name="list_price">0</field>
+            <field name="list_price">140</field>
             <field name="is_published" eval="False"/>
-            <field name="description_sale">Restauración más allá de la limpieza incluida: pulido profundo, retensado de garras, rodinado.</field>
+            <field name="description_sale">Restauración más allá de la limpieza incluida: pulido profundo, retensado de garras, rodinado o baño de oro. Precio desde $140 según la pieza; te confirmamos el costo exacto antes de hacerlo.</field>
         </record>
 
         <record id="svc_grabado_joya" model="product.template">
@@ -30,9 +31,9 @@
             <field name="type">service</field>
             <field name="sale_ok" eval="True"/>
             <field name="purchase_ok" eval="False"/>
-            <field name="list_price">0</field>
+            <field name="list_price">75</field>
             <field name="is_published" eval="False"/>
-            <field name="description_sale">Grabamos tu dedicatoria en el interior del anillo antes del envío.</field>
+            <field name="description_sale">Grabamos tu dedicatoria en el interior del anillo antes del envío. Precio desde $75 según la longitud del texto.</field>
         </record>
 
         <record id="svc_inscripcion_piedra" model="product.template">
@@ -40,9 +41,9 @@
             <field name="type">service</field>
             <field name="sale_ok" eval="True"/>
             <field name="purchase_ok" eval="False"/>
-            <field name="list_price">0</field>
+            <field name="list_price">480</field>
             <field name="is_published" eval="False"/>
-            <field name="description_sale">Inscripción láser personalizada en el borde del diamante, además del número de serie del certificado.</field>
+            <field name="description_sale">Inscripción láser personalizada en el borde del diamante, además del número de serie del certificado que ya va incluido. Precio desde $480.</field>
         </record>
 
     </data>

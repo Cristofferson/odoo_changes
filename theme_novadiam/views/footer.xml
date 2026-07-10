@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="footer_custom" model="theme.ir.ui.view">
+        <field name="name">NOVADIAM Footer</field>
+        <field name="key">theme_novadiam.footer_custom</field>
+        <field name="inherit_id" ref="website.footer_custom"/>
+        <field name="mode">extension</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='footer']" position="replace">
+                <div id="footer" class="oe_structure oe_structure_solo">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="ico-ring">
+      <circle cx="32" cy="40" r="17" fill="none" stroke="currentColor" stroke-width="3.2"/>
+      <path d="M25 21 L32 10 L39 21 L32 26 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M25 21 L39 21" stroke="currentColor" stroke-width="2.4"/>
+    </g>
+    <g id="ico-shield">
+      <path d="M12 3 L20 6 V12 C20 17 16.5 20 12 21.5 C7.5 20 4 17 4 12 V6 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M8.5 12 L11 14.5 L15.5 9.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="ico-cert">
+      <circle cx="12" cy="10" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M9.5 10 L11.3 12 L14.8 8.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M9 15.5 L7.5 21 L12 18.8 L16.5 21 L15 15.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </g>
+    <g id="ico-eye">
+      <path d="M3 12 C6 7 10 5 12 5 C14 5 18 7 21 12 C18 17 14 19 12 19 C10 19 6 17 3 12 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5 4 L19 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+    <g id="ico-cycle">
+      <path d="M12 4 A8 8 0 1 1 4.6 9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+      <path d="M4 4.5 L4.6 9 L9 8.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+</svg>
+<div class="nv-ft">
+  <div class="wrap ft-grid">
+    <div>
+      <img class="ft-logo" src="/theme_novadiam/static/src/img/logo-blanco.png" alt="NOVADIAM"/>
+      <p>El marketplace mexicano de anillos de compromiso seminuevos. Piezas verificadas, compra protegida y discreción absoluta.</p>
+    </div>
+    <div>
+      <h3>Marketplace</h3>
+      <a href="/shop">Comprar un anillo</a>
+      <a href="/vender">Vender mi anillo</a>
+      <a href="/proteccion">Protección Novadiam</a>
+      <a href="/proteccion#verificacion">Certificado digital</a>
+    </div>
+    <div>
+      <h3>Empresa</h3>
+      <a href="/nosotros">Nosotros</a>
+      <a href="/nosotros#medios">En los medios</a>
+      <a href="/nosotros#contacto">Contacto</a>
+      <a href="/privacidad">Aviso de privacidad</a>
+      <a href="/terminos">Términos del servicio</a>
+    </div>
+    <div>
+      <h3>Contacto</h3>
+      <a href="mailto:hola@novadiam.mx">hola@novadiam.mx</a>
+      <p>México</p>
+    </div>
+  </div>
+  <div class="wrap ft-base">
+    <span>© 2026 NOVADIAM. Todos los derechos reservados.</span>
+    <span>Parte del grupo <a href="https://anello.mx">Anello</a> · <a href="https://diamane.mx">DIAMANE</a> — más de 25 años en joyería.</span>
+  </div>
+</div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

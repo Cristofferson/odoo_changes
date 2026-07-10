@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Atributos para filtros de tienda. Piezas únicas: sin variantes. -->
+
+    <record id="attr_marca" model="product.attribute">
+        <field name="name">Marca</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_marca_sin" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_marca"/><field name="name">Sin marca / hechura particular</field><field name="sequence">99</field>
+    </record>
+    <record id="attr_marca_anello" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_marca"/><field name="name">Anello</field>
+    </record>
+    <record id="attr_marca_tiffany" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_marca"/><field name="name">Tiffany &amp; Co.</field>
+    </record>
+    <record id="attr_marca_cartier" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_marca"/><field name="name">Cartier</field>
+    </record>
+    <record id="attr_marca_otra" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_marca"/><field name="name">Otra marca</field><field name="sequence">98</field>
+    </record>
+
+    <record id="attr_estilo" model="product.attribute">
+        <field name="name">Estilo</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_estilo_solitario" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Solitario</field>
+    </record>
+    <record id="attr_estilo_halo" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Halo</field>
+    </record>
+    <record id="attr_estilo_trilogia" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Trilogía</field>
+    </record>
+    <record id="attr_estilo_pave" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Pavé</field>
+    </record>
+    <record id="attr_estilo_vintage" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Vintage</field>
+    </record>
+    <record id="attr_estilo_otro" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_estilo"/><field name="name">Otro</field><field name="sequence">99</field>
+    </record>
+
+    <record id="attr_metal" model="product.attribute">
+        <field name="name">Metal</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_metal_ob14" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Oro blanco 14k</field>
+    </record>
+    <record id="attr_metal_ob18" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Oro blanco 18k</field>
+    </record>
+    <record id="attr_metal_oa14" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Oro amarillo 14k</field>
+    </record>
+    <record id="attr_metal_oa18" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Oro amarillo 18k</field>
+    </record>
+    <record id="attr_metal_rosa" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Oro rosa</field>
+    </record>
+    <record id="attr_metal_platino" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_metal"/><field name="name">Platino</field>
+    </record>
+
+    <record id="attr_color" model="product.attribute">
+        <field name="name">Color</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_color_df" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_color"/><field name="name">D–F (incoloro)</field>
+    </record>
+    <record id="attr_color_gh" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_color"/><field name="name">G–H (casi incoloro)</field>
+    </record>
+    <record id="attr_color_ij" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_color"/><field name="name">I–J</field>
+    </record>
+
+    <record id="attr_claridad" model="product.attribute">
+        <field name="name">Claridad</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_claridad_ifvvs" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_claridad"/><field name="name">IF–VVS</field>
+    </record>
+    <record id="attr_claridad_vs" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_claridad"/><field name="name">VS</field>
+    </record>
+    <record id="attr_claridad_si" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_claridad"/><field name="name">SI</field>
+    </record>
+
+    <record id="attr_corte" model="product.attribute">
+        <field name="name">Corte</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_corte_exc" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_corte"/><field name="name">Excelente</field>
+    </record>
+    <record id="attr_corte_mb" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_corte"/><field name="name">Muy bueno</field>
+    </record>
+    <record id="attr_corte_b" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_corte"/><field name="name">Bueno</field>
+    </record>
+
+    <record id="attr_certificadora" model="product.attribute">
+        <field name="name">Certificadora</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_cert_gia" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_certificadora"/><field name="name">GIA</field>
+    </record>
+    <record id="attr_cert_igi" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_certificadora"/><field name="name">IGI</field>
+    </record>
+    <record id="attr_cert_otra" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_certificadora"/><field name="name">Otra</field>
+    </record>
+    <record id="attr_cert_sin" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_certificadora"/><field name="name">Sin certificado</field><field name="sequence">99</field>
+    </record>
+
+    <record id="attr_origen" model="product.attribute">
+        <field name="name">Origen del diamante</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+        <field name="visibility">visible</field>
+    </record>
+    <record id="attr_origen_natural" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_origen"/><field name="name">Natural</field>
+    </record>
+    <record id="attr_origen_lab" model="product.attribute.value">
+        <field name="attribute_id" ref="attr_origen"/><field name="name">Cultivado (lab)</field>
+    </record>
+</odoo>

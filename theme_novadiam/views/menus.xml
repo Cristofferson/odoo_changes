@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="menu_inicio" model="theme.website.menu">
+        <field name="name">Inicio</field><field name="url">/</field><field name="sequence">10</field>
+    </record>
+    <record id="menu_comprar" model="theme.website.menu">
+        <field name="name">Comprar</field><field name="url">/shop</field><field name="sequence">20</field>
+    </record>
+    <record id="menu_proteccion" model="theme.website.menu">
+        <field name="name">Protección Novadiam</field><field name="url">/proteccion</field><field name="sequence">30</field>
+    </record>
+    <record id="menu_nosotros" model="theme.website.menu">
+        <field name="name">Nosotros</field><field name="url">/nosotros</field><field name="sequence">40</field>
+    </record>
+    <record id="menu_vender" model="theme.website.menu">
+        <field name="name">Vende tu anillo</field><field name="url">/vender</field><field name="sequence">50</field>
+    </record>
+</odoo>

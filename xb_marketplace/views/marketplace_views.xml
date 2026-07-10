@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================ Vendedores ============================ -->
+    <record id="view_marketplace_seller_list" model="ir.ui.view">
+        <field name="name">marketplace.seller.list</field>
+        <field name="model">marketplace.seller</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'suspended'"/>
+                <field name="identity_verified" widget="boolean_toggle"/>
+                <field name="listing_count" string="Anuncios"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_marketplace_seller_form" model="ir.ui.view">
+        <field name="name">marketplace.seller.form</field>
+        <field name="model">marketplace.seller</field>
+        <field name="arch" type="xml">
+            <form string="Vendedor">
+                <header>
+                    <button name="action_approve" type="object" string="Aprobar"
+                            class="btn-primary" invisible="state == 'approved'"/>
+                    <button name="action_suspend" type="object" string="Suspender"
+                            invisible="state == 'suspended'"
+                            confirm="Se despublicarán sus anuncios activos. ¿Continuar?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_listings" type="object"
+                                class="oe_stat_button" icon="fa-diamond">
+                            <field name="listing_count" widget="statinfo" string="Anuncios"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="city"/>
+                            <field name="identity_verified"/>
+                        </group>
+                        <group>
+                            <field name="payout_bank"/>
+                            <field name="payout_clabe"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Notas internas del equipo…"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_marketplace_sellers" model="ir.actions.act_window">
+        <field name="name">Vendedores</field>
+        <field name="res_model">marketplace.seller</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ============================ Anuncios ============================ -->
+    <record id="view_marketplace_listing_kanban" model="ir.ui.view">
+        <field name="name">product.template.listing.kanban</field>
+        <field name="model">product.template</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="nv_state" quick_create="false">
+                <field name="nv_state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex">
+                            <field name="image_128" widget="image" class="o_kanban_image me-2" options="{'img_class': 'object-fit-cover'}"/>
+                            <div>
+                                <field name="name" class="fw-bold"/>
+                                <div class="text-muted small">
+                                    <field name="nv_brand"/> · <field name="nv_city"/>
+                                </div>
+                                <div class="text-muted small">
+                                    Vendedor: <field name="nv_seller_id"/>
+                                </div>
+                                <field name="list_price" widget="monetary" class="fw-bold"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_marketplace_listing_list" model="ir.ui.view">
+        <field name="name">product.template.listing.list</field>
+        <field name="model">product.template</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="nv_seller_id"/>
+                <field name="nv_brand" optional="show"/>
+                <field name="nv_city" optional="show"/>
+                <field name="list_price" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="nv_serial" optional="hide"/>
+                <field name="nv_state" widget="badge"
+                       decoration-info="nv_state in ('review','verifying')"
+                       decoration-success="nv_state in ('published','released')"
+                       decoration-warning="nv_state in ('reserved','to_workshop','inspection')"
+                       decoration-danger="nv_state in ('rejected','cancelled_verif')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_product_template_form_marketplace" model="ir.ui.view">
+        <field name="name">product.template.form.marketplace</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                <button name="action_publish_listing" type="object" string="Publicar anuncio"
+                        class="btn-primary"
+                        invisible="not nv_is_listing or nv_state not in ('draft', 'review')"/>
+                <button name="action_reject_listing" type="object" string="Rechazar"
+                        invisible="not nv_is_listing or nv_state not in ('draft', 'review')"/>
+                <button name="action_mark_reserved" type="object" string="Marcar vendido"
+                        invisible="not nv_is_listing or nv_state != 'published'"/>
+                <button name="action_send_to_workshop" type="object" string="Guía a taller emitida"
+                        invisible="not nv_is_listing or nv_state != 'reserved'"/>
+                <button name="action_receive_workshop" type="object" string="Recibida en taller"
+                        invisible="not nv_is_listing or nv_state != 'to_workshop'"/>
+                <button name="action_certify" type="object" string="Certificar"
+                        class="btn-primary"
+                        invisible="not nv_is_listing or nv_state != 'verifying'"/>
+                <button name="action_cancel_verification" type="object" string="No pasó verificación"
+                        invisible="not nv_is_listing or nv_state != 'verifying'"
+                        confirm="Se cancela la venta: reembolso al comprador y devolución al vendedor. ¿Continuar?"/>
+                <button name="action_personalize" type="object" string="A personalización"
+                        invisible="not nv_is_listing or nv_state != 'certified'"/>
+                <button name="action_ship" type="object" string="Enviada al comprador"
+                        invisible="not nv_is_listing or nv_state not in ('certified', 'personalizing')"/>
+                <button name="action_start_inspection" type="object" string="Entregada (inicia 72 h)"
+                        invisible="not nv_is_listing or nv_state != 'shipped'"/>
+                <button name="action_release" type="object" string="Liberar pago"
+                        class="btn-primary"
+                        invisible="not nv_is_listing or nv_state != 'inspection'"/>
+                <button name="action_mark_returned" type="object" string="Devuelta"
+                        invisible="not nv_is_listing or nv_state not in ('inspection', 'cancelled_verif')"/>
+                </header>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Marketplace" name="marketplace" invisible="not nv_is_listing">
+                    <group>
+                        <group string="Anuncio">
+                            <field name="nv_state" widget="badge"/>
+                            <field name="nv_seller_id"/>
+                            <field name="nv_city"/>
+                            <field name="nv_brand"/>
+                            <field name="nv_size"/>
+                            <field name="nv_carats"/>
+                        </group>
+                        <group string="Certificación">
+                            <field name="nv_cert_type"/>
+                            <field name="nv_cert_number"/>
+                            <field name="nv_cert_file" filename="nv_cert_filename"/>
+                            <field name="nv_cert_filename" invisible="1"/>
+                            <field name="nv_serial"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="nv_story" placeholder="Nota personal del vendedor (anónima)…"/>
+                        <field name="nv_workshop_notes" placeholder="Notas del paso por taller…"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_marketplace_listings" model="ir.actions.act_window">
+        <field name="name">Anuncios</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('nv_is_listing', '=', True)]</field>
+        <field name="context">{'default_nv_is_listing': True, 'default_type': 'consu', 'default_is_storable': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_marketplace_listing_kanban')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_marketplace_listing_list')}),
+            (0, 0, {'view_mode': 'form'})]"/>
+    </record>
+
+    <!-- ============================ Menú ============================ -->
+    <menuitem id="menu_marketplace_root" name="Marketplace"
+              web_icon="xb_marketplace,static/description/icon.png"
+              groups="xb_marketplace.group_marketplace_manager" sequence="46"/>
+    <menuitem id="menu_marketplace_listings" name="Anuncios"
+              parent="menu_marketplace_root" action="action_marketplace_listings" sequence="10"/>
+    <menuitem id="menu_marketplace_sellers" name="Vendedores"
+              parent="menu_marketplace_root" action="action_marketplace_sellers" sequence="20"/>
+
+</odoo>

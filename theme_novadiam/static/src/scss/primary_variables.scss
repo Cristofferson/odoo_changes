@@ -1,0 +1,31 @@
+//------------------------------------------------------------------------------
+// NOVADIAM — preset y paleta
+//------------------------------------------------------------------------------
+
+$o-website-values-palettes: (
+    (
+        'color-palettes-name':  'novadiam',
+        'link-underline':       'never',
+        'btn-padding-y':        .8125rem,
+        'btn-padding-x':        1.75rem,
+        'btn-padding-y-sm':     .5625rem,
+        'btn-padding-x-sm':     1.125rem,
+        'btn-padding-y-lg':     .9375rem,
+        'btn-padding-x-lg':     2rem,
+        'btn-border-radius':    999px,
+        'btn-border-radius-sm': 999px,
+        'btn-border-radius-lg': 999px,
+    ),
+);
+
+$nv-palette: map-merge(map-get($o-color-palettes, 'default-1'), (
+    'o-color-1': #0E7C7B,   // teal acción
+    'o-color-2': #26282B,   // tinta
+    'o-color-3': #F2F0EB,   // marfil bruma
+    'o-color-4': #FFFFFF,
+    'o-color-5': #22282A,   // oscuro
+    'menu': 1,
+    'footer': 5,
+    'copyright': 5,
+));
+$o-color-palettes: map-merge($o-color-palettes, ('novadiam': $nv-palette));

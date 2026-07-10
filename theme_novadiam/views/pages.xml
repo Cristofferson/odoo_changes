@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- ============================================================ INICIO -->
+    <record id="view_page_inicio" model="theme.ir.ui.view">
+        <field name="name">Inicio</field>
+        <field name="key">theme_novadiam.page_inicio</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+<t t-name="theme_novadiam.page_inicio">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure">
+
+<section class="nv-hero">
+  <div class="wrap hero-in">
+    <div>
+      <p class="eyebrow">Anillos de compromiso seminuevos</p>
+      <h1>Cada anillo merece una <em>segunda historia</em></h1>
+      <p class="lead-nv">Compra y vende anillos de compromiso verificados, con certificado y pago protegido. Con la discreción y el respeto que una pieza así merece.</p>
+      <form class="searchbar" action="/shop" method="get">
+        <input type="text" name="search" placeholder="Busca por marca, estilo, metal o quilates…"/>
+        <button class="btn btn-primary" type="submit">Buscar</button>
+      </form>
+      <div class="hero-chips">
+        <a class="chip" href="/shop?search=solitario">Solitario</a>
+        <a class="chip" href="/shop?search=halo">Halo</a>
+        <a class="chip" href="/shop?search=tiffany">Tiffany &amp; Co.</a>
+        <a class="chip" href="/shop?search=oro%20blanco">Oro blanco</a>
+        <a class="chip" href="/shop?search=platino">Platino</a>
+        <a class="chip" href="/shop?search=GIA">Certificado GIA</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ring-stage">
+        <svg viewBox="0 0 64 64"><use href="#ico-ring"/></svg>
+      </div>
+      <div class="hero-note">
+        <span class="dot-ok"/>
+        <div><b>Cada venta pasa por nuestro taller</b><span>Limpieza, verificación y certificado digital</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="nv-trust">
+  <div class="wrap trust-in">
+    <div class="trust-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-shield"/></svg></span><div><b>Pago protegido</b><br/>Tu dinero se libera hasta que confirmas</div></div>
+    <div class="trust-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-cert"/></svg></span><div><b>Certificación estándares GIA</b><br/>Por gemólogo graduado del GIA, sin el sesgo de quien vende</div></div>
+    <div class="trust-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-cycle"/></svg></span><div><b>Certificado digital</b><br/>Número de serie grabado: autenticidad y trazabilidad</div></div>
+    <div class="trust-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-eye"/></svg></span><div><b>Discreción absoluta</b><br/>Tus datos nunca se publican</div></div>
+  </div>
+</div>
+
+<section class="nv-sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Selección</p>
+        <h2>Piezas destacadas</h2>
+      </div>
+      <a class="more" href="/shop">Ver todo el catálogo →</a>
+    </div>
+    <div class="nv-cards">
+      <div class="nv-card"><a href="/shop">
+        <div class="ph"><div class="badges"><span class="bdg c">Cert. GIA</span></div><svg viewBox="0 0 64 64"><use href="#ico-ring"/></svg></div>
+        <div class="nv-card-b"><h3>Solitario clásico · Diamante 0.50 ct</h3><div class="specs">Oro blanco 14k · H / VS2 · Talla 6</div>
+        <div class="price-row"><span class="price">$28,900 <small>MXN</small></span><span class="loc">Guadalajara</span></div></div>
+      </a></div>
+      <div class="nv-card"><a href="/shop">
+        <div class="ph rose"><div class="badges"><span class="bdg c">Cert. IGI</span></div><svg viewBox="0 0 64 64"><use href="#ico-ring"/></svg></div>
+        <div class="nv-card-b"><h3>Anello · Halo · Centro 0.40 ct</h3><div class="specs">Oro rosa 14k · G / VS1 · Talla 5.5</div>
+        <div class="price-row"><span class="price">$24,500 <small>MXN</small></span><span class="loc">CDMX</span></div></div>
+      </a></div>
+      <div class="nv-card"><a href="/shop">
+        <div class="ph plat"><div class="badges"><span class="bdg c">Cert. GIA</span></div><svg viewBox="0 0 64 64"><use href="#ico-ring"/></svg></div>
+        <div class="nv-card-b"><h3>Tiffany &amp; Co. · Solitario · Diamante 0.72 ct</h3><div class="specs">Platino · F / VS1 · Talla 6.5</div>
+        <div class="price-row"><span class="price">$56,800 <small>MXN</small></span><span class="loc">Mérida</span></div></div>
+      </a></div>
+      <div class="nv-card"><a href="/shop">
+        <div class="ph gold"><div class="badges"><span class="bdg c">Cert. GIA</span></div><svg viewBox="0 0 64 64"><use href="#ico-ring"/></svg></div>
+        <div class="nv-card-b"><h3>Trilogía · 0.60 ct total</h3><div class="specs">Oro amarillo 14k · H / SI1 · Talla 7</div>
+        <div class="price-row"><span class="price">$19,900 <small>MXN</small></span><span class="loc">Querétaro</span></div></div>
+      </a></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec nv-band">
+  <div class="wrap">
+    <p class="eyebrow">Cómo funciona</p>
+    <h2>Ninguna pieza llega a ti sin pasar por nuestras manos</h2>
+    <p class="sub-nv">Nunca le pagas directamente a un desconocido. Novadiam resguarda tu dinero y la pieza viaja primero a nuestro taller, donde se limpia, se verifica y se certifica antes de llegar a ti.</p>
+    <div class="timeline">
+      <div class="tl"><div class="tl-dot">1</div><h3>Pagas a Novadiam</h3><p>Tu pago queda resguardado por nosotros, no va al vendedor.</p></div>
+      <div class="tl"><div class="tl-dot">2</div><h3>La pieza viaja a nuestro taller</h3><p>El vendedor la envía con guía asegurada a nuestras oficinas.</p></div>
+      <div class="tl"><div class="tl-dot">3</div><h3>Limpiamos, verificamos y certificamos</h3><p>Gemólogo graduado del GIA, estándares GIA (4C&#8217;s), certificado digital y número de serie inscrito con láser.</p></div>
+      <div class="tl"><div class="tl-dot">4</div><h3>La recibes y confirmas</h3><p>Al confirmar la recepción, el dinero se libera para ambas partes.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="press">
+  <div class="wrap press-in">
+    <span class="press-label">Han hablado de nosotros</span>
+    <div class="press-marks">
+      <span class="pmark">Shark Tank México<small>Sony Channel · 3ª temporada</small></span>
+      <span class="pmark">Empresando<small>Medio de emprendimiento</small></span>
+    </div>
+    <a class="press-more" href="/nosotros#medios">Ver los medios →</a>
+  </div>
+</div>
+
+<section class="nv-sec">
+  <div class="wrap sell-cta">
+    <div>
+      <p class="eyebrow">Para vendedores</p>
+      <h2>Ese anillo guardado puede convertirse en un nuevo comienzo</h2>
+      <p class="lead-nv">Publicarlo no cuesta nada. Nosotros revisamos cada pieza, cuidamos tu privacidad y te acompañamos hasta que recibes tu pago.</p>
+      <ul class="check-list">
+        <li><span class="ck">✓</span><span><b>Exhibe gratis.</b> Publicar no cuesta; solo hay comisión cuando tu anillo se vende.</span></li>
+        <li><span class="ck">✓</span><span><b>Tu identidad, protegida.</b> Los compradores nunca ven tus datos personales.</span></li>
+        <li><span class="ck">✓</span><span><b>Pago garantizado.</b> El comprador paga antes de que envíes; tú solo mandas la pieza a nuestro taller con la guía que te damos.</span></li>
+      </ul>
+      <a class="btn btn-primary" href="/vender">Vende tu anillo</a>
+      <a class="btn btn-nv-ghost" href="/proteccion" style="margin-left:10px">Conoce la protección</a>
+    </div>
+    <div class="hero-visual">
+      <div class="ring-stage stage-aqua">
+        <svg viewBox="0 0 24 24" style="width:150px;height:150px;color:var(--nv-teal)"><use href="#ico-cycle"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>
+        </field>
+    </record>
+    <record id="page_inicio" model="theme.website.page">
+        <field name="url">/</field>
+        <field name="view_id" ref="view_page_inicio"/>
+        <field name="website_indexed" eval="True"/>
+        <field name="is_published" eval="True"/>
+    </record>
+
+<!-- ============================================================ VENDER -->
+    <record id="view_page_vender" model="theme.ir.ui.view">
+        <field name="name">Vende tu anillo</field>
+        <field name="key">theme_novadiam.page_vender</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+<t t-name="theme_novadiam.page_vender">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure">
+
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Vende tu anillo</p>
+    <h1 style="max-width:20ch">Dale una segunda historia, con discreción y sin riesgos</h1>
+    <p class="lead-nv" style="margin-top:16px">Exhibir tu anillo es gratis. Cuando se vende, el comprador paga por adelantado, tú envías la pieza a nuestro taller con la guía que te damos, nosotros la verificamos y certificamos, y recibes tu dinero en cuanto el comprador confirma.</p>
+    <div style="margin-top:26px">
+      <a class="btn btn-primary btn-lg" href="/marketplace/vender">Publicar mi anillo</a>
+      <a class="btn btn-nv-ghost btn-lg" href="#tarifas" style="margin-left:10px">Ver tarifas</a>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" style="padding:56px 0">
+  <div class="wrap">
+    <div class="sec-head"><div>
+      <p class="eyebrow">Así de simple</p>
+      <h2>Publicar toma unos minutos</h2>
+      <p class="sub-nv">Nos cuentas lo esencial de tu pieza, subes tus fotos y el certificado si lo tienes. Nadie verá tu nombre ni tus datos: ante los compradores siempre serás «Vendedor particular».</p>
+    </div></div>
+    <div class="nv-cards three">
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">1 · Tu pieza</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Estilo, metal, quilates, talla y marca si aplica. Si no sabes algún dato con exactitud, lo confirmamos en el taller.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">2 · Fotos y certificado</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Mínimo 4 fotos. ¿Sin certificado? No importa: al venderse la certificamos con estándares GIA e inscripción láser.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">3 · Revisión y publicación</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">En 24–48 h validamos tu anuncio y sale al catálogo con tu ciudad, nunca con tu nombre.</div>
+      </div></div>
+    </div>
+    <div style="margin-top:30px">
+      <a class="btn btn-primary" href="/marketplace/vender">Comenzar ahora →</a>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" style="padding:56px 0" id="tarifas">
+  <div class="wrap">
+    <div class="sec-head"><div>
+      <p class="eyebrow">Tarifas</p>
+      <h2>Sin costos ocultos</h2>
+      <p class="sub-nv">Exhibir no cuesta. La comisión se descuenta del pago solo cuando tu anillo se vende, e incluye la protección del pago, los envíos asegurados, la limpieza y verificación en taller y el certificado digital de la pieza.</p>
+    </div></div>
+    <table class="fee-table">
+      <tr><th>Concepto</th><th>Costo</th></tr>
+      <tr><td>Exhibir tu anillo en el marketplace</td><td>Gratis</td></tr>
+      <tr><td>Comisión única al venderse</td><td>18%</td></tr>
+    </table>
+    <p class="fee-note">La comisión incluye todo: protección del pago, los dos envíos asegurados, la limpieza y verificación en taller, y el certificado digital con número de serie grabado. Sin cuotas mensuales ni costos ocultos.</p>
+  </div>
+</section>
+
+<section class="nv-sec nv-band">
+  <div class="wrap">
+    <p class="eyebrow">Qué sigue después de publicar</p>
+    <h2>Te acompañamos hasta el depósito</h2>
+    <div class="timeline">
+      <div class="tl"><div class="tl-dot">1</div><h3>Revisamos y publicamos</h3><p>En 24–48 h validamos tu anuncio. Se exhibe gratis, con tu ciudad, nunca con tu nombre.</p></div>
+      <div class="tl"><div class="tl-dot">2</div><h3>Alguien lo compra</h3><p>El comprador paga a Novadiam y te enviamos la guía asegurada para mandar la pieza a nuestro taller.</p></div>
+      <div class="tl"><div class="tl-dot">3</div><h3>La verificamos y certificamos</h3><p>Limpieza, autenticación por gemólogos y certificado digital con número de serie grabado.</p></div>
+      <div class="tl"><div class="tl-dot">4</div><h3>Recibes tu pago</h3><p>Se entrega al comprador; cuando confirma (máx. 72 h), depositamos a tu cuenta menos la comisión.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec">
+  <div class="wrap">
+    <p class="eyebrow">Preguntas frecuentes</p>
+    <h2 style="font-size:30px;margin-bottom:28px">Antes de publicar</h2>
+    <div class="faq">
+      <details>
+        <summary>¿Qué pasa si no tengo el certificado del diamante?</summary>
+        <p>Puedes publicar sin certificado; la pieza se marca como tal. No te preocupes: cuando se venda, la evaluamos con los estándares del GIA (4C&#8217;s completas), por gemólogo graduado del GIA, y emitimos su certificado digital Novadiam con número de serie inscrito con láser. El comprador compra con total confianza — y tu pieza vale más.</p>
+      </details>
+      <details>
+        <summary>¿Quién fija el precio?</summary>
+        <p>Tú. Al publicar te damos una sugerencia basada en piezas comparables vendidas, el metal y las características del diamante, pero la decisión final siempre es tuya.</p>
+      </details>
+      <details>
+        <summary>¿Cómo protegen mi privacidad?</summary>
+        <p>Ante los compradores solo apareces como «Vendedor particular» con tu ciudad. Los mensajes pasan por la plataforma sin revelar correos ni teléfonos, y el envío se gestiona con guías que no exponen tus datos al comprador.</p>
+      </details>
+      <details>
+        <summary>¿Cuándo recibo mi dinero?</summary>
+        <p>El comprador paga antes de que envíes. La pieza pasa por nuestro taller (limpieza, verificación y certificado), se entrega, y cuando el comprador confirma la recepción —o al cumplirse 72 horas sin reclamo— transferimos a tu cuenta el importe menos la comisión, normalmente en 1–2 días hábiles.</p>
+      </details>
+      <details>
+        <summary>¿Y si la pieza no pasa la verificación?</summary>
+        <p>Si en el taller encontramos que la pieza no corresponde a lo publicado, la venta se cancela: el comprador recibe su reembolso completo y te devolvemos tu pieza con guía asegurada. Por eso conviene describirla con honestidad — nuestro equipo te ayuda a hacerlo desde el anuncio.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>
+        </field>
+    </record>
+    <record id="page_vender" model="theme.website.page">
+        <field name="url">/vender</field>
+        <field name="view_id" ref="view_page_vender"/>
+        <field name="website_indexed" eval="True"/>
+        <field name="is_published" eval="True"/>
+    </record>
+
+<!-- ============================================================ PROTECCIÓN -->
+    <record id="view_page_proteccion" model="theme.ir.ui.view">
+        <field name="name">Protección Novadiam</field>
+        <field name="key">theme_novadiam.page_proteccion</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+<t t-name="theme_novadiam.page_proteccion">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure">
+
+<section class="page-hero">
+  <div class="wrap" style="max-width:860px;text-align:center">
+    <p class="eyebrow">Protección Novadiam</p>
+    <h1>Comprar una joya a otra persona, sin conocerla, exige garantías</h1>
+    <p class="lead-nv" style="margin:18px auto 0">Por eso en Novadiam ni el dinero ni la pieza viajan directo entre desconocidos: el pago se resguarda con nosotros y cada joya pasa físicamente por nuestro taller antes de entregarse.</p>
+  </div>
+</section>
+
+<section class="nv-sec">
+  <div class="wrap">
+    <p class="eyebrow">Paso a paso</p>
+    <h2 style="font-size:32px">El recorrido de tu dinero</h2>
+    <div class="timeline">
+      <div class="tl"><div class="tl-dot">1</div><h3>Pagas a Novadiam</h3><p>Tu pago entra a resguardo. El vendedor solo ve la confirmación de la venta, nunca tu dinero por adelantado.</p></div>
+      <div class="tl"><div class="tl-dot">2</div><h3>La pieza viaja a nuestro taller</h3><p>El vendedor la envía con guía asegurada a nuestras oficinas, con seguimiento visible para ambos.</p></div>
+      <div class="tl"><div class="tl-dot">3</div><h3>Se limpia, verifica y certifica</h3><p>Nuestros gemólogos la autentican y emitimos su certificado digital. Solo entonces sale hacia ti.</p></div>
+      <div class="tl"><div class="tl-dot">4</div><h3>Confirmas y se libera</h3><p>La recibes, confirmas en tu cuenta —o transcurren 72 h sin reclamo— y el dinero se libera para ambas partes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec nv-band" style="padding:70px 0">
+  <div class="wrap">
+    <p class="eyebrow">Incluido en cada venta</p>
+    <h2>El paso por nuestro taller</h2>
+    <p class="sub-nv">Ninguna pieza va directo del vendedor al comprador. Todas pasan por las manos de nuestros joyeros antes de entregarse.</p>
+    <div class="steps four">
+      <div class="step"><div class="step-n">LIMPIEZA</div><h3>Renovada por dentro y por fuera</h3><p>Limpieza profesional a fondo — física y energética. La pieza suelta su pasado y llega lista para su nueva historia.</p></div>
+      <div class="step"><div class="step-n">VERIFICACIÓN</div><h3>Estándares GIA, sin sesgos</h3><p>Gemólogo graduado del GIA evalúa las 4C&#8217;s, la autenticidad del diamante, el metal contrastado y el estado real de la montura.</p></div>
+      <div class="step"><div class="step-n">CERTIFICADO</div><h3>Certificado digital Novadiam</h3><p>Número de serie inscrito con láser en el diamante (si no lo trae) y grabado en la joya, ligado a su certificado digital: trazabilidad de por vida.</p></div>
+      <div class="step"><div class="step-n">SI NO PASA</div><h3>Nadie pierde</h3><p>Si la pieza no corresponde a lo publicado, la venta se cancela: reembolso completo al comprador y la pieza vuelve al vendedor.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" id="verificacion">
+  <div class="wrap">
+    <p class="eyebrow">El gran diferenciador</p>
+    <h2 style="font-size:32px">Certificación sin sesgos, con estándares GIA</h2>
+    <p class="lead-nv" style="margin-top:14px">En una joyería tradicional, quien «certifica» la pieza es el mismo que te la vende. En NOVADIAM la pieza no es nuestra: certificamos como terceros imparciales, y lo hacemos con los estándares del GIA.</p>
+    <div class="versus">
+      <div class="vs-card bad">
+        <div class="vs-tag">Joyería tradicional</div>
+        <h3>El vendedor se califica a sí mismo</h3>
+        <ul>
+          <li><span class="x">✕</span><span>Quien certifica tiene interés en que compres: el sesgo de la venta.</span></li>
+          <li><span class="x">✕</span><span>«Certificados» propios, con criterios propios, sin estándar externo.</span></li>
+          <li><span class="x">✕</span><span>Sin inscripción en la piedra: nada liga el documento a TU diamante.</span></li>
+        </ul>
+      </div>
+      <div class="vs-card good">
+        <div class="vs-tag">En NOVADIAM</div>
+        <h3>Tercero imparcial, estándar mundial</h3>
+        <ul>
+          <li><span class="ok">✓</span><span>No somos el vendedor: certificamos sin conflicto de interés.</span></li>
+          <li><span class="ok">✓</span><span>Gemólogo <b>graduado del GIA</b>, evaluando con los estándares del GIA: las 4C&#8217;s completas (quilates, color, claridad y corte).</span></li>
+          <li><span class="ok">✓</span><span><b>Inscripción láser incluida</b> en el diamante (si no la trae ya): el certificado queda ligado a tu piedra, no a un papel.</span></li>
+          <li><span class="ok">✓</span><span>Certificado digital consultable siempre: trazabilidad de por vida, incluso si la pieza vuelve a venderse algún día.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size:14px;color:var(--nv-ink3);margin:18px 0 26px">Con la tecnología y los 25+ años de experiencia joyera del grupo Anello · DIAMANE.</p>
+    <a class="btn btn-primary" href="/shop">Ver el catálogo</a>
+  </div>
+</section>
+
+<section class="nv-sec" id="personalizar" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow">Ya que está en nuestras manos…</p>
+    <h2 style="font-size:30px;margin-bottom:14px">Hazla tuya antes de recibirla</h2>
+    <p class="lead-nv" style="margin-bottom:34px">La pieza ya va a pasar por nuestro taller. Si lo deseas, con costo extra, nuestros joyeros la dejan exactamente como la necesitas antes de enviártela.</p>
+    <div class="nv-cards three">
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Ajuste de talla</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Modificamos la medida del anillo a tu talla exacta, cuidando montura y piedras, para que llegue listo para usarse.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Restauración</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Más allá de la limpieza incluida: reparación de garras, rodinado, pulido profundo o recuperación del acabado original.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Grabado personalizado</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Una fecha, unas iniciales, una promesa — grabadas en el anillo o inscritas con láser en la propia piedra.</div>
+      </div></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--nv-ink3);margin-top:18px;max-width:80ch">Importante: si pediste personalizaciones y la compra termina en devolución, el costo de esos trabajos y el de regresar la pieza a su estado original corre por tu cuenta — al recibirla de vuelta verificamos, con el número de serie inscrito, que sea exactamente la misma pieza y la restauramos tal como la entregó el vendedor.</p>
+  </div>
+</section>
+
+<section class="nv-sec nv-band" style="padding:70px 0">
+  <div class="wrap">
+    <p class="eyebrow">Si algo no cuadra</p>
+    <h2>Mediación con el pago congelado</h2>
+    <p class="sub-nv">Aun con la pieza verificada por nosotros, tienes 72 horas desde que recibes para confirmar. Si algo no está bien, el pago queda congelado hasta resolverlo.</p>
+    <div class="steps">
+      <div class="step"><div class="step-n">RECLAMO</div><h3>Nos cuentas qué pasó</h3><p>Con fotos y descripción. Nuestro equipo responde en menos de 24 horas hábiles.</p></div>
+      <div class="step"><div class="step-n">REVISIÓN</div><h3>Cotejamos contra el expediente</h3><p>Tenemos la pieza documentada de su paso por el taller: anuncio, certificado, fotografías de salida y el número de serie inscrito, que confirma que es exactamente la misma pieza.</p></div>
+      <div class="step"><div class="step-n">RESOLUCIÓN</div><h3>Devolución o liberación</h3><p>Si algo no corresponde, la devuelves y te reembolsamos completo. Si está en orden, el pago se libera.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec">
+  <div class="wrap">
+    <p class="eyebrow">Privacidad</p>
+    <h2 style="font-size:30px;margin-bottom:16px">Discreción para ambas partes</h2>
+    <p class="lead-nv" style="margin-bottom:34px">Sabemos que detrás de cada pieza hay una historia personal. La plataforma está diseñada para que nadie tenga que contarla si no quiere.</p>
+    <div class="nv-cards three">
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Identidades protegidas</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Compradores y vendedores nunca ven nombres, correos ni teléfonos del otro. Solo la ciudad de origen de la pieza.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Mensajería intermediada</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Las preguntas y respuestas pasan por Novadiam. Compartir datos de contacto para operar por fuera suspende el anuncio.</div>
+      </div></div>
+      <div class="nv-card"><div class="nv-card-b" style="padding:26px">
+        <h3 style="margin-bottom:8px">Envíos sin datos expuestos</h3>
+        <div class="specs" style="font-size:14px;line-height:1.6">Las guías se gestionan desde la plataforma; el paquete no revela quién vende ni qué contiene.</div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow">Preguntas frecuentes</p>
+    <h2 style="font-size:30px;margin-bottom:28px">Sobre la protección</h2>
+    <div class="faq">
+      <details>
+        <summary>¿Novadiam guarda mi dinero en una cuenta separada?</summary>
+        <p>Sí. Los pagos en resguardo se administran contablemente separados de los recursos de la empresa y solo se mueven en dos direcciones: al vendedor cuando se confirma la operación, o de vuelta a ti si la mediación resulta en devolución.</p>
+      </details>
+      <details>
+        <summary>¿Qué métodos de pago aceptan?</summary>
+        <p>Tarjeta de crédito y débito, transferencia SPEI y, en piezas seleccionadas, meses sin intereses.</p>
+      </details>
+      <details>
+        <summary>¿Puedo devolver la pieza si simplemente no me gustó?</summary>
+        <p>Las 72 horas de confirmación protegen que la pieza sea exactamente lo publicado y verificado. Si corresponde al anuncio, la compra es firme; por eso publicamos fotos, medidas y certificados detallados, y puedes preguntar todo antes de comprar.</p>
+      </details>
+      <details>
+        <summary>¿Qué es exactamente el certificado digital?</summary>
+        <p>Al pasar por nuestro taller, un gemólogo graduado del GIA evalúa la pieza con los estándares del GIA (las 4C&#8217;s: quilates, color, claridad y corte), inscribimos con láser un número de serie en el diamante —si no lo trae ya— y lo grabamos en la joya. El certificado digital queda ligado a ese número: describe la pieza, su verificación y su historia, y cualquier joyero puede cotejarlo después. Autenticidad y trazabilidad de por vida.</p>
+      </details>
+      <details>
+        <summary>¿Puedo pedir ajuste de talla, restauración o un grabado personal?</summary>
+        <p>Sí. Al comprar puedes solicitar, con costo extra, que el taller ajuste la medida a tu talla, restaure la pieza más allá de la limpieza incluida, o agregue un grabado personalizado en el anillo o inscrito en la propia piedra. Todo se hace antes del envío, en el mismo paso por el taller. Toma en cuenta: si la compra termina en devolución, esos trabajos y la reversión de la pieza a su estado original corren por tu cuenta — verificamos por número de serie que sea la misma pieza y la dejamos tal como la entregó el vendedor.</p>
+      </details>
+      <details>
+        <summary>¿Quién paga los envíos asegurados?</summary>
+        <p>Están incluidos en el precio que ves: tanto el del vendedor a nuestro taller como el del taller a tu domicilio. El vendedor no paga envíos: se cubren de la comisión de Novadiam.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>
+        </field>
+    </record>
+    <record id="page_proteccion" model="theme.website.page">
+        <field name="url">/proteccion</field>
+        <field name="view_id" ref="view_page_proteccion"/>
+        <field name="website_indexed" eval="True"/>
+        <field name="is_published" eval="True"/>
+    </record>
+
+<!-- ============================================================ NOSOTROS -->
+    <record id="view_page_nosotros" model="theme.ir.ui.view">
+        <field name="name">Nosotros</field>
+        <field name="key">theme_novadiam.page_nosotros</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+<t t-name="theme_novadiam.page_nosotros">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure">
+
+<section class="page-hero">
+  <div class="wrap" style="max-width:860px;text-align:center">
+    <p class="eyebrow">Nosotros</p>
+    <h1>Joyeros antes que plataforma</h1>
+    <p class="lead-nv" style="margin:18px auto 0">NOVADIAM nació de una convicción sencilla: un anillo que ya cumplió su historia puede comenzar otra — si alguien garantiza que el proceso sea seguro, justo y discreto.</p>
+  </div>
+</section>
+
+<section class="nv-sec">
+  <div class="wrap about-grid">
+    <div>
+      <p class="eyebrow">Nuestra historia</p>
+      <h2>Más de 25 años tocando oro y diamantes</h2>
+      <p>No somos una startup que descubrió las joyas en una hoja de cálculo. Detrás de NOVADIAM está una familia joyera mexicana con más de dos décadas fabricando, certificando y vendiendo anillos de compromiso.</p>
+      <p>Esa experiencia es la que ponemos en cada operación: con formación gemológica del GIA (Gemological Institute of America), sabemos leer un certificado, contrastar un metal y reconocer una montura bien hecha. Por eso podemos garantizar lo que otros solo prometen.</p>
+      <div class="hist">
+        <div class="h-row"><span class="h-year">1999</span><p><b>La Esfinge.</b> Inicia la trayectoria joyera de la familia.</p></div>
+        <div class="h-row"><span class="h-year">2006</span><p><b>Anello.</b> Nace la marca de anillos de compromiso, hoy referente regional.</p></div>
+        <div class="h-row"><span class="h-year">2013</span><p><b>DIAMANE.</b> Proveeduría de diamantes naturales y tecnología para joyerías.</p></div>
+        <div class="h-row"><span class="h-year">2017</span><p><b>NOVADIAM.</b> Nace el reciclaje de anillos: valuación, consignación, transformación y reventa con respaldo profesional.</p></div>
+        <div class="h-row"><span class="h-year">2018</span><p><b>Shark Tank México.</b> El proyecto se presenta en la tercera temporada del programa.</p></div>
+        <div class="h-row"><span class="h-year">2026</span><p><b>El marketplace.</b> NOVADIAM se convierte en la plataforma mexicana de anillos de compromiso seminuevos con pago protegido.</p></div>
+      </div>
+    </div>
+    <div>
+      <div class="ring-stage" style="margin:0 auto">
+        <img src="/theme_novadiam/static/src/img/isotipo.png" alt="Isotipo NOVADIAM" style="width:150px"/>
+      </div>
+      <div class="stats-nv">
+        <div class="stat"><b>25+</b><span>años de oficio joyero</span></div>
+        <div class="stat"><b>100%</b><span>de anuncios moderados</span></div>
+        <div class="stat"><b>72 h</b><span>de inspección protegida</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec nv-band" style="padding:70px 0">
+  <div class="wrap">
+    <p class="eyebrow">Principios</p>
+    <h2>Cómo trabajamos</h2>
+    <div class="steps">
+      <div class="step"><div class="step-n">RESPETO</div><h3>Sin preguntas incómodas</h3><p>Nadie tiene que explicar por qué vende. Tratamos cada pieza y cada historia con la seriedad que merece.</p></div>
+      <div class="step"><div class="step-n">RIGOR</div><h3>Certificación sin sesgos</h3><p>No somos el vendedor: certificamos como terceros, con estándares GIA y gemólogo graduado del GIA. Si algo no corresponde, no se entrega.</p></div>
+      <div class="step"><div class="step-n">CLARIDAD</div><h3>Cuentas claras</h3><p>Comisión visible desde el primer día, sin costos escondidos ni letras pequeñas.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" id="medios">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">En los medios</p>
+        <h2>Quién está hablando de nosotros</h2>
+        <p class="sub-nv">El modelo de NOVADIAM ha llamado la atención desde sus inicios: reciclar anillos con respaldo joyero profesional no se le había ocurrido a nadie más.</p>
+      </div>
+    </div>
+    <div class="media-cards">
+      <div class="mcard">
+        <a class="video-ph" href="https://www.youtube.com/watch?v=8AB5OrbyxVE" target="_blank" rel="noopener"><span class="vtag">Televisión nacional</span><span class="play"/></a>
+        <div class="mcard-b">
+          <h3>Shark Tank México · Sony Channel · 3ª temporada</h3>
+          <p>Llevamos NOVADIAM al tanque: el modelo de reciclaje de anillos de compromiso frente a los tiburones. El clip oficial del programa lo dice todo desde el título.</p>
+          <p class="mq">«¿Le propone matrimonio en el Tanque?» <cite>— Shark Tank México, clip oficial</cite></p>
+        </div>
+      </div>
+      <div class="mcard">
+        <a class="video-ph" href="https://web.archive.org/web/20190719182840/http://www.empresando.com/2018/06/novadiam.html" target="_blank" rel="noopener"><span class="vtag">Emprendimiento</span><span class="play"/></a>
+        <div class="mcard-b">
+          <h3>Empresando · «Novadiam — Reciclando anillos de compromiso»</h3>
+          <p>La historia de cómo un gemólogo titulado por el GIA descubrió que muchos anillos de compromiso buscaban regresar a la joyería… y decidió darles opciones: valuación, consignación, transformación y reventa.</p>
+          <p class="mq">«Buscamos darle una nueva historia al diamante.» <cite>— Cristofferson Reyes, fundador · Empresando, 2018</cite></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="nv-sec" id="contacto" style="padding-top:0">
+  <div class="wrap contact-grid">
+    <div>
+      <p class="eyebrow">Contacto</p>
+      <h2 style="font-size:32px;margin-bottom:18px">Hablemos</h2>
+      <p class="lead-nv" style="margin-bottom:28px">¿Tienes dudas sobre una pieza, una venta o la protección del pago? Escríbenos.</p>
+      <div class="c-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-shield"/></svg></span><div><b>Correo</b><a href="mailto:hola@novadiam.mx">hola@novadiam.mx</a></div></div>
+      <div class="c-item"><span class="t-ico"><svg viewBox="0 0 24 24"><use href="#ico-eye"/></svg></span><div><b>Cobertura</b>Operamos en todo México, con envíos asegurados</div></div>
+    </div>
+    <div class="nv-form-card" style="padding:32px">
+      <h2 style="font-size:22px">Envíanos un mensaje</h2>
+      <p class="sub-nv" style="margin-bottom:22px">Respondemos en menos de un día hábil.</p>
+      <section class="s_website_form" data-vcss="001" data-snippet="s_website_form">
+        <form action="/website/form/" method="post" enctype="multipart/form-data" class="o_mark_required" data-mark="*" data-model_name="crm.lead" data-success-mode="redirect" data-success-page="/gracias" data-pre-fill="true">
+          <div class="s_website_form_rows row s_col_no_bgcolor">
+            <div class="s_website_form_field s_website_form_dnone col-12" data-type="char" data-name="Field">
+              <input type="hidden" class="form-control s_website_form_input" name="name" value="Mensaje web NOVADIAM"/>
+            </div>
+            <div class="mb-3 col-lg-6 s_website_form_field s_website_form_required s_website_form_model_required" data-type="char" data-name="Field">
+              <label class="s_website_form_label" for="nvf-nombre"><span class="s_website_form_label_content">Nombre</span><span class="s_website_form_mark"> *</span></label>
+              <input id="nvf-nombre" type="text" class="form-control s_website_form_input" name="contact_name" required="required" data-fill-with="name"/>
+            </div>
+            <div class="mb-3 col-lg-6 s_website_form_field s_website_form_required" data-type="email" data-name="Field">
+              <label class="s_website_form_label" for="nvf-mail"><span class="s_website_form_label_content">Correo</span><span class="s_website_form_mark"> *</span></label>
+              <input id="nvf-mail" type="email" class="form-control s_website_form_input" name="email_from" required="required" data-fill-with="email"/>
+            </div>
+            <div class="mb-3 col-12 s_website_form_field s_website_form_custom" data-type="char" data-name="Field">
+              <label class="s_website_form_label" for="nvf-asunto"><span class="s_website_form_label_content">Asunto</span></label>
+              <select id="nvf-asunto" class="form-select s_website_form_input" name="Asunto">
+                <option>Quiero vender un anillo</option><option>Dudas sobre una pieza</option><option>Protección del pago</option><option>Otro tema</option>
+              </select>
+            </div>
+            <div class="mb-3 col-12 s_website_form_field s_website_form_custom" data-type="text" data-name="Field">
+              <label class="s_website_form_label" for="nvf-msg"><span class="s_website_form_label_content">Mensaje</span></label>
+              <textarea id="nvf-msg" class="form-control s_website_form_input" name="Mensaje" rows="5" placeholder="Cuéntanos en qué te ayudamos"/>
+            </div>
+            <div class="mb-0 py-2 col-12 s_website_form_submit s_website_form_no_submit_label" data-name="Submit Button">
+              <div style="width: 200px;" class="s_website_form_label"/>
+              <a href="#" role="button" class="btn btn-primary s_website_form_send">Enviar</a>
+              <span id="s_website_form_result"/>
+            </div>
+          </div>
+        </form>
+      </section>
+      <p style="font-size:13px;color:var(--nv-ink3);margin-top:10px;margin-bottom:0">Tus datos solo se usan para responderte.</p>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>
+        </field>
+    </record>
+    <record id="page_nosotros" model="theme.website.page">
+        <field name="url">/nosotros</field>
+        <field name="view_id" ref="view_page_nosotros"/>
+        <field name="website_indexed" eval="True"/>
+        <field name="is_published" eval="True"/>
+    </record>
+
+<!-- ============================================================ GRACIAS -->
+    <record id="view_page_gracias" model="theme.ir.ui.view">
+        <field name="name">Gracias</field>
+        <field name="key">theme_novadiam.page_gracias</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+<t t-name="theme_novadiam.page_gracias">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure">
+<section class="nv-sec" style="padding:110px 0 130px">
+  <div class="wrap" style="max-width:640px;text-align:center">
+    <div class="ring-stage stage-aqua" style="width:120px;height:120px;margin:0 auto 30px">
+      <svg viewBox="0 0 24 24" style="width:54px;height:54px;color:var(--nv-teal)"><use href="#ico-shield"/></svg>
+    </div>
+    <p class="eyebrow">Mensaje recibido</p>
+    <h1 style="font-size:38px;margin-bottom:14px">Gracias por escribirnos</h1>
+    <p class="lead-nv" style="margin:0 auto 30px">Nuestro equipo te responderá en menos de un día hábil. La discreción empieza aquí: tus datos solo se usan para atenderte.</p>
+    <a class="btn btn-primary" href="/shop">Explorar el catálogo</a>
+    <a class="btn btn-nv-ghost" href="/" style="margin-left:10px">Volver al inicio</a>
+  </div>
+</section>
+    </div>
+  </t>
+</t>
+        </field>
+    </record>
+    <record id="page_gracias" model="theme.website.page">
+        <field name="url">/gracias</field>
+        <field name="view_id" ref="view_page_gracias"/>
+        <field name="website_indexed" eval="False"/>
+        <field name="is_published" eval="True"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== Wizard: publicar anuncio ==================== -->
+    <template id="vender_form" name="Publicar mi anillo">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <section style="padding:56px 0 72px">
+                    <div class="container" style="max-width:860px">
+                        <p class="text-uppercase fw-bold small" style="letter-spacing:.2em;color:#0E7C7B">Vende tu anillo</p>
+                        <h1 class="mb-2">Cuéntanos sobre tu pieza</h1>
+                        <p class="text-muted mb-4">Solo lo esencial. Nadie verá tu nombre ni tus datos de contacto: ante los compradores siempre serás «Vendedor particular». Nuestro equipo revisa cada anuncio en 24–48 h antes de publicarlo.</p>
+                        <div t-if="error" class="alert alert-danger" role="alert"><t t-esc="error"/></div>
+                        <form action="/marketplace/vender" method="post" enctype="multipart/form-data" class="bg-white border rounded-3 p-4 p-lg-5 shadow-sm">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Estilo</label>
+                                    <select class="form-select" name="estilo">
+                                        <option>Solitario</option><option>Halo</option><option>Trilogía</option>
+                                        <option>Pavé</option><option>Vintage</option><option>Otro</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Metal</label>
+                                    <select class="form-select" name="metal">
+                                        <option>Oro blanco 14k</option><option>Oro blanco 18k</option>
+                                        <option>Oro amarillo 14k</option><option>Oro amarillo 18k</option>
+                                        <option>Oro rosa</option><option>Platino</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Quilates de la piedra central</label>
+                                    <input type="text" class="form-control" name="carats" placeholder="Ej. 0.50"/>
+                                    <div class="form-text">Si no lo sabes con exactitud, indícalo aproximado; lo confirmamos en el taller.</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Talla del anillo</label>
+                                    <input type="text" class="form-control" name="size" placeholder="Ej. 6"/>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Marca (si aplica)</label>
+                                    <input type="text" class="form-control" name="brand" placeholder="Ej. Tiffany &amp; Co., Cartier, Anello…"/>
+                                    <div class="form-text">Si la pieza es de marca, la cotejamos en el taller; las piezas de marca suelen venderse mejor.</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Origen del diamante</label>
+                                    <select class="form-select" name="origen">
+                                        <option>Natural</option><option>Cultivado (lab)</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">¿Tiene certificado?</label>
+                                    <select class="form-select" name="cert_type">
+                                        <option>Sin certificado</option><option>GIA</option><option>IGI</option>
+                                        <option>Otra certificadora</option><option>No estoy seguro(a)</option>
+                                    </select>
+                                    <div class="form-text">Sin certificado no hay problema: al venderse la certificamos con estándares GIA.</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">No. de certificado (si lo tienes)</label>
+                                    <input type="text" class="form-control" name="cert_number"/>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Precio que pides (MXN)</label>
+                                    <input type="text" class="form-control" name="price" placeholder="Ej. 28900" required="required"/>
+                                    <div class="form-text">Comisión única del 18% solo si se vende. Exhibir es gratis.</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">Ciudad</label>
+                                    <input type="text" class="form-control" name="city" placeholder="Ej. Guadalajara" required="required"/>
+                                    <div class="form-text">Solo se muestra la ciudad, nunca tu dirección.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Fotos de la pieza (mínimo 4)</label>
+                                    <input type="file" class="form-control" name="photos" accept="image/*" multiple="multiple" required="required"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Certificado escaneado (opcional)</label>
+                                    <input type="file" class="form-control" name="cert_file" accept="image/*,.pdf"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Descripción breve (opcional)</label>
+                                    <textarea class="form-control" name="description" rows="3" placeholder="Estado de la pieza, dónde se adquirió, detalles que un comprador querría saber…"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Una nota personal para el anuncio (opcional y anónima)</label>
+                                    <textarea class="form-control" name="story" rows="2" placeholder="Si quieres, comparte en una línea la historia que esta pieza busca continuar."/>
+                                    <div class="form-text">Muchos compradores valoran saber que la pieza fue querida. Siempre se publica sin tu nombre.</div>
+                                </div>
+                                <div class="col-12 d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <span class="text-muted small" style="max-width:46ch">Al enviar aceptas nuestra revisión previa: ningún anuncio se publica sin pasar por el equipo Novadiam.</span>
+                                    <button type="submit" class="btn btn-primary btn-lg">Enviar a revisión →</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ==================== Confirmación ==================== -->
+    <template id="vender_gracias" name="Anuncio recibido">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <section style="padding:110px 0 130px">
+                    <div class="container text-center" style="max-width:640px">
+                        <p class="text-uppercase fw-bold small" style="letter-spacing:.2em;color:#0E7C7B">Anuncio recibido</p>
+                        <h1 class="mb-3">Tu pieza ya está en revisión</h1>
+                        <p class="text-muted mb-4">En 24–48 horas hábiles validamos los datos y, si todo está en orden, tu anuncio sale al catálogo — con tu ciudad, nunca con tu nombre. Te avisaremos por correo.</p>
+                        <a class="btn btn-primary" href="/my/anuncios">Ver mis anuncios</a>
+                        <a class="btn btn-outline-secondary ms-2" href="/">Volver al inicio</a>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ==================== Portal: mis anuncios ==================== -->
+    <template id="portal_my_listings" name="Mis anuncios">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Mis anuncios</t>
+            </t>
+            <div t-if="not listings" class="alert alert-light border text-center py-5">
+                <p class="mb-3">Aún no tienes anuncios publicados.</p>
+                <a class="btn btn-primary" href="/marketplace/vender">Publicar mi anillo</a>
+            </div>
+            <t t-if="listings" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Pieza</th>
+                        <th>Precio</th>
+                        <th>Etapa</th>
+                        <th class="text-end">Publicado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="listings" t-as="listing">
+                        <td><t t-esc="listing.name"/></td>
+                        <td><t t-esc="'$ {:,.0f} MXN'.format(listing.list_price)"/></td>
+                        <td><span class="badge text-bg-light border"><t t-esc="state_labels.get(listing.nv_state, listing.nv_state)"/></span></td>
+                        <td class="text-end"><t t-esc="listing.create_date.strftime('%d/%m/%Y')"/></td>
+                    </tr>
+                </tbody>
+            </t>
+            <div class="mt-3" t-if="listings">
+                <a class="btn btn-outline-primary" href="/marketplace/vender">Publicar otra pieza</a>
+            </div>
+        </t>
+    </template>
+
+</odoo>

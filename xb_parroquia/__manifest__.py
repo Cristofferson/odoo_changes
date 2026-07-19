@@ -1,6 +1,6 @@
 {
     'name': 'XUBAX Gestión Parroquial',
-    'version': '19.0.2.0.1',
+    'version': '19.0.2.1.0',
     'category': 'Services',
     'summary': 'Misas, intenciones y hoja de intenciones imprimible para la notaría parroquial.',
     'description': """

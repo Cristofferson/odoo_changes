@@ -12,3 +12,8 @@ class ResCompany(models.Model):
         string='Membrete (dirección)',
         default='Portal Matamoros No. 8 Centro, CP. 61800',
         help='Línea de dirección del encabezado de los certificados.')
+    xb_firma = fields.Image(
+        string='Firma del párroco',
+        max_width=1024, max_height=1024,
+        help='Firma escaneada que se imprime sobre la línea de firma de los '
+             'certificados sacramentales.')

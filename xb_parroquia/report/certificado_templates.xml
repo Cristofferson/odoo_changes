@@ -114,7 +114,10 @@
                         </p>
 
                         <!-- Firma -->
-                        <div style="margin-top: 90px; text-align: center;">
+                        <div style="margin-top: 70px; text-align: center;">
+                            <img t-if="compania.xb_firma"
+                                 t-att-src="image_data_uri(compania.xb_firma)"
+                                 style="height: 80px; margin-bottom: -18px;"/>
                             <div style="border-top: 1px solid #000; width: 320px; margin: 0 auto 6px;"/>
                             <div><b t-out="compania.xb_parroco or ''"/></div>
                             <div>Párroco</div>

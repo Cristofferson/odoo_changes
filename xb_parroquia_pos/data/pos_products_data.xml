@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="pos_categ_servicios" model="pos.category">
+        <field name="name">Servicios Parroquiales</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="pos_categ_articulos" model="pos.category">
+        <field name="name">Artículos Religiosos</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="producto_intencion" model="product.template">
+        <field name="name">Intención de misa</field>
+        <field name="type">service</field>
+        <field name="list_price">10</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="xb_es_intencion" eval="True"/>
+    </record>
+
+    <record id="producto_misa_especial" model="product.template">
+        <field name="name">Misa especial</field>
+        <field name="type">service</field>
+        <field name="list_price">600</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="xb_es_intencion" eval="True"/>
+    </record>
+
+    <record id="producto_certificado" model="product.template">
+        <field name="name">Certificado de sacramento</field>
+        <field name="type">service</field>
+        <field name="list_price">100</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="producto_boleta_bautismo" model="product.template">
+        <field name="name">Boleta de Bautismo</field>
+        <field name="type">service</field>
+        <field name="list_price">200</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="producto_boleta_comunion" model="product.template">
+        <field name="name">Boleta de 1.ª Comunión</field>
+        <field name="type">service</field>
+        <field name="list_price">130</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="producto_boleta_confirmacion" model="product.template">
+        <field name="name">Boleta de Confirmación</field>
+        <field name="type">service</field>
+        <field name="list_price">130</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="producto_mica" model="product.template">
+        <field name="name">Mica</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="False"/>
+        <field name="list_price">20</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="producto_diezmo" model="product.template">
+        <field name="name">Diezmo</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="description_sale">Registrar el monto que entrega la persona; se entregan sus boletos.</field>
+    </record>
+</odoo>

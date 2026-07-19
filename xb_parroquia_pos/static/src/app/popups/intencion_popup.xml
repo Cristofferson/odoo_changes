@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="xb_parroquia_pos.IntencionPopup">
+        <Dialog title="props.title" size="'md'">
+            <div class="d-flex flex-column gap-3">
+                <div>
+                    <label class="form-label fw-bolder">Misa</label>
+                    <select class="form-select form-select-lg"
+                            t-model="state.celebracionId">
+                        <option t-foreach="props.celebraciones" t-as="cel"
+                                t-key="cel.id" t-att-value="cel.id"
+                                t-esc="cel.label"/>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label fw-bolder">Tipo de intención</label>
+                    <select class="form-select form-select-lg"
+                            t-model="state.tipo">
+                        <option t-foreach="tipos" t-as="tipo" t-key="tipo.id"
+                                t-att-value="tipo.id" t-esc="tipo.label"/>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label fw-bolder">
+                        Nombres (como deben aparecer en la hoja)
+                    </label>
+                    <textarea class="form-control form-control-lg" rows="4"
+                              t-model="state.nombres"
+                              placeholder="Ej.: 6° aniversario luctuoso de María Pérez, Salvador Villegas"/>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg"
+                        t-att-disabled="!puedeConfirmar"
+                        t-on-click="confirm">Agregar</button>
+                <button class="btn btn-secondary btn-lg"
+                        t-on-click="cancel">Cancelar</button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

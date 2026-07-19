@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_hoja_intenciones">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-set="fechas" t-value="sorted(set(docs.mapped('fecha')))"/>
+                <t t-foreach="fechas" t-as="fecha">
+                    <t t-set="dia" t-value="docs.filtered(lambda c: c.fecha == fecha).sorted(key=lambda c: (c.hora, c.id))"/>
+                    <div class="page" t-att-style="'page-break-before: always;' if not fecha_first else ''">
+                        <h3 class="text-center mb-2"
+                            style="font-weight: bold; letter-spacing: 1px;">
+                            <span t-out="dia[0].encabezado_dia()"/>
+                        </h3>
+                        <table class="table table-bordered"
+                               style="font-size: 12px; border: 1.5px solid #000;">
+                            <thead>
+                                <tr style="border-bottom: 1.5px solid #000;">
+                                    <th style="width: 9%; text-align: center;">CELEBRA</th>
+                                    <th style="width: 11%; text-align: center;">HORA</th>
+                                    <th style="width: 14%; text-align: center;">LUGAR</th>
+                                    <th style="text-align: center; letter-spacing: 4px;">INTENCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="dia" t-as="cel">
+                                    <td style="text-align: center; vertical-align: top;">
+                                        <span t-if="cel.celebrante_id"
+                                              t-out="'P. %s' % (cel.celebrante_id.name or '')"/>
+                                        <span t-else="">P.</span>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: top; white-space: nowrap;">
+                                        <span t-out="cel.hora_texto()"/>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: top;">
+                                        <span t-out="cel.lugar_id.name"/>
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;">
+                                        <t t-set="grupos" t-value="cel.intenciones_agrupadas()"/>
+                                        <t t-if="grupos">
+                                            <t t-foreach="grupos" t-as="grupo">
+                                                <span t-if="grupo[0]" style="font-weight: bold;">
+                                                    <t t-out="grupo[0]"/>: </span>
+                                                <span t-out="grupo[1]"/>
+                                                <t t-if="not grupo_last"> </t>
+                                            </t>
+                                        </t>
+                                        <t t-elif="cel.nota">
+                                            <span t-out="cel.nota"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-out="dict(cel._fields['tipo'].selection).get(cel.tipo)"/>
+                                        </t>
+                                        <span t-if="grupos and cel.nota"
+                                              style="font-style: italic;">
+                                            (<t t-out="cel.nota"/>)</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

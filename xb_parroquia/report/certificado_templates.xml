@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_certificado">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="compania" t-value="doc.company_id or doc.env.company"/>
+                    <div class="page"
+                         style="font-family: 'DejaVu Serif', Georgia, 'Times New Roman', serif; font-size: 14px; padding: 0 30px;"
+                         t-att-style="'page-break-before: always;' if not doc_first else ''">
+
+                        <!-- Membrete -->
+                        <div style="margin-bottom: 28px; text-align: center;">
+                            <img t-if="compania.logo"
+                                 t-att-src="image_data_uri(compania.logo)"
+                                 style="max-height: 90px; margin-bottom: 8px;"/>
+                            <div style="font-weight: bold; font-size: 16px; letter-spacing: 1px;">
+                                SANTA CLARA DEL COBRE, MICH.</div>
+                            <div t-out="compania.xb_direccion_membrete or 'Portal Matamoros No. 8 Centro, CP. 61800'"/>
+                            <div style="font-weight: bold; font-size: 15px;">
+                                Parroquia Santa Clara de Asís</div>
+                        </div>
+
+                        <!-- Encabezado de certificación -->
+                        <p style="text-align: justify; margin-bottom: 22px;">
+                            <t t-if="doc.tipo == 'bautismo'">
+                                El Pbro. que suscribe, <b>CERTIFICA</b> que en el
+                                <b>Libro de Bautismos <t t-out="doc.libro"/></b> en la hoja
+                                No. <b t-out="doc.hoja"/> encuentra un acta que a la letra
+                                dice: <b>Partida <t t-out="doc.partida"/></b>
+                                <t t-if="doc.partida_ubicacion"> (<t t-out="doc.partida_ubicacion"/>)</t>
+                            </t>
+                            <t t-elif="doc.tipo == 'comunion'">
+                                El Pbro. que suscribe, <b>CERTIFICA</b> la boleta de comunión
+                                <t t-if="doc.libro">asentada en el <b>Libro de Comuniones
+                                <t t-out="doc.libro"/></b>, hoja No. <b t-out="doc.hoja"/>,
+                                partida <b t-out="doc.partida"/></t>
+                            </t>
+                            <t t-elif="doc.tipo == 'confirmacion'">
+                                El Pbro. que suscribe, <b>CERTIFICA</b> la boleta de
+                                confirmación en el <b>libro <t t-out="doc.libro"/></b> en la
+                                hoja No. <b t-out="doc.hoja"/>
+                                <t t-if="doc.partida_ubicacion"><t t-out="doc.partida_ubicacion"/> de</t>
+                                partida <b t-out="doc.partida"/>
+                            </t>
+                            <t t-else="">
+                                El Pbro. que suscribe, <b>CERTIFICA</b> que en el
+                                <b>Libro de Matrimonios <t t-out="doc.libro"/></b> en la hoja
+                                No. <b t-out="doc.hoja"/>, de partida
+                                <b t-out="doc.partida"/><t t-if="doc.partida_ubicacion">
+                                (<t t-out="doc.partida_ubicacion"/>)</t>
+                            </t>
+                        </p>
+
+                        <!-- Datos -->
+                        <div style="line-height: 2.1; margin-bottom: 8px;">
+                            <t t-if="doc.tipo == 'matrimonio'">
+                                <div><b>Nombre de los contrayentes:</b>
+                                    <t t-out="doc.nombre"/> y <t t-out="doc.conyuge"/></div>
+                                <div t-if="doc.padrinos"><b>Padrinos:</b> <t t-out="doc.padrinos"/></div>
+                                <div><b>Fecha y lugar del matrimonio:</b>
+                                    <t t-out="doc.fecha_larga_sacramento()"/> en <t t-out="doc.lugar_sacramento"/></div>
+                                <div t-if="doc.ministro" style="margin-top: 10px;">
+                                    Firma del Sacerdote que llevó a cabo el matrimonio:
+                                    <div class="text-center" style="margin-top: 6px;">
+                                        <b t-out="doc.ministro"/></div>
+                                </div>
+                            </t>
+                            <t t-elif="doc.tipo == 'bautismo'">
+                                <div><b>Nombre del Bautizado:</b> <t t-out="doc.nombre"/></div>
+                                <div t-if="doc.padres_texto()"><b>Padres:</b> <t t-out="doc.padres_texto()"/></div>
+                                <div t-if="doc.fecha_nacimiento"><b>Fecha y Lugar de Nacimiento:</b>
+                                    <t t-out="doc.fecha_larga_nacimiento()"/> en <t t-out="doc.lugar_nacimiento"/></div>
+                                <div><b>Fecha del Bautismo:</b> <t t-out="doc.fecha_larga_sacramento()"/></div>
+                                <div t-if="doc.padrinos"><b>Padrinos:</b> <t t-out="doc.padrinos"/></div>
+                                <div t-if="doc.ministro" style="margin-top: 10px;">
+                                    Firma del Sacerdote que realizó el Bautismo:
+                                    <div class="text-center" style="margin-top: 6px;">
+                                        <b t-out="doc.ministro"/></div>
+                                </div>
+                            </t>
+                            <t t-elif="doc.tipo == 'comunion'">
+                                <div><b>Nombre:</b> <t t-out="doc.nombre"/></div>
+                                <div t-if="doc.padres_texto()"><b>Padres:</b> <t t-out="doc.padres_texto()"/></div>
+                                <div><b>Fecha de comunión:</b> <t t-out="doc.fecha_larga_sacramento()"/></div>
+                                <div t-if="doc.padrinos"><b>Padrino:</b> <t t-out="doc.padrinos"/></div>
+                                <div t-if="doc.ministro"><b>Firma del Sacerdote:</b> <t t-out="doc.ministro"/></div>
+                            </t>
+                            <t t-else="">
+                                <div><b>Nombre del Confirmado:</b> <t t-out="doc.nombre"/></div>
+                                <div t-if="doc.padres_texto()"><b>Padres:</b> <t t-out="doc.padres_texto()"/></div>
+                                <div t-if="doc.fecha_bautismo"><b>Lugar y fecha del Bautismo:</b>
+                                    <t t-out="doc.fecha_larga_bautismo()"/> en <t t-out="doc.lugar_bautismo"/></div>
+                                <div><b>Fecha de confirmación:</b> <t t-out="doc.fecha_larga_sacramento()"/></div>
+                                <div t-if="doc.padrinos"><b>Padrino:</b> <t t-out="doc.padrinos"/></div>
+                                <div t-if="doc.ministro" class="text-center" style="margin-top: 10px;">
+                                    <b t-out="doc.ministro"/></div>
+                            </t>
+                        </div>
+
+                        <div style="margin-top: 14px;">
+                            <b>Notas marginales.</b>
+                            <t t-out="doc.notas_marginales or 'Ninguna.'"/>
+                        </div>
+
+                        <p t-if="doc.tipo != 'bautismo'" style="margin-top: 20px;">
+                            Este CERTIFICADO es copia fiel tomada de su original.
+                        </p>
+
+                        <p style="margin-top: 26px; text-align: justify;">
+                            Dado en las oficinas de la Parroquia Santa Clara de
+                            Asís, en Santa Clara del Cobre, Mich.,
+                            <t t-out="doc.fecha_emision_texto()"/>.
+                        </p>
+
+                        <!-- Firma -->
+                        <div style="margin-top: 90px; text-align: center;">
+                            <div style="border-top: 1px solid #000; width: 320px; margin: 0 auto 6px;"/>
+                            <div><b t-out="compania.xb_parroco or ''"/></div>
+                            <div>Párroco</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_lugar_list" model="ir.ui.view">
+        <field name="name">parroquia.lugar.list</field>
+        <field name="model">parroquia.lugar</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="es_templo_parroquial"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_parroquia_lugar" model="ir.actions.act_window">
+        <field name="name">Lugares de celebración</field>
+        <field name="res_model">parroquia.lugar</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Registre las capillas y comunidades</p>
+            <p>El templo parroquial, las capillas y las comunidades donde se celebra misa.</p>
+        </field>
+    </record>
+</odoo>

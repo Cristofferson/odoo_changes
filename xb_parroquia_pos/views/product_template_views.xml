@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_intencion" model="ir.ui.view">
+        <field name="name">product.template.form.xb.intencion</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="point_of_sale.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <field name="available_in_pos" position="after">
+                <field name="xb_es_intencion"
+                       invisible="not available_in_pos"/>
+            </field>
+        </field>
+    </record>
+</odoo>

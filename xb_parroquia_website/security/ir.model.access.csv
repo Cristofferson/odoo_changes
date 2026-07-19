@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_parroquia_aviso_user,parroquia.aviso user,model_parroquia_aviso,xb_parroquia.group_parroquia_user,1,1,1,1
+access_parroquia_aviso_public,parroquia.aviso public,model_parroquia_aviso,base.group_public,1,0,0,0
+access_parroquia_aviso_portal,parroquia.aviso portal,model_parroquia_aviso,base.group_portal,1,0,0,0
+access_parroquia_dia_user,parroquia.dia.liturgico user,model_parroquia_dia_liturgico,xb_parroquia.group_parroquia_user,1,0,0,0
+access_parroquia_dia_manager,parroquia.dia.liturgico manager,model_parroquia_dia_liturgico,xb_parroquia.group_parroquia_manager,1,1,1,1
+access_parroquia_dia_public,parroquia.dia.liturgico public,model_parroquia_dia_liturgico,base.group_public,1,0,0,0
+access_parroquia_dia_portal,parroquia.dia.liturgico portal,model_parroquia_dia_liturgico,base.group_portal,1,0,0,0

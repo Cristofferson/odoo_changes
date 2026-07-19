@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_celebracion_list" model="ir.ui.view">
+        <field name="name">parroquia.celebracion.list</field>
+        <field name="model">parroquia.celebracion</field>
+        <field name="arch" type="xml">
+            <list multi_edit="1">
+                <field name="fecha"/>
+                <field name="hora" widget="float_time"/>
+                <field name="lugar_id"/>
+                <field name="tipo"/>
+                <field name="celebrante_id" optional="show"/>
+                <field name="intencion_count" string="Intenciones"/>
+                <field name="nota" optional="show"/>
+                <field name="pagada" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_parroquia_celebracion_form" model="ir.ui.view">
+        <field name="name">parroquia.celebracion.form</field>
+        <field name="model">parroquia.celebracion</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="fecha"/>
+                            <field name="hora" widget="float_time"/>
+                            <field name="lugar_id"/>
+                            <field name="tipo"/>
+                        </group>
+                        <group>
+                            <field name="celebrante_id"/>
+                            <field name="nota"/>
+                            <field name="pagada"
+                                   invisible="tipo not in ('misa_especial', 'funeral', 'boda', 'xv')"/>
+                            <field name="incluir_animas"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Intenciones" name="intenciones">
+                            <field name="intencion_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="tipo"/>
+                                    <field name="nombres"/>
+                                    <field name="solicitante" optional="hide"/>
+                                    <field name="pagada"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_parroquia_celebracion_calendar" model="ir.ui.view">
+        <field name="name">parroquia.celebracion.calendar</field>
+        <field name="model">parroquia.celebracion</field>
+        <field name="arch" type="xml">
+            <calendar date_start="fecha" color="lugar_id" mode="week"
+                      quick_create="0" event_open_popup="1">
+                <field name="hora" widget="float_time"/>
+                <field name="lugar_id"/>
+                <field name="tipo"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_parroquia_celebracion_search" model="ir.ui.view">
+        <field name="name">parroquia.celebracion.search</field>
+        <field name="model">parroquia.celebracion</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="lugar_id"/>
+                <field name="celebrante_id"/>
+                <field name="intencion_ids" string="Intención (nombres)"
+                       filter_domain="[('intencion_ids.nombres', 'ilike', self)]"/>
+                <filter string="Hoy" name="hoy"
+                        domain="[('fecha', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Mañana" name="manana"
+                        domain="[('fecha', '=', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Misas" name="misas"
+                        domain="[('tipo', 'in', ('misa', 'misa_especial', 'clausura'))]"/>
+                <group>
+                    <filter string="Fecha" name="group_fecha"
+                            context="{'group_by': 'fecha'}"/>
+                    <filter string="Lugar" name="group_lugar"
+                            context="{'group_by': 'lugar_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_parroquia_celebracion" model="ir.actions.act_window">
+        <field name="name">Celebraciones</field>
+        <field name="res_model">parroquia.celebracion</field>
+        <field name="view_mode">list,form,calendar</field>
+        <field name="context">{'search_default_group_fecha': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Agende la primera celebración</p>
+            <p>Misas diarias, dominicales, especiales, funerales, bodas y demás
+               actos. Las intenciones se capturan dentro de cada celebración y
+               la hoja de intenciones se imprime desde el menú Reportes.</p>
+        </field>
+    </record>
+</odoo>

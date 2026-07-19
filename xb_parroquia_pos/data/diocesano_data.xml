@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_parroquia_recibo" model="ir.sequence">
+        <field name="name">Recibos de ingresos parroquia</field>
+        <field name="code">parroquia.recibo</field>
+        <field name="implementation">no_gap</field>
+        <field name="padding">1</field>
+        <field name="number_next">92</field>
+    </record>
+
+    <record id="producto_limosna" model="product.template">
+        <field name="name">Limosnas</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="xb_categoria_diocesana">limosnas</field>
+        <field name="description_sale">Registrar el total de limosnas del día/semana (monto abierto).</field>
+    </record>
+    <record id="producto_colecta" model="product.template">
+        <field name="name">Colectas</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="available_in_pos" eval="True"/>
+        <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_servicios')])]"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="xb_categoria_diocesana">colectas</field>
+        <field name="description_sale">Registrar el total de la colecta (monto abierto).</field>
+    </record>
+</odoo>

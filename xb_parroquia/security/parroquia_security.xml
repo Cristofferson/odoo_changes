@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_parroquia" model="ir.module.category">
+        <field name="name">Parroquia</field>
+        <field name="description">Gestión parroquial</field>
+        <field name="sequence">25</field>
+    </record>
+
+    <record id="privilege_parroquia" model="res.groups.privilege">
+        <field name="name">Parroquia</field>
+        <field name="sequence">25</field>
+        <field name="category_id" ref="module_category_parroquia"/>
+    </record>
+
+    <record id="group_parroquia_user" model="res.groups">
+        <field name="name">Notaría</field>
+        <field name="privilege_id" ref="privilege_parroquia"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_parroquia_manager" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="privilege_id" ref="privilege_parroquia"/>
+        <field name="implied_ids" eval="[(4, ref('group_parroquia_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>

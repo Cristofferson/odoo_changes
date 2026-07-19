@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="pagina_sacramentos" model="website.page">
+        <field name="url">/sacramentos</field>
+        <field name="view_id" ref="vista_pagina_sacramentos"/>
+        <field name="is_published" eval="True"/>
+    </record>
+</odoo>

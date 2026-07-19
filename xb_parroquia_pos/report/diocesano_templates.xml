@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ INFORME MENSUAL (ingresos + egresos) ============ -->
+    <template id="report_informe_diocesano">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-set="doc" t-value="docs[0]"/>
+                <t t-set="Datos" t-value="doc.env['parroquia.informe.datos']"/>
+                <t t-set="ingresos" t-value="Datos.ingresos(doc.fecha_desde, doc.fecha_hasta)"/>
+                <t t-set="tot_ing" t-value="Datos.totales_ingresos(doc.fecha_desde, doc.fecha_hasta)"/>
+                <t t-set="egresos" t-value="Datos.egresos(doc.fecha_desde, doc.fecha_hasta)"/>
+                <t t-set="tot_egr" t-value="Datos.totales_egresos(doc.fecha_desde, doc.fecha_hasta)"/>
+
+                <div class="page" style="font-family: 'DejaVu Sans', sans-serif; font-size: 10px;">
+                    <div class="text-center" style="margin-bottom: 10px;">
+                        <div style="font-weight: bold; font-size: 13px;">DIÓCESIS DE TACÁMBARO A.R. · R.F.C. DTA930621CJ2</div>
+                        <div style="font-weight: bold; font-size: 12px;">PARROQUIA DE SANTA CLARA DE ASÍS, SANTA CLARA DEL COBRE, MICH.</div>
+                        <div style="font-size: 11px;">INFORME DE INGRESOS Y EGRESOS ·
+                            DEL <span t-out="doc.fecha_desde.strftime('%d/%m/%Y')"/>
+                            AL <span t-out="doc.fecha_hasta.strftime('%d/%m/%Y')"/></div>
+                    </div>
+
+                    <div style="font-weight: bold; font-size: 11px; margin: 8px 0 4px;">INGRESOS</div>
+                    <table class="table table-sm table-bordered" style="font-size: 9.5px;">
+                        <thead>
+                            <tr style="background-color: #EFEFEF; text-align: center;">
+                                <th style="width: 8%;">FECHA</th>
+                                <th>CONCEPTO</th>
+                                <th style="width: 9%;">CELEBRACIONES DE CULTO</th>
+                                <th style="width: 9%;">DERECHOS Y SERVICIOS</th>
+                                <th style="width: 8%;">LIMOSNAS</th>
+                                <th style="width: 8%;">COLECTAS</th>
+                                <th style="width: 8%;">DIEZMO</th>
+                                <th style="width: 9%;">ARTÍCULOS RELIGIOSOS</th>
+                                <th style="width: 8%;">OTROS</th>
+                                <th style="width: 9%;">SUMA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="ingresos" t-as="fila">
+                                <td t-out="fila['fecha'].strftime('%d/%m/%Y')"/>
+                                <td t-out="fila['concepto']"/>
+                                <t t-foreach="['celebraciones', 'derechos', 'limosnas', 'colectas', 'diezmo', 'articulos', 'otros']" t-as="cat">
+                                    <td class="text-end">
+                                        <t t-if="fila['categoria'] == cat"
+                                           t-out="'%.2f' % fila['monto']"/>
+                                    </td>
+                                </t>
+                                <td class="text-end" t-out="'%.2f' % fila['monto']"/>
+                            </tr>
+                            <tr t-if="not ingresos">
+                                <td colspan="10" class="text-center">Sin ingresos en el periodo.</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold; background-color: #EFEFEF;">
+                                <td colspan="2">SUMAS TOTALES</td>
+                                <t t-foreach="['celebraciones', 'derechos', 'limosnas', 'colectas', 'diezmo', 'articulos', 'otros']" t-as="cat">
+                                    <td class="text-end" t-out="'%.2f' % tot_ing[cat]"/>
+                                </t>
+                                <td class="text-end" t-out="'%.2f' % tot_ing['suma']"/>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div style="font-weight: bold; font-size: 11px; margin: 12px 0 4px;">EGRESOS</div>
+                    <table class="table table-sm table-bordered" style="font-size: 9.5px;">
+                        <thead>
+                            <tr style="background-color: #EFEFEF; text-align: center;">
+                                <th style="width: 8%;">FECHA</th>
+                                <th>CONCEPTO</th>
+                                <th style="width: 12%;">FOLIO / FACTURA</th>
+                                <th style="width: 10%;">GTOS. ADMINISTRATIVOS</th>
+                                <th style="width: 10%;">GTOS. PASTORALES Y CULTO</th>
+                                <th style="width: 10%;">GTOS. DE PERSONAL</th>
+                                <th style="width: 10%;">FONDOS EN CUSTODIA</th>
+                                <th style="width: 9%;">SUMA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="egresos" t-as="egreso">
+                                <td t-out="egreso.fecha.strftime('%d/%m/%Y')"/>
+                                <td t-out="egreso.concepto"/>
+                                <td t-out="egreso.referencia or ''"/>
+                                <t t-foreach="['administrativos', 'pastorales', 'personal', 'custodia']" t-as="cat">
+                                    <td class="text-end">
+                                        <t t-if="egreso.categoria == cat"
+                                           t-out="'%.2f' % egreso.monto"/>
+                                    </td>
+                                </t>
+                                <td class="text-end" t-out="'%.2f' % egreso.monto"/>
+                            </tr>
+                            <tr t-if="not egresos">
+                                <td colspan="8" class="text-center">Sin egresos en el periodo.</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold; background-color: #EFEFEF;">
+                                <td colspan="3">SUMAS TOTALES</td>
+                                <t t-foreach="['administrativos', 'pastorales', 'personal', 'custodia']" t-as="cat">
+                                    <td class="text-end" t-out="'%.2f' % tot_egr[cat]"/>
+                                </t>
+                                <td class="text-end" t-out="'%.2f' % tot_egr['suma']"/>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <table style="margin-top: 12px; font-size: 11px; font-weight: bold;">
+                        <tr><td style="padding-right: 30px;">TOTAL DE INGRESOS:</td>
+                            <td class="text-end" t-out="'$ %.2f' % tot_ing['suma']"/></tr>
+                        <tr><td>TOTAL DE EGRESOS:</td>
+                            <td class="text-end" t-out="'$ %.2f' % tot_egr['suma']"/></tr>
+                        <tr style="border-top: 1px solid #000;"><td>DIFERENCIA DEL PERIODO:</td>
+                            <td class="text-end" t-out="'$ %.2f' % (tot_ing['suma'] - tot_egr['suma'])"/></tr>
+                    </table>
+
+                    <div class="row text-center" style="margin-top: 46px; font-size: 10px;">
+                        <div class="col-4"><div style="border-top: 1px solid #000; width: 80%; margin: 0 auto 4px;"/>ELABORÓ</div>
+                        <div class="col-4"><div style="border-top: 1px solid #000; width: 80%; margin: 0 auto 4px;"/>AUTORIZÓ ·
+                            <t t-out="doc.env.company.xb_parroco or ''"/></div>
+                        <div class="col-4"><div style="border-top: 1px solid #000; width: 80%; margin: 0 auto 4px;"/>RECIBIÓ (DIÓCESIS)</div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============ RECIBO DE INGRESOS FOLIADO ============ -->
+    <template id="report_recibo_ingresos">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-foreach="docs" t-as="doc">
+                    <div class="page" style="font-family: 'DejaVu Sans', sans-serif; font-size: 12px;"
+                         t-att-style="'page-break-before: always;' if not doc_first else ''">
+                        <div style="border: 2px solid #333; border-radius: 8px; padding: 22px 26px; max-width: 720px; margin: 0 auto;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 90px;">
+                                        <img t-if="doc.company_id.logo"
+                                             t-att-src="image_data_uri(doc.company_id.logo)"
+                                             style="max-height: 80px;"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <div style="font-weight: bold;">DIÓCESIS DE TACÁMBARO A.R.</div>
+                                        <div style="font-weight: bold;">PARROQUIA DE SANTA CLARA DE ASÍS</div>
+                                        <div style="font-size: 10.5px;">R.F.C. DTA930621CJ2 · Portal Matamoros 8,
+                                            Centro, C.P. 61800, Santa Clara del Cobre, Mich.</div>
+                                    </td>
+                                    <td style="width: 120px; text-align: right; vertical-align: top;">
+                                        <div style="font-size: 10px;">FOLIO</div>
+                                        <div style="font-size: 22px; font-weight: bold; color: #B03030;"
+                                             t-out="doc.folio"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="text-center" style="font-weight: bold; letter-spacing: 2px; margin: 14px 0;">
+                                RECIBO DE INGRESOS</div>
+
+                            <table style="width: 100%; line-height: 2;">
+                                <tr>
+                                    <td><b>FECHA:</b> <span t-out="doc.fecha.strftime('%d/%m/%Y')"/></td>
+                                    <td class="text-end"><b>BUENO POR:</b>
+                                        <span style="font-size: 16px; font-weight: bold;"
+                                              t-out="'$ {0:,.2f}'.format(doc.total)"/></td>
+                                </tr>
+                            </table>
+                            <div style="line-height: 2;">
+                                <b>RECIBÍ DE:</b> <span t-out="doc.recibido_de"/><br/>
+                                <b>LA CANTIDAD DE:</b> <span style="text-decoration: underline;"
+                                    t-out="doc.total_en_letra()"/>
+                                <t t-if="doc.periodo_desde and doc.periodo_hasta"><br/>
+                                    <b>PERIODO:</b> del <span t-out="doc.periodo_desde.strftime('%d/%m/%Y')"/>
+                                    al <span t-out="doc.periodo_hasta.strftime('%d/%m/%Y')"/></t>
+                            </div>
+
+                            <div style="margin-top: 10px;"><b>POR CONCEPTO DE:</b></div>
+                            <table class="table table-sm" style="font-size: 11.5px; margin-top: 4px;">
+                                <tr t-foreach="doc.linea_ids" t-as="linea"
+                                    style="border-bottom: 1px dotted #999;">
+                                    <td style="text-transform: uppercase;" t-out="linea.concepto"/>
+                                    <td class="text-end" t-out="'{0:,.2f}'.format(linea.monto)"/>
+                                </tr>
+                                <tr style="font-weight: bold;">
+                                    <td>TOTAL</td>
+                                    <td class="text-end" t-out="'{0:,.2f}'.format(doc.total)"/>
+                                </tr>
+                            </table>
+
+                            <div class="row text-center" style="margin-top: 44px; font-size: 10.5px;">
+                                <div class="col-4"><div style="border-top: 1px solid #000; width: 85%; margin: 0 auto 4px;"/>ELABORÓ</div>
+                                <div class="col-4"><div style="border-top: 1px solid #000; width: 85%; margin: 0 auto 4px;"/>AUTORIZÓ</div>
+                                <div class="col-4"><div style="border-top: 1px solid #000; width: 85%; margin: 0 auto 4px;"/>NOMBRE Y FIRMA DE QUIEN RECIBE</div>
+                            </div>
+                            <div class="text-center" style="font-size: 9.5px; margin-top: 12px; color: #666;">
+                                EN ORIGINAL Y COPIA</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

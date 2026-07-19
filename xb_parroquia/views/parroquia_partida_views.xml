@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_partida_list" model="ir.ui.view">
+        <field name="name">parroquia.partida.list</field>
+        <field name="model">parroquia.partida</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="tipo" optional="show"/>
+                <field name="nombre"/>
+                <field name="conyuge" optional="hide"/>
+                <field name="libro"/>
+                <field name="hoja"/>
+                <field name="partida"/>
+                <field name="fecha_sacramento" optional="show"/>
+                <field name="ministro" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_parroquia_partida_form" model="ir.ui.view">
+        <field name="name">parroquia.partida.form</field>
+        <field name="model">parroquia.partida</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="%(action_report_certificado)d" type="action"
+                            string="Imprimir certificado" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="display_name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Libro parroquial">
+                            <field name="tipo"/>
+                            <field name="libro"/>
+                            <field name="hoja"/>
+                            <field name="partida"/>
+                            <field name="partida_ubicacion"
+                                   placeholder="Al Margen / Al Centro"/>
+                        </group>
+                        <group string="Persona(s)">
+                            <field name="nombre"/>
+                            <field name="conyuge"
+                                   invisible="tipo != 'matrimonio'"
+                                   required="tipo == 'matrimonio'"/>
+                            <field name="padre"
+                                   invisible="tipo == 'matrimonio'"/>
+                            <field name="madre"
+                                   invisible="tipo == 'matrimonio'"/>
+                            <field name="padrinos"/>
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Sacramento">
+                            <field name="fecha_sacramento"/>
+                            <field name="lugar_sacramento"/>
+                            <field name="ministro"/>
+                        </group>
+                        <group string="Nacimiento"
+                               invisible="tipo != 'bautismo'">
+                            <field name="fecha_nacimiento"/>
+                            <field name="lugar_nacimiento"/>
+                        </group>
+                        <group string="Bautismo (referencia)"
+                               invisible="tipo != 'confirmacion'">
+                            <field name="fecha_bautismo"/>
+                            <field name="lugar_bautismo"/>
+                        </group>
+                    </group>
+                    <group string="Notas marginales">
+                        <field name="notas_marginales" nolabel="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_parroquia_partida_search" model="ir.ui.view">
+        <field name="name">parroquia.partida.search</field>
+        <field name="model">parroquia.partida</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="nombre"
+                       filter_domain="['|', ('nombre', 'ilike', self), ('conyuge', 'ilike', self)]"/>
+                <field name="libro"/>
+                <field name="padrinos"/>
+                <filter string="Bautismos" name="bautismos"
+                        domain="[('tipo', '=', 'bautismo')]"/>
+                <filter string="1.ª Comuniones" name="comuniones"
+                        domain="[('tipo', '=', 'comunion')]"/>
+                <filter string="Confirmaciones" name="confirmaciones"
+                        domain="[('tipo', '=', 'confirmacion')]"/>
+                <filter string="Matrimonios" name="matrimonios"
+                        domain="[('tipo', '=', 'matrimonio')]"/>
+                <group>
+                    <filter string="Sacramento" name="group_tipo"
+                            context="{'group_by': 'tipo'}"/>
+                    <filter string="Libro" name="group_libro"
+                            context="{'group_by': 'libro'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_parroquia_partida" model="ir.actions.act_window">
+        <field name="name">Partidas sacramentales</field>
+        <field name="res_model">parroquia.partida</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Registre la primera partida</p>
+            <p>Asientos de los libros de bautismos, comuniones, confirmaciones
+               y matrimonios. Desde cada partida se imprime su certificado.</p>
+        </field>
+    </record>
+</odoo>

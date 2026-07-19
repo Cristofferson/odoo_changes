@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_aviso_list" model="ir.ui.view">
+        <field name="name">parroquia.aviso.list</field>
+        <field name="model">parroquia.aviso</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="texto"/>
+                <field name="fecha"/>
+                <field name="publicado" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_parroquia_aviso" model="ir.actions.act_window">
+        <field name="name">Avisos parroquiales</field>
+        <field name="res_model">parroquia.aviso</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Capture el primer aviso</p>
+            <p>Los avisos publicados aparecen en el sitio web y en la hoja
+               impresa que se lee el fin de semana. Cuando un aviso ya no
+               aplique, despublíquelo.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_parroquia_avisos" name="Avisos"
+              parent="xb_parroquia.menu_parroquia_root"
+              action="action_parroquia_aviso" sequence="40"/>
+</odoo>

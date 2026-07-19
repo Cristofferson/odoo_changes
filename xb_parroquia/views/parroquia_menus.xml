@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_parroquia_root" name="Parroquia"
+              web_icon="xb_parroquia,static/description/icon.png"
+              sequence="40"
+              groups="xb_parroquia.group_parroquia_user"/>
+
+    <menuitem id="menu_parroquia_celebraciones" name="Celebraciones"
+              parent="menu_parroquia_root"
+              action="action_parroquia_celebracion" sequence="10"/>
+
+    <menuitem id="menu_parroquia_intenciones" name="Intenciones"
+              parent="menu_parroquia_root"
+              action="action_parroquia_intencion" sequence="20"/>
+
+    <menuitem id="menu_parroquia_sacramentos" name="Sacramentos"
+              parent="menu_parroquia_root"
+              action="action_parroquia_partida" sequence="30"/>
+
+    <menuitem id="menu_parroquia_reportes" name="Reportes"
+              parent="menu_parroquia_root" sequence="50"/>
+    <menuitem id="menu_parroquia_hoja" name="Hoja de intenciones"
+              parent="menu_parroquia_reportes"
+              action="action_parroquia_hoja_wizard" sequence="10"/>
+
+    <menuitem id="menu_parroquia_config" name="Configuración"
+              parent="menu_parroquia_root" sequence="90"
+              groups="xb_parroquia.group_parroquia_manager"/>
+    <menuitem id="menu_parroquia_lugares" name="Lugares"
+              parent="menu_parroquia_config"
+              action="action_parroquia_lugar" sequence="10"/>
+</odoo>

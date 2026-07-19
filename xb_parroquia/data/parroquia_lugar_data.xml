@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="lugar_templo_parroquial" model="parroquia.lugar">
+        <field name="name">T. Parroquial</field>
+        <field name="sequence">1</field>
+        <field name="es_templo_parroquial" eval="True"/>
+    </record>
+    <record id="lugar_notaria" model="parroquia.lugar">
+        <field name="name">Notaría</field>
+        <field name="sequence">2</field>
+    </record>
+    <record id="lugar_paramuen" model="parroquia.lugar">
+        <field name="name">Paramuén</field>
+    </record>
+    <record id="lugar_camembaro" model="parroquia.lugar">
+        <field name="name">Camémbaro</field>
+    </record>
+    <record id="lugar_artesano" model="parroquia.lugar">
+        <field name="name">Artesano</field>
+    </record>
+    <record id="lugar_paso_del_muerto" model="parroquia.lugar">
+        <field name="name">Paso del Muerto</field>
+    </record>
+    <record id="lugar_cuanajillo" model="parroquia.lugar">
+        <field name="name">Cuanajillo</field>
+    </record>
+    <record id="lugar_los_manzanillos" model="parroquia.lugar">
+        <field name="name">Los Manzanillos</field>
+    </record>
+    <record id="lugar_emiliano_zapata" model="parroquia.lugar">
+        <field name="name">Emiliano Zapata</field>
+    </record>
+    <record id="lugar_chapa" model="parroquia.lugar">
+        <field name="name">Chapa</field>
+    </record>
+    <record id="lugar_cuitzitan" model="parroquia.lugar">
+        <field name="name">Cuitzitán</field>
+    </record>
+    <record id="lugar_turian" model="parroquia.lugar">
+        <field name="name">Turián</field>
+    </record>
+    <record id="lugar_querendal" model="parroquia.lugar">
+        <field name="name">Querendal</field>
+    </record>
+    <record id="lugar_huaniqueo" model="parroquia.lugar">
+        <field name="name">Huaniqueo</field>
+    </record>
+    <record id="lugar_bicentenario" model="parroquia.lugar">
+        <field name="name">Bicentenario</field>
+    </record>
+    <record id="lugar_san_francisco" model="parroquia.lugar">
+        <field name="name">San Francisco</field>
+    </record>
+</odoo>

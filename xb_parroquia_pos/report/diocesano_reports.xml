@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_carta_horizontal" model="report.paperformat">
+        <field name="name">Carta horizontal (informe diocesano)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_informe_diocesano" model="ir.actions.report">
+        <field name="name">Informe mensual diocesano</field>
+        <field name="model">parroquia.informe.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_parroquia_pos.report_informe_diocesano</field>
+        <field name="report_file">xb_parroquia_pos.report_informe_diocesano</field>
+        <field name="print_report_name">'Informe diocesano'</field>
+        <field name="paperformat_id" ref="paperformat_carta_horizontal"/>
+    </record>
+
+    <record id="action_report_recibo_ingresos" model="ir.actions.report">
+        <field name="name">Recibo de ingresos</field>
+        <field name="model">parroquia.recibo</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_parroquia_pos.report_recibo_ingresos</field>
+        <field name="report_file">xb_parroquia_pos.report_recibo_ingresos</field>
+        <field name="print_report_name">'Recibo %s' % (object.folio)</field>
+        <field name="binding_model_id" ref="model_parroquia_recibo"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="aviso_diezmo" model="parroquia.aviso">
+        <field name="texto">Se les recuerda a todas las personas cumplir con la responsabilidad del Diezmo.</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="aviso_corona" model="parroquia.aviso">
+        <field name="texto">A las personas que gusten donar algún objeto de oro para la corona de la Virgen, lo pueden pasar a dejar a la notaría parroquial.</field>
+        <field name="sequence">2</field>
+    </record>
+    <record id="aviso_santisimo" model="parroquia.aviso">
+        <field name="texto">El Santísimo está expuesto en su capilla permanentemente; se les pide entrar con respeto y sin alimentos.</field>
+        <field name="sequence">3</field>
+    </record>
+</odoo>

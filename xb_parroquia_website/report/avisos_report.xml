@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_avisos" model="ir.actions.report">
+        <field name="name">Hoja de avisos parroquiales</field>
+        <field name="model">parroquia.aviso</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_parroquia_website.report_avisos</field>
+        <field name="report_file">xb_parroquia_website.report_avisos</field>
+        <field name="print_report_name">'Avisos parroquiales'</field>
+        <field name="binding_model_id" ref="model_parroquia_aviso"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+</odoo>

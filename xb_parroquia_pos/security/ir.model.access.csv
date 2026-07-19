@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_parroquia_lugar_pos,parroquia.lugar pos user,xb_parroquia.model_parroquia_lugar,point_of_sale.group_pos_user,1,0,0,0
+access_parroquia_celebracion_pos,parroquia.celebracion pos user,xb_parroquia.model_parroquia_celebracion,point_of_sale.group_pos_user,1,0,0,0
+access_parroquia_intencion_pos,parroquia.intencion pos user,xb_parroquia.model_parroquia_intencion,point_of_sale.group_pos_user,1,1,1,0
+access_parroquia_egreso_user,parroquia.egreso user,model_parroquia_egreso,xb_parroquia.group_parroquia_user,1,1,1,0
+access_parroquia_egreso_manager,parroquia.egreso manager,model_parroquia_egreso,xb_parroquia.group_parroquia_manager,1,1,1,1
+access_parroquia_recibo_user,parroquia.recibo user,model_parroquia_recibo,xb_parroquia.group_parroquia_user,1,1,1,0
+access_parroquia_recibo_manager,parroquia.recibo manager,model_parroquia_recibo,xb_parroquia.group_parroquia_manager,1,1,1,1
+access_parroquia_recibo_linea_user,parroquia.recibo.linea user,model_parroquia_recibo_linea,xb_parroquia.group_parroquia_user,1,1,1,1
+access_parroquia_informe_wizard,parroquia.informe.wizard,model_parroquia_informe_wizard,xb_parroquia.group_parroquia_user,1,1,1,1

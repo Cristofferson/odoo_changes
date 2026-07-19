@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_intencion_list" model="ir.ui.view">
+        <field name="name">parroquia.intencion.list</field>
+        <field name="model">parroquia.intencion</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="fecha"/>
+                <field name="celebracion_id"/>
+                <field name="tipo"/>
+                <field name="nombres"/>
+                <field name="solicitante" optional="hide"/>
+                <field name="pagada"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_parroquia_intencion_search" model="ir.ui.view">
+        <field name="name">parroquia.intencion.search</field>
+        <field name="model">parroquia.intencion</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="nombres"/>
+                <field name="solicitante"/>
+                <field name="celebracion_id"/>
+                <filter string="Sin pagar" name="sin_pagar"
+                        domain="[('pagada', '=', False)]"/>
+                <group>
+                    <filter string="Fecha de la misa" name="group_fecha"
+                            context="{'group_by': 'fecha'}"/>
+                    <filter string="Tipo" name="group_tipo"
+                            context="{'group_by': 'tipo'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_parroquia_intencion" model="ir.actions.act_window">
+        <field name="name">Intenciones</field>
+        <field name="res_model">parroquia.intencion</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin intenciones registradas</p>
+            <p>Vista global para buscar un nombre en todas las misas. La
+               captura normal se hace dentro de cada celebración.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_parroquia_dia_list" model="ir.ui.view">
+        <field name="name">parroquia.dia.liturgico.list</field>
+        <field name="model">parroquia.dia.liturgico</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="fecha"/>
+                <field name="titulo_liturgico"/>
+                <field name="santos"/>
+                <field name="evangelio_titulo"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_parroquia_dia_form" model="ir.ui.view">
+        <field name="name">parroquia.dia.liturgico.form</field>
+        <field name="model">parroquia.dia.liturgico</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="fecha"/>
+                        <field name="titulo_liturgico"/>
+                        <field name="santos"/>
+                        <field name="evangelio_titulo"/>
+                    </group>
+                    <field name="evangelio_texto"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_parroquia_dia" model="ir.actions.act_window">
+        <field name="name">Evangelio del día</field>
+        <field name="res_model">parroquia.dia.liturgico</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin días descargados aún</p>
+            <p>Cada mañana se descargan automáticamente el santoral y el
+               evangelio del día (fuente: evangelizo.org). Es información de
+               consulta; también se publica en el sitio web.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_parroquia_evangelio" name="Evangelio del día"
+              parent="xb_parroquia.menu_parroquia_root"
+              action="action_parroquia_dia" sequence="45"/>
+</odoo>

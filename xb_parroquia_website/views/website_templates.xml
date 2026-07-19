@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ PORTADA (controlador /portada) ============ -->
+    <template id="pagina_portada" name="Portada Forja">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <svg width="0" height="0" style="position:absolute">
+                    <filter id="fj-martillado">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+                        <feDiffuseLighting in="n" lighting-color="#FFDDB0" surfaceScale="1.6" result="l">
+                            <feDistantLight azimuth="235" elevation="58"/>
+                        </feDiffuseLighting>
+                        <feComposite in="l" in2="SourceGraphic" operator="arithmetic" k1="1.15" k2="0" k3="0" k4="0"/>
+                    </filter>
+                </svg>
+
+                <section class="fj-hero">
+                    <div class="fj-disco"></div>
+                    <div class="fj-templo"></div>
+                    <span class="fj-chispa" style="left:12%;animation-duration:9s"></span>
+                    <span class="fj-chispa" style="left:26%;animation-duration:12s;animation-delay:3s"></span>
+                    <span class="fj-chispa" style="left:41%;animation-duration:8s;animation-delay:1.4s"></span>
+                    <span class="fj-chispa" style="left:57%;animation-duration:11s;animation-delay:5s"></span>
+                    <span class="fj-chispa" style="left:71%;animation-duration:9.5s;animation-delay:2.2s"></span>
+                    <span class="fj-chispa" style="left:86%;animation-duration:13s;animation-delay:.8s"></span>
+                    <div class="fj-hero-contenido">
+                        <div class="fj-eyebrow">Santa Clara del Cobre · Diócesis de Tacámbaro</div>
+                        <h1>Parroquia<br/><em>Santa Clara de Asís</em></h1>
+                        <p class="fj-lema">En el pueblo donde el cobre se forja a fuego y
+                           martillo, la fe se forja cada día en la mesa del altar.</p>
+                        <div class="mt-4">
+                            <a class="fj-btn fj-btn-solido" href="/horarios">Horarios de misa</a>
+                            <a class="fj-btn fj-btn-linea" href="/evangelio">Evangelio de hoy</a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="fj-seccion">
+                    <div class="fj-marco">
+                        <div class="fj-titulo"><h2>Misas de la semana</h2><div class="fj-linea"></div></div>
+                        <t t-if="dias">
+                            <t t-foreach="dias" t-as="dia">
+                                <div class="fj-fecha"><t t-out="dia['titulo']"/></div>
+                                <div class="fj-misas">
+                                    <div t-foreach="dia['celebraciones']" t-as="cel" class="fj-misa">
+                                        <span class="fj-hora"><t t-out="cel['hora']"/></span>
+                                        <span class="fj-punto"></span>
+                                        <span class="fj-lugar"><t t-out="cel['lugar']"/></span>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                        <p t-else="" class="text-muted">Aún no se publica la programación;
+                           consulte en la notaría parroquial.</p>
+                        <div class="mt-5"><a href="/horarios" class="fj-btn fj-btn-linea">Ver todos los horarios</a></div>
+                    </div>
+                </section>
+
+                <section class="fj-banda">
+                    <div class="fj-banda-foto"></div>
+                    <div style="padding:90px 24px">
+                        <blockquote>«Cada cazo lleva mil golpes de martillo.
+                            Cada alma, la paciencia de Dios.»</blockquote>
+                        <div class="fj-quien">El oficio y la fe · Capital Mundial del Cobre Martillado</div>
+                    </div>
+                </section>
+
+                <section class="fj-seccion">
+                    <div class="fj-arcos">
+                        <div class="fj-arco">
+                            <div class="fj-ventana"><img src="/xb_parroquia_website/static/src/img/puerta.jpg" alt="Puerta del templo" loading="lazy"/></div>
+                            <div class="fj-cuerpo"><h3>Sacramentos</h3>
+                            <p>Bautismos, comuniones, confirmaciones y matrimonios. Boletas y
+                               certificados fieles a los libros del archivo.</p>
+                            <a href="/sacramentos">Requisitos y costos</a></div>
+                        </div>
+                        <div class="fj-arco">
+                            <div class="fj-ventana"><img src="/xb_parroquia_website/static/src/img/cazos.jpg" alt="Cazos de cobre" loading="lazy"/></div>
+                            <div class="fj-cuerpo"><h3>Intenciones</h3>
+                            <p>Encomiende a sus vivos y a sus difuntos en la misa. Se reciben
+                               todos los días en la notaría.</p>
+                            <a href="/contactus">Cómo pedir una intención</a></div>
+                        </div>
+                        <div class="fj-arco">
+                            <div class="fj-ventana"><img src="/xb_parroquia_website/static/src/img/templo_dia.jpg" alt="Templo parroquial" loading="lazy"/></div>
+                            <div class="fj-cuerpo"><h3>El Santísimo</h3>
+                            <p>Expuesto permanentemente en su capilla. Entre con respeto;
+                               el silencio también es oración.</p>
+                            <a href="/horarios">Horarios de visita</a></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="fj-cita-seccion" t-if="evangelio">
+                    <div class="fj-eyebrow">Evangelio del día<t t-if="evangelio.santos"> · <t t-out="(evangelio.santos or '').split('·')[0].strip()"/></t></div>
+                    <blockquote t-if="frase">«<t t-out="frase"/>»</blockquote>
+                    <div class="fj-cita-pie"><t t-out="evangelio.evangelio_titulo"/> · <a href="/evangelio" style="color:inherit">Leer completo →</a></div>
+                </section>
+
+                <section class="fj-seccion">
+                    <div class="fj-notaria">
+                        <figure class="fj-foto">
+                            <img src="/xb_parroquia_website/static/src/img/portal.jpg" alt="Portal Matamoros" loading="lazy"/>
+                            <figcaption>Portal Matamoros No. 8 · Centro</figcaption>
+                        </figure>
+                        <div>
+                            <div class="fj-eyebrow">Notaría parroquial</div>
+                            <h2>Bajo los portales,<br/>como siempre</h2>
+                            <p>La notaría atiende en el mismo portal de siempre, a un costado
+                               de la plaza. Intenciones, certificados, presentaciones de
+                               matrimonio y registro del diezmo.</p>
+                            <div class="fj-dato"><b>Horario</b> Lunes a sábado</div>
+                            <div class="fj-dato"><b>Bautismos</b> Se asientan jueves y viernes</div>
+                            <div class="fj-dato"><b>Matrimonios</b> Presentaciones de martes a viernes</div>
+                            <div class="fj-dato"><b>Correo</b> contacto@parroquiasantaclaradeasis.com</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============ HORARIOS ============ -->
+    <template id="pagina_horarios" name="Horarios de misa">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <section class="fj-cabecera">
+                    <div class="fj-cab-foto" style="background-image:url('/xb_parroquia_website/static/src/img/templo_dia.jpg')"></div>
+                    <div class="fj-marco">
+                        <div class="fj-eyebrow">Celebraciones de los próximos días</div>
+                        <h1 style="font-size:clamp(34px,5vw,60px)">Horarios de misa</h1>
+                    </div>
+                </section>
+                <section class="fj-seccion" style="padding-top:30px">
+                    <div class="fj-marco" style="max-width:820px">
+                        <t t-if="dias">
+                            <t t-foreach="dias" t-as="dia">
+                                <div class="fj-fecha"><t t-out="dia['titulo']"/></div>
+                                <div class="fj-misas">
+                                    <div t-foreach="dia['celebraciones']" t-as="cel" class="fj-misa">
+                                        <span class="fj-hora"><t t-out="cel['hora']"/></span>
+                                        <span class="fj-punto"></span>
+                                        <span class="fj-lugar"><t t-out="cel['lugar']"/></span>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                        <p t-else="" class="text-center text-muted">Aún no se publica la
+                           programación de esta semana; consulte en la notaría parroquial.</p>
+                        <p class="text-muted mt-5 text-center">La programación puede cambiar;
+                           en caso de duda consulte los <a href="/avisos">avisos parroquiales</a>.</p>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============ AVISOS ============ -->
+    <template id="pagina_avisos" name="Avisos parroquiales">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <section class="fj-cabecera">
+                    <div class="fj-cab-foto" style="background-image:url('/xb_parroquia_website/static/src/img/vendedores.jpg')"></div>
+                    <div class="fj-marco">
+                        <div class="fj-eyebrow">Semana a semana</div>
+                        <h1 style="font-size:clamp(34px,5vw,60px)">Avisos parroquiales</h1>
+                    </div>
+                </section>
+                <section class="fj-seccion" style="padding-top:30px">
+                    <div class="fj-marco" style="max-width:760px">
+                        <t t-if="avisos">
+                            <div t-foreach="avisos" t-as="aviso" class="fj-aviso">
+                                <div class="fj-cruz">✠</div>
+                                <div><t t-out="aviso.texto"/></div>
+                            </div>
+                        </t>
+                        <p t-else="" class="text-center text-muted">Por el momento no hay avisos.</p>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============ EVANGELIO DEL DÍA ============ -->
+    <template id="pagina_evangelio" name="Evangelio del día">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <section class="fj-cabecera">
+                    <div class="fj-cab-foto" style="background-image:url('/xb_parroquia_website/static/src/img/templo_noche.jpg')"></div>
+                    <div class="fj-marco">
+                        <div class="fj-eyebrow" t-if="fecha_texto"><t t-out="fecha_texto"/></div>
+                        <h1 style="font-size:clamp(34px,5vw,60px)">Evangelio del día</h1>
+                        <p t-if="dia and dia.titulo_liturgico" class="fst-italic" style="color:#E6D4B8;text-shadow:0 1px 12px rgba(0,0,0,.9)">
+                            <t t-out="dia.titulo_liturgico"/></p>
+                    </div>
+                </section>
+                <section class="fj-seccion" style="padding-top:20px">
+                    <div class="fj-marco" style="max-width:760px">
+                        <t t-if="dia">
+                            <div t-if="dia.santos" class="fj-santoral">
+                                <b style="color:var(--fj-lumbre)">Santoral:</b>
+                                <span style="color:#E6D4B8"> <t t-out="dia.santos"/></span>
+                            </div>
+                            <h3 style="color:var(--fj-lumbre)"><t t-out="dia.evangelio_titulo"/></h3>
+                            <div class="fj-evangelio-texto mt-3" t-out="dia.evangelio_texto"/>
+                            <p class="text-muted mt-5" style="font-size:13px">
+                                Fuente: <a href="https://evangelizo.org" rel="nofollow"
+                                target="_blank">evangelizo.org</a> — texto litúrgico de la
+                                Iglesia Católica.</p>
+                        </t>
+                        <p t-else="" class="text-center text-muted">El evangelio de hoy no
+                           está disponible por el momento; inténtelo más tarde.</p>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============ SACRAMENTOS (página editable) ============ -->
+    <record id="vista_pagina_sacramentos" model="ir.ui.view">
+        <field name="name">Sacramentos</field>
+        <field name="type">qweb</field>
+        <field name="key">xb_parroquia_website.pagina_sacramentos</field>
+        <field name="arch" type="xml">
+            <t t-name="xb_parroquia_website.pagina_sacramentos">
+                <t t-call="website.layout">
+                    <div id="wrap" class="oe_structure">
+                        <section class="fj-cabecera">
+                            <div class="fj-cab-foto" style="background-image:url('/xb_parroquia_website/static/src/img/puerta.jpg')"></div>
+                            <div class="fj-marco">
+                                <div class="fj-eyebrow">Notaría parroquial</div>
+                                <h1 style="font-size:clamp(34px,5vw,60px)">Sacramentos y servicios</h1>
+                            </div>
+                        </section>
+                        <section class="fj-seccion" style="padding-top:30px">
+                            <div class="fj-marco" style="max-width:860px">
+                                <h3 style="color:var(--fj-lumbre)">Bautismos</h3>
+                                <p style="color:#D9C5A4">Los datos se asientan en el libro de bautismos los días
+                                   <b>jueves y viernes</b>. Presente el acta de nacimiento del
+                                   niño o niña y los datos de los padrinos.</p>
+                                <h3 style="color:var(--fj-lumbre)" class="mt-4">Matrimonios</h3>
+                                <p style="color:#D9C5A4">Las <b>presentaciones de matrimonio</b> se realizan de
+                                   <b>martes a viernes</b>. Acuda a la notaría con anticipación
+                                   para conocer los requisitos y agendar.</p>
+                                <h3 style="color:var(--fj-lumbre)" class="mt-4">Certificados y boletas</h3>
+                                <p style="color:#D9C5A4">Se expiden certificados de bautismo, primera comunión,
+                                   confirmación y matrimonio, tomados de los libros del archivo
+                                   parroquial.</p>
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr style="color:var(--fj-lumbre)"><th>Servicio</th><th class="text-end">Cooperación</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>Intención de misa</td><td class="text-end">$10</td></tr>
+                                            <tr><td>Misa especial</td><td class="text-end">$600</td></tr>
+                                            <tr><td>Certificado de sacramento</td><td class="text-end">$100</td></tr>
+                                            <tr><td>Boleta de bautismo</td><td class="text-end">$200 (+$20 mica)</td></tr>
+                                            <tr><td>Boleta de 1.ª comunión o confirmación</td><td class="text-end">$130 (+$20 mica)</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="text-muted mt-3">Montos de cooperación vigentes;
+                                   pueden cambiar sin previo aviso. Informes en la notaría
+                                   parroquial.</p>
+                            </div>
+                        </section>
+                    </div>
+                </t>
+            </t>
+        </field>
+    </record>
+
+</odoo>

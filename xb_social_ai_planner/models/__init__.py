@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from . import xb_social_ai_transport
+from . import xb_social_ai_image
 from . import xb_social_ai_provider
 from . import xb_social_brand_profile
 from . import xb_social_competitor

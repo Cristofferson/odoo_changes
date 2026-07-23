@@ -143,6 +143,77 @@ class XbSocialBrandProfile(models.Model):
             lines.append("Art direction: %s" % self.visual_style)
         return "\n".join(lines)
 
+    # Hue buckets (degrees) -> plain-English colour family. Image models act on
+    # words, not hex codes, so we translate the brand kit before prompting.
+    _HUE_NAMES = [
+        (15, "red"), (45, "orange"), (65, "yellow"), (160, "green"),
+        (200, "teal"), (255, "blue"), (290, "purple"), (330, "magenta"),
+        (360, "red"),
+    ]
+
+    @api.model
+    def _color_word(self, hex_value):
+        """Describe a hex colour in words (e.g. '#1A1A2E' -> 'deep navy blue')."""
+        raw = (hex_value or "").strip().lstrip("#")
+        if len(raw) == 3:
+            raw = "".join(c * 2 for c in raw)
+        if len(raw) != 6:
+            return ""
+        try:
+            r, g, b = (int(raw[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+        except ValueError:
+            return ""
+        import colorsys
+        hue, light, sat = colorsys.rgb_to_hls(r, g, b)
+        hue *= 360
+
+        if sat < 0.12:
+            if light < 0.15:
+                return "near-black"
+            if light < 0.4:
+                return "charcoal grey"
+            if light < 0.75:
+                return "mid grey"
+            return "off-white" if light < 0.97 else "white"
+
+        family = next(
+            (name for limit, name in self._HUE_NAMES if hue <= limit), "red")
+        if family == "blue" and light < 0.3:
+            return "deep navy blue"
+        # Golds sit on the orange/yellow border with medium lightness.
+        if 30 <= hue <= 60 and 0.3 <= light <= 0.65 and sat > 0.35:
+            return "warm gold"
+        if light < 0.25:
+            return "deep %s" % family
+        if light > 0.8:
+            return "pale %s" % family
+        if sat > 0.7:
+            return "vivid %s" % family
+        return family
+
+    def _image_photo_context(self):
+        """Art direction for photoreal image models. Colours are described in
+        words (hex is meaningless to them) and the logo is left out — it is
+        composited onto the render afterwards."""
+        self.ensure_one()
+        lines = []
+        if self.industry:
+            lines.append("Industry / subject matter: %s." % self.industry)
+        if self.target_audience:
+            lines.append("It must appeal to: %s" % self.target_audience)
+        palette = [w for w in (
+            self._color_word(self.palette_primary),
+            self._color_word(self.palette_secondary),
+            self._color_word(self.palette_accent),
+        ) if w]
+        if palette:
+            lines.append(
+                "Colour mood: the scene should read predominantly in %s."
+                % ", ".join(dict.fromkeys(palette)))
+        if self.visual_style:
+            lines.append("Art direction: %s" % self.visual_style)
+        return "\n".join(lines)
+
     def _ai_system_context(self):
         """Frozen, brand-grounded system prompt shared by every generation."""
         self.ensure_one()

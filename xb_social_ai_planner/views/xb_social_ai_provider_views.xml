@@ -26,14 +26,47 @@
                                    placeholder="e.g. /opt/odoo/.claude (optional)"
                                    invisible="provider_type != 'claude_code'"/>
                         </group>
-                        <group string="Media">
+                        <group string="Images">
                             <field name="image_provider_type"/>
                             <field name="image_model"
+                                   placeholder="Leave empty for provider default"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                            <field name="image_api_base_url"
+                                   required="image_provider_type == 'custom'"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                            <field name="image_format"
                                    invisible="image_provider_type == 'none'"/>
+                            <field name="image_style"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                            <field name="image_quality"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                            <field name="image_count"
+                                   invisible="image_provider_type == 'none'"/>
+                            <field name="image_prompt_boost"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                            <field name="image_timeout"
+                                   invisible="image_provider_type in ('none', 'svg')"/>
+                        </group>
+                        <group string="Other">
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
+                    <div class="text-muted"
+                         invisible="image_provider_type != 'svg'">
+                        Images are drawn by the text model as vector art and
+                        rasterised on the server: no image API key and nothing
+                        billed per image. It produces on-brand graphics, not
+                        photographs — switch to OpenAI or Gemini for photoreal
+                        imagery. (Needs the optional
+                        <code>cairosvg</code> Python library.)
+                    </div>
+                    <div class="text-muted"
+                         invisible="image_provider_type not in ('openai_images', 'gemini_images', 'custom')">
+                        Photoreal images are billed per image by the provider.
+                        Set the key in Settings ▸ AI Social Planner ▸
+                        <em>AI Image API Key</em>.
+                    </div>
                     <div class="text-muted"
                          invisible="provider_type == 'claude_code'">
                         The API key is set in Settings ▸ AI Social Planner, not here.

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class XbSocialAiProvider(models.Model):
@@ -18,13 +19,14 @@ class XbSocialAiProvider(models.Model):
     provider_type = fields.Selection(
         [("anthropic", "Anthropic API (Claude — bring your own key)"),
          ("claude_code", "Claude Code CLI (existing subscription, no API key)"),
-         ("openai", "OpenAI"),
-         ("custom", "Custom")],
+         ("openai", "OpenAI API (GPT — bring your own key)"),
+         ("custom", "Custom (OpenAI-compatible endpoint)")],
         string="Provider", required=True, default="anthropic",
         help="Selects the transport implementation used to call the model.\n"
-             "• Anthropic API: pay-per-use, needs an API key.\n"
+             "• Anthropic API / OpenAI API: pay-per-use, needs an API key.\n"
              "• Claude Code CLI: reuses a Claude Code / Max subscription already "
-             "installed on the server (no API key, no per-call billing).",
+             "installed on the server (no API key, no per-call billing).\n"
+             "• Custom: any endpoint that speaks the OpenAI chat API.",
     )
     text_model = fields.Char(
         string="Text Model", default="claude-opus-4-8",
@@ -57,11 +59,102 @@ class XbSocialAiProvider(models.Model):
              "Leave empty to use the service user's default (~/.claude).",
     )
 
-    # Media generation (image now / video later) — separate provider.
+    # ----- media generation (image now / video later) -----------------------
     image_provider_type = fields.Selection(
-        [("none", "None (manual upload)"),
-         ("openai_images", "OpenAI Images"),
-         ("custom", "Custom")],
-        string="Image Provider", default="none",
+        [("svg", "Vector design by the text model (no image key, no extra cost)"),
+         ("openai_images", "OpenAI Images (photoreal — bring your own key)"),
+         ("gemini_images", "Google Gemini (photoreal — bring your own key)"),
+         ("custom", "Custom (OpenAI-compatible endpoint)"),
+         ("none", "Disabled (manual upload)")],
+        string="Image Provider", required=True, default="svg",
+        help="How post images are produced.\n"
+             "• Vector design: the text model draws an on-brand graphic that "
+             "is rasterised locally. No image API key and no per-image "
+             "billing, but it is graphic design, not photography.\n"
+             "• OpenAI / Gemini: real photoreal image models. Needs an image "
+             "API key and is billed per image by the provider.",
     )
-    image_model = fields.Char(string="Image Model")
+    image_model = fields.Char(
+        string="Image Model",
+        help="Image model id, e.g. 'gpt-image-1' or 'gemini-3-pro-image'. "
+             "Leave empty for the provider default.",
+    )
+    image_api_base_url = fields.Char(
+        string="Image API Base URL",
+        help="Override the image endpoint (gateway / self-hosted). Required "
+             "for the custom provider; leave empty otherwise.",
+    )
+    image_format = fields.Selection(
+        [("square", "Square 1080×1080"),
+         ("portrait", "Portrait 1080×1350"),
+         ("landscape", "Landscape 1200×675")],
+        string="Image Format", default="square",
+        help="Aspect ratio of generated images. Square is the safest across "
+             "Facebook, Instagram, LinkedIn and X.",
+    )
+    image_style = fields.Selection(
+        [("photo", "Photograph"),
+         ("product", "Studio product shot"),
+         ("lifestyle", "Lifestyle / people"),
+         ("illustration", "Illustration"),
+         ("flat", "Flat graphic")],
+        string="Image Style", default="photo",
+        help="Art direction sent to photoreal image models. Ignored by the "
+             "vector backend, which follows the brand kit instead.",
+    )
+    image_quality = fields.Selection(
+        [("auto", "Automatic"), ("low", "Low"), ("medium", "Medium"),
+         ("high", "High")],
+        string="Image Quality", default="auto",
+        help="Higher quality costs more per image at the provider.",
+    )
+    image_count = fields.Integer(
+        string="Variants per Post", default=1,
+        help="How many images to generate per post so an editor can pick. "
+             "Each variant is billed separately by the image provider.",
+    )
+    image_prompt_boost = fields.Boolean(
+        string="Enrich Image Prompt", default=True,
+        help="Let the text model rewrite the brief into a richer prompt "
+             "before calling the image model. Costs one extra (cheap) text "
+             "call and noticeably improves photoreal results.",
+    )
+    image_timeout = fields.Integer(
+        string="Image Timeout (s)", default=180,
+        help="Photoreal generation is slower than text; keep this generous.",
+    )
+
+    @api.onchange("provider_type")
+    def _onchange_provider_type(self):
+        """Suggest that provider's flagship text model when switching backend."""
+        defaults = {
+            "anthropic": "claude-opus-4-8",
+            "claude_code": "claude-opus-4-8",
+            "openai": "gpt-4.1",
+        }
+        for provider in self:
+            suggested = defaults.get(provider.provider_type)
+            if suggested and provider.text_model in (False, "", *defaults.values()):
+                provider.text_model = suggested
+
+    @api.onchange("image_provider_type")
+    def _onchange_image_provider_type(self):
+        """Suggest a sensible model id when switching image backend."""
+        defaults = {
+            "openai_images": "gpt-image-1",
+            "gemini_images": "gemini-3-pro-image",
+        }
+        for provider in self:
+            suggested = defaults.get(provider.image_provider_type)
+            if suggested and provider.image_model in (
+                    False, "", *defaults.values()):
+                provider.image_model = suggested
+            elif provider.image_provider_type in ("svg", "none"):
+                provider.image_model = False
+
+    @api.constrains("image_count")
+    def _check_image_count(self):
+        for provider in self:
+            if provider.image_count < 1 or provider.image_count > 4:
+                raise ValidationError(
+                    _("Variants per Post must be between 1 and 4."))

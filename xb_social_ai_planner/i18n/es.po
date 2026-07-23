@@ -12,380 +12,279 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: xb_social_ai_planner
-msgid "AI Social Planner"
-msgstr "Planificador Social IA"
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid "%(provider)s image error (HTTP %(code)s): %(detail)s"
+msgstr "Error de imagen de %(provider)s (HTTP %(code)s): %(detail)s"
 
 #. module: xb_social_ai_planner
-msgid "Generate Month"
-msgstr "Generar mes"
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid "%(provider)s rate limit or quota reached. Details: %(detail)s"
+msgstr "Se alcanzó el límite de peticiones o la cuota de %(provider)s. Detalles: %(detail)s"
 
 #. module: xb_social_ai_planner
-msgid "Content Plans"
-msgstr "Planes de contenido"
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"%(provider)s rejected the image API key (HTTP %(code)s). Check 'AI Image API"
+" Key' in Settings ▸ AI Social Planner. Details: %(detail)s"
+msgstr "%(provider)s rechazó la clave de API de imágenes (HTTP %(code)s). Revisa «Clave de API de imágenes» en Ajustes ▸ AI Social Planner. Detalles: %(detail)s"
 
 #. module: xb_social_ai_planner
-msgid "Content Plan"
-msgstr "Plan de contenido"
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "@handle, profile URLs (reference only)"
+msgstr "@usuario, URLs de perfil (solo referencia)"
 
 #. module: xb_social_ai_planner
-msgid "Brand Profiles"
-msgstr "Perfiles de marca"
-
-#. module: xb_social_ai_planner
-msgid "Brand Profile"
-msgstr "Perfil de marca"
-
-#. module: xb_social_ai_planner
-msgid "AI Providers"
-msgstr "Proveedores de IA"
-
-#. module: xb_social_ai_planner
-msgid "AI Provider"
-msgstr "Proveedor de IA"
-
-#. module: xb_social_ai_planner
-msgid "Generation Jobs"
-msgstr "Trabajos de generación"
-
-#. module: xb_social_ai_planner
-msgid "Configuration"
-msgstr "Configuración"
-
-#. module: xb_social_ai_planner
-msgid "Settings"
-msgstr "Ajustes"
-
-#. module: xb_social_ai_planner
-msgid "Posts"
-msgstr "Publicaciones"
-
-#. module: xb_social_ai_planner
-msgid "Generate with AI"
-msgstr "Generar con IA"
-
-#. module: xb_social_ai_planner
-msgid "Generate"
-msgstr "Generar"
-
-#. module: xb_social_ai_planner
-msgid "Approve All"
-msgstr "Aprobar todo"
-
-#. module: xb_social_ai_planner
-msgid "Approve"
-msgstr "Aprobar"
-
-#. module: xb_social_ai_planner
-msgid "Reject"
-msgstr "Rechazar"
-
-#. module: xb_social_ai_planner
-msgid "Push Approved"
-msgstr "Publicar aprobados"
-
-#. module: xb_social_ai_planner
-msgid "Push to Social"
-msgstr "Enviar a redes"
-
-#. module: xb_social_ai_planner
-msgid "Reset to Draft"
-msgstr "Restablecer a borrador"
-
-#. module: xb_social_ai_planner
-msgid "Native Calendar"
-msgstr "Calendario nativo"
-
-#. module: xb_social_ai_planner
-msgid "Open Published Post"
-msgstr "Abrir publicación"
-
-#. module: xb_social_ai_planner
-msgid "Re-queue"
-msgstr "Reencolar"
-
-#. module: xb_social_ai_planner
-msgid "Monthly Theme"
-msgstr "Tema del mes"
-
-#. module: xb_social_ai_planner
-msgid "Strategy Summary"
-msgstr "Resumen de estrategia"
-
-#. module: xb_social_ai_planner
-msgid "Strategy"
-msgstr "Estrategia"
-
-#. module: xb_social_ai_planner
-msgid "Month"
-msgstr "Mes"
-
-#. module: xb_social_ai_planner
-msgid "Accounts"
-msgstr "Cuentas"
-
-#. module: xb_social_ai_planner
-msgid "Campaign"
-msgstr "Campaña"
-
-#. module: xb_social_ai_planner
-msgid "Posts / Week"
-msgstr "Publicaciones / semana"
-
-#. module: xb_social_ai_planner
-msgid "Target Posts"
-msgstr "Publicaciones objetivo"
-
-#. module: xb_social_ai_planner
-msgid "Also Generate Images"
-msgstr "Generar también imágenes"
-
-#. module: xb_social_ai_planner
-msgid "Angle / Theme"
-msgstr "Ángulo / tema"
-
-#. module: xb_social_ai_planner
-msgid "Planned Date"
-msgstr "Fecha planificada"
-
-#. module: xb_social_ai_planner
-msgid "Post Text"
-msgstr "Texto de la publicación"
-
-#. module: xb_social_ai_planner
-msgid "Call to Action"
-msgstr "Llamado a la acción"
-
-#. module: xb_social_ai_planner
-msgid "Hashtags"
-msgstr "Hashtags"
-
-#. module: xb_social_ai_planner
-msgid "Inferred Trends"
-msgstr "Tendencias inferidas"
-
-#. module: xb_social_ai_planner
-msgid "Per Network"
-msgstr "Por red"
-
-#. module: xb_social_ai_planner
-msgid "Split Per Network"
-msgstr "Dividir por red"
-
-#. module: xb_social_ai_planner
-msgid "Creative Briefs"
-msgstr "Briefs creativos"
-
-#. module: xb_social_ai_planner
-msgid "Image Brief"
-msgstr "Brief de imagen"
-
-#. module: xb_social_ai_planner
-msgid "Video Brief"
-msgstr "Brief de video"
-
-#. module: xb_social_ai_planner
-msgid "Images"
-msgstr "Imágenes"
-
-#. module: xb_social_ai_planner
-msgid "Generated Images"
-msgstr "Imágenes generadas"
-
-#. module: xb_social_ai_planner
-msgid "Selected Images"
-msgstr "Imágenes seleccionadas"
-
-#. module: xb_social_ai_planner
-msgid "Industry"
-msgstr "Industria"
-
-#. module: xb_social_ai_planner
-msgid "Brand Voice / Tone"
-msgstr "Voz / tono de marca"
-
-#. module: xb_social_ai_planner
-msgid "Target Audience"
-msgstr "Audiencia objetivo"
-
-#. module: xb_social_ai_planner
-msgid "Value Proposition"
-msgstr "Propuesta de valor"
-
-#. module: xb_social_ai_planner
-msgid "Always-on Keywords"
-msgstr "Palabras clave permanentes"
-
-#. module: xb_social_ai_planner
-msgid "Words to Avoid"
-msgstr "Palabras a evitar"
-
-#. module: xb_social_ai_planner
-msgid "Preferred CTA Style"
-msgstr "Estilo de CTA preferido"
-
-#. module: xb_social_ai_planner
-msgid "Output Language"
-msgstr "Idioma de salida"
-
-#. module: xb_social_ai_planner
-msgid "Emoji Policy"
-msgstr "Política de emojis"
-
-#. module: xb_social_ai_planner
-msgid "Hashtag Policy"
-msgstr "Política de hashtags"
-
-#. module: xb_social_ai_planner
-msgid "Draft"
-msgstr "Borrador"
-
-#. module: xb_social_ai_planner
-msgid "Generating"
-msgstr "Generando"
-
-#. module: xb_social_ai_planner
-msgid "Generated"
-msgstr "Generado"
-
-#. module: xb_social_ai_planner
-msgid "Needs Review"
-msgstr "Requiere revisión"
-
-#. module: xb_social_ai_planner
-msgid "Approved"
-msgstr "Aprobado"
-
-#. module: xb_social_ai_planner
-msgid "Rejected"
-msgstr "Rechazado"
-
-#. module: xb_social_ai_planner
-msgid "Pushed"
-msgstr "Publicado"
-
-#. module: xb_social_ai_planner
-msgid "Posted"
-msgstr "Publicado en red"
-
-#. module: xb_social_ai_planner
-msgid "Failed"
-msgstr "Fallido"
-
-#. module: xb_social_ai_planner
-msgid "Queued"
-msgstr "En cola"
-
-#. module: xb_social_ai_planner
-msgid "Running"
-msgstr "En ejecución"
-
-#. module: xb_social_ai_planner
-msgid "Done"
-msgstr "Hecho"
-
-#. module: xb_social_ai_planner
-msgid "AI Text API Key"
-msgstr "Clave API de texto IA"
-
-#. module: xb_social_ai_planner
-msgid "AI Image API Key"
-msgstr "Clave API de imágenes IA"
-
-#. module: xb_social_ai_planner
-msgid "Default AI Provider"
-msgstr "Proveedor de IA por defecto"
-
-#. module: xb_social_ai_planner
-msgid "No approved posts to push."
-msgstr "No hay publicaciones aprobadas para enviar."
-
-#. module: xb_social_ai_planner
-msgid "Add at least one account to the plan first."
-msgstr "Primero agrega al menos una cuenta al plan."
-
-#. module: xb_social_ai_planner
-msgid "Competitors"
-msgstr "Competidores"
-
-#. module: xb_social_ai_planner
-msgid "Competitor"
-msgstr "Competidor"
-
-#. module: xb_social_ai_planner
-msgid "For Brand"
-msgstr "Para la marca"
-
-#. module: xb_social_ai_planner
-msgid "Public Website / URL"
-msgstr "Sitio web público / URL"
-
-#. module: xb_social_ai_planner
-msgid "Social Handles"
-msgstr "Cuentas/handles"
-
-#. module: xb_social_ai_planner
-msgid "Sample Posts (pasted)"
-msgstr "Publicaciones de ejemplo (pegadas)"
-
-#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__analysis_summary
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
 msgid "AI Analysis"
 msgstr "Análisis IA"
 
 #. module: xb_social_ai_planner
-msgid "Key Themes"
-msgstr "Temas clave"
-
-#. module: xb_social_ai_planner
-msgid "Tone"
-msgstr "Tono"
-
-#. module: xb_social_ai_planner
-msgid "Content Gaps / Opportunities"
-msgstr "Huecos de contenido / Oportunidades"
-
-#. module: xb_social_ai_planner
-msgid "Scrape Website"
-msgstr "Scrapear sitio web"
-
-#. module: xb_social_ai_planner
-msgid "Analyze with AI"
-msgstr "Analizar con IA"
-
-#. module: xb_social_ai_planner
-msgid "Scraped Page Text"
-msgstr "Texto de la página scrapeada"
-
-#. module: xb_social_ai_planner
-msgid "Scraped Text"
-msgstr "Texto scrapeado"
-
-#. module: xb_social_ai_planner
-msgid "Notes"
-msgstr "Notas"
-
-#. module: xb_social_ai_planner
-msgid "Inputs"
-msgstr "Entradas"
-
-#. module: xb_social_ai_planner
-msgid "Competitor Analysis"
-msgstr "Análisis de competencia"
-
-#. module: xb_social_ai_planner
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_content_plan
 msgid "AI Content Plans"
 msgstr "Planes de contenido IA"
 
 #. module: xb_social_ai_planner
-msgid "AI: Generate Month"
-msgstr "IA: Generar mes"
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_generation_job
+msgid "AI Generation Job"
+msgstr "Trabajo de generación IA"
 
 #. module: xb_social_ai_planner
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_generation_job
 msgid "AI Generation Jobs"
 msgstr "Trabajos de generación IA"
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__xb_social_ai_image_api_key
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_config_settings__xb_social_ai_image_api_key
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "AI Image API Key"
+msgstr "Clave API de imágenes IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_image
+msgid "AI Image Backend (abstract contract)"
+msgstr "Backend de imágenes IA (contrato abstracto)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_image_custom
+msgid "AI Image — Custom (OpenAI-compatible endpoint)"
+msgstr "Imagen IA — Personalizado (endpoint compatible con OpenAI)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_image_gemini_images
+msgid "AI Image — Google Gemini (bring your own key)"
+msgstr "Imagen IA — Google Gemini (con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_image_openai_images
+msgid "AI Image — OpenAI Images (bring your own key)"
+msgstr "Imagen IA — OpenAI Images (con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_image_svg
+msgid "AI Image — Vector design via the text model"
+msgstr "Imagen IA — Diseño vectorial con el modelo de texto"
+
+#. module: xb_social_ai_planner
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_settings
 msgid "AI Planner Settings"
 msgstr "Ajustes del planificador IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__ai_provider_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__ai_provider_id
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "AI Provider"
+msgstr "Proveedor de IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_provider
+msgid "AI Provider Configuration"
+msgstr "Configuración del proveedor de IA"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "AI Provider Keys (Bring Your Own Key)"
+msgstr "Claves de proveedores de IA (usa tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_ai_provider
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_ai_provider
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_list
+msgid "AI Providers"
+msgstr "Proveedores de IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.module.category,name:xb_social_ai_planner.module_category_xb_social_ai_planner
+#: model:res.groups.privilege,name:xb_social_ai_planner.res_groups_privilege_xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "AI Social Planner"
+msgstr "Planificador Social IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.server,name:xb_social_ai_planner.ir_cron_run_generation_jobs_ir_actions_server
+msgid "AI Social Planner: Run Generation Jobs"
+msgstr "AI Social Planner: ejecutar trabajos de generación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__xb_social_ai_api_key
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_config_settings__xb_social_ai_api_key
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "AI Text API Key"
+msgstr "Clave API de texto IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport
+msgid "AI Transport (abstract contract)"
+msgstr "Transporte de IA (contrato abstracto)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_anthropic
+msgid "AI Transport — Anthropic (Claude)"
+msgstr "Transporte de IA — Anthropic (Claude)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_claude_code
+msgid "AI Transport — Claude Code CLI (subscription, no API key)"
+msgstr "Transporte IA — Claude Code CLI (suscripción, sin clave API)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_custom
+msgid "AI Transport — Custom (OpenAI-compatible endpoint)"
+msgstr "Transporte de IA — Personalizado (endpoint compatible con OpenAI)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_openai
+msgid "AI Transport — OpenAI (bring your own key)"
+msgstr "Transporte de IA — OpenAI (con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_generation_job.py:0
+msgid "AI generation failed: %s"
+msgstr "Falló la generación con IA: %s"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"AI image generation needs the optional 'cairosvg' Python library (and the "
+"system Cairo library). Install it with `pip install cairosvg`, or disable "
+"'Also Generate Images'."
+msgstr "La generación de imágenes con IA necesita la librería Python opcional 'cairosvg' (y la librería de sistema Cairo). Instálala con `pip install cairosvg`, o desactiva 'Generar también imágenes'."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "AI provider error (HTTP %s): %s"
+msgstr "Error del proveedor de IA (HTTP %s): %s"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "AI provider rate limit or quota reached: %s"
+msgstr "Se alcanzó el límite de peticiones o la cuota del proveedor de IA: %s"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "AI provider rate limit reached (retry after %s s)."
+msgstr "Se alcanzó el límite de peticiones del proveedor de IA (reintenta en %s s)."
+
+#. module: xb_social_ai_planner
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_generate_month
+msgid "AI: Generate Month"
+msgstr "IA: Generar mes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__api_base_url
+msgid "API Base URL"
+msgstr "URL base de la API"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_res_company__xb_social_ai_image_api_key
+#: model:ir.model.fields,help:xb_social_ai_planner.field_res_config_settings__xb_social_ai_image_api_key
+msgid "API key for the image-generation provider (optional)."
+msgstr "Clave de API del proveedor de generación de imágenes (opcional)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__account_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__account_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__account_ids
+msgid "Accounts"
+msgstr "Cuentas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_needaction
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_needaction
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_needaction
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_needaction
+msgid "Action Needed"
+msgstr "Se requiere una acción"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__active
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__active
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoración de la actividad de excepción"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_state
+msgid "Activity State"
+msgstr "Estado de la actividad"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono del tipo de actividad"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "Add at least one account to the plan first."
+msgstr "Primero agrega al menos una cuenta al plan."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__also_generate_images
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__also_generate_images
+msgid "Also Generate Images"
+msgstr "Generar también imágenes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__keywords
+msgid "Always-on Keywords"
+msgstr "Palabras clave permanentes"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Analyze with AI"
+msgstr "Analizar con IA"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__analyzed_on
+msgid "Analyzed On"
+msgstr "Analizado el"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__theme
+msgid "Angle / Theme"
+msgstr "Ángulo / tema"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__anthropic
@@ -393,14 +292,98 @@ msgid "Anthropic API (Claude — bring your own key)"
 msgstr "API de Anthropic (Claude — usa tu propia clave)"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__claude_code
-msgid "Claude Code CLI (existing subscription, no API key)"
-msgstr "Claude Code CLI (suscripción existente, sin clave API)"
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__plan_date
+msgid "Any date in the target month; the day is normalised to the 1st."
+msgstr "Cualquier fecha del mes objetivo; el día se normaliza al 1."
 
 #. module: xb_social_ai_planner
-#: model:ir.model,name:xb_social_ai_planner.model_xb_social_ai_transport_claude_code
-msgid "AI Transport — Claude Code CLI (subscription, no API key)"
-msgstr "Transporte IA — Claude Code CLI (suscripción, sin clave API)"
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Approve"
+msgstr "Aprobar"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Approve All"
+msgstr "Aprobar todo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__approved
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__approved
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Approved"
+msgstr "Aprobado"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__approved_count
+msgid "Approved Count"
+msgstr "Aprobadas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_style
+msgid ""
+"Art direction sent to photoreal image models. Ignored by the vector backend,"
+" which follows the brand kit instead."
+msgstr "Dirección de arte que se envía a los modelos de imagen foto-realistas. El backend vectorial la ignora: ese sigue el kit de marca."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__visual_style
+msgid ""
+"Art-direction notes for AI images: mood, composition, motifs, what to avoid."
+msgstr "Notas de dirección de arte para las imágenes de IA: ambiente, composición, motivos, qué evitar."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid ""
+"Art-direction notes for AI images: mood, composition, motifs, what to avoid…"
+msgstr "Notas de dirección de arte para las imágenes de IA: ambiente, composición, motivos, qué evitar…"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_format
+msgid ""
+"Aspect ratio of generated images. Square is the safest across Facebook, "
+"Instagram, LinkedIn and X."
+msgstr "Proporción de las imágenes generadas. La cuadrada es la más segura en Facebook, Instagram, LinkedIn y X."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_attachment_count
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_attachment_count
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_attachment_count
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_attachment_count
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_attachment_count
+msgid "Attachment Count"
+msgstr "Número de archivos adjuntos"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_quality__auto
+msgid "Automatic"
+msgstr "Automático"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__brand_profile_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__brand_profile_id
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Brand Profile"
+msgstr "Perfil de marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_brand_profile
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_brand_profile
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_list
+msgid "Brand Profiles"
+msgstr "Perfiles de marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__brand_voice
+msgid "Brand Voice / Tone"
+msgstr "Voz / tono de marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_res_company__xb_social_ai_api_key
+#: model:ir.model.fields,help:xb_social_ai_planner.field_res_config_settings__xb_social_ai_api_key
+msgid ""
+"Bring-your-own-key for the text/strategy provider (e.g. Claude). Stored per "
+"company; never displayed to non-admins."
+msgstr "Tu propia clave para el proveedor de texto/estrategia (por ejemplo, Claude). Se guarda por compañía y nunca se muestra a quien no sea administrador."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__cli_binary
@@ -413,54 +396,30 @@ msgid "CLI Config Dir"
 msgstr "Directorio de configuración CLI"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_binary
-msgid ""
-"Path to the Claude Code executable runnable by the Odoo service user (e.g. "
-"/usr/local/bin/claude). 'claude' resolves it on PATH."
-msgstr "Ruta al ejecutable de Claude Code accesible por el usuario del servicio Odoo (p. ej. /usr/local/bin/claude). 'claude' lo resuelve en el PATH."
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__cta
+msgid "Call to Action"
+msgstr "Llamado a la acción"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_config_dir
-msgid ""
-"Optional value for CLAUDE_CONFIG_DIR — the directory holding the CLI's "
-"auth/credentials, readable by the Odoo service user. Leave empty to use the "
-"service user's default (~/.claude)."
-msgstr "Valor opcional para CLAUDE_CONFIG_DIR: el directorio con la autenticación/credenciales del CLI, legible por el usuario del servicio Odoo. Déjalo vacío para usar el predeterminado del usuario (~/.claude)."
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__utm_campaign_id
+msgid "Campaign"
+msgstr "Campaña"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__provider_type
-msgid ""
-"Selects the transport implementation used to call the model.\n"
-"• Anthropic API: pay-per-use, needs an API key.\n"
-"• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing)."
-msgstr ""
-"Selecciona la implementación de transporte usada para llamar al modelo.\n"
-"• API de Anthropic: pago por uso, requiere una clave API.\n"
-"• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
+msgid "Cancel"
+msgstr "Cancelar"
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
-msgid ""
-"No API key needed: this reuses a Claude Code subscription\n"
-"                        on the server. The <code>claude</code> binary and its\n"
-"                        login must be reachable by the Odoo service user."
-msgstr "Sin clave API: reutiliza una suscripción de Claude Code en el servidor. El binario claude y su sesión deben ser accesibles por el usuario del servicio Odoo."
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__claude_code
+msgid "Claude Code CLI (existing subscription, no API key)"
+msgstr "Claude Code CLI (suscripción existente, sin clave API)"
 
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid ""
-"Claude Code CLI not found ('%s'). Install it and set the CLI Binary path on "
-"the AI provider."
-msgstr "No se encontró el CLI de Claude Code ('%s'). Instálalo y configura la ruta del Binario CLI en el proveedor de IA."
-
-#. module: xb_social_ai_planner
-#. odoo-python
-#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid ""
-"The Claude Code CLI timed out after %ss. Increase the provider's Timeout or "
-"lower Effort."
-msgstr "El CLI de Claude Code agotó el tiempo tras %ss. Aumenta el Tiempo de espera del proveedor o baja el Esfuerzo."
+msgid "Claude Code CLI error: %s"
+msgstr "Error del CLI de Claude Code: %s"
 
 #. module: xb_social_ai_planner
 #. odoo-python
@@ -474,32 +433,316 @@ msgstr "El CLI de Claude Code falló (salida %s). Verifica que el usuario del se
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"Claude Code CLI not found ('%s'). Install it and set the CLI Binary path on "
+"the AI provider."
+msgstr "No se encontró el CLI de Claude Code ('%s'). Instálalo y configura la ruta del Binario CLI en el proveedor de IA."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
 msgid "Claude Code CLI returned unreadable output: %s"
 msgstr "El CLI de Claude Code devolvió una salida ilegible: %s"
 
 #. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_res_company
+msgid "Companies"
+msgstr "Empresas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__company_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__company_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__company_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__company_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__company_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__company_id
+msgid "Company"
+msgstr "Empresa"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__competitor_id
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Competitor"
+msgstr "Competidor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__competitor
+msgid "Competitor Analysis"
+msgstr "Análisis de competencia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__competitor_count
+msgid "Competitor Count"
+msgstr "Competidores"
+
+#. module: xb_social_ai_planner
 #. odoo-python
-#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid "Claude Code CLI error: %s"
-msgstr "Error del CLI de Claude Code: %s"
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "Competitor analysis queued."
+msgstr "Análisis de competencia en cola."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_competitor
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__competitor_ids
+#: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_competitor
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_list
+msgid "Competitors"
+msgstr "Competidores"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__opportunities
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Content Gaps / Opportunities"
+msgstr "Huecos de contenido / Oportunidades"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_generate_month_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Content Plan"
+msgstr "Plan de contenido"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_content_plan
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_list
+msgid "Content Plans"
+msgstr "Planes de contenido"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Copy"
+msgstr "Texto"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "Could not fetch the page: %s"
+msgstr "No se pudo obtener la página: %s"
 
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid "The Claude Code CLI returned an empty response."
-msgstr "El CLI de Claude Code devolvió una respuesta vacía."
+msgid "Could not rasterise the generated SVG: %s"
+msgstr "No se pudo rasterizar el SVG generado: %s"
 
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid "The Claude Code CLI returned malformed JSON."
-msgstr "El CLI de Claude Code devolvió un JSON mal formado."
+msgid "Could not reach the AI provider: %s"
+msgstr "No se pudo contactar al proveedor de IA: %s"
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
-msgid "e.g. /opt/odoo/.claude (optional)"
-msgstr "p. ej. /opt/odoo/.claude (opcional)"
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid "Could not reach the image provider: %s"
+msgstr "No se pudo contactar al proveedor de imágenes: %s"
 
+#. module: xb_social_ai_planner
+#: model:res.groups,comment:xb_social_ai_planner.group_xb_social_planner_user
+msgid "Create plans, generate content, approve and push posts."
+msgstr "Crea planes, genera contenido, aprueba y envía publicaciones."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.actions.act_window,help:xb_social_ai_planner.action_xb_social_content_plan
+msgid "Create your first content plan"
+msgstr "Crea tu primer plan de contenido"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Creative Briefs"
+msgstr "Briefs creativos"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__custom
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__custom
+msgid "Custom (OpenAI-compatible endpoint)"
+msgstr "Personalizado (endpoint compatible con OpenAI)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__xb_social_ai_default_provider_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_config_settings__xb_social_ai_default_provider_id
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "Default AI Provider"
+msgstr "Proveedor de IA por defecto"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__default_account_ids
+msgid "Default Accounts"
+msgstr "Cuentas predeterminadas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__default_utm_campaign_id
+msgid "Default Campaign"
+msgstr "Campaña predeterminada"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__none
+msgid "Disabled (manual upload)"
+msgstr "Desactivado (carga manual)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_custom__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_gemini_images__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_openai_images__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_svg__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_anthropic__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_claude_code__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_custom__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_openai__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__display_name
+msgid "Display Name"
+msgstr "Nombre en pantalla"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__done
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__done
+msgid "Done"
+msgstr "Hecho"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__draft
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__industry
+msgid "Drives the AI-inferred seasonal/industry trends and hashtags."
+msgstr "Orienta las tendencias de temporada y de industria y los hashtags que infiere la IA."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__effort
+msgid "Effort"
+msgstr "Esfuerzo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__emoji_policy
+msgid "Emoji Policy"
+msgstr "Política de emojis"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_prompt_boost
+msgid "Enrich Image Prompt"
+msgstr "Enriquecer el prompt de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__error_message
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__error_message
+msgid "Error Message"
+msgstr "Mensaje de error"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__facebook_message
+msgid "Facebook Text"
+msgstr "Texto de Facebook"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__failed
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__failed
+msgid "Failed"
+msgstr "Fallido"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__hashtag_policy__few
+msgid "Few (3-5)"
+msgstr "Pocos (3-5)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__finished_at
+msgid "Finished At"
+msgstr "Finalizado el"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__flat
+msgid "Flat graphic"
+msgstr "Gráfico plano"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_follower_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_follower_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_follower_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_follower_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_partner_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_partner_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_partner_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_partner_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (contactos)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icono de Font Awesome, por ejemplo, fa-tasks"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__brand_profile_id
+msgid "For Brand"
+msgstr "Para la marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__font_hint
+msgid ""
+"Free text describing the desired type style (e.g. 'elegant serif', 'bold "
+"modern sans')."
+msgstr "Texto libre que describe el estilo tipográfico deseado (por ejemplo, «serif elegante», «sans moderna y gruesa»)."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Friendly, expert, concise…"
+msgstr "Cercana, experta, concisa…"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
+msgid "Generate"
+msgstr "Generar"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
@@ -507,45 +750,84 @@ msgid "Generate Image"
 msgstr "Generar imagen"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_primary
-msgid "Primary Color"
-msgstr "Color primario"
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_generate_month_wizard
+msgid "Generate Month"
+msgstr "Generar mes"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_secondary
-msgid "Secondary Color"
-msgstr "Color secundario"
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_generate_month_wizard
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
+msgid "Generate Monthly Content Plan"
+msgstr "Generar plan de contenido mensual"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_accent
-msgid "Text / Accent Color"
-msgstr "Color de texto / acento"
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Generate with AI"
+msgstr "Generar con IA"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__font_hint
-msgid "Typography Hint"
-msgstr "Sugerencia tipográfica"
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__generated
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__generated
+msgid "Generated"
+msgstr "Generado"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__visual_style
-msgid "Visual Style"
-msgstr "Estilo visual"
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Generated %(count)s image(s) via %(backend)s%(model)s."
+msgstr "Se generaron %(count)s imagen(es) con %(backend)s%(model)s."
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
-msgid "Palette"
-msgstr "Paleta"
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__generated_image_ids
+msgid "Generated Images"
+msgstr "Imágenes generadas"
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
-msgid "Visual / Brand Kit"
-msgstr "Visual / Kit de marca"
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__generating
+msgid "Generating"
+msgstr "Generando"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__logo
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
-msgid "Logo"
-msgstr "Logo"
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_form
+msgid "Generation Job"
+msgstr "Trabajo de generación"
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_generation_job
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__generation_job_ids
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
+msgid "Generation Jobs"
+msgstr "Trabajos de generación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__gemini_images
+msgid "Google Gemini (photoreal — bring your own key)"
+msgstr "Google Gemini (foto-realista — con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__social_handles
+msgid "Handles/URLs for reference (not scraped — platforms forbid it)."
+msgstr "Cuentas/URLs de referencia (no se rastrean: las plataformas lo prohíben)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__has_message
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__has_message
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__has_message
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__has_message
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__has_message
+msgid "Has Message"
+msgstr "Tiene un mensaje"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__hashtag_policy
+msgid "Hashtag Policy"
+msgstr "Política de hashtags"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__hashtags
+msgid "Hashtags"
+msgstr "Hashtags"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__palette_primary
@@ -563,26 +845,1114 @@ msgid "Hex color used for headline text on the image."
 msgstr "Color hexadecimal usado para el texto del titular en la imagen."
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__effort__high
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_quality__high
+msgid "High"
+msgstr "Alta"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_quality
+msgid "Higher quality costs more per image at the provider."
+msgstr "Mayor calidad cuesta más por imagen en el proveedor."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_count
+msgid ""
+"How many images to generate per post so an editor can pick. Each variant is "
+"billed separately by the image provider."
+msgstr "Cuántas imágenes generar por publicación para que alguien elija. El proveedor cobra cada variante por separado."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_provider_type
+msgid ""
+"How post images are produced.\n"
+"• Vector design: the text model draws an on-brand graphic that is rasterised locally. No image API key and no per-image billing, but it is graphic design, not photography.\n"
+"• OpenAI / Gemini: real photoreal image models. Needs an image API key and is billed per image by the provider."
+msgstr "Cómo se producen las imágenes de las publicaciones.\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_config_settings__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_custom__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_gemini_images__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_openai_images__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_image_svg__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_anthropic__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_claude_code__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_custom__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_transport_openai__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__id
+msgid "ID"
+msgstr "Identificación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icono que indica una actividad de excepción."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__idempotency_key
+msgid "Idempotency Key"
+msgstr "Clave de idempotencia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__message_needaction
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__message_needaction
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__message_needaction
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si está seleccionado, hay nuevos mensajes que requieren tu atención."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__message_has_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__message_has_sms_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__message_has_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__message_has_sms_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__message_has_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__message_has_sms_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__message_has_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__message_has_sms_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__message_has_error
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si está seleccionado, algunos mensajes tienen error de envío."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__illustration
+msgid "Illustration"
+msgstr "Ilustración"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__image
+msgid "Image"
+msgstr "Imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_api_base_url
+msgid "Image API Base URL"
+msgstr "URL base de la API de imágenes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__image_brief
+msgid "Image Brief"
+msgstr "Brief de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_format
+msgid "Image Format"
+msgstr "Formato de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_model
+msgid "Image Model"
+msgstr "Modelo de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_provider_type
+msgid "Image Provider"
+msgstr "Proveedor de imágenes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_quality
+msgid "Image Quality"
+msgstr "Calidad de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_style
+msgid "Image Style"
+msgstr "Estilo de imagen"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_timeout
+msgid "Image Timeout (s)"
+msgstr "Tiempo de espera de imagen (s)"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"Image generation is disabled on AI provider '%s'. Pick an Image Provider on "
+"it, or upload the image manually."
+msgstr "La generación de imágenes está desactivada en el proveedor de IA «%s». Elige un proveedor de imágenes o sube la imagen manualmente."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_model
+msgid ""
+"Image model id, e.g. 'gpt-image-1' or 'gemini-3-pro-image'. Leave empty for "
+"the provider default."
+msgstr "Id del modelo de imagen, por ejemplo «gpt-image-1» o «gemini-3-pro-image». Déjalo vacío para usar el predeterminado del proveedor."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Images"
+msgstr "Imágenes"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid ""
+"Images are drawn by the text model as vector art and\n"
+"                        rasterised on the server: no image API key and nothing\n"
+"                        billed per image. It produces on-brand graphics, not\n"
+"                        photographs — switch to OpenAI or Gemini for photoreal\n"
+"                        imagery. (Needs the optional\n"
+"                        <code>cairosvg</code> Python library.)"
+msgstr "Las imágenes las dibuja el modelo de texto como arte vectorial y el servidor las rasteriza: sin clave de API de imágenes y sin cobro por imagen. Produce gráficos de marca, no fotografías; cambia a OpenAI o Gemini para imágenes foto-realistas. (Requiere la biblioteca opcional de Python <code>cairosvg</code>.)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__industry
+msgid "Industry"
+msgstr "Industria"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
+msgid "Inferred Trends"
+msgstr "Tendencias inferidas"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
+msgid "Input"
+msgstr "Entrada"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__token_usage_input
+msgid "Input Tokens"
+msgstr "Tokens de entrada"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Inputs"
+msgstr "Entradas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__instagram_message
+msgid "Instagram Text"
+msgstr "Texto de Instagram"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_is_follower
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_is_follower
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_is_follower
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_is_follower
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_is_follower
+msgid "Is Follower"
+msgstr "Es un seguidor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__item_id
+msgid "Item"
+msgstr "Elemento"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__item_count
+msgid "Item Count"
+msgstr "Publicaciones"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__job_type
+msgid "Job Type"
+msgstr "Tipo de trabajo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__key_themes
+msgid "Key Themes"
+msgstr "Temas clave"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "Key for the text/strategy provider (e.g. Claude)."
+msgstr "Clave del proveedor de texto/estrategia (por ejemplo, Claude)."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Keywords"
+msgstr "Palabras clave"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_format__landscape
+msgid "Landscape 1200×675"
+msgstr "Horizontal 1200×675"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__default_language
+msgid ""
+"Language the AI writes the copy in. Defaults to the user's language when "
+"empty."
+msgstr "Idioma en el que la IA escribe los textos. Si se deja vacío, usa el idioma del usuario."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__last_scraped
+msgid "Last Scraped"
+msgstr "Último rastreo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "Leave empty for provider default"
+msgstr "Déjalo vacío para usar el predeterminado del proveedor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__length_warning
+msgid "Length Warning"
+msgstr "Aviso de longitud"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_prompt_boost
+msgid ""
+"Let the text model rewrite the brief into a richer prompt before calling the"
+" image model. Costs one extra (cheap) text call and noticeably improves "
+"photoreal results."
+msgstr "Deja que el modelo de texto reescriba el brief como un prompt más rico antes de llamar al modelo de imagen. Cuesta una llamada de texto extra (barata) y mejora bastante los resultados foto-realistas."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__lifestyle
+msgid "Lifestyle / people"
+msgstr "Estilo de vida / personas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__emoji_policy__light
+msgid "Light"
+msgstr "Claro"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__linkedin_message
+msgid "LinkedIn Text"
+msgstr "Texto de LinkedIn"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__logo
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Logo"
+msgstr "Logo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__emoji_policy__heavy
+msgid "Lots of emojis"
+msgstr "Muchos emojis"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__effort__low
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_quality__low
+msgid "Low"
+msgstr "Baja"
+
+#. module: xb_social_ai_planner
+#: model:res.groups,comment:xb_social_ai_planner.group_xb_social_planner_manager
+msgid "Manage brand profiles, AI providers, keys and generation jobs."
+msgstr "Administra perfiles de marca, proveedores de IA, claves y trabajos de generación."
+
+#. module: xb_social_ai_planner
+#: model:res.groups,name:xb_social_ai_planner.group_xb_social_planner_manager
+msgid "Manager"
+msgstr "Gerente"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__hashtag_policy__many
+msgid "Many (8-12)"
+msgstr "Muchos (8-12)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__max_tokens
+msgid "Max Tokens"
+msgstr "Tokens máximos"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__effort__medium
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_quality__medium
+msgid "Medium"
+msgstr "Medio"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_has_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_has_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_has_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_has_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_has_error
+msgid "Message Delivery error"
+msgstr "Error al enviar el mensaje"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__text_model
+msgid "Model id used for strategy and copy generation."
+msgstr "Id del modelo que se usa para la estrategia y los textos."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__plan_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__plan_date
+msgid "Month"
+msgstr "Mes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__monthly_theme
+msgid "Monthly Theme"
+msgstr "Tema del mes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Fecha límite de mi actividad"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Native Calendar"
+msgstr "Calendario nativo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__needs_review
+msgid "Needs Review"
+msgstr "Requiere revisión"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Siguiente evento en el calendario de actividades"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Siguiente fecha límite de la actividad"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resumen de la siguiente actividad"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_type_id
+msgid "Next Activity Type"
+msgstr "Siguiente tipo de actividad"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "No AI API key configured. Set it in Settings ▸ AI Social Planner."
+msgstr "No hay ninguna clave de API de IA configurada. Configúrala en Ajustes ▸ AI Social Planner."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "No AI provider configured."
+msgstr "No hay ningún proveedor de IA configurado."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid ""
+"No AI provider configured. Create one under AI Social Planner ▸ "
+"Configuration ▸ Providers."
+msgstr "No hay ningún proveedor de IA configurado. Crea uno en AI Social Planner ▸ Configuración ▸ Proveedores."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "No AI transport is implemented for provider type '%s'."
+msgstr "No hay transporte implementado para el tipo de proveedor «%s»."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid ""
+"No API key needed: this reuses a Claude Code subscription\n"
+"                        on the server. The <code>claude</code> binary and its\n"
+"                        login must be reachable by the Odoo service user."
+msgstr "Sin clave API: reutiliza una suscripción de Claude Code en el servidor. El binario claude y su sesión deben ser accesibles por el usuario del servicio Odoo."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "No approved posts to push."
+msgstr "No hay publicaciones aprobadas para enviar."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__emoji_policy__none
+msgid "No emojis"
+msgstr "Sin emojis"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_brand_profile__hashtag_policy__none
+msgid "No hashtags"
+msgstr "Sin hashtags"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"No image API key configured. Set 'AI Image API Key' in Settings ▸ AI Social "
+"Planner, or switch the provider's Image Provider to the key-free vector "
+"option."
+msgstr "No hay ninguna clave de API de imágenes configurada. Configura «Clave de API de imágenes» en Ajustes ▸ AI Social Planner, o cambia el proveedor de imágenes a la opción vectorial que no requiere clave."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid "No image backend is implemented for '%s'."
+msgstr "No hay backend de imágenes implementado para «%s»."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid ""
+"None of the selected accounts belong to a supported network (Facebook, "
+"Instagram, LinkedIn, X)."
+msgstr "Ninguna de las cuentas seleccionadas pertenece a una red compatible (Facebook, Instagram, LinkedIn, X)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__notes
+msgid "Notes"
+msgstr "Notas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_needaction_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_needaction_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_needaction_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_has_error_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_has_error_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_has_error_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_has_error_counter
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__message_needaction_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__message_needaction_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__message_needaction_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren una acción"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__message_has_error_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__message_has_error_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__message_has_error_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__message_has_error_counter
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de envío"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid ""
+"Only public web pages are scraped. Social network feeds are\n"
+"                        not scraped (the platforms forbid it) — paste sample posts above."
+msgstr "Solo se rastrean páginas web públicas. Los feeds de redes sociales no se rastrean (las plataformas lo prohíben): pega arriba publicaciones de ejemplo."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Open Published Post"
+msgstr "Abrir publicación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__openai
+msgid "OpenAI API (GPT — bring your own key)"
+msgstr "API de OpenAI (GPT — con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__openai_images
+msgid "OpenAI Images (photoreal — bring your own key)"
+msgstr "OpenAI Images (foto-realista — con tu propia clave)"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
+msgid "Optional key for the image-generation provider."
+msgstr "Clave opcional para el proveedor de generación de imágenes."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_config_dir
+msgid ""
+"Optional value for CLAUDE_CONFIG_DIR — the directory holding the CLI's "
+"auth/credentials, readable by the Odoo service user. Leave empty to use the "
+"service user's default (~/.claude)."
+msgstr "Valor opcional para CLAUDE_CONFIG_DIR: el directorio con la autenticación/credenciales del CLI, legible por el usuario del servicio Odoo. Déjalo vacío para usar el predeterminado del usuario (~/.claude)."
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__logo
 msgid "Optional. Embedded into AI-generated post images."
 msgstr "Opcional. Se incrusta en las imágenes generadas por IA."
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
-msgid "e.g. elegant serif"
-msgstr "p. ej. serif elegante"
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "Other"
+msgstr "Otro"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
+msgid "Output"
+msgstr "Salida"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__default_language
+msgid "Output Language"
+msgstr "Idioma de salida"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__token_usage_output
+msgid "Output Tokens"
+msgstr "Tokens de salida"
 
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
-msgid "Generated %s image(s)."
-msgstr "Se generaron %s imagen(es)."
+msgid "Over limit: %s"
+msgstr "Excede el límite: %s"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_api_base_url
+msgid ""
+"Override the image endpoint (gateway / self-hosted). Required for the custom"
+" provider; leave empty otherwise."
+msgstr "Sustituye el endpoint de imágenes (pasarela / autoalojado). Obligatorio para el proveedor personalizado; en los demás déjalo vacío."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__api_base_url
+msgid ""
+"Override the provider endpoint (self-hosted / proxy). Leave empty for the "
+"provider default."
+msgstr "Sustituye el endpoint del proveedor (autoalojado / proxy). Déjalo vacío para usar el predeterminado."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Palette"
+msgstr "Paleta"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Paste example posts/captions here"
+msgstr "Pega aquí publicaciones o textos de ejemplo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__manual_samples
+msgid "Paste example posts/captions to feed the AI analysis."
+msgstr "Pega publicaciones o textos de ejemplo para alimentar el análisis de la IA."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__cli_binary
+msgid ""
+"Path to the Claude Code executable runnable by the Odoo service user (e.g. "
+"/usr/local/bin/claude). 'claude' resolves it on PATH."
+msgstr "Ruta al ejecutable de Claude Code accesible por el usuario del servicio Odoo (p. ej. /usr/local/bin/claude). 'claude' lo resuelve en el PATH."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Per Network"
+msgstr "Por red"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__photo
+msgid "Photograph"
+msgstr "Fotografía"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__image_timeout
+msgid "Photoreal generation is slower than text; keep this generous."
+msgstr "La generación foto-realista es más lenta que la de texto; deja un margen amplio."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid ""
+"Photoreal images are billed per image by the provider.\n"
+"                        Set the key in Settings ▸ AI Social Planner ▸\n"
+"                        <em>AI Image API Key</em>."
+msgstr "El proveedor cobra cada imagen foto-realista. Configura la clave en Ajustes ▸ AI Social Planner ▸ <em>Clave de API de imágenes</em>."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__plan_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__plan_id
+msgid "Plan"
+msgstr "Plan"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__plan_count
+msgid "Plan Count"
+msgstr "Planes"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Plan Item"
+msgstr "Elemento del plan"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
+msgid "Plan Items"
+msgstr "Elementos del plan"
+
+#. module: xb_social_ai_planner
+#: model:ir.module.category,description:xb_social_ai_planner.module_category_xb_social_ai_planner
+msgid "Plan and generate social media content with AI."
+msgstr "Planifica y genera contenido para redes sociales con IA."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__planned_date
+msgid "Planned Date"
+msgstr "Fecha planificada"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_calendar
+msgid "Planner"
+msgstr "Planificador"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__plan_ids
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Plans"
+msgstr "Planes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_format__portrait
+msgid "Portrait 1080×1350"
+msgstr "Vertical 1080×1350"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post '%s' exceeds the %s character limit (%d)."
+msgstr "La publicación «%s» excede el límite de %s caracteres (%d)."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post '%s' has no accounts."
+msgstr "La publicación «%s» no tiene cuentas."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post '%s' has no text."
+msgstr "La publicación «%s» no tiene texto."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post '%s' targets Instagram, which requires an image."
+msgstr "La publicación «%s» va a Instagram, que exige una imagen."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__item_copy
+msgid "Post Copy"
+msgstr "Texto de la publicación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__social_post_state
+msgid "Post Status"
+msgstr "Estado de la publicación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message
+msgid "Post Text"
+msgstr "Texto de la publicación"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__posted
+msgid "Posted"
+msgstr "Publicado en red"
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_plan_item
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__item_ids
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Posts"
+msgstr "Publicaciones"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__posts_per_week
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__posts_per_week
+msgid "Posts / Week"
+msgstr "Publicaciones / semana"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__cta_style
+msgid "Preferred CTA Style"
+msgstr "Estilo de CTA preferido"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_primary
+msgid "Primary Color"
+msgstr "Color primario"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__provider_type
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__provider_id
+msgid "Provider"
+msgstr "Proveedor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__website
+msgid "Public Website / URL"
+msgstr "Sitio web público / URL"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__website
+msgid "Public page to scrape (homepage, landing or blog)."
+msgstr "Página pública que se va a rastrear (inicio, landing o blog)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__social_post_id
+msgid "Published Post"
+msgstr "Publicación publicada"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Push Approved"
+msgstr "Publicar aprobados"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Push to Social"
+msgstr "Enviar a redes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_content_plan__state__pushed
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__pushed
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Pushed"
+msgstr "Publicado"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__pushed_count
+msgid "Pushed Count"
+msgstr "Enviadas"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__queued
+msgid "Queued"
+msgstr "En cola"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__rating_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__rating_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__rating_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__rating_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__rating_ids
+msgid "Ratings"
+msgstr "Calificaciones"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_form
+msgid "Re-queue"
+msgstr "Reencolar"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Ready-to-post text…"
+msgstr "Texto listo para publicar…"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__effort
+msgid "Reasoning/output effort. Higher = better quality, more tokens."
+msgstr "Esfuerzo de razonamiento/salida. Más alto = mejor calidad y más tokens."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Reject"
+msgstr "Rechazar"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__rejected
+msgid "Rejected"
+msgstr "Rechazado"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_form
+msgid "Request"
+msgstr "Solicitud"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__request_payload
+msgid "Request (audit)"
+msgstr "Petición (auditoría)"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Reset to Draft"
+msgstr "Restablecer a borrador"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_form
+msgid "Response"
+msgstr "Respuesta"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__response_raw
+msgid "Response (audit)"
+msgstr "Respuesta (auditoría)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_user_id
+msgid "Responsible User"
+msgstr "Usuario responsable"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__running
+msgid "Running"
+msgstr "En ejecución"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_has_sms_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_has_sms_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_has_sms_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__message_has_sms_error
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error en el envío del SMS"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__manual_samples
+msgid "Sample Posts (pasted)"
+msgstr "Publicaciones de ejemplo (pegadas)"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "Scheduled Posts"
+msgstr "Publicaciones programadas"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Scrape Website"
+msgstr "Scrapear sitio web"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "Scrape failed: %s"
+msgstr "Falló el rastreo: %s"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "Scraped %d characters from %s."
+msgstr "Se rastrearon %d caracteres de %s."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__scraped_content
+msgid "Scraped Page Text"
+msgstr "Texto de la página scrapeada"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "Scraped Text"
+msgstr "Texto scrapeado"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_secondary
+msgid "Secondary Color"
+msgstr "Color secundario"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_generate_month_wizard.py:0
+msgid "Select at least one account."
+msgstr "Selecciona al menos una cuenta."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__selected_image_ids
+msgid "Selected Images"
+msgstr "Imágenes seleccionadas"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Selected for posting"
+msgstr "Seleccionadas para publicar"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_ai_provider__provider_type
+msgid ""
+"Selects the transport implementation used to call the model.\n"
+"• Anthropic API / OpenAI API: pay-per-use, needs an API key.\n"
+"• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing).\n"
+"• Custom: any endpoint that speaks the OpenAI chat API."
+msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\n• API de Anthropic: pago por uso, requiere una clave API.\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__sequence
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
+msgid "Set a public website/URL to scrape."
+msgstr "Indica un sitio web/URL público para rastrear."
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_settings
+msgid "Settings"
+msgstr "Ajustes"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_brand_profile
+msgid "Social Brand Profile"
+msgstr "Perfil de marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_competitor
+msgid "Social Competitor"
+msgstr "Competidor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_content_plan
+msgid "Social Content Plan (monthly)"
+msgstr "Plan de contenido (mensual)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__social_handles
+msgid "Social Handles"
+msgstr "Cuentas/handles"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_plan_item
+msgid "Social Plan Item (AI draft post)"
+msgstr "Elemento del plan (borrador de IA)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
+msgid "Split Per Network"
+msgstr "Dividir por red"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_format__square
+msgid "Square 1080×1080"
+msgstr "Cuadrada 1080×1080"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__started_at
+msgid "Started At"
+msgstr "Iniciado el"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__state
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__state
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__state
+msgid "State"
+msgstr "Estado"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr "Estado según las actividades\nVencida: ya pasó la fecha límite\nHoy: hoy es la fecha de la actividad\nPlaneada: futuras actividades."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__strategy
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Strategy"
+msgstr "Estrategia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__strategy_summary
+msgid "Strategy Summary"
+msgstr "Resumen de estrategia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__product
+msgid "Studio product shot"
+msgstr "Foto de producto en estudio"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__target_audience
+msgid "Target Audience"
+msgstr "Audiencia objetivo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__target_post_count
+msgid "Target Posts"
+msgstr "Publicaciones objetivo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__palette_accent
+msgid "Text / Accent Color"
+msgstr "Color de texto / acento"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "Text / Strategy"
+msgstr "Texto / Estrategia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__text_model
+msgid "Text Model"
+msgstr "Modelo de texto"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
+msgid ""
+"The AI builds the monthly strategy and queues the copy for\n"
+"                        each post. Generation runs in the background — refresh the\n"
+"                        plan in a minute or two."
+msgstr "La IA arma la estrategia del mes y pone en cola el texto de cada publicación. La generación corre en segundo plano: vuelve a cargar el plan en un par de minutos."
 
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
-msgid "Could not rasterise the generated SVG: %s"
-msgstr "No se pudo rasterizar el SVG generado: %s"
+msgid ""
+"The AI declined to generate this content (safety refusal). Try rephrasing "
+"the brand profile or the request."
+msgstr "La IA se negó a generar este contenido (rechazo por seguridad). Prueba a reformular el perfil de marca o la petición."
 
 #. module: xb_social_ai_planner
 #. odoo-python
@@ -594,7 +1964,280 @@ msgstr "La IA no devolvió una imagen SVG válida."
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
 msgid ""
-"AI image generation needs the optional 'cairosvg' Python library (and the "
-"system Cairo library). Install it with `pip install cairosvg`, or disable "
-"'Also Generate Images'."
-msgstr "La generación de imágenes con IA necesita la librería Python opcional 'cairosvg' (y la librería de sistema Cairo). Instálala con `pip install cairosvg`, o desactiva 'Generar también imágenes'."
+"The AI provider rejected the API key (HTTP %(code)s). Check it in Settings ▸"
+" AI Social Planner. Details: %(detail)s"
+msgstr "El proveedor de IA rechazó la clave de API (HTTP %(code)s). Revísala en Ajustes ▸ AI Social Planner. Detalles: %(detail)s"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"The AI response was cut off (max_tokens). Increase the provider's Max Tokens"
+" and try again."
+msgstr "La respuesta de la IA se cortó (max_tokens). Aumenta «Tokens máximos» del proveedor y vuelve a intentar."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"The AI response was cut off (token limit). Increase the provider's Max "
+"Tokens and try again."
+msgstr "La respuesta de la IA se cortó (límite de tokens). Aumenta «Tokens máximos» del proveedor y vuelve a intentar."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The AI returned an empty response."
+msgstr "La IA devolvió una respuesta vacía."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The AI returned malformed JSON."
+msgstr "La IA devolvió un JSON mal formado."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The AI returned malformed JSON: %s"
+msgstr "La IA devolvió un JSON mal formado: %s"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "The API key is set in Settings ▸ AI Social Planner, not here."
+msgstr "La clave de API se configura en Ajustes ▸ AI Social Planner, no aquí."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid "The Claude Code CLI returned an empty response."
+msgstr "El CLI de Claude Code devolvió una respuesta vacía."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"The Claude Code CLI timed out after %ss. Increase the provider's Timeout or "
+"lower Effort."
+msgstr "El CLI de Claude Code agotó el tiempo tras %ss. Aumenta el Tiempo de espera del proveedor o baja el Esfuerzo."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__brand_profile_id
+msgid "The brand this competitor is benchmarked against."
+msgstr "La marca contra la que se compara este competidor."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"The custom image provider needs an 'Image API Base URL' (an OpenAI-"
+"compatible endpoint)."
+msgstr "El proveedor de imágenes personalizado necesita una «URL base de la API de imágenes» (un endpoint compatible con OpenAI)."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
+msgid ""
+"The custom provider needs an 'API Base URL' (an OpenAI-compatible endpoint)."
+msgstr "El proveedor personalizado necesita una «URL base de la API» (un endpoint compatible con OpenAI)."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"The image provider returned no usable image. This usually means the prompt "
+"was blocked by its safety filter — try rewording the post's image brief."
+msgstr "El proveedor de imágenes no devolvió ninguna imagen utilizable. Normalmente significa que su filtro de seguridad bloqueó el prompt: prueba a reformular el brief de imagen de la publicación."
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_image.py:0
+msgid ""
+"The image provider returned no usable image. This usually means the prompt "
+"was rejected by its content filter — try rewording the post's image brief."
+msgstr "El proveedor de imágenes no devolvió ninguna imagen utilizable. Normalmente significa que su filtro de contenido rechazó el prompt: prueba a reformular el brief de imagen de la publicación."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__social_post_state
+msgid ""
+"The post is considered as 'Posted' when all its sub-posts (one per social "
+"account) are either 'Failed' or 'Posted'"
+msgstr "Se cuenta como \"publicado\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Themes/keywords to weave in"
+msgstr "Temas/palabras clave a incluir"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__keywords
+msgid "Themes/keywords to weave into the content."
+msgstr "Temas/palabras clave que se deben tejer en el contenido."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__timeout
+msgid "Timeout (s)"
+msgstr "Tiempo de espera (s)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__tone
+msgid "Tone"
+msgstr "Tono"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipo de la actividad de excepción registrada."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__font_hint
+msgid "Typography Hint"
+msgstr "Sugerencia tipográfica"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.actions.act_window,help:xb_social_ai_planner.action_xb_social_content_plan
+msgid "Use <b>Generate Month</b> to let AI build a full monthly plan."
+msgstr "Usa <b>Generar mes</b> para que la IA arme un plan mensual completo."
+
+#. module: xb_social_ai_planner
+#: model:res.groups,name:xb_social_ai_planner.group_xb_social_planner_user
+msgid "User"
+msgstr "Usuario"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__utm_campaign_id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__utm_campaign_id
+msgid "Utm Campaign"
+msgstr "Campaña UTM"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__value_proposition
+msgid "Value Proposition"
+msgstr "Propuesta de valor"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_count
+msgid "Variants per Post"
+msgstr "Variantes por publicación"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_ai_provider.py:0
+msgid "Variants per Post must be between 1 and 4."
+msgstr "«Variantes por publicación» debe estar entre 1 y 4."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__svg
+msgid "Vector design by the text model (no image key, no extra cost)"
+msgstr "Diseño vectorial con el modelo de texto (sin clave de imágenes ni costo extra)"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__video
+msgid "Video"
+msgstr "Video"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__video_brief
+msgid "Video Brief"
+msgstr "Brief de video"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Visual / Brand Kit"
+msgstr "Visual / Kit de marca"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__visual_style
+msgid "Visual Style"
+msgstr "Estilo visual"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Voice & Audience"
+msgstr "Voz y audiencia"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__website_message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__website_message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__website_message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__website_message_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__website_message_ids
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_competitor__website_message_ids
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__website_message_ids
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__website_message_ids
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__week_number
+msgid "Week Number"
+msgstr "Número de semana"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__account_ids
+msgid "Which connected accounts this plan targets."
+msgstr "A qué cuentas conectadas apunta este plan."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__banned_words
+msgid "Words to Avoid"
+msgstr "Palabras a evitar"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Words to avoid"
+msgstr "Palabras a evitar"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__twitter_message
+msgid "X Text"
+msgstr "Texto de X"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid "brand_profile_id"
+msgstr "brand_profile_id"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
+msgid "e.g. /opt/odoo/.claude (optional)"
+msgstr "p. ej. /opt/odoo/.claude (opcional)"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "e.g. Acme Coffee"
+msgstr "p. ej. Café Acme"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
+msgid "e.g. Competitor Co."
+msgstr "p. ej. Competidor S.A."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "e.g. elegant serif"
+msgstr "p. ej. serif elegante"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "id"
+msgstr "id"
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_kanban
+msgid "posts ·"
+msgstr "publicaciones ·"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid "the user's language"
+msgstr "el idioma del usuario"

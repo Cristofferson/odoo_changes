@@ -39,14 +39,21 @@ Key features
 * Multi-company, Odoo 19 privilege-based security, English / Spanish /
   Spanish (Mexico) translations bundled and auto-loaded.
 
-* **AI image generation** — optionally generate an on-brand image per post.
-  The AI designs a vector graphic from each post's brief and your brand kit
-  (palette, typography, logo), which is rasterised to PNG and attached to the
-  post — no separate image-generation API key required. (Requires the optional
-  ``cairosvg`` Python library; disabled gracefully when absent.)
+* **AI image generation, two ways** — optionally generate an on-brand image per
+  post, from that post's brief and your brand kit (palette, typography, logo):
 
-AI video (v2) plugs in through a separate, configurable media-generation
-provider.
+  * *Vector design by the text model* — the AI draws the graphic and the server
+    rasterises it to PNG. **No image API key and nothing billed per image.**
+    Ideal for typographic promos and brand cards. (Requires the optional
+    ``cairosvg`` Python library; disabled gracefully when absent.)
+  * *Photoreal image models (bring-your-own-key)* — OpenAI Images, Google
+    Gemini, or any OpenAI-compatible endpoint, with configurable model,
+    format (square / portrait / landscape), style, quality and number of
+    variants per post. The brief is automatically expanded into a proper
+    image prompt, the result is fitted to the exact social format, and your
+    logo is composited on top.
+
+AI video (v2) plugs in through the same pluggable media layer.
 """,
     "author": "Cristofferson Reyes",
     "maintainer": "XUBAX",
@@ -54,7 +61,7 @@ provider.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Marketing/Social Marketing",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "license": "OPL-1",
     "depends": [
         "social",

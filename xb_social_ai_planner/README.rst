@@ -13,8 +13,14 @@ Requirements
   ``social_facebook``, ``social_instagram``, ``social_linkedin``,
   ``social_twitter``).
 * An AI provider API key (Claude by default). Set it in
-  *Settings ▸ AI Social Planner*.
+  *Settings ▸ AI Social Planner*. Alternatively, point the provider at a
+  Claude Code CLI already installed on the server and use no key at all.
 * Python ``requests`` (ships with Odoo).
+* Optional, for images only:
+
+  * key-free vector images need the ``cairosvg`` Python library;
+  * photoreal images need an image API key (OpenAI or Gemini) in
+    *Settings ▸ AI Social Planner ▸ AI Image API Key*.
 
 Quick start
 ===========
@@ -26,5 +32,19 @@ Quick start
    minutes).
 5. Review/approve the posts, then **Push Approved** — they become scheduled
    ``social.post`` records and publish through Odoo's native pipeline.
+
+Images
+======
+Fill the **Brand Kit** tab of the brand profile (logo, palette, typography,
+visual style), then choose an **Image Provider** on the AI provider:
+
+* *Vector design by the text model* — no image key, nothing billed per image.
+  On-brand typographic graphics and promo cards.
+* *OpenAI Images* / *Google Gemini* — photoreal imagery, billed per image by
+  the provider. Set the format, style, quality and how many variants to
+  generate per post so an editor can pick.
+
+Either way the image is fitted to the social format and your logo is
+composited on top, then attached to the post.
 
 License: OPL-1. Author/Maintainer: XUBAX — https://www.xubax.com

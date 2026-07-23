@@ -12,7 +12,9 @@
             <field name="effort">high</field>
             <field name="max_tokens">8000</field>
             <field name="timeout">120</field>
-            <field name="image_provider_type">none</field>
+            <!-- Vector art via the text model: works out of the box with no
+                 second API key. Switch to OpenAI/Gemini for photoreal images. -->
+            <field name="image_provider_type">svg</field>
         </record>
     </data>
 </odoo>

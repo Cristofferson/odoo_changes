@@ -25,6 +25,7 @@ _logger = logging.getLogger(__name__)
 
 ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_ANTHROPIC_BASE = "https://api.anthropic.com"
+DEFAULT_OPENAI_BASE = "https://api.openai.com"
 
 # Tools the CLI must never invoke for plain text generation (defence in depth:
 # print mode rarely uses tools, but the planner only ever wants text back).
@@ -57,28 +58,17 @@ class XbSocialAiTransport(models.AbstractModel):
         raise NotImplementedError()
 
     @api.model
-    def generate_image(self, provider, brief, n=1, size="1080x1080"):
-        """Generate on-brand post image(s) without a dedicated image API.
+    def generate_image(self, provider, brief, n=1, size=None):
+        """Back-compatible shim.
 
-        Strategy: ask the (text) model for a single, self-contained SVG that
-        matches the art brief, then rasterise it to PNG with cairosvg. This
-        works for ANY text-capable provider (Anthropic HTTP or Claude Code
-        CLI) because it only relies on `generate_text`. Returns a list of
-        ``(png_bytes, mimetype)`` tuples.
+        Image generation moved to its own pluggable layer (`xb.social.ai.image`)
+        when photoreal backends were added; the vector backend still calls the
+        helpers below. Kept so existing integrations keep working.
         """
-        try:
-            width, height = (int(x) for x in str(size).lower().split("x"))
-        except (ValueError, TypeError):
-            width = height = 1080
-        system = self._image_svg_system(width, height)
-        images = []
-        for _i in range(max(1, n)):
-            text, _usage = self.generate_text(provider, system, brief)
-            svg = self._extract_svg(text)
-            images.append((self._svg_to_png(svg, width, height), "image/png"))
-        return images
+        backend = self.env["xb.social.ai.image"]._get_backend(provider)
+        return backend.generate_image(provider, brief, n=n)
 
-    # ----- image helpers ----------------------------------------------------
+    # ----- image helpers (used by the vector image backend) -----------------
     @api.model
     def _image_svg_system(self, width, height):
         return (
@@ -131,6 +121,38 @@ class XbSocialAiTransport(models.AbstractModel):
                 _("Could not rasterise the generated SVG: %s") % exc)
 
     # ----- shared helpers ---------------------------------------------------
+    @api.model
+    def _normalize_usage(self, usage):
+        """Return usage as {input_tokens, output_tokens} whatever the provider
+        calls it, so job auditing stays comparable across backends."""
+        usage = usage or {}
+        return {
+            "input_tokens": usage.get("input_tokens")
+            or usage.get("prompt_tokens") or 0,
+            "output_tokens": usage.get("output_tokens")
+            or usage.get("completion_tokens") or 0,
+        }
+
+    @api.model
+    def _parse_loose_json(self, text):
+        """Parse JSON from a model that gives no schema guarantee, tolerating
+        code fences or surrounding prose."""
+        s = (text or "").strip()
+        if s.startswith("```"):
+            s = s.strip("`").strip()
+            if s[:4].lower() == "json":
+                s = s[4:].strip()
+        try:
+            return json.loads(s)
+        except (ValueError, json.JSONDecodeError):
+            start, end = s.find("{"), s.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                try:
+                    return json.loads(s[start:end + 1])
+                except (ValueError, json.JSONDecodeError):
+                    pass
+        raise UserError(_("The AI returned malformed JSON."))
+
     @api.model
     def _resolve_api_key(self, provider):
         """Read the BYOK key from the company (system-only field) or, as a
@@ -224,7 +246,7 @@ class XbSocialAiTransportAnthropic(models.AbstractModel):
         if not text:
             raise UserError(_("The AI returned an empty response."))
 
-        usage = data.get("usage", {}) or {}
+        usage = self._normalize_usage(data.get("usage"))
         if json_schema:
             try:
                 parsed = json.loads(text)
@@ -234,6 +256,105 @@ class XbSocialAiTransportAnthropic(models.AbstractModel):
                 )
             return parsed, usage
         return text, usage
+
+
+class XbSocialAiTransportOpenai(models.AbstractModel):
+    """OpenAI (and any OpenAI-compatible gateway) via /v1/chat/completions.
+
+    Structured output is requested as a plain JSON object plus the schema in
+    the prompt, rather than the vendor-specific `json_schema` mode: it behaves
+    the same on every compatible endpoint and never rejects a schema a gateway
+    does not implement. The reply is parsed leniently.
+    """
+    _name = "xb.social.ai.transport.openai"
+    _inherit = "xb.social.ai.transport"
+    _description = "AI Transport — OpenAI (bring your own key)"
+
+    @api.model
+    def _base_url(self, provider):
+        return (provider.api_base_url or DEFAULT_OPENAI_BASE).rstrip("/")
+
+    @api.model
+    def generate_text(self, provider, system_prompt, user_prompt, json_schema=None):
+        api_key = self._resolve_api_key(provider)
+        url = "%s/v1/chat/completions" % self._base_url(provider)
+
+        prompt = user_prompt
+        body = {
+            "model": provider.text_model or "gpt-4.1",
+            "messages": [],
+            # Newer OpenAI models reject `max_tokens`.
+            "max_completion_tokens": provider.max_tokens or 8000,
+        }
+        if json_schema:
+            prompt = (
+                "%s\n\n---\nReturn a SINGLE valid JSON object and nothing else. "
+                "It MUST conform to this JSON Schema:\n%s"
+                % (user_prompt, json.dumps(json_schema))
+            )
+            body["response_format"] = {"type": "json_object"}
+        if system_prompt:
+            body["messages"].append({"role": "system", "content": system_prompt})
+        body["messages"].append({"role": "user", "content": prompt})
+
+        try:
+            resp = requests.post(
+                url,
+                headers={"Authorization": "Bearer %s" % api_key,
+                         "Content-Type": "application/json"},
+                json=body,
+                timeout=provider.timeout or 120,
+            )
+        except requests.exceptions.RequestException as exc:
+            raise UserError(_("Could not reach the AI provider: %s") % exc)
+
+        if resp.status_code >= 400:
+            detail = ""
+            try:
+                detail = resp.json().get("error", {}).get("message", "")
+            except ValueError:
+                detail = resp.text[:500]
+            if resp.status_code in (401, 403):
+                raise UserError(_(
+                    "The AI provider rejected the API key (HTTP %(code)s). "
+                    "Check it in Settings ▸ AI Social Planner. "
+                    "Details: %(detail)s", code=resp.status_code, detail=detail))
+            if resp.status_code == 429:
+                raise UserError(_(
+                    "AI provider rate limit or quota reached: %s") % detail)
+            raise UserError(
+                _("AI provider error (HTTP %s): %s") % (resp.status_code, detail))
+
+        data = resp.json()
+        choice = (data.get("choices") or [{}])[0]
+        if choice.get("finish_reason") == "length":
+            raise UserError(_(
+                "The AI response was cut off (token limit). Increase the "
+                "provider's Max Tokens and try again."))
+        text = (choice.get("message") or {}).get("content")
+        if not text:
+            raise UserError(_("The AI returned an empty response."))
+
+        usage = self._normalize_usage(data.get("usage"))
+        if json_schema:
+            return self._parse_loose_json(text), usage
+        return text, usage
+
+
+class XbSocialAiTransportCustom(models.AbstractModel):
+    """Any OpenAI-compatible chat endpoint (self-hosted model, proxy, gateway).
+    Same wire format; the base URL is mandatory."""
+    _name = "xb.social.ai.transport.custom"
+    _inherit = "xb.social.ai.transport.openai"
+    _description = "AI Transport — Custom (OpenAI-compatible endpoint)"
+
+    @api.model
+    def _base_url(self, provider):
+        if not provider.api_base_url:
+            raise UserError(_(
+                "The custom provider needs an 'API Base URL' (an "
+                "OpenAI-compatible endpoint)."))
+        return provider.api_base_url.rstrip("/")
 
 
 class XbSocialAiTransportClaudeCode(models.AbstractModel):
@@ -320,28 +441,12 @@ class XbSocialAiTransportClaudeCode(models.AbstractModel):
         if not text:
             raise UserError(_("The Claude Code CLI returned an empty response."))
 
-        # The CLI usage envelope already exposes input_tokens / output_tokens.
-        usage = envelope.get("usage", {}) or {}
+        usage = self._normalize_usage(envelope.get("usage"))
         if json_schema:
             return self._parse_cli_json(text), usage
         return text, usage
 
     @api.model
     def _parse_cli_json(self, text):
-        """Parse JSON returned by the CLI, tolerating stray code fences or
-        surrounding prose (the CLI gives no schema guarantee)."""
-        s = (text or "").strip()
-        if s.startswith("```"):
-            s = s.strip("`").strip()
-            if s[:4].lower() == "json":
-                s = s[4:].strip()
-        try:
-            return json.loads(s)
-        except (ValueError, json.JSONDecodeError):
-            start, end = s.find("{"), s.rfind("}")
-            if start != -1 and end != -1 and end > start:
-                try:
-                    return json.loads(s[start:end + 1])
-                except (ValueError, json.JSONDecodeError):
-                    pass
-        raise UserError(_("The Claude Code CLI returned malformed JSON."))
+        """Kept for backwards compatibility; the lenient parser is shared."""
+        return self._parse_loose_json(text)

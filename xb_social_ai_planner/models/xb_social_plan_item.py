@@ -202,13 +202,29 @@ class XbSocialPlanItem(models.Model):
         return usage
 
     # ----- image generation -------------------------------------------------
-    def _build_image_brief(self, brand):
-        """Compose the full art brief handed to the (SVG) image generator."""
+    def _build_image_brief(self, brand, mode="vector"):
+        """Compose the art brief handed to the image backend.
+
+        The two backend families want very different input: the vector one is
+        briefed like a designer (palette, typography, headline), the photoreal
+        ones like a photographer (subject, setting, light).
+        """
         self.ensure_one()
+        angle = self.theme or self.plan_id.monthly_theme or ""
+        if mode == "photo":
+            parts = [
+                "Photograph for a social media post.",
+                "The post is about: %s" % angle,
+                brand._image_photo_context(),
+            ]
+            if self.image_brief:
+                parts.append("Creative brief: %s" % self.image_brief)
+            return "\n".join(p for p in parts if p)
+
         parts = [
             brand._image_visual_context(),
-            "Design a single, square social-media post image for this post.",
-            "Post angle/theme: %s" % (self.theme or self.plan_id.monthly_theme or ""),
+            "Design a single social-media post image for this post.",
+            "Post angle/theme: %s" % angle,
         ]
         if self.image_brief:
             parts.append("Creative brief: %s" % self.image_brief)
@@ -251,11 +267,12 @@ class XbSocialPlanItem(models.Model):
         self.ensure_one()
         provider = job.provider_id or self.plan_id._get_provider()
         brand = self.plan_id.brand_profile_id
-        brief = self._build_image_brief(brand)
-        transport = self.env["xb.social.ai.transport"]._get_transport(provider)
+        backend = self.env["xb.social.ai.image"]._get_backend(provider)
+        brief = self._build_image_brief(brand, backend._brief_mode())
         job.request_payload = brief[:30000]
 
-        images = transport.generate_image(provider, brief, n=1)
+        images = backend.generate_image(
+            provider, brief, n=max(1, provider.image_count or 1))
         Attachment = self.env["ir.attachment"]
         created = self.env["ir.attachment"]
         for idx, (data, mimetype) in enumerate(images):
@@ -274,7 +291,19 @@ class XbSocialPlanItem(models.Model):
             self.generated_image_ids = [(4, a.id) for a in created]
             if not self.selected_image_ids:
                 self.selected_image_ids = [(6, 0, created[:1].ids)]
-            job.response_raw = _("Generated %s image(s).") % len(created)
+            # Image models bill per image, not per token: record what was
+            # produced and by whom so the cost is auditable from the job.
+            # The vector backend draws with the *text* model, not an image one.
+            used_model = (
+                provider.text_model if provider.image_provider_type == "svg"
+                else provider.image_model)
+            job.response_raw = _(
+                "Generated %(count)s image(s) via %(backend)s%(model)s.",
+                count=len(created),
+                backend=dict(provider._fields["image_provider_type"].selection).get(
+                    provider.image_provider_type, provider.image_provider_type),
+                model=" (%s)" % used_model if used_model else "",
+            )
         return {}
 
     # ----- approval ---------------------------------------------------------

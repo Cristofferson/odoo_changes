@@ -164,6 +164,7 @@ class XbSocialPlanItem(models.Model):
         user = (
             "Monthly theme: %s\n"
             "This post's angle: %s\n"
+            "Scheduled publication date: %s\n"
             "Write the copy for this single social post.\n"
             "Provide a base 'message' plus a tailored version per network, "
             "each within the network's character limit:\n%s\n"
@@ -171,6 +172,7 @@ class XbSocialPlanItem(models.Model):
         ) % (
             self.plan_id.monthly_theme or "",
             self.theme or "",
+            self.planned_date and self.planned_date.strftime("%d %B %Y") or "",
             net_lines,
         )
 

@@ -241,10 +241,26 @@ class XbSocialBrandProfile(models.Model):
             lines.append("Preferred call-to-action style: %s" % self.cta_style)
         lines.append("Emoji policy: %s." % (emoji or "light"))
         lines.append("Hashtag policy: %s." % (hashtags or "few"))
+        # Models date from their training cut-off and happily emit hashtags
+        # like #Weddings2024 years later, so state the date explicitly.
+        lines.append(
+            "Today's date is %s. Every year, season or dated hashtag you write "
+            "must match it; never use a year from the past."
+            % fields.Date.context_today(self).strftime("%d %B %Y")
+        )
         lines.append(
             "Infer current seasonal and industry trends and relevant hashtags "
             "from your own knowledge of this industry and the time of year. "
             "Do not invent real-time data, statistics, or breaking news."
+        )
+        # Anything a brand publishes is a factual claim about itself. The model
+        # has no way to check these, so it must never make them up.
+        lines.append(
+            "Never fabricate facts about the business: no invented customer "
+            "testimonials or named customers, no made-up prices, discounts, "
+            "promotions, deadlines, awards, statistics or events. Write only "
+            "from the brand information given above. If a post idea would need "
+            "such a fact, write it as a general invitation instead."
         )
         lines.append("Always respond with JSON matching the provided schema.")
         return "\n".join(lines)

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- A — Burbuja + chispa. Social (burbuja) atravesado por IA (destello).
+       El destello sale de la silueta por la esquina: es lo que hace que el
+       icono se lea a 64 px y que el cruce tenga su tercer color. -->
+  <defs>
+    <path id="a-bubble"
+          d="M18 22 h44 a15 15 0 0 1 15 15 v24 a15 15 0 0 1 -15 15 h-23
+             l-18 14 v-14 h-3 a15 15 0 0 1 -15 -15 v-24 a15 15 0 0 1 15 -15 z"/>
+    <path id="a-spark"
+          d="M72 4
+             Q78 27 98 33
+             Q78 39 72 62
+             Q66 39 46 33
+             Q66 27 72 4 z"/>
+    <clipPath id="a-clip"><use href="#a-bubble"/></clipPath>
+  </defs>
+  <use href="#a-bubble" fill="#1AD3BB"/>
+  <use href="#a-spark" fill="#985184"/>
+  <g clip-path="url(#a-clip)"><use href="#a-spark" fill="#005E7A"/></g>
+</svg>

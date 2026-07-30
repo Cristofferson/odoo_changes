@@ -1,0 +1,65 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  @font-face{font-family:Montserrat;
+    src:url("file:///odoo/custom-addons/theme_xubax/static/fonts/Montserrat-400.woff2") format("woff2");
+    font-weight:400}
+  @font-face{font-family:Montserrat;
+    src:url("file:///odoo/custom-addons/theme_xubax/static/fonts/Montserrat-600.woff2") format("woff2");
+    font-weight:600}
+  @font-face{font-family:Montserrat;
+    src:url("file:///odoo/custom-addons/theme_xubax/static/fonts/Montserrat-700.woff2") format("woff2");
+    font-weight:700}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:300px;overflow:hidden}
+  .banner{width:1200px;height:300px;background:#FFFFFF;display:flex;
+    align-items:center;gap:52px;padding:0 66px;position:relative;
+    font-family:Montserrat,sans-serif;color:#0B1517}
+  /* barra de la paleta nativa: firma de color sin degradados */
+  .rail{position:absolute;left:0;top:0;bottom:0;width:14px;display:flex;
+    flex-direction:column}
+  .rail i{flex:1;display:block}
+  .mark{flex:none;width:204px;height:204px}
+  .mark img{width:100%;height:100%;display:block}
+  .copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+  h1{font-weight:700;font-size:56px;line-height:1.04;letter-spacing:-.015em}
+  h1 em{font-style:normal;color:#005E7A}
+  p{font-weight:400;font-size:22px;line-height:1.4;color:#41575B;max-width:46ch}
+  .chips{display:flex;gap:10px;margin-top:4px}
+  .chip{font-weight:600;font-size:14.5px;letter-spacing:.01em;
+    padding:7px 15px;border-radius:999px;white-space:nowrap}
+  .c1{background:#E4FBF7;color:#046B5E}
+  .c2{background:#F5EBF2;color:#6E3A5F}
+  .c3{background:#FEF4E2;color:#8A5B08}
+  /* el mes en 12 publicaciones: llena el aire de la derecha sin ruido */
+  .month{margin-left:auto;flex:none;display:grid;gap:11px;
+    grid-template-columns:repeat(4,34px);grid-template-rows:repeat(3,34px)}
+  .month span{border-radius:9px;background:#E9EFEF;display:block}
+  .month .on1{background:#1AD3BB}
+  .month .on2{background:#005E7A}
+  .month .on3{background:#985184}
+  .month .on4{background:#FBB945}
+</style>
+<div class="banner">
+  <div class="rail">
+    <i style="background:#1AD3BB"></i>
+    <i style="background:#005E7A"></i>
+    <i style="background:#985184"></i>
+    <i style="background:#FBB945"></i>
+  </div>
+  <div class="mark"><img src="icon_master.png" alt=""></div>
+  <div class="copy">
+    <h1>AI Social<br><em>Content Planner</em></h1>
+    <p>Plans the month, writes every post, learns from what worked.</p>
+    <div class="chips">
+      <span class="chip c1">Learns from engagement</span>
+      <span class="chip c2">Refine with AI</span>
+      <span class="chip c3">Autopilot</span>
+    </div>
+  </div>
+  <div class="month" aria-hidden="true">
+    <span class="on1"></span><span></span><span class="on3"></span><span></span>
+    <span></span><span class="on2"></span><span></span><span class="on1"></span>
+    <span class="on4"></span><span></span><span class="on2"></span><span></span>
+  </div>
+</div>

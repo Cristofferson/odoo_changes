@@ -36,6 +36,10 @@ Changelog
   QA caught the model offering "certified gold" of its own accord.
 * Planner users can create generation jobs, which they need in order to launch
   an image or a refinement themselves.
+* **New icon and banner**, rebuilt in the Odoo 19 native icon typology (flat,
+  transparent, overlapping shapes, native palette) instead of the previous
+  gradient-in-a-rounded-square. Sources and how to re-render them are in
+  ``doc/art/``.
 
 19.0.1.3.0 (2026-07)
 --------------------

@@ -2,6 +2,7 @@
 import logging
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -25,10 +26,15 @@ class XbSocialGenerationJob(models.Model):
     job_type = fields.Selection(
         [("strategy", "Strategy"),
          ("item_copy", "Post Copy"),
+         ("item_refine", "Copy Refinement"),
          ("competitor", "Competitor Analysis"),
          ("image", "Image"),
          ("video", "Video")],
         required=True,
+    )
+    instruction = fields.Text(
+        string="Instruction",
+        help="What the user asked for, on a refinement job.",
     )
     state = fields.Selection(
         [("queued", "Queued"),
@@ -60,8 +66,12 @@ class XbSocialGenerationJob(models.Model):
             job.name = "%s — %s" % (labels.get(job.job_type, job.job_type), target)
 
     # ----- execution --------------------------------------------------------
-    def _run(self):
-        """Execute a single job. Dispatches to the plan/item generator."""
+    def _run(self, raise_on_error=False):
+        """Execute a single job. Dispatches to the plan/item generator.
+
+        The cron swallows failures so one bad job cannot stop the queue; jobs
+        launched straight from a dialog pass raise_on_error so the user sees
+        what went wrong instead of a silent no-op."""
         self.ensure_one()
         self.write({"state": "running", "started_at": fields.Datetime.now()})
         try:
@@ -69,6 +79,8 @@ class XbSocialGenerationJob(models.Model):
                 usage = self.plan_id._generate_strategy(self)
             elif self.job_type == "item_copy":
                 usage = self.item_id._generate_copy(self)
+            elif self.job_type == "item_refine":
+                usage = self.item_id._refine_copy(self)
             elif self.job_type == "competitor":
                 usage = self.competitor_id._generate_analysis(self)
             elif self.job_type == "image":
@@ -96,7 +108,9 @@ class XbSocialGenerationJob(models.Model):
                 self.competitor_id.message_post(body=body)
             elif self.plan_id:
                 self.plan_id.message_post(body=body)
-            # do not re-raise: keep the cron processing other jobs
+            if raise_on_error:
+                raise UserError(body) from exc
+            # otherwise do not re-raise: keep the cron processing other jobs
 
     @api.model
     def _cron_run_generation_jobs(self, limit=20):

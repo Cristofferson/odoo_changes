@@ -14,6 +14,9 @@
                     <button name="action_push_to_social" type="object"
                             string="Push to Social" class="btn-primary"
                             invisible="state != 'approved'"/>
+                    <button name="action_open_refine_wizard" type="object"
+                            string="Refine with AI"
+                            invisible="state in ('draft','pushed','posted')"/>
                     <button name="action_generate_image" type="object"
                             string="Generate Image"
                             invisible="state in ('pushed','posted')"/>
@@ -45,6 +48,7 @@
                             <field name="inferred_trends"/>
                             <field name="social_post_id" readonly="1"/>
                             <field name="social_post_state"/>
+                            <field name="engagement" invisible="not social_post_id"/>
                             <field name="is_split_per_media"/>
                         </group>
                     </group>
@@ -87,12 +91,18 @@
         <field name="model">xb.social.plan.item</field>
         <field name="arch" type="xml">
             <list string="Plan Items" editable="bottom">
+                <header>
+                    <button name="action_open_refine_wizard" type="object"
+                            string="Refine with AI"/>
+                    <button name="action_approve" type="object" string="Approve"/>
+                </header>
                 <field name="sequence" widget="handle"/>
                 <field name="planned_date"/>
                 <field name="theme"/>
                 <field name="message" optional="show"/>
                 <field name="account_ids" widget="many2many_tags" optional="hide"/>
                 <field name="length_warning" optional="show"/>
+                <field name="engagement" optional="hide" sum="Engagement"/>
                 <field name="state" widget="badge"
                        decoration-success="state in ('approved','pushed','posted')"
                        decoration-warning="state == 'needs_review'"

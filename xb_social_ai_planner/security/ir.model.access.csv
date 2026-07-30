@@ -9,6 +9,7 @@ access_xb_social_plan_item_user,xb.social.plan.item user,model_xb_social_plan_it
 access_xb_social_plan_item_manager,xb.social.plan.item manager,model_xb_social_plan_item,group_xb_social_planner_manager,1,1,1,1
 access_xb_social_ai_provider_user,xb.social.ai.provider user,model_xb_social_ai_provider,group_xb_social_planner_user,1,0,0,0
 access_xb_social_ai_provider_manager,xb.social.ai.provider manager,model_xb_social_ai_provider,group_xb_social_planner_manager,1,1,1,1
-access_xb_social_generation_job_user,xb.social.generation.job user,model_xb_social_generation_job,group_xb_social_planner_user,1,0,0,0
+access_xb_social_generation_job_user,xb.social.generation.job user,model_xb_social_generation_job,group_xb_social_planner_user,1,1,1,0
 access_xb_social_generation_job_manager,xb.social.generation.job manager,model_xb_social_generation_job,group_xb_social_planner_manager,1,1,1,1
 access_xb_social_generate_month_wizard_user,xb.social.generate.month.wizard user,model_xb_social_generate_month_wizard,group_xb_social_planner_user,1,1,1,1
+access_xb_social_refine_wizard_user,xb.social.refine.wizard user,model_xb_social_refine_wizard,group_xb_social_planner_user,1,1,1,1

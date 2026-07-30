@@ -87,6 +87,11 @@ class XbSocialPlanItem(models.Model):
     social_post_state = fields.Selection(
         related="social_post_id.state", string="Post Status", readonly=True,
     )
+    engagement = fields.Integer(
+        string="Engagement", compute="_compute_engagement",
+        help="Likes, comments and shares reported by the networks for this "
+             "post. Feeds the next plan when 'Learn From Past Results' is on.",
+    )
 
     # ----- compute ----------------------------------------------------------
     @api.depends("planned_date")
@@ -96,6 +101,12 @@ class XbSocialPlanItem(models.Model):
                 item.week_number = (item.planned_date.day - 1) // 7 + 1
             else:
                 item.week_number = 0
+
+    @api.depends("social_post_id.live_post_ids.engagement")
+    def _compute_engagement(self):
+        for item in self:
+            item.engagement = sum(
+                item.social_post_id.live_post_ids.mapped("engagement"))
 
     def _network_message(self, media_type):
         """Per-network copy, falling back to the base message."""
@@ -202,6 +213,92 @@ class XbSocialPlanItem(models.Model):
         # flag for review if any network is over its limit
         self.state = "needs_review" if self.length_warning else "generated"
         return usage
+
+    # ----- refinement --------------------------------------------------------
+    def _current_copy_block(self):
+        """The copy as it stands today, for the model to rewrite."""
+        self.ensure_one()
+        lines = ["Base text:\n%s" % (self.message or "")]
+        for mt, field in MEDIA_TO_FIELD.items():
+            if self[field] and self[field] != self.message:
+                lines.append("%s version:\n%s" % (mt, self[field]))
+        if self.hashtags:
+            lines.append("Hashtags: %s" % self.hashtags)
+        if self.cta:
+            lines.append("Call to action: %s" % self.cta)
+        return "\n\n".join(lines)
+
+    def _refine_copy(self, job):
+        """Rewrite this item's copy following the instruction carried by the
+        job. Called by the job runner, synchronously from the wizard."""
+        self.ensure_one()
+        provider = job.provider_id or self.plan_id._get_provider()
+        networks = self._max_lengths()
+        system = self.plan_id.brand_profile_id._ai_system_context()
+
+        net_lines = "\n".join(
+            "- %s (max %s characters)" % (mt, maxlen or "no limit")
+            for mt, maxlen in networks.items()
+        ) or "- generic"
+        user = (
+            "Here is an existing social post for this brand.\n\n%s\n\n"
+            "Rewrite it following this instruction:\n%s\n\n"
+            "Keep the same underlying angle (%s) and the same publication "
+            "date (%s) unless the instruction says otherwise. Return the full "
+            "rewritten copy — base text plus one version per network, each "
+            "within its limit:\n%s"
+        ) % (
+            self._current_copy_block(),
+            job.instruction or "",
+            self.theme or "",
+            self.planned_date and self.planned_date.strftime("%d %B %Y") or "",
+            net_lines,
+        )
+
+        schema = self._copy_schema(networks)
+        transport = self.env["xb.social.ai.transport"]._get_transport(provider)
+        job.request_payload = json.dumps({"system": system, "user": user})
+        parsed, usage = transport.generate_text(provider, system, user, schema)
+        job.response_raw = json.dumps(parsed)[:30000]
+
+        # Keep the previous wording in the chatter: refining is destructive and
+        # the user must be able to see (and copy back) what was there before.
+        self.message_post(
+            body=_("Copy refined — instruction: %(instruction)s"
+                   "<br/>Previous version:<br/><pre>%(previous)s</pre>",
+                   instruction=job.instruction or "",
+                   previous=self.message or ""))
+
+        vals = {
+            "message": parsed.get("message"),
+            "cta": parsed.get("cta"),
+            "hashtags": parsed.get("hashtags"),
+            "inferred_trends": parsed.get("inferred_trends"),
+        }
+        split = False
+        for mt in networks:
+            field = MEDIA_TO_FIELD[mt]
+            net_text = parsed.get(field)
+            if net_text:
+                vals[field] = net_text
+                if net_text != vals["message"]:
+                    split = True
+        vals["is_split_per_media"] = split
+        self.write(vals)
+        # A refined post has not been approved in its new wording.
+        self.state = "needs_review" if self.length_warning else "generated"
+        return usage
+
+    def action_open_refine_wizard(self):
+        """Open the 'refine with AI' dialog for the selected items."""
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Refine with AI"),
+            "res_model": "xb.social.refine.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_item_ids": [(6, 0, self.ids)]},
+        }
 
     # ----- image generation -------------------------------------------------
     def _build_image_brief(self, brand, mode="vector"):

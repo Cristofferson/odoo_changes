@@ -48,6 +48,9 @@
                             <field name="utm_campaign_id"/>
                             <field name="ai_provider_id"/>
                             <field name="also_generate_images"/>
+                            <field name="use_performance_feedback"/>
+                            <field name="review_user_id"/>
+                            <field name="created_by_autopilot" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
@@ -58,14 +61,28 @@
                             </group>
                             <field name="strategy_summary" readonly="1"/>
                         </page>
+                        <page string="Past Results" name="performance"
+                              invisible="not performance_preview">
+                            <div class="text-muted">
+                                What the AI is told about this brand's previous posts.
+                                Turn off <b>Learn From Past Results</b> to plan the
+                                month from scratch instead.
+                            </div>
+                            <field name="performance_preview" readonly="1" nolabel="1"/>
+                        </page>
                         <page string="Posts" name="posts">
                             <field name="item_ids" mode="kanban,list">
                                 <list editable="bottom">
+                                    <header>
+                                        <button name="action_open_refine_wizard"
+                                                type="object" string="Refine with AI"/>
+                                    </header>
                                     <field name="sequence" widget="handle"/>
                                     <field name="planned_date"/>
                                     <field name="theme"/>
                                     <field name="message"/>
                                     <field name="length_warning"/>
+                                    <field name="engagement" optional="hide"/>
                                     <field name="state" widget="badge"
                                            decoration-success="state in ('approved','pushed','posted')"
                                            decoration-warning="state == 'needs_review'"

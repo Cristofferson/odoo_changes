@@ -30,6 +30,21 @@ Key features
     server: **no API key, no per-call billing**. Ideal for in-house use.
 
   The provider and model are configurable. No vendor lock-in.
+* **Learns from what worked** — the real engagement of the brand's previous
+  posts (likes, comments, shares reported by the connected accounts) is fed
+  back into the next month's strategy: best and worst angles, image vs
+  text-only, best weekdays. The planner gets better every month, and you can
+  read exactly what it was told before generating.
+* **Refine with AI** — one click on any post (or a whole selection) to make it
+  shorter, warmer, more professional, emoji-free, or anything you type. Every
+  network version is rewritten at once and the previous wording is kept in the
+  chatter.
+* **Autopilot** — pick a day of the month and next month's plan builds itself,
+  then lands as an activity for whoever reviews it. Nothing is ever published
+  without approval.
+* **Your posting calendar, your rules** — choose the weekdays and the times of
+  day each brand publishes at; posts are spread evenly across them, in your
+  company's timezone.
 * **Per-network copy** — text generated per network (Facebook, Instagram,
   LinkedIn, X) respecting each network's maximum post length.
 * **Push to native publishing** — one click creates scheduled ``social.post``
@@ -61,7 +76,7 @@ AI video (v2) plugs in through the same pluggable media layer.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Marketing/Social Marketing",
-    "version": "19.0.1.3.0",
+    "version": "19.0.1.4.0",
     "license": "OPL-1",
     "depends": [
         "social",
@@ -79,6 +94,7 @@ AI video (v2) plugs in through the same pluggable media layer.
         "data/ir_cron_data.xml",
         "data/xb_social_ai_provider_data.xml",
         "wizard/xb_social_generate_month_wizard_views.xml",
+        "wizard/xb_social_refine_wizard_views.xml",
         "views/xb_social_brand_profile_views.xml",
         "views/xb_social_competitor_views.xml",
         "views/xb_social_ai_provider_views.xml",

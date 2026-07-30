@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
+import re
+from datetime import timedelta
+
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.addons.base.models.res_partner import _tz_get
+
+_logger = logging.getLogger(__name__)
+
+# "10:00", "18.30", "9h" ... anything that reads as a time of day.
+_TIME_RE = re.compile(r"^\s*(\d{1,2})\s*[:.hH]?\s*(\d{2})?\s*$")
 
 
 class XbSocialBrandProfile(models.Model):
@@ -73,6 +84,50 @@ class XbSocialBrandProfile(models.Model):
              "what to avoid.",
     )
 
+    # ----- posting windows --------------------------------------------------
+    post_mon = fields.Boolean(string="Monday", default=True)
+    post_tue = fields.Boolean(string="Tuesday", default=True)
+    post_wed = fields.Boolean(string="Wednesday", default=True)
+    post_thu = fields.Boolean(string="Thursday", default=True)
+    post_fri = fields.Boolean(string="Friday", default=True)
+    post_sat = fields.Boolean(string="Saturday")
+    post_sun = fields.Boolean(string="Sunday")
+    posting_times = fields.Char(
+        string="Posting Times", default="10:00",
+        help="Times of day the posts are scheduled at, separated by commas "
+             "(e.g. 10:00, 18:30). When several are given they are used in "
+             "turn.",
+    )
+    tz = fields.Selection(
+        _tz_get, string="Timezone",
+        default=lambda self: self.env.user.tz or "UTC",
+        help="Timezone the posting times are expressed in. Set it explicitly: "
+             "the autopilot runs unattended and must not depend on whoever "
+             "happens to trigger it.",
+    )
+
+    # ----- autopilot ---------------------------------------------------------
+    autopilot = fields.Boolean(
+        string="Autopilot",
+        help="Generate next month's plan automatically and notify the person "
+             "in charge so they only have to review and approve it.",
+    )
+    autopilot_day = fields.Integer(
+        string="Generate On Day", default=25,
+        help="Day of the month the next month's plan is generated on.",
+    )
+    autopilot_user_id = fields.Many2one(
+        "res.users", string="Notify",
+        help="Who gets the review activity once the plan is generated.",
+    )
+    autopilot_posts_per_week = fields.Integer(
+        string="Autopilot Posts / Week", default=3,
+    )
+    autopilot_images = fields.Boolean(
+        string="Autopilot Images",
+        help="Also generate the images for the automatically created plan.",
+    )
+
     default_utm_campaign_id = fields.Many2one(
         "utm.campaign", string="Default Campaign",
         domain="[('is_auto_campaign', '=', False)]",
@@ -120,6 +175,221 @@ class XbSocialBrandProfile(models.Model):
             "domain": [("brand_profile_id", "=", self.id)],
             "context": {"default_brand_profile_id": self.id},
         }
+
+    # ----- posting windows --------------------------------------------------
+    _WEEKDAY_FIELDS = ("post_mon", "post_tue", "post_wed", "post_thu",
+                       "post_fri", "post_sat", "post_sun")
+
+    def _posting_weekdays(self):
+        """Weekday numbers (Mon=0 … Sun=6) the brand publishes on.
+        Falls back to Mon-Fri when the profile has every day switched off."""
+        self.ensure_one()
+        days = [idx for idx, fname in enumerate(self._WEEKDAY_FIELDS) if self[fname]]
+        return days or [0, 1, 2, 3, 4]
+
+    @api.model
+    def _parse_posting_times(self, raw):
+        """Parse the free-text posting times into sorted (hour, minute) tuples.
+        Returns an empty list when nothing parses, so callers can fall back."""
+        times = []
+        for chunk in (raw or "").replace(";", ",").split(","):
+            if not chunk.strip():
+                continue
+            match = _TIME_RE.match(chunk)
+            if not match:
+                return []
+            hour = int(match.group(1))
+            minute = int(match.group(2) or 0)
+            if hour > 23 or minute > 59:
+                return []
+            times.append((hour, minute))
+        return sorted(set(times))
+
+    def _posting_times(self):
+        """Times of day to publish at, defaulting to a single 10:00 slot."""
+        self.ensure_one()
+        return self._parse_posting_times(self.posting_times) or [(10, 0)]
+
+    @api.constrains("posting_times")
+    def _check_posting_times(self):
+        for profile in self:
+            if profile.posting_times and not self._parse_posting_times(
+                    profile.posting_times):
+                raise ValidationError(self.env._(
+                    "'%(value)s' is not a valid list of posting times. Use 24h "
+                    "times separated by commas, for example: 10:00, 18:30",
+                    value=profile.posting_times,
+                ))
+
+    @api.constrains("autopilot_day")
+    def _check_autopilot_day(self):
+        for profile in self:
+            if profile.autopilot and not 1 <= profile.autopilot_day <= 28:
+                raise ValidationError(self.env._(
+                    "The autopilot day must be between 1 and 28 so it exists "
+                    "in every month."))
+
+    def _tz(self):
+        """Timezone the brand's posting times are expressed in."""
+        self.ensure_one()
+        return (self.tz
+                or self.company_id.partner_id.tz
+                or self.env.user.tz
+                or "UTC")
+
+    # ----- performance feedback ---------------------------------------------
+    # How many published posts must carry engagement figures before we let the
+    # numbers steer the next plan. Below this it is noise, not a signal.
+    _PERF_MIN_POSTS = 3
+    # How far back to look. A year of posts is plenty and keeps the prompt small.
+    _PERF_SAMPLE = 60
+
+    def _scored_history(self):
+        """[(engagement, item)] for this brand's already-published posts that
+        carry engagement figures, best first. Empty when there is nothing to
+        learn from yet (fresh install, or the account statistics never synced)."""
+        self.ensure_one()
+        items = self.env["xb.social.plan.item"].search(
+            [("plan_id.brand_profile_id", "=", self.id),
+             ("social_post_id", "!=", False),
+             ("planned_date", "<", fields.Datetime.now())],
+            order="planned_date desc", limit=self._PERF_SAMPLE,
+        )
+        scored = []
+        for item in items:
+            live = item.social_post_id.live_post_ids.filtered(
+                lambda lp: lp.state == "posted")
+            if live:
+                scored.append((sum(live.mapped("engagement")), item))
+        # All-zero means the statistics were never fetched from the networks;
+        # feeding a flat ranking to the model would teach it nothing.
+        if len(scored) < self._PERF_MIN_POSTS or not any(s for s, _i in scored):
+            return []
+        return sorted(scored, key=lambda pair: pair[0], reverse=True)
+
+    def _describe_post_result(self, engagement, item):
+        """One human-readable line about how a published post did."""
+        local = fields.Datetime.context_timestamp(item, item.planned_date)
+        networks = ", ".join(sorted(set(
+            item.social_post_id.live_post_ids.mapped("account_id.media_id.name")
+        ))) or "—"
+        return "- \"%s\" — %s at %s, %s, %s: %d engagements" % (
+            (item.theme or "").strip() or "(untitled)",
+            local.strftime("%A"),
+            local.strftime("%H:%M"),
+            networks,
+            "with image" if item.selected_image_ids else "text only",
+            engagement,
+        )
+
+    def _performance_context(self):
+        """Real engagement figures from this brand's previous AI-planned posts,
+        rendered for the strategy prompt. Empty string when there is no signal
+        yet, so the prompt simply omits the section."""
+        self.ensure_one()
+        scored = self._scored_history()
+        if not scored:
+            return ""
+
+        best = scored[:5]
+        # Only contrast with the worst performers once the sample is big enough
+        # for "worst" to mean something other than "the other two".
+        worst = scored[-3:] if len(scored) >= 8 else []
+
+        lines = [
+            "Real engagement results from this brand's previous posts "
+            "(likes, comments and shares reported by the connected accounts). "
+            "Use them: repeat what worked, drop what did not.",
+            "Best performing:",
+        ]
+        lines += [self._describe_post_result(s, i) for s, i in best]
+        if worst:
+            lines.append("Worst performing:")
+            lines += [self._describe_post_result(s, i)
+                      for s, i in reversed(worst)]
+
+        # Aggregates say more than any single post: they are what tells the
+        # model to shift the whole month, not just imitate one lucky angle.
+        with_image = [s for s, i in scored if i.selected_image_ids]
+        without = [s for s, i in scored if not i.selected_image_ids]
+        if with_image and without:
+            lines.append(
+                "Average engagement with an image: %d, without: %d."
+                % (sum(with_image) / len(with_image),
+                   sum(without) / len(without)))
+
+        by_day = {}
+        for score, item in scored:
+            local = fields.Datetime.context_timestamp(item, item.planned_date)
+            by_day.setdefault(local.strftime("%A"), []).append(score)
+        if len(by_day) > 1:
+            ranked = sorted(
+                ((sum(v) / len(v), day) for day, v in by_day.items()),
+                reverse=True)
+            lines.append(
+                "Average engagement by weekday: %s."
+                % ", ".join("%s %d" % (day, avg) for avg, day in ranked))
+        return "\n".join(lines)
+
+    # ----- autopilot ---------------------------------------------------------
+    def _autopilot_target_month(self, today):
+        """First day of the month the autopilot should be planning right now."""
+        return (today.replace(day=1) + timedelta(days=32)).replace(day=1)
+
+    def _autopilot_create_plan(self, month):
+        """Build next month's plan and start generating it. Returns the plan."""
+        self.ensure_one()
+        plan = self.env["xb.social.content.plan"].create({
+            "brand_profile_id": self.id,
+            "company_id": self.company_id.id or self.env.company.id,
+            "plan_date": month,
+            "account_ids": [(6, 0, self.default_account_ids.ids)],
+            "utm_campaign_id": self.default_utm_campaign_id.id or False,
+            "posts_per_week": self.autopilot_posts_per_week or 3,
+            "also_generate_images": self.autopilot_images,
+            "created_by_autopilot": True,
+            "review_user_id": self.autopilot_user_id.id or False,
+        })
+        plan.action_generate()
+        return plan
+
+    @api.model
+    def _cron_autopilot(self):
+        """Generate next month's plan for every brand on autopilot.
+
+        Runs daily and fires from the configured day onwards, so a server that
+        was down on the day itself still catches up. Idempotent: a brand that
+        already has a plan for the target month is skipped."""
+        today = fields.Date.context_today(self)
+        profiles = self.search([("autopilot", "=", True)])
+        Plan = self.env["xb.social.content.plan"]
+        for profile in profiles:
+            if today.day < (profile.autopilot_day or 25):
+                continue
+            month = profile._autopilot_target_month(today)
+            if Plan.search_count([("brand_profile_id", "=", profile.id),
+                                  ("plan_date", "=", month)]):
+                continue
+            if not profile.default_account_ids:
+                profile.message_post(body=self.env._(
+                    "Autopilot could not generate the plan for %(month)s: this "
+                    "brand profile has no default accounts.",
+                    month=month.strftime("%B %Y"),
+                ))
+                continue
+            try:
+                profile._autopilot_create_plan(month)
+                self.env.cr.commit()
+            except Exception as exc:  # noqa: BLE001 — one brand must not stop the rest
+                self.env.cr.rollback()
+                _logger.warning(
+                    "[xb_social_ai_planner] autopilot failed for brand %s: %s",
+                    profile.id, exc)
+                profile.message_post(body=self.env._(
+                    "Autopilot could not generate the plan for %(month)s: "
+                    "%(error)s", month=month.strftime("%B %Y"), error=exc))
+                self.env.cr.commit()
+        return True
 
     def _image_visual_context(self):
         """Art-direction block injected into the image (SVG) prompt. Keeps the
@@ -258,9 +528,11 @@ class XbSocialBrandProfile(models.Model):
         lines.append(
             "Never fabricate facts about the business: no invented customer "
             "testimonials or named customers, no made-up prices, discounts, "
-            "promotions, deadlines, awards, statistics or events. Write only "
-            "from the brand information given above. If a post idea would need "
-            "such a fact, write it as a general invitation instead."
+            "promotions, deadlines, awards, statistics or events, and no "
+            "certifications, guarantees, insurance, materials or origin claims "
+            "that are not stated above. Write only from the brand information "
+            "given above. If a post idea would need such a fact, write it as a "
+            "general invitation instead."
         )
         lines.append("Always respond with JSON matching the provided schema.")
         return "\n".join(lines)

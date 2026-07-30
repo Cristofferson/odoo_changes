@@ -1,14 +1,19 @@
-#  Translation template translation for xb_social_ai_planner.
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* xb_social_ai_planner
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.0\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"Last-Translator: XUBAX\n"
+"POT-Creation-Date: 2026-07-30 05:31+0000\n"
+"PO-Revision-Date: 2026-07-30 05:31+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: xb_social_ai_planner
 #. odoo-python
@@ -28,6 +33,25 @@ msgstr ""
 msgid ""
 "%(provider)s rejected the image API key (HTTP %(code)s). Check 'AI Image API"
 " Key' in Settings ▸ AI Social Planner. Details: %(detail)s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "%s generation job(s) failed."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid ""
+"'%(value)s' is not a valid list of posting times. Use 24h times separated by"
+" commas, for example: 10:00, 18:30"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "10:00, 18:30"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -122,6 +146,11 @@ msgstr ""
 #: model:res.groups.privilege,name:xb_social_ai_planner.res_groups_privilege_xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.res_config_settings_view_form_xb_social
 msgid "AI Social Planner"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.actions.server,name:xb_social_ai_planner.ir_cron_autopilot_ir_actions_server
+msgid "AI Social Planner: Autopilot"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -266,6 +295,11 @@ msgid "Also Generate Images"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_images
+msgid "Also generate the images for the automatically created plan."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__keywords
 msgid "Always-on Keywords"
 msgstr ""
@@ -297,6 +331,7 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
 msgid "Approve"
 msgstr ""
 
@@ -358,6 +393,36 @@ msgid "Automatic"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Autopilot"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_images
+msgid "Autopilot Images"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_posts_per_week
+msgid "Autopilot Posts / Week"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid "Autopilot could not generate the plan for %(month)s: %(error)s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid ""
+"Autopilot could not generate the plan for %(month)s: this brand profile has "
+"no default accounts."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__brand_profile_id
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__brand_profile_id
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
@@ -406,6 +471,7 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
 msgid "Cancel"
 msgstr ""
 
@@ -523,6 +589,19 @@ msgid "Copy"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__job_type__item_refine
+msgid "Copy Refinement"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid ""
+"Copy refined — instruction: %(instruction)s<br/>Previous "
+"version:<br/><pre>%(previous)s</pre>"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
 msgid "Could not fetch the page: %s"
@@ -557,6 +636,11 @@ msgid "Create your first content plan"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__created_by_autopilot
+msgid "Created By Autopilot"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__create_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__create_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__create_uid
@@ -564,6 +648,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__create_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__create_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__create_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__create_uid
 msgid "Created by"
 msgstr ""
 
@@ -575,6 +660,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__create_date
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__create_date
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__create_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__create_date
 msgid "Created on"
 msgstr ""
 
@@ -587,6 +673,16 @@ msgstr ""
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__custom
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__custom
 msgid "Custom (OpenAI-compatible endpoint)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__custom
+msgid "Custom instruction"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_day
+msgid "Day of the month the next month's plan is generated on."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -604,6 +700,13 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__default_utm_campaign_id
 msgid "Default Campaign"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_refine_wizard__instruction
+msgid ""
+"Describe the change in your own words, e.g. 'mention the lifetime warranty' "
+"or 'do not talk about prices'."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -631,6 +734,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__display_name
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__display_name
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__display_name
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__display_name
 msgid "Display Name"
 msgstr ""
 
@@ -662,6 +766,12 @@ msgid "Emoji Policy"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__engagement
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
+msgid "Engagement"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__image_prompt_boost
 msgid "Enrich Image Prompt"
 msgstr ""
@@ -673,6 +783,14 @@ msgid "Error Message"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__performance_preview
+msgid ""
+"Exactly what the past-results section of the prompt will say. Empty until "
+"enough posts have been published and their statistics fetched from the "
+"networks."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__facebook_message
 msgid "Facebook Text"
 msgstr ""
@@ -681,6 +799,13 @@ msgstr ""
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__failed
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__failed
 msgid "Failed"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__use_performance_feedback
+msgid ""
+"Feed the engagement figures of this brand's previous posts into the "
+"strategy, so the plan leans on what actually worked."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -734,8 +859,22 @@ msgid ""
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_fri
+msgid "Friday"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
 msgid "Friendly, expert, concise…"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid ""
+"From that day of the month onwards, next month's plan is\n"
+"                                generated automatically using the default accounts, and\n"
+"                                the person above gets an activity to review and approve\n"
+"                                it. Nothing is published without approval."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -757,6 +896,18 @@ msgstr ""
 #: model:ir.model,name:xb_social_ai_planner.model_xb_social_generate_month_wizard
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
 msgid "Generate Monthly Content Plan"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_day
+msgid "Generate On Day"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot
+msgid ""
+"Generate next month's plan automatically and notify the person in charge so "
+"they only have to review and approve it."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -797,6 +948,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
 msgid "Generation Jobs"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
+msgid "Gets an activity to review the plan once the AI is done."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -889,6 +1045,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__id
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__id
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__id
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__id
 msgid "ID"
 msgstr ""
 
@@ -1043,6 +1200,12 @@ msgid "Instagram Text"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__instruction
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__instruction
+msgid "Instruction"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_is_follower
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_is_follower
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_is_follower
@@ -1058,6 +1221,7 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__item_count
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__item_count
 msgid "Item Count"
 msgstr ""
 
@@ -1106,6 +1270,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__write_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__write_uid
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__write_uid
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__write_uid
 msgid "Last Updated by"
 msgstr ""
 
@@ -1117,7 +1282,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__write_date
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__write_date
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__write_date
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__write_date
 msgid "Last Updated on"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__use_performance_feedback
+msgid "Learn From Past Results"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1149,6 +1320,13 @@ msgid "Light"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__engagement
+msgid ""
+"Likes, comments and shares reported by the networks for this post. Feeds the"
+" next plan when 'Learn From Past Results' is on."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__linkedin_message
 msgid "LinkedIn Text"
 msgstr ""
@@ -1168,6 +1346,16 @@ msgstr ""
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__effort__low
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_quality__low
 msgid "Low"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__longer
+msgid "Make it longer"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__shorter
+msgid "Make it shorter"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1220,6 +1408,11 @@ msgid "Model id used for strategy and copy generation."
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_mon
+msgid "Monday"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__plan_date
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__plan_date
 msgid "Month"
@@ -1228,6 +1421,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__monthly_theme
 msgid "Monthly Theme"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__professional
+msgid "More professional"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1343,6 +1541,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
 msgid ""
+"No posting slot fits this month. Check the posting days and times on brand "
+"profile '%s'."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid ""
 "None of the selected accounts belong to a supported network (Facebook, "
 "Instagram, LinkedIn, X)."
 msgstr ""
@@ -1350,6 +1556,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__notes
 msgid "Notes"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
+msgid "Notify"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1429,6 +1640,11 @@ msgid "Optional. Embedded into AI-generated post images."
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid "Optional: anything else to change"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
 msgid "Other"
 msgstr ""
@@ -1471,6 +1687,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
 msgid "Palette"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid "Past Results"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1607,8 +1828,20 @@ msgid "Posted"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Posting Days"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__posting_times
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Posting Times"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_plan_item
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__item_ids
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__item_ids
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid "Posts"
 msgstr ""
@@ -1617,6 +1850,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__posts_per_week
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generate_month_wizard__posts_per_week
 msgid "Posts / Week"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid ""
+"Posts are spread evenly across the days and\n"
+"                                        times chosen here."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1702,6 +1942,26 @@ msgid "Reasoning/output effort. Higher = better quality, more tokens."
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid "Refine"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_refine_wizard
+msgid "Refine Post Copy with AI"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid "Refine with AI"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
 msgid "Reject"
 msgstr ""
@@ -1709,6 +1969,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__rejected
 msgid "Rejected"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__no_emoji
+msgid "Remove the emojis"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1742,6 +2007,17 @@ msgid "Responsible User"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid "Review the AI content plan"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
+msgid "Reviewer"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_generation_job__state__running
 msgid "Running"
 msgstr ""
@@ -1758,6 +2034,16 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__manual_samples
 msgid "Sample Posts (pasted)"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_sat
+msgid "Saturday"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Schedule & Autopilot"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1802,6 +2088,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/xb_social_ai_planner/wizard/xb_social_generate_month_wizard.py:0
 msgid "Select at least one account."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_refine_wizard.py:0
+msgid "Select at least one post."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1908,8 +2200,18 @@ msgid "Strategy Summary"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__stronger_cta
+msgid "Stronger call to action"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_style__product
 msgid "Studio product shot"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_sun
+msgid "Sunday"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1961,6 +2263,13 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
+msgid ""
+"The AI plan for %(month)s is ready: %(count)s posts to review and approve."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_ai_transport.py:0
 msgid ""
 "The AI provider rejected the API key (HTTP %(code)s). Check it in Settings ▸"
@@ -2002,6 +2311,14 @@ msgid "The AI returned malformed JSON: %s"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid ""
+"The AI rewrites the copy for every network at once. The\n"
+"                        previous wording is kept in the post's chatter, and the\n"
+"                        post goes back to review so you approve the new one."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_ai_provider_view_form
 msgid "The API key is set in Settings ▸ AI Social Planner, not here."
 msgstr ""
@@ -2018,6 +2335,13 @@ msgstr ""
 msgid ""
 "The Claude Code CLI timed out after %ss. Increase the provider's Timeout or "
 "lower Effort."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_brand_profile.py:0
+msgid ""
+"The autopilot day must be between 1 and 28 so it exists in every month."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2064,6 +2388,11 @@ msgid ""
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid "The same instruction is applied to"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
 msgid "Themes/keywords to weave in"
 msgstr ""
@@ -2074,13 +2403,51 @@ msgid "Themes/keywords to weave into the content."
 msgstr ""
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_refine_wizard.py:0
+msgid ""
+"These posts have already been pushed to Social Marketing and can no longer "
+"be refined here: %s"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_thu
+msgid "Thursday"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__timeout
 msgid "Timeout (s)"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__posting_times
+msgid ""
+"Times of day the posts are scheduled at, separated by commas (e.g. 10:00, "
+"18:30). When several are given they are used in turn."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__tz
+msgid "Timezone"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__tz
+msgid ""
+"Timezone the posting times are expressed in. Set it explicitly: the "
+"autopilot runs unattended and must not depend on whoever happens to trigger "
+"it."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__tone
 msgid "Tone"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_tue
+msgid "Tuesday"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2156,6 +2523,11 @@ msgid "Voice & Audience"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_refine_wizard__preset__warmer
+msgid "Warmer, more human"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__website_message_ids
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__website_message_ids
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__website_message_ids
@@ -2174,13 +2546,46 @@ msgid "Website communication history"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__post_wed
+msgid "Wednesday"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__week_number
 msgid "Week Number"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__performance_preview
+msgid "What the AI Learned"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
+msgid ""
+"What the AI is told about this brand's previous posts.\n"
+"                                Turn off <b>Learn From Past Results</b> to plan the\n"
+"                                month from scratch instead."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__instruction
+msgid "What the user asked for, on a refinement job."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__preset
+msgid "What to change"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__account_ids
 msgid "Which connected accounts this plan targets."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
+msgid "Who gets the review activity once the plan is generated."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2191,6 +2596,12 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
 msgid "Words to avoid"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_refine_wizard.py:0
+msgid "Write the instruction for the AI."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2233,6 +2644,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_kanban
 msgid "posts ·"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_refine_wizard_form
+msgid "posts."
 msgstr ""
 
 #. module: xb_social_ai_planner

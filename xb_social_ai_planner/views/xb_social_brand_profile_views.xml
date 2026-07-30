@@ -49,6 +49,49 @@
                                 <field name="banned_words" placeholder="Words to avoid"/>
                             </group>
                         </page>
+                        <page string="Schedule &amp; Autopilot" name="schedule">
+                            <group>
+                                <group string="Posting Days">
+                                    <field name="post_mon"/>
+                                    <field name="post_tue"/>
+                                    <field name="post_wed"/>
+                                    <field name="post_thu"/>
+                                    <field name="post_fri"/>
+                                    <field name="post_sat"/>
+                                    <field name="post_sun"/>
+                                </group>
+                                <group string="Posting Times">
+                                    <field name="posting_times" placeholder="10:00, 18:30"/>
+                                    <field name="tz"/>
+                                    <div class="text-muted" colspan="2">
+                                        Posts are spread evenly across the days and
+                                        times chosen here.
+                                    </div>
+                                </group>
+                            </group>
+                            <group string="Autopilot">
+                                <group>
+                                    <field name="autopilot"/>
+                                    <field name="autopilot_day"
+                                           invisible="not autopilot"
+                                           required="autopilot"/>
+                                    <field name="autopilot_user_id"
+                                           invisible="not autopilot"/>
+                                </group>
+                                <group>
+                                    <field name="autopilot_posts_per_week"
+                                           invisible="not autopilot"/>
+                                    <field name="autopilot_images"
+                                           invisible="not autopilot"/>
+                                </group>
+                            </group>
+                            <div class="text-muted" invisible="not autopilot">
+                                From that day of the month onwards, next month's plan is
+                                generated automatically using the default accounts, and
+                                the person above gets an activity to review and approve
+                                it. Nothing is published without approval.
+                            </div>
+                        </page>
                         <page string="Visual / Brand Kit" name="visual">
                             <group>
                                 <group string="Logo">

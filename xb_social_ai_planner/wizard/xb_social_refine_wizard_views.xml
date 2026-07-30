@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_social_refine_wizard_form" model="ir.ui.view">
+        <field name="name">xb.social.refine.wizard.form</field>
+        <field name="model">xb.social.refine.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Refine with AI">
+                <sheet>
+                    <field name="item_ids" invisible="1"/>
+                    <field name="item_count" invisible="1"/>
+                    <div class="alert alert-info" role="status"
+                         invisible="item_count &lt; 2">
+                        The same instruction is applied to
+                        <field name="item_count" class="oe_inline" readonly="1"/>
+                        posts.
+                    </div>
+                    <group>
+                        <field name="preset" widget="radio"/>
+                        <field name="instruction" widget="text"
+                               placeholder="Optional: anything else to change"
+                               required="preset == 'custom'"/>
+                    </group>
+                    <div class="text-muted">
+                        The AI rewrites the copy for every network at once. The
+                        previous wording is kept in the post's chatter, and the
+                        post goes back to review so you approve the new one.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_refine" type="object" string="Refine"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

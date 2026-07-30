@@ -1,6 +1,42 @@
 Changelog
 =========
 
+19.0.1.4.0 (2026-07)
+--------------------
+* **The planner learns from what worked.** Real engagement figures reported by
+  the connected accounts (``social.live.post.engagement``) for the brand's
+  previous posts are fed back into the next month's strategy prompt: best and
+  worst angles, average engagement with an image vs text-only, and a ranking by
+  weekday. A **Past Results** tab on the plan shows verbatim what the AI will
+  be told, and a switch turns the whole thing off. Silent until at least three
+  published posts carry statistics, so a fresh install behaves as before.
+  Engagement is also readable per post, in the form and as a list column.
+* **Refine with AI.** New dialog on one post or a whole selection: shorter,
+  longer, warmer, more professional, emoji-free, stronger CTA, or a free-text
+  instruction (which can be combined with a preset). Every network version is
+  rewritten in one call, the previous wording is kept in the chatter, and the
+  post returns to review. Runs synchronously — waiting for the queue to pick up
+  a one-line tweak is not an edit loop anyone would use. Posts already pushed
+  to Social Marketing are refused with a clear message.
+* **Autopilot.** Per brand profile: from a chosen day of the month, next
+  month's plan is generated automatically from the default accounts, and the
+  designated reviewer gets a *Review the AI content plan* activity when it is
+  ready. Idempotent and catch-up safe — a day the server was down is picked up
+  the next morning; a brand with no default accounts is reported in its chatter
+  instead of failing silently. Nothing is ever published without approval.
+* **Posting windows.** The posting weekdays and times of day are configurable
+  per brand (they were hard-coded to Monday-Friday at 10:00), together with an
+  explicit timezone, and posts are spread evenly across the resulting slots.
+* Fixed: planned dates were stored as if the local wall-clock time were UTC, so
+  a plan meant for 10:00 published at 04:00 in a UTC-6 country. Times are now
+  converted from the brand's timezone. **Plans generated before this version
+  keep their old times** — check any pending schedule.
+* The copy prompt now also forbids inventing certifications, guarantees,
+  insurance, and materials or origin claims that are not in the brand profile.
+  QA caught the model offering "certified gold" of its own accord.
+* Planner users can create generation jobs, which they need in order to launch
+  an image or a refinement themselves.
+
 19.0.1.3.0 (2026-07)
 --------------------
 * **Photoreal image generation (bring-your-own-key).** Image generation is now

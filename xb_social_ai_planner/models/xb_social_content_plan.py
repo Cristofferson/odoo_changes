@@ -3,6 +3,8 @@ import calendar
 import json
 from datetime import datetime, timedelta
 
+import pytz
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -38,6 +40,22 @@ class XbSocialContentPlan(models.Model):
     ai_provider_id = fields.Many2one("xb.social.ai.provider", string="AI Provider")
 
     posts_per_week = fields.Integer(string="Posts / Week", default=3)
+    use_performance_feedback = fields.Boolean(
+        string="Learn From Past Results", default=True,
+        help="Feed the engagement figures of this brand's previous posts into "
+             "the strategy, so the plan leans on what actually worked.",
+    )
+    performance_preview = fields.Text(
+        string="What the AI Learned", compute="_compute_performance_preview",
+        help="Exactly what the past-results section of the prompt will say. "
+             "Empty until enough posts have been published and their "
+             "statistics fetched from the networks.",
+    )
+    created_by_autopilot = fields.Boolean(readonly=True, copy=False)
+    review_user_id = fields.Many2one(
+        "res.users", string="Reviewer", copy=False,
+        help="Gets an activity to review the plan once the AI is done.",
+    )
     target_post_count = fields.Integer(
         string="Target Posts", compute="_compute_target_post_count",
         store=True, readonly=False,
@@ -79,6 +97,15 @@ class XbSocialContentPlan(models.Model):
     def _compute_target_post_count(self):
         for plan in self:
             plan.target_post_count = max(1, (plan.posts_per_week or 3)) * 4
+
+    @api.depends("brand_profile_id", "use_performance_feedback")
+    def _compute_performance_preview(self):
+        for plan in self:
+            plan.performance_preview = (
+                plan.brand_profile_id._performance_context()
+                if plan.use_performance_feedback and plan.brand_profile_id
+                else False
+            )
 
     @api.depends("item_ids.state")
     def _compute_counts(self):
@@ -126,34 +153,56 @@ class XbSocialContentPlan(models.Model):
         return result
 
     def _planned_dates(self, count):
-        """Spread `count` posting datetimes across the plan's month, on weekdays
-        at 10:00 local time. Never schedules in the past: days already elapsed
-        are skipped, so a plan created mid-month still pushes cleanly."""
+        """Spread `count` posting datetimes across the plan's month, honouring
+        the brand's posting days and times. Never schedules in the past: slots
+        already elapsed are skipped, so a plan created mid-month still pushes
+        cleanly. Returned datetimes are UTC, ready to store."""
         self.ensure_one()
+        brand = self.brand_profile_id
+        weekdays = brand._posting_weekdays()
+        times = brand._posting_times()
+        tz = pytz.timezone(brand._tz())
+        now_local = pytz.utc.localize(fields.Datetime.now()).astimezone(tz)
+
+        def slots_from(first_day, days):
+            """Future (day, time) slots in chronological order."""
+            found = []
+            for offset in range(days):
+                day = first_day + timedelta(days=offset)
+                if day.weekday() not in weekdays:
+                    continue
+                for hour, minute in times:
+                    naive = datetime(day.year, day.month, day.day, hour, minute)
+                    # A DST jump can leave a wall-clock time non-existent or
+                    # ambiguous; is_dst=None would raise, so let pytz pick.
+                    local = tz.localize(naive)
+                    if local > now_local:
+                        found.append(local)
+            return found
+
         first = self.plan_date.replace(day=1)
-        days_in_month = calendar.monthrange(first.year, first.month)[1]
-        # only schedule strictly after today (native social.post rejects past dates)
-        today = fields.Date.context_today(self)
-        # candidate weekdays (Mon-Fri), future-only
-        candidates = []
-        for day in range(1, days_in_month + 1):
-            d = first.replace(day=day)
-            if d.weekday() < 5 and d > today:
-                candidates.append(d)
-        # fallback: plan month fully elapsed -> next `count` weekdays from tomorrow
+        candidates = slots_from(
+            first, calendar.monthrange(first.year, first.month)[1])
+        # Fallback: the plan's month is already over (or fully elapsed) — roll
+        # forward from tomorrow until we have enough slots.
         if not candidates:
-            d = today + timedelta(days=1)
-            while len(candidates) < max(1, count):
-                if d.weekday() < 5:
-                    candidates.append(d)
-                d += timedelta(days=1)
-        # even sampling
+            start = now_local.date() + timedelta(days=1)
+            span = 7
+            while len(candidates) < max(1, count) and span <= 120:
+                candidates = slots_from(start, span)
+                span += 7
+        if not candidates:
+            raise UserError(_(
+                "No posting slot fits this month. Check the posting days and "
+                "times on brand profile '%s'.") % brand.display_name)
+
+        # even sampling across the available slots
         dates = []
         n = max(1, count)
         step = len(candidates) / float(n)
         for i in range(n):
-            d = candidates[min(len(candidates) - 1, int(round(i * step)))]
-            dates.append(datetime(d.year, d.month, d.day, 10, 0, 0))
+            local = candidates[min(len(candidates) - 1, int(round(i * step)))]
+            dates.append(local.astimezone(pytz.utc).replace(tzinfo=None))
         return dates
 
     # ----- generation entrypoints ------------------------------------------
@@ -240,6 +289,12 @@ class XbSocialContentPlan(models.Model):
                 "\n\nDifferentiate from these competitors and exploit the "
                 "content gaps noted:\n%s" % competitor_brief
             )
+        performance = (
+            self.brand_profile_id._performance_context()
+            if self.use_performance_feedback else ""
+        )
+        if performance:
+            user += "\n\n%s" % performance
 
         schema = self._strategy_schema(count)
         transport = self.env["xb.social.ai.transport"]._get_transport(provider)
@@ -287,7 +342,8 @@ class XbSocialContentPlan(models.Model):
         return usage
 
     def _refresh_state_after_generation(self):
-        """Move plans to 'generated' once no copy job is left pending."""
+        """Move plans to 'generated' once no copy job is left pending, and hand
+        the finished plan to its reviewer."""
         for plan in self:
             if plan.state != "generating":
                 continue
@@ -295,6 +351,30 @@ class XbSocialContentPlan(models.Model):
                 lambda j: j.state in ("queued", "running"))
             if not pending and plan.item_ids:
                 plan.state = "generated"
+                plan._notify_reviewer()
+
+    def _notify_reviewer(self):
+        """Schedule the 'review this plan' activity. Only ever fires once, so a
+        regenerated plan does not pile activities on the reviewer."""
+        self.ensure_one()
+        if not self.review_user_id or self.activity_ids.filtered(
+                lambda a: a.user_id == self.review_user_id):
+            return
+        failed = len(self.generation_job_ids.filtered(
+            lambda j: j.state == "failed"))
+        note = _(
+            "The AI plan for %(month)s is ready: %(count)s posts to review "
+            "and approve.", month=self.plan_date.strftime("%B %Y"),
+            count=len(self.item_ids))
+        if failed:
+            note += " " + _("%s generation job(s) failed.") % failed
+        self.activity_schedule(
+            "mail.mail_activity_data_todo",
+            date_deadline=self.plan_date,
+            summary=_("Review the AI content plan"),
+            note=note,
+            user_id=self.review_user_id.id,
+        )
 
     # ----- approval / push --------------------------------------------------
     def action_approve_all(self):

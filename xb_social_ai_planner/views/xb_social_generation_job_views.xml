@@ -44,6 +44,7 @@
                             <field name="idempotency_key"/>
                         </group>
                     </group>
+                    <field name="instruction" invisible="job_type != 'item_refine'"/>
                     <field name="error_message" invisible="state != 'failed'"/>
                     <notebook>
                         <page string="Request"><field name="request_payload"/></page>

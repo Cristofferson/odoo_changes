@@ -68,8 +68,10 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Fotos de la pieza</label>
-                        <input class="form-control form-control-lg" name="imagenes" id="dmn_q_imgs" type="file" accept="image/*" multiple="multiple" capture="environment"/>
-                        <div class="form-text">Puedes elegir varias.</div>
+                        <!-- Sin `capture`: con ese atributo el teléfono abre la cámara
+                             directo y ya no deja elegir una foto tomada antes. -->
+                        <input class="form-control form-control-lg" name="imagenes" id="dmn_q_imgs" type="file" accept="image/*" multiple="multiple"/>
+                        <div class="form-text">Toma la foto o elige varias de la galería.</div>
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-bold">Descripción STIJ</label>

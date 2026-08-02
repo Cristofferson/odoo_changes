@@ -517,6 +517,40 @@ class StockLot(models.Model):
             return {"ok": False, "error": _("No se pudo conectar con la IA.")}
 
     @api.model
+    def _dmn_ensure_variant(self, product):
+        """Devuelve la variante de la joya recién creada, creándola si hace falta.
+
+        Los atributos Metal y Medida de esta base son `dynamic` (así se bajaron
+        las decenas de miles de variantes que cargaba el POS). Con atributos
+        dinámicos Odoo NO genera la variante al crear la plantilla:
+        `product_variant_id` queda vacío y el lote se quedaría sin producto.
+        """
+        # Los valores de las líneas de atributo se materializan al vaciar el
+        # buffer del ORM. Sin esto la combinación se lee VACÍA y Odoo crearía
+        # una variante suelta, sin metal ni medida.
+        product.env.flush_all()
+        product.invalidate_recordset()
+        if product.product_variant_id:
+            return product.product_variant_id
+        combination = product.attribute_line_ids.product_template_value_ids
+        try:
+            if combination:
+                product._create_product_variant(combination, log_warning=True)
+                product.invalidate_recordset(["product_variant_id", "product_variant_ids"])
+        except Exception:  # pragma: no cover
+            _logger.exception("DMN: falló la variante de la joya %s", product.id)
+        if product.product_variant_id:
+            return product.product_variant_id
+        # Red de seguridad: sin líneas de atributo el core sí crea la variante
+        # base. Vale más registrar la pieza que perder el alta por el metal.
+        _logger.warning(
+            "DMN: la joya %s no generó variante con sus atributos; se crea sin ellos.",
+            product.id)
+        product.attribute_line_ids.unlink()
+        product.invalidate_recordset(["product_variant_id", "product_variant_ids"])
+        return product.product_variant_id
+
+    @api.model
     def _dmn_quick_create(self, vals):
         """Alta rápida de una pieza STIJ desde el mostrador: con los datos mínimos
         crea la joya (producto) + el lote ya escaneable (visor activo, Activo) y le
@@ -619,7 +653,7 @@ class StockLot(models.Model):
                 prod_vals["x_studio_id_joya"] = id_joya
         if imgs:
             prod_vals["image_1920"] = imgs[0][1]
-        # Atributo real (como el alta tradicional) -> genera la variante.
+        # Atributo real (como el alta tradicional).
         attr_lines = []
         for val in (metal_val, medida_val):
             if val and val.exists() and val.attribute_id:
@@ -631,9 +665,14 @@ class StockLot(models.Model):
             prod_vals["attribute_line_ids"] = attr_lines
         product = Product.create(prod_vals)
 
+        variant = self._dmn_ensure_variant(product)
+        if not variant:
+            return {"ok": False, "error": _(
+                "No se pudo preparar la joya en el catálogo. Avisa a sistemas.")}
+
         lot_vals = {
             "name": codigo,
-            "product_id": product.product_variant_id.id,
+            "product_id": variant.id,
             "company_id": self.env.company.id,
         }
         for fname, fval in (

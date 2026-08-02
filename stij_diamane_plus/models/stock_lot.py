@@ -45,6 +45,94 @@ class StockLot(models.Model):
             else:
                 lot.dmn_warranty_until = False
 
+    # ----- Fase 6: origen del alta + gema certificada de la pieza ------ #
+    dmn_quick_origin = fields.Boolean(
+        string="Alta rápida (mostrador)", copy=False, readonly=True, index=True,
+        help="La pieza se registró desde /dmn/alta, no por el catálogo.",
+    )
+    dmn_quick_user_id = fields.Many2one(
+        "res.users", string="Registrada por", copy=False, readonly=True,
+    )
+    dmn_quick_date = fields.Datetime(
+        string="Fecha de registro", copy=False, readonly=True,
+    )
+    dmn_gem_lot_id = fields.Many2one(
+        "stock.lot", string="Gema certificada", copy=False, index=True,
+        domain="[('id', '!=', id)]",
+        help="Gema ya registrada (con su propio certificado) que lleva montada "
+             "esta joya. El visor de la joya muestra la gema, y el de la gema "
+             "muestra la joya.",
+    )
+    dmn_jewel_lot_ids = fields.One2many(
+        "stock.lot", "dmn_gem_lot_id", string="Joyas que la llevan montada",
+    )
+
+    def _dmn_is_gem(self):
+        """Mismo criterio que el visor de STIJ: la categoría lleva 'Gema'."""
+        self.ensure_one()
+        return "Gema" in (self.product_id.categ_id.name or "")
+
+    @api.model
+    def _dmn_find_gem(self, code):
+        """Busca una gema ya dada de alta por el código que se escanea (su
+        plástico) o, en su defecto, por el nombre del lote."""
+        code = (code or "").strip()
+        if not code:
+            return self.browse()
+        lot = self.sudo().search([("x_studio_url_stij", "=", code)], limit=1)
+        if not lot:
+            lot = self.sudo().search([("name", "=", code)], limit=1)
+        return lot if (lot and lot._dmn_is_gem()) else self.browse()
+
+    @api.model
+    def _dmn_gem_info(self, code):
+        """Para el alta rápida: confirma al staff que el código tecleado es una
+        gema registrada antes de crear la pieza."""
+        lot = self._dmn_find_gem(code)
+        if not lot:
+            return {"ok": False, "error": _(
+                "No encontré ninguna gema registrada con ese número.")}
+        product = lot.product_id
+        # Los datos gemológicos son de tipos distintos (quilataje float, pureza /
+        # color / corte many2one a modelos de Studio): se normalizan a texto.
+        detalles = []
+        for fname, etiqueta in (
+            ("x_studio_quilataje_c", _("%s ct")),
+            ("x_studio_pureza_real", "%s"),
+            ("x_studio_color_real", "%s"),
+            ("x_studio_corte", "%s"),
+        ):
+            value = getattr(product, fname, False)
+            if not value:
+                continue
+            if hasattr(value, "display_name"):
+                value = value.display_name
+            elif isinstance(value, float):
+                value = ("%g" % value)
+            detalles.append(etiqueta % value)
+        return {
+            "ok": True,
+            "lot_id": lot.id,
+            "name": product.display_name or lot.name,
+            "detalle": " · ".join(detalles),
+        }
+
+    def _dmn_visor_pair(self):
+        """Pareja joya/gema que el visor debe pintar. Devuelve (jewel, diamond)
+        como productos, o False cada uno si no aplica.
+
+        Sustituye a los productos tipo `combo` de STIJ, que en Odoo 19 no pueden
+        llevar inventario ni número de serie (`type != 'consu'` fuerza
+        `is_storable = False` y eso a su vez `tracking = 'none'`): una joya real
+        con lote NO puede ser un combo.
+        """
+        self.ensure_one()
+        if self._dmn_is_gem():
+            jewel_lot = self.dmn_jewel_lot_ids[:1]
+            return (jewel_lot.product_id if jewel_lot else False), False
+        gem_lot = self.dmn_gem_lot_id
+        return False, (gem_lot.product_id if gem_lot else False)
+
     # ----- Fase 3: dedicatoria secreta (regalo) ------------------------ #
     dmn_dedication_text = fields.Text(
         string="Dedicatoria", copy=False,
@@ -564,6 +652,7 @@ class StockLot(models.Model):
         - medida_value_id -> valor del atributo Medida (solo anillos)
         - peso            -> texto libre (ej. "4.7 gr")
         - imagenes        -> lista de data-urls (varias)
+        - gema_codigo     -> nº de una gema YA registrada, para ligarla (opcional)
         """
         joya = (vals.get("joya") or "").strip()
         codigo = (vals.get("codigo") or vals.get("plastico") or "").strip()
@@ -575,6 +664,7 @@ class StockLot(models.Model):
         grosor = (vals.get("grosor") or "").strip()
         descripcion = (vals.get("descripcion") or "").strip()
         categ_id = vals.get("categ_id") or False
+        gema_codigo = (vals.get("gema_codigo") or "").strip()
         imagenes = vals.get("imagenes") or []
         if not imagenes and vals.get("foto"):  # compat: una sola foto
             imagenes = [vals.get("foto")]
@@ -588,6 +678,15 @@ class StockLot(models.Model):
         dup = self.sudo().search([("x_studio_url_stij", "=", codigo)], limit=1)
         if dup:
             return {"ok": False, "error": _("Ese número ya está registrado en otra pieza.")}
+
+        # Gema montada: se valida ANTES de crear nada, para no dejar a medias una
+        # pieza por un número mal tecleado.
+        gem_lot = self.browse()
+        if gema_codigo:
+            gem_lot = self._dmn_find_gem(gema_codigo)
+            if not gem_lot:
+                return {"ok": False, "error": _(
+                    "No encontré ninguna gema registrada con el número %s.") % gema_codigo}
 
         Categ = self.env["product.category"].sudo()
         categ = Categ.browse(int(categ_id)) if categ_id else Categ
@@ -674,7 +773,14 @@ class StockLot(models.Model):
             "name": codigo,
             "product_id": variant.id,
             "company_id": self.env.company.id,
+            # Origen del alta: sin esto una pieza de mostrador es
+            # indistinguible de una capturada por el catálogo.
+            "dmn_quick_origin": True,
+            "dmn_quick_user_id": self.env.user.id,
+            "dmn_quick_date": fields.Datetime.now(),
         }
+        if gem_lot:
+            lot_vals["dmn_gem_lot_id"] = gem_lot.id
         for fname, fval in (
             ("x_studio_url_stij", codigo),
             ("x_studio_estatus", "Activo"),
@@ -701,6 +807,19 @@ class StockLot(models.Model):
                     })
                 except Exception:  # pragma: no cover
                     _logger.exception("DMN: no se pudo ligar imagen %s al lote %s", seq, lot.id)
+
+        # Ledger STIJ: el alta queda como el primer eslabón de la trazabilidad.
+        note = _("Alta rápida desde el mostrador.")
+        if gem_lot:
+            note = "%s %s" % (note, _("Gema montada: %s.") % (
+                gem_lot.product_id.display_name or gem_lot.name))
+        self.env["stij.lot.event"].sudo()._record(
+            lot, "dmn_quick_created",
+            user_id=self.env.user.id,
+            company_id=lot.company_id.id,
+            note=note,
+            source="visor_web",
+        )
 
         base = self.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
         from urllib.parse import quote

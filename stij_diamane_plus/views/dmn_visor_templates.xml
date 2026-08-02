@@ -67,6 +67,11 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold">Gema certificada (opcional)</label>
+                        <input class="form-control form-control-lg" name="gema_codigo" id="dmn_q_gema" placeholder="Nº de la gema ya registrada"/>
+                        <div class="form-text" id="dmn_q_gema_info">Si la joya lleva un diamante o gema ya dado de alta, teclea su número: el visor mostrará las dos fichas.</div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold">Fotos de la pieza</label>
                         <!-- Sin `capture`: con ese atributo el teléfono abre la cámara
                              directo y ya no deja elegir una foto tomada antes. -->
@@ -115,6 +120,34 @@
                 tipo.addEventListener('change', toggleMedida);
                 toggleMedida();
 
+                // Gema montada: al salir del campo se confirma cuál es, para que
+                // un número mal tecleado se vea ANTES de crear la pieza.
+                var gemaInput = document.getElementById('dmn_q_gema');
+                var gemaInfo = document.getElementById('dmn_q_gema_info');
+                var gemaHelp = gemaInfo.textContent;
+                gemaInput.addEventListener('blur', function(){
+                  var code = gemaInput.value.trim();
+                  if(!code){ gemaInfo.className = 'form-text'; gemaInfo.textContent = gemaHelp; return; }
+                  gemaInfo.className = 'form-text'; gemaInfo.textContent = 'Buscando…';
+                  fetch('/dmn/alta/gema', {method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({jsonrpc:'2.0', method:'call', params:{codigo: code}, id:1})})
+                  .then(function(r){return r.json();})
+                  .then(function(d){
+                    var res = d.result || {};
+                    if(res.ok){
+                      gemaInfo.className = 'form-text text-success';
+                      gemaInfo.textContent = '✔ ' + res.name + (res.detalle ? ' — ' + res.detalle : '');
+                    } else {
+                      gemaInfo.className = 'form-text text-danger';
+                      gemaInfo.textContent = res.error || 'No se encontró esa gema.';
+                    }
+                  })
+                  .catch(function(){
+                    gemaInfo.className = 'form-text text-danger';
+                    gemaInfo.textContent = 'No se pudo verificar la gema.';
+                  });
+                });
+
                 function readFiles(input){
                   var files = input.files ? Array.prototype.slice.call(input.files) : [];
                   return Promise.all(files.map(function(file){
@@ -138,7 +171,8 @@
                       medida_value_id: medSel.value, medida_text: medText.value,
                       ancho: f.ancho.value, grosor: f.grosor.value,
                       descripcion: document.getElementById('dmn_q_desc').value,
-                      peso: f.peso.value, codigo: f.codigo.value, imagenes: imgs
+                      peso: f.peso.value, codigo: f.codigo.value,
+                      gema_codigo: gemaInput.value, imagenes: imgs
                     };
                     return fetch('/dmn/alta/crear', {method:'POST', headers:{'Content-Type':'application/json'},
                       body: JSON.stringify({jsonrpc:'2.0', method:'call', params:p, id:1})});
@@ -198,6 +232,7 @@
 
                 document.getElementById('dmn_q_again').addEventListener('click', function(){
                   f.reset(); toggleMedida(); document.getElementById('dmn_q_ai_status').textContent = '';
+                  gemaInfo.className = 'form-text'; gemaInfo.textContent = gemaHelp;
                   f.style.display = 'block'; result.style.display = 'none'; box.innerHTML = '';
                   window.scrollTo({top:0, behavior:'smooth'});
                 });

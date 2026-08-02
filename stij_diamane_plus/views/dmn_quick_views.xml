@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fase 6: piezas registradas desde el mostrador (/dmn/alta) -->
+    <record id="view_dmn_quick_lot_list" model="ir.ui.view">
+        <field name="name">stock.lot.list.dmn.quick</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <list string="Altas rápidas" create="false" default_order="dmn_quick_date desc">
+                <field name="dmn_quick_date"/>
+                <field name="dmn_quick_user_id"/>
+                <field name="name" string="Nº de pieza / plástico"/>
+                <field name="product_id"/>
+                <field name="dmn_gem_lot_id" optional="show"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="x_studio_estatus" optional="hide"/>
+                <field name="dmn_view_count" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dmn_quick_lot_search" model="ir.ui.view">
+        <field name="name">stock.lot.search.dmn.quick</field>
+        <field name="model">stock.lot</field>
+        <field name="arch" type="xml">
+            <search string="Altas rápidas">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="dmn_quick_user_id"/>
+                <filter name="dmn_quick_with_gem" string="Con gema montada"
+                        domain="[('dmn_gem_lot_id', '!=', False)]"/>
+                <filter name="dmn_quick_today" string="Hoy"
+                        domain="[('dmn_quick_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <group>
+                    <filter name="group_quick_user" string="Registrada por"
+                            context="{'group_by': 'dmn_quick_user_id'}"/>
+                    <filter name="group_quick_date" string="Fecha de registro"
+                            context="{'group_by': 'dmn_quick_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_dmn_quick_lots" model="ir.actions.act_window">
+        <field name="name">Altas rápidas (STIJ)</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('dmn_quick_origin', '=', True)]</field>
+        <field name="view_id" ref="view_dmn_quick_lot_list"/>
+        <field name="search_view_id" ref="view_dmn_quick_lot_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavía no se ha registrado ninguna pieza desde el mostrador</p>
+            <p>Las piezas dadas de alta en <b>/dmn/alta</b> aparecen aquí con quién
+               las registró y cuándo.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_dmn_quick_lots"
+              name="Altas rápidas (STIJ)"
+              parent="stock.menu_stock_root"
+              action="action_dmn_quick_lots"
+              sequence="94"/>
+</odoo>

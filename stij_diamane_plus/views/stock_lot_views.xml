@@ -23,6 +23,14 @@
                         <field name="dmn_warranty_until"/>
                         <field name="dmn_claim_token" groups="base.group_system"/>
                     </group>
+                    <group string="Origen y gema" name="dmn_quick">
+                        <field name="dmn_quick_origin"/>
+                        <field name="dmn_quick_user_id" invisible="not dmn_quick_origin"/>
+                        <field name="dmn_quick_date" invisible="not dmn_quick_origin"/>
+                        <field name="dmn_gem_lot_id"/>
+                        <field name="dmn_jewel_lot_ids" widget="many2many_tags"
+                               readonly="1" invisible="not dmn_jewel_lot_ids"/>
+                    </group>
                     <group string="Dedicatoria (regalo)" name="dmn_dedication">
                         <field name="dmn_dedication_visibility"/>
                         <field name="dmn_dedication_from"/>

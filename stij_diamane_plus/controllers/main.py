@@ -77,6 +77,31 @@ class StijWebsitePlus(StijWebsite):
             _logger.exception("DMN: fallo al contar vista del lote %s", lot.id if lot else "?")
         return resp
 
+    # Re-decorado igual que /stijid (ver nota arriba). El visor de Gerardo arma
+    # `jewel`/`diamond`/`small_gems` sólo desde productos tipo `combo`, que en
+    # Odoo 19 no admiten inventario ni número de serie; como sus piezas SÍ llevan
+    # lote, la pareja joya/gema se resuelve aquí y se inyecta en el qcontext
+    # (request.render es lazy: la plantilla se renderiza al final del dispatch).
+    @http.route("/visor", type="http", auth="public", website=True, sitemap=False)
+    def stij_visor(self, **kw):
+        resp = super().stij_visor(**kw)
+        try:
+            qcontext = getattr(resp, "qcontext", None)
+            lot = qcontext.get("lot") if qcontext else None
+            if lot:
+                jewel, diamond = lot._dmn_visor_pair()
+                if jewel and not qcontext.get("jewel"):
+                    qcontext["jewel"] = jewel
+                if diamond and not qcontext.get("diamond"):
+                    qcontext["diamond"] = diamond
+                    # El bloque "Gemas" (quilataje, pureza, color, corte) se
+                    # pinta desde small_gems; la galería técnica, desde diamond.
+                    if not qcontext.get("small_gems"):
+                        qcontext["small_gems"] = [{"product": diamond, "qty": 1}]
+        except Exception:  # pragma: no cover
+            _logger.exception("DMN: fallo al inyectar la gema en el visor")
+        return resp
+
     @http.route("/dmn/claim", type="jsonrpc", auth="public", website=True)
     def dmn_claim(self, token=None, name=None, email=None, phone=None, **kw):
         """Registro de propiedad por el comprador: valida el código de un solo uso
@@ -122,6 +147,14 @@ class StijWebsitePlus(StijWebsite):
         if not self._dmn_is_staff():
             return {"ok": False, "error": "No autorizado."}
         return request.env["stock.lot"].sudo()._dmn_ai_describe(kw)
+
+    @http.route("/dmn/alta/gema", type="jsonrpc", auth="user")
+    def dmn_quick_gem(self, codigo=None, **kw):
+        """Confirma que el número tecleado corresponde a una gema ya registrada,
+        para que el mostrador vea QUÉ gema está montando antes de crear la pieza."""
+        if not self._dmn_is_staff():
+            return {"ok": False, "error": "No autorizado."}
+        return request.env["stock.lot"].sudo()._dmn_gem_info(codigo)
 
     @http.route("/dmn/alta/crear", type="jsonrpc", auth="user")
     def dmn_quick_create(self, **kw):

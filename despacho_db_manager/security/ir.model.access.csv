@@ -10,3 +10,5 @@ access_db_module_system,despacho.db.module.system,model_despacho_db_module,base.
 access_db_installed_manager,despacho.db.installed.module.manager,model_despacho_db_installed_module,databases.group_databases_manager,1,0,0,0
 access_db_installed_system,despacho.db.installed.module.system,model_despacho_db_installed_module,base.group_system,1,1,1,1
 access_sub_link_wizard_manager,despacho.subscription.link.wizard.manager,model_despacho_subscription_link_wizard,databases.group_databases_manager,1,1,1,1
+access_db_analitix_manager,despacho.db.analitix.store.manager,model_despacho_db_analitix_store,databases.group_databases_manager,1,0,0,0
+access_db_analitix_system,despacho.db.analitix.store.system,model_despacho_db_analitix_store,base.group_system,1,1,1,1

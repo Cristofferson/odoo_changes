@@ -348,6 +348,42 @@
                         </list>
                     </field>
                 </page>
+                <page name="despacho_analitix" string="Analitix"
+                      invisible="not despacho_analitix_store_ids"
+                      groups="databases.group_databases_manager">
+                    <div class="alert alert-warning" role="alert"
+                         invisible="despacho_analitix_drift == 0">
+                        <b>Hay sucursales midiendo sin cobro activo.</b>
+                        El addon del cliente no tiene interruptor remoto a
+                        propósito — una tienda que ya mide sigue midiendo pase lo
+                        que pase con la factura. Esto es para levantar el
+                        teléfono, no para apagar nada.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="despacho_analitix_measuring"/>
+                            <field name="despacho_analitix_billed"/>
+                        </group>
+                        <group>
+                            <field name="despacho_analitix_drift"/>
+                            <field name="despacho_analitix_at_risk"/>
+                        </group>
+                    </group>
+                    <field name="despacho_analitix_store_ids" nolabel="1" readonly="1">
+                        <list string="Sucursales" create="0" edit="0" delete="0"
+                              decoration-danger="drifting">
+                            <field name="code" string="Código"/>
+                            <field name="name" string="Sucursal"/>
+                            <field name="plan" string="Plan"/>
+                            <field name="billing" string="Cobro"/>
+                            <field name="activated" string="Activada" widget="boolean"/>
+                            <field name="events_7d" string="Eventos 7d" sum="Eventos"/>
+                            <field name="monthly_fee" string="Cuota" sum="Cuota"/>
+                            <field name="measuring" string="Midiendo" widget="boolean"/>
+                            <field name="drifting" column_invisible="1"/>
+                        </list>
+                    </field>
+                </page>
                 <page name="despacho_backups" string="Respaldos"
                       invisible="not database_hosting"
                       groups="databases.group_databases_manager">

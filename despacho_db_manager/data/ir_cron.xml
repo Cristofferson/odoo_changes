@@ -11,7 +11,19 @@
         <field name="active" eval="True"/>
     </record>
 
-    <!-- Censo automático del servidor. DESACTIVADO por defecto (opt-in). -->
+    <!-- Censo automático de TODOS los servidores (action_scan_server recorre SERVER_KEYS
+         y encola un censo por cada uno; read-only, los remotos por SSH).
+
+         ACTIVO desde 19.0.1.61.0: sin él, la ficha de cada BD (pestaña Respaldos,
+         último respaldo, off-site, usuarios, apps) solo se refrescaba al pulsar
+         "Escanear servidor" a mano, y el tablero se quedaba congelado semanas
+         mostrando respaldos "de hace días" aunque el nocturno corriera perfecto
+         (falsa alarma real del 2026-07-30: censo del 07-06, respaldos al día).
+
+         nextcall = 12:00 UTC = 06:00 Morelia (el server corre en TZ local pero
+         ir.cron guarda/agenda en UTC; México ya no usa horario de verano, así que
+         no hay deriva). A esa hora YA terminaron los dos nocturnos: odoo19 04:30→~05:11
+         y odoo18 03:30→~03:38 hora de Morelia. -->
     <record id="cron_db_census" model="ir.cron">
         <field name="name">Despacho: escanear servidor (censo de BDs)</field>
         <field name="model_id" ref="model_project_project"/>
@@ -19,7 +31,8 @@
         <field name="code">model.action_scan_server()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
-        <field name="active" eval="False"/>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 12:00:00')"/>
+        <field name="active" eval="True"/>
     </record>
 
     <!-- Convierte automáticamente los Pendientes (To-do) etiquetados por cliente en
@@ -50,4 +63,17 @@
         <field name="interval_type">minutes</field>
         <field name="active" eval="True"/>
     </record>
+    <!-- Conciliación de Analitix: sucursales midiendo sin cobro activo.
+         Levanta una actividad, nunca una acción — el addon del cliente no
+         lleva interruptor remoto y no debe llevarlo. -->
+    <record id="cron_analitix_drift" model="ir.cron">
+        <field name="name">Despacho: conciliar sucursales de Analitix</field>
+        <field name="model_id" ref="project.model_project_project"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_analitix_drift()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
 </odoo>

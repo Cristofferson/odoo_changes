@@ -85,6 +85,24 @@ class ProjectProject(models.Model):
     despacho_module_ids = fields.One2many('despacho.db.module', 'project_id',
                                           string='Apps custom (detalle)')
     # Todos los módulos instalados (tabla simple, para que no se desborde el texto).
+    # --- Analitix: sucursales que miden contra sucursales que pagan ---
+    despacho_analitix_store_ids = fields.One2many(
+        'despacho.db.analitix.store', 'project_id', string='Sucursales Analitix',
+        copy=False)
+    despacho_analitix_measuring = fields.Integer(
+        'Sucursales midiendo', compute='_compute_analitix', store=True,
+        aggregator='sum')
+    despacho_analitix_billed = fields.Integer(
+        'Sucursales con cobro activo', compute='_compute_analitix', store=True,
+        aggregator='sum')
+    despacho_analitix_drift = fields.Integer(
+        'Desviación', compute='_compute_analitix', store=True, aggregator='sum',
+        help='Sucursales midiendo sin cobro activo. No apaga nada: es la lista '
+             'de conversaciones pendientes.')
+    despacho_analitix_at_risk = fields.Float(
+        'Cuota sin cobrar', compute='_compute_analitix', store=True,
+        aggregator='sum',
+        help='Suma de las cuotas mensuales de las sucursales desviadas.')
     despacho_installed_module_ids = fields.One2many(
         'despacho.db.installed.module', 'project_id', string='Módulos instalados')
     despacho_last_backup = fields.Datetime('Último respaldo', copy=False)
@@ -887,6 +905,43 @@ class ProjectProject(models.Model):
         }
 
     @api.model
+    @api.depends('despacho_analitix_store_ids.measuring',
+                 'despacho_analitix_store_ids.drifting',
+                 'despacho_analitix_store_ids.monthly_fee')
+    def _compute_analitix(self):
+        for rec in self:
+            stores = rec.despacho_analitix_store_ids
+            drift = stores.filtered('drifting')
+            rec.despacho_analitix_measuring = len(stores.filtered('measuring'))
+            rec.despacho_analitix_billed = len(
+                stores.filtered(lambda s: s.billing == 'active'))
+            rec.despacho_analitix_drift = len(drift)
+            rec.despacho_analitix_at_risk = sum(drift.mapped('monthly_fee'))
+
+    @api.model
+    def _cron_analitix_drift(self):
+        """Aviso diario de sucursales midiendo sin cobro activo.
+
+        Deliberadamente una actividad y no una acción: el addon del cliente no
+        tiene ningún interruptor remoto, y no debe tenerlo. Lo que esto produce
+        es una conversación con fecha.
+        """
+        drifting = self.sudo().search([('despacho_analitix_drift', '>', 0)])
+        for project in drifting:
+            names = ', '.join(project.despacho_analitix_store_ids
+                              .filtered('drifting').mapped('code')[:8])
+            project.activity_schedule(
+                'mail.mail_activity_data_todo',
+                summary='Analitix: %d sucursal(es) midiendo sin cobro activo'
+                        % project.despacho_analitix_drift,
+                note='%s — %s. Cuota implicada: %.2f al mes.<br/><br/>'
+                     'Nada se apagó ni se puede apagar desde aquí: el addon no '
+                     'lleva interruptor remoto a propósito. Esto es para '
+                     'levantar el teléfono.' % (
+                         project.database_name or '', names,
+                         project.despacho_analitix_at_risk))
+        return True
+
     def _census_upsert(self, census_list):
         """Crea/actualiza un registro premise por cada BD reportada por el censo.
         Idempotente por (database_name, despacho_server). Honra el `server` que
@@ -1071,6 +1126,26 @@ class ProjectProject(models.Model):
                         'application': bool(m.get('application')),
                     }))
                 vals['despacho_installed_module_ids'] = icmds
+            # Sucursales de Analitix. None = la BD no tiene el addon, y en ese
+            # caso NO se toca la lista (borrarla en cada censo perdería el dato
+            # de una BD que el censo remoto no alcanzó a leer).
+            alist = row.get('analitix')
+            if isinstance(alist, list):
+                acmds = [(5, 0, 0)]
+                for st in alist:
+                    scode = (st.get('code') or '').strip()
+                    if not scode:
+                        continue
+                    acmds.append((0, 0, {
+                        'code': scode[:64],
+                        'name': (st.get('name') or '')[:128] or False,
+                        'plan': st.get('plan') or False,
+                        'billing': st.get('billing') or False,
+                        'activated': bool(st.get('activated')),
+                        'monthly_fee': st.get('fee') or 0.0,
+                        'events_7d': st.get('events_7d') or 0,
+                    }))
+                vals['despacho_analitix_store_ids'] = acmds
             try:
                 # Savepoint por fila: un fallo (p.ej. URL duplicada) no tira el lote.
                 with self.env.cr.savepoint():

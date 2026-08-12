@@ -6,6 +6,7 @@ import logging
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import format_date
 
 _logger = logging.getLogger(__name__)
 
@@ -21,12 +22,14 @@ MEDIA_TO_FIELD = {
 
 class XbSocialPlanItem(models.Model):
     _name = "xb.social.plan.item"
-    _description = "Social Plan Item (AI draft post)"
+    _description = "Planned Post"
     _inherit = ["mail.thread"]
     _order = "planned_date, sequence, id"
 
     plan_id = fields.Many2one(
-        "xb.social.content.plan", required=True, ondelete="cascade", index=True,
+        "xb.social.content.plan", string="Plan",
+        required=True, ondelete="cascade", index=True,
+        help="The monthly plan this post belongs to.",
     )
     company_id = fields.Many2one(
         related="plan_id.company_id", store=True, index=True,
@@ -52,10 +55,23 @@ class XbSocialPlanItem(models.Model):
     message = fields.Text(string="Post Text")
     cta = fields.Char(string="Call to Action")
     hashtags = fields.Char(string="Hashtags")
-    inferred_trends = fields.Char(string="Inferred Trends")
+    inferred_trends = fields.Char(
+        string="Angle the AI Leaned On",
+        help="What the AI decided was topical for this post's date — season, "
+             "local dates, industry moment — and wove into the copy. It is "
+             "the model's own reasoning, kept so you can tell whether the "
+             "post landed on the right moment. Purely informative: editing "
+             "it changes nothing.",
+    )
 
     # Per-network copy
-    is_split_per_media = fields.Boolean(string="Split Per Network")
+    is_split_per_media = fields.Boolean(
+        string="Different Text Per Network",
+        help="Off: every network publishes the same text. On: each one "
+             "publishes its own version from the Per Network tab — useful "
+             "when X needs it short and LinkedIn can run long. It switches "
+             "itself on when the AI writes versions that actually differ.",
+    )
     facebook_message = fields.Text(string="Facebook Text")
     instagram_message = fields.Text(string="Instagram Text")
     linkedin_message = fields.Text(string="LinkedIn Text")
@@ -111,6 +127,22 @@ class XbSocialPlanItem(models.Model):
     )
 
     # ----- compute ----------------------------------------------------------
+    @api.depends("theme", "planned_date")
+    def _compute_display_name(self):
+        """Without this the record is called 'xb.social.plan.item,13' —
+        in the breadcrumb, in the calendar dialog and anywhere it is linked."""
+        for item in self:
+            date = (
+                format_date(self.env, item.planned_date)
+                if item.planned_date else ""
+            )
+            if item.theme and date:
+                item.display_name = "%s — %s" % (item.theme, date)
+            else:
+                item.display_name = (
+                    item.theme or (date and _("Post of %s") % date)
+                    or _("New post"))
+
     @api.depends("planned_date")
     def _compute_week_number(self):
         for item in self:
@@ -454,9 +486,22 @@ class XbSocialPlanItem(models.Model):
         return {}
 
     # ----- approval ---------------------------------------------------------
+    @api.onchange("plan_id")
+    def _onchange_plan_id(self):
+        """A post added by hand on the grid inherits its plan's accounts and
+        campaign — without accounts the push refuses it."""
+        if self.plan_id:
+            if not self.account_ids:
+                self.account_ids = self.plan_id.account_ids
+            if not self.utm_campaign_id:
+                self.utm_campaign_id = self.plan_id.utm_campaign_id
+
     def action_approve(self):
         for item in self:
-            if item.state in ("generated", "needs_review"):
+            # 'draft' included so a post written by hand can be approved too;
+            # the AI's own drafts are never in that state by the time anyone
+            # reviews them.
+            if item.state in ("draft", "generated", "needs_review"):
                 item.state = "approved"
         return True
 

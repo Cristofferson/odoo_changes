@@ -4,13 +4,13 @@
         <field name="name">xb.social.plan.item.form</field>
         <field name="model">xb.social.plan.item</field>
         <field name="arch" type="xml">
-            <form string="Plan Item">
+            <form string="Planned Post">
                 <header>
                     <button name="action_approve" type="object" string="Approve"
                             class="btn-primary"
-                            invisible="state not in ('generated','needs_review')"/>
+                            invisible="state not in ('draft','generated','needs_review')"/>
                     <button name="action_reject" type="object" string="Reject"
-                            invisible="state not in ('generated','needs_review')"/>
+                            invisible="state not in ('draft','generated','needs_review')"/>
                     <button name="action_push_to_social" type="object"
                             string="Push to Social" class="btn-primary"
                             invisible="state != 'approved'"/>
@@ -39,17 +39,23 @@
                     </div>
                     <group>
                         <group>
-                            <field name="theme"/>
+                            <field name="plan_id"
+                                   options="{'no_create': True}"/>
+                            <field name="theme"
+                                   placeholder="What this post is about"/>
                             <field name="planned_date"/>
                             <field name="account_ids" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="utm_campaign_id"/>
-                            <field name="inferred_trends"/>
-                            <field name="social_post_id" readonly="1"/>
-                            <field name="social_post_state"/>
+                            <field name="social_post_id" readonly="1"
+                                   invisible="not social_post_id"/>
+                            <field name="social_post_state"
+                                   invisible="not social_post_id"/>
                             <field name="engagement" invisible="not social_post_id"/>
                             <field name="is_split_per_media"/>
+                            <field name="inferred_trends" readonly="1"
+                                   invisible="not inferred_trends"/>
                         </group>
                     </group>
                     <notebook>
@@ -205,7 +211,7 @@
                             <div class="ms-auto">
                                 <button name="action_approve" type="object"
                                         class="btn btn-sm btn-primary"
-                                        invisible="state not in ('generated','needs_review')">
+                                        invisible="state not in ('draft','generated','needs_review')">
                                     Approve
                                 </button>
                                 <button name="action_open_refine_wizard" type="object"

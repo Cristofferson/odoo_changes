@@ -20,6 +20,11 @@ class XbSocialOnboarding(models.TransientModel):
     _name = "xb.social.onboarding"
     _description = "AI Social Planner — Start Here"
 
+    def _compute_display_name(self):
+        """Otherwise the breadcrumb reads 'xb.social.onboarding,5'."""
+        for wizard in self:
+            wizard.display_name = self.env._("Start Here")
+
     # Whole sentences are computed here rather than assembled in the view.
     # Interleaving <field> with text splits each line into several translatable
     # fragments, which are then impossible to translate well.

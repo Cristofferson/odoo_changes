@@ -540,6 +540,11 @@ msgid "Angle / Theme"
 msgstr "Ángulo / tema"
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
+msgid "Angle the AI Leaned On"
+msgstr "En qué se apoyó la IA"
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__anthropic
 msgid "Anthropic API (Claude — bring your own key)"
 msgstr "API de Anthropic (Claude — usa tu propia clave)"
@@ -1007,6 +1012,11 @@ msgid ""
 msgstr "Describe el cambio con tus palabras, por ejemplo «menciona la garantía de por vida» o «no hables de precios»."
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
+msgid "Different Text Per Network"
+msgstr "Texto distinto por red"
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__none
 msgid "Disabled (manual upload)"
 msgstr "Desactivado (carga manual)"
@@ -1461,7 +1471,7 @@ msgid ""
 "How post images are produced.\n"
 "• Vector design: the text model draws an on-brand graphic that is rasterised locally. No image API key and no per-image billing, but it is graphic design, not photography.\n"
 "• OpenAI / Gemini: real photoreal image models. Needs an image API key and is billed per image by the provider."
-msgstr "Cómo se producen las imágenes de las publicaciones.\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
+msgstr "Cómo se producen las imágenes de las publicaciones.\\\\\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__id
@@ -1640,11 +1650,6 @@ msgstr "Mejorar"
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__industry
 msgid "Industry"
 msgstr "Industria"
-
-#. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
-msgid "Inferred Trends"
-msgstr "Tendencias inferidas"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
@@ -1964,6 +1969,12 @@ msgid "Needs Review"
 msgstr "Requiere revisión"
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "New post"
+msgstr "Publicación nueva"
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
 msgstr "Siguiente evento en el calendario de actividades"
@@ -2147,6 +2158,15 @@ msgid "Number of messages with delivery error"
 msgstr "Número de mensajes con error de envío"
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
+msgid ""
+"Off: every network publishes the same text. On: each one publishes its own "
+"version from the Per Network tab — useful when X needs it short and LinkedIn"
+" can run long. It switches itself on when the AI writes versions that "
+"actually differ."
+msgstr "Apagado: todas las redes publican el mismo texto. Encendido: cada una publica su propia versión de la pestaña «Por red», útil cuando X lo necesita corto y LinkedIn admite algo largo. Se enciende solo cuando la IA escribe versiones que de verdad son distintas."
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
 msgid ""
 "Only public web pages are scraped. Social network feeds are\n"
@@ -2306,11 +2326,6 @@ msgid "Plan Count"
 msgstr "Planes"
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
-msgid "Plan Item"
-msgstr "Elemento del plan"
-
-#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
 msgid "Plan Items"
 msgstr "Elementos del plan"
@@ -2335,6 +2350,12 @@ msgstr "Planifica y genera contenido para redes sociales con IA."
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_search
 msgid "Planned Date"
 msgstr "Fecha planificada"
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_plan_item
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Planned Post"
+msgstr "Publicación planificada"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__plan_ids
@@ -2390,6 +2411,12 @@ msgstr "Texto de la publicación"
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_kanban
 msgid "Post image"
 msgstr "Imagen de la publicación"
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post of %s"
+msgstr "Publicación del %s"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_plan_item__state__posted
@@ -2735,12 +2762,6 @@ msgstr "Scrapear sitio web"
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
-msgid "Scrape failed: %s"
-msgstr "Falló el rastreo: %s"
-
-#. module: xb_social_ai_planner
-#. odoo-python
-#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
 msgid "Scraped %d characters from %s."
 msgstr "Se rastrearon %d caracteres de %s."
 
@@ -2784,7 +2805,7 @@ msgid ""
 "• Anthropic API / OpenAI API: pay-per-use, needs an API key.\n"
 "• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing).\n"
 "• Custom: any endpoint that speaks the OpenAI chat API."
-msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
+msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__sequence
@@ -2837,21 +2858,13 @@ msgid "Social Handles"
 msgstr "Cuentas/handles"
 
 #. module: xb_social_ai_planner
-#: model:ir.model,name:xb_social_ai_planner.model_xb_social_plan_item
-msgid "Social Plan Item (AI draft post)"
-msgstr "Elemento del plan (borrador de IA)"
-
-#. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
-msgid "Split Per Network"
-msgstr "Dividir por red"
-
-#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_format__square
 msgid "Square 1080×1080"
 msgstr "Cuadrada 1080×1080"
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_onboarding.py:0
 #: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_onboarding
 #: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_onboarding
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
@@ -2882,7 +2895,7 @@ msgid ""
 "Overdue: Due date is already passed\n"
 "Today: Activity date is today\n"
 "Planned: Future activities."
-msgstr "Estado según las actividades\\\\nVencida: ya pasó la fecha límite\\\\nHoy: hoy es la fecha de la actividad\\\\nPlaneada: futuras actividades."
+msgstr "Estado según las actividades\\\\\\\\nVencida: ya pasó la fecha límite\\\\\\\\nHoy: hoy es la fecha de la actividad\\\\\\\\nPlaneada: futuras actividades."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__completeness_missing
@@ -3123,11 +3136,16 @@ msgid ""
 msgstr "La imagen que muestran la tarjeta y la parrilla. Se sirve desde /web/image, así el navegador recibe una miniatura en caché en vez de un PNG de 1080 px por registro."
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__plan_id
+msgid "The monthly plan this post belongs to."
+msgstr "El plan mensual al que pertenece esta publicación."
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__social_post_state
 msgid ""
 "The post is considered as 'Posted' when all its sub-posts (one per social "
 "account) are either 'Failed' or 'Posted'"
-msgstr "Se cuenta como \\\\\\\"publicado\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
+msgstr "Se cuenta como \\\\\\\\\\\\\\\"publicado\\\\\\\\\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
 
 #. module: xb_social_ai_planner
 #. odoo-python
@@ -3369,6 +3387,15 @@ msgid "What the AI Learned"
 msgstr "Lo que aprendió la IA"
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
+msgid ""
+"What the AI decided was topical for this post's date — season, local dates, "
+"industry moment — and wove into the copy. It is the model's own reasoning, "
+"kept so you can tell whether the post landed on the right moment. Purely "
+"informative: editing it changes nothing."
+msgstr "Lo que la IA consideró oportuno para la fecha de esta publicación —temporada, fechas locales, momento del sector— y tejió en el texto. Es el razonamiento del propio modelo, guardado para que puedas ver si la publicación cayó en el momento correcto. Es solo informativo: editarlo no cambia nada."
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid ""
 "What the AI is told about this brand's previous posts.\n"
@@ -3380,6 +3407,11 @@ msgstr "Lo que se le dice a la IA sobre las publicaciones anteriores de esta mar
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__instruction
 msgid "What the user asked for, on a refinement job."
 msgstr "Lo que pidió el usuario, en un trabajo de refinamiento."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "What this post is about"
+msgstr "De qué trata esta publicación"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_refine_wizard__preset

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 21:07+0000\n"
-"PO-Revision-Date: 2026-08-12 21:07+0000\n"
+"POT-Creation-Date: 2026-08-12 23:36+0000\n"
+"PO-Revision-Date: 2026-08-12 23:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -544,6 +544,11 @@ msgid "Angle / Theme"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
+msgid "Angle the AI Leaned On"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__provider_type__anthropic
 msgid "Anthropic API (Claude — bring your own key)"
 msgstr ""
@@ -1008,6 +1013,11 @@ msgstr ""
 msgid ""
 "Describe the change in your own words, e.g. 'mention the lifetime warranty' "
 "or 'do not talk about prices'."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
+msgid "Different Text Per Network"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1646,11 +1656,6 @@ msgid "Industry"
 msgstr ""
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
-msgid "Inferred Trends"
-msgstr ""
-
-#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generation_job_view_list
 msgid "Input"
 msgstr ""
@@ -1968,6 +1973,12 @@ msgid "Needs Review"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "New post"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
 msgstr ""
@@ -2151,6 +2162,15 @@ msgid "Number of messages with delivery error"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
+msgid ""
+"Off: every network publishes the same text. On: each one publishes its own "
+"version from the Per Network tab — useful when X needs it short and LinkedIn"
+" can run long. It switches itself on when the AI writes versions that "
+"actually differ."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
 msgid ""
 "Only public web pages are scraped. Social network feeds are\n"
@@ -2310,11 +2330,6 @@ msgid "Plan Count"
 msgstr ""
 
 #. module: xb_social_ai_planner
-#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
-msgid "Plan Item"
-msgstr ""
-
-#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_list
 msgid "Plan Items"
 msgstr ""
@@ -2338,6 +2353,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__planned_date
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_search
 msgid "Planned Date"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model,name:xb_social_ai_planner.model_xb_social_plan_item
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "Planned Post"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2393,6 +2414,12 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_kanban
 msgid "Post image"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/models/xb_social_plan_item.py:0
+msgid "Post of %s"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2739,12 +2766,6 @@ msgstr ""
 #. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
-msgid "Scrape failed: %s"
-msgstr ""
-
-#. module: xb_social_ai_planner
-#. odoo-python
-#: code:addons/xb_social_ai_planner/models/xb_social_competitor.py:0
 msgid "Scraped %d characters from %s."
 msgstr ""
 
@@ -2841,21 +2862,13 @@ msgid "Social Handles"
 msgstr ""
 
 #. module: xb_social_ai_planner
-#: model:ir.model,name:xb_social_ai_planner.model_xb_social_plan_item
-msgid "Social Plan Item (AI draft post)"
-msgstr ""
-
-#. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_plan_item__is_split_per_media
-msgid "Split Per Network"
-msgstr ""
-
-#. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_format__square
 msgid "Square 1080×1080"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#. odoo-python
+#: code:addons/xb_social_ai_planner/wizard/xb_social_onboarding.py:0
 #: model:ir.actions.act_window,name:xb_social_ai_planner.action_xb_social_onboarding
 #: model:ir.ui.menu,name:xb_social_ai_planner.menu_xb_social_onboarding
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
@@ -3127,6 +3140,11 @@ msgid ""
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__plan_id
+msgid "The monthly plan this post belongs to."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__social_post_state
 msgid ""
 "The post is considered as 'Posted' when all its sub-posts (one per social "
@@ -3373,6 +3391,15 @@ msgid "What the AI Learned"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_plan_item__inferred_trends
+msgid ""
+"What the AI decided was topical for this post's date — season, local dates, "
+"industry moment — and wove into the copy. It is the model's own reasoning, "
+"kept so you can tell whether the post landed on the right moment. Purely "
+"informative: editing it changes nothing."
+msgstr ""
+
+#. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid ""
 "What the AI is told about this brand's previous posts.\n"
@@ -3383,6 +3410,11 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_generation_job__instruction
 msgid "What the user asked for, on a refinement job."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_form
+msgid "What this post is about"
 msgstr ""
 
 #. module: xb_social_ai_planner

@@ -307,10 +307,17 @@ class XbSocialContentPlan(models.Model):
             provider = plan._get_provider()
             plan.ai_provider_id = provider
             # remove un-approved/un-pushed items so regeneration is clean
-            plan.item_ids.filtered(
+            # Clear only what the AI itself wrote. A post someone added by
+            # hand on the grid has no item_copy job behind it, and losing it
+            # to a regeneration would be indistinguishable from a bug.
+            stale = plan.item_ids.filtered(
                 lambda i: i.state in ("draft", "generated", "needs_review",
-                                      "rejected", "failed")
-            ).unlink()
+                                      "rejected", "failed"))
+            ai_written = self.env["xb.social.generation.job"].search([
+                ("item_id", "in", stale.ids),
+                ("job_type", "=", "item_copy"),
+            ]).item_id
+            (stale & ai_written).unlink()
             # No need to set the state: creating the job below puts something
             # in the queue, and the state is derived from that.
             self.env["xb.social.generation.job"].create({

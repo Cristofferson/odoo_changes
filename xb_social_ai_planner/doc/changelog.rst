@@ -6,6 +6,20 @@ Changelog
 Usability release. The features were all there; finding and following them was
 the problem.
 
+* Records read as themselves. A planned post had no name, so it showed up as
+  ``xb.social.plan.item,13`` in the breadcrumb, in the calendar dialog and in
+  every link to it; it now reads "Angle — date". Same for the Start Here
+  screen and for AI jobs, whose stored name went stale the moment the post it
+  pointed at was renamed.
+* A post can be added to the grid by hand: its plan is on the form (it was
+  required but nowhere to be seen, so creating one always failed), it inherits
+  the plan's accounts and campaign, it can be approved straight from draft,
+  and regenerating the month no longer deletes it — only what the AI itself
+  wrote is cleared.
+* Two fields nobody could interpret now say what they are: *Inferred Trends*
+  is *Angle the AI Leaned On*, and *Split Per Network* is *Different Text Per
+  Network*, both with help explaining when they matter.
+
 * **Content Grid.** The month calendar of everything the AI planned, reachable
   from its own menu and from a button on the plan. Drag a post to another day
   to reschedule it — and if it had already been pushed, its scheduled

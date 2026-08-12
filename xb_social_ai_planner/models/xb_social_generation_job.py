@@ -13,7 +13,10 @@ class XbSocialGenerationJob(models.Model):
     _inherit = ["mail.thread"]
     _order = "create_date desc, id desc"
 
-    name = fields.Char(compute="_compute_name", store=True)
+    # Deliberately not stored: it is built from the post's own name and from a
+    # translated label, and a stored copy went stale the moment either changed
+    # — jobs were still showing "Image — xb.social.plan.item,21".
+    name = fields.Char(compute="_compute_name")
     company_id = fields.Many2one(
         "res.company", default=lambda self: self.env.company, index=True,
     )
@@ -58,7 +61,8 @@ class XbSocialGenerationJob(models.Model):
          "A generation job with this idempotency key already exists."),
     ]
 
-    @api.depends("job_type", "plan_id", "item_id")
+    @api.depends("job_type", "plan_id.name", "item_id.theme",
+                 "item_id.planned_date")
     def _compute_name(self):
         labels = dict(self._fields["job_type"].selection)
         for job in self:

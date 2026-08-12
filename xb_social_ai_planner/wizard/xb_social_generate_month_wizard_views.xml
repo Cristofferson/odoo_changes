@@ -19,10 +19,25 @@
                             <field name="also_generate_images"/>
                         </group>
                     </group>
+                    <!-- What you are about to ask for, before it is paid for -->
+                    <div class="alert alert-info" role="status"
+                         invisible="not schedule_preview">
+                        <i class="fa fa-calendar me-2" title="Schedule"/>
+                        <field name="schedule_preview" class="oe_inline"/>
+                        <div class="text-muted mt-1">
+                            Slots come from the brand's posting days and times.
+                            Change them on the brand profile.
+                        </div>
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not schedule_problem">
+                        <field name="schedule_problem" class="oe_inline"/>
+                    </div>
+                    <field name="post_count" invisible="1"/>
                     <div class="text-muted">
-                        The AI builds the monthly strategy and queues the copy for
-                        each post. Generation runs in the background — refresh the
-                        plan in a minute or two.
+                        The AI builds the monthly strategy and then writes each
+                        post. It runs in the background and the plan shows its
+                        own progress — nothing is published until you approve it.
                     </div>
                 </sheet>
                 <footer>

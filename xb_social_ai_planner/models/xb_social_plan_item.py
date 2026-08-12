@@ -76,6 +76,23 @@ class XbSocialPlanItem(models.Model):
         "item_id", "attachment_id", string="Selected Images",
     )
 
+    preview_attachment_id = fields.Many2one(
+        "ir.attachment", string="Preview", compute="_compute_preview_attachment",
+        help="The image the card and the grid show. Served straight from "
+             "/web/image, so the browser gets a cached thumbnail instead of a "
+             "1080px PNG per record.",
+    )
+    length_summary = fields.Char(
+        string="Length", compute="_compute_length_warning",
+        help="Characters used per network against that network's limit.",
+    )
+    preview_image_url = fields.Char(
+        string="Preview Image", compute="_compute_preview_attachment",
+        help="Thumbnail URL for the preview panel. Points at /web/image so "
+             "the server resizes and caches it, instead of shipping a 1080px "
+             "PNG through the form's read.",
+    )
+
     account_ids = fields.Many2many("social.account", string="Accounts")
     utm_campaign_id = fields.Many2one(
         "utm.campaign", domain="[('is_auto_campaign', '=', False)]",
@@ -108,6 +125,22 @@ class XbSocialPlanItem(models.Model):
             item.engagement = sum(
                 item.social_post_id.live_post_ids.mapped("engagement"))
 
+    # ----- keep the native post in sync -------------------------------------
+    def write(self, vals):
+        """Reschedule the native post along with the plan item.
+
+        The planner grid lets you drag a post to another day. If that post had
+        already been pushed, leaving ``social.post.scheduled_date`` behind
+        would publish it on the old date and silently contradict the calendar
+        the user is looking at."""
+        res = super().write(vals)
+        if vals.get("planned_date"):
+            for item in self:
+                post = item.social_post_id
+                if post and post.state in ("draft", "scheduled"):
+                    post.scheduled_date = item.planned_date
+        return res
+
     def _network_message(self, media_type):
         """Per-network copy, falling back to the base message."""
         self.ensure_one()
@@ -123,6 +156,16 @@ class XbSocialPlanItem(models.Model):
                 result[mt] = account.media_id.max_post_length or 0
         return result
 
+    @api.depends("selected_image_ids", "generated_image_ids")
+    def _compute_preview_attachment(self):
+        for item in self:
+            attachment = (
+                item.selected_image_ids[:1] or item.generated_image_ids[:1])
+            item.preview_attachment_id = attachment
+            item.preview_image_url = (
+                "/web/image/ir.attachment/%s/datas/512x512" % attachment.id
+                if attachment else False)
+
     @api.depends("message", "facebook_message", "instagram_message",
                  "linkedin_message", "twitter_message", "account_ids")
     def _compute_length_warning(self):
@@ -130,11 +173,16 @@ class XbSocialPlanItem(models.Model):
                   "linkedin": "LinkedIn", "twitter": "X"}
         for item in self:
             over = []
+            used = []
             for mt, maxlen in item._max_lengths().items():
-                if maxlen and len(item._network_message(mt)) > maxlen:
-                    over.append("%s (>%d)" % (labels.get(mt, mt), maxlen))
+                label = labels.get(mt, mt)
+                length = len(item._network_message(mt))
+                if maxlen and length > maxlen:
+                    over.append("%s (>%d)" % (label, maxlen))
+                used.append("%s %d/%s" % (label, length, maxlen or "∞"))
             item.length_warning = (
                 _("Over limit: %s") % ", ".join(over) if over else False)
+            item.length_summary = " · ".join(used)
 
     # ----- generation -------------------------------------------------------
     def _copy_schema(self, networks):

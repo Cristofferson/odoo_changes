@@ -9,19 +9,59 @@
                 <app data-string="AI Social Planner" string="AI Social Planner"
                      name="xb_social_ai_planner"
                      groups="xb_social_ai_planner.group_xb_social_planner_manager">
-                    <block title="AI Provider Keys (Bring Your Own Key)"
+                    <block title="AI Engine" name="xb_social_ai_engine">
+                        <setting string="Engine"
+                                 help="The configuration the planner uses by default. Everything below edits it.">
+                            <field name="xb_social_ai_default_provider_id"/>
+                            <div class="mt-2" invisible="not xb_social_ai_default_provider_id">
+                                <button name="action_open_ai_engine" type="object"
+                                        string="Advanced settings"
+                                        class="btn btn-link ps-0"
+                                        icon="fa-arrow-right"/>
+                            </div>
+                        </setting>
+                        <setting string="Writes the copy"
+                                 help="Which model writes the strategy and the posts."
+                                 invisible="not xb_social_ai_default_provider_id">
+                            <field name="xb_social_ai_text_engine"/>
+                            <div class="content-group mt-2">
+                                <label for="xb_social_ai_text_model"
+                                       class="o_light_label"/>
+                                <field name="xb_social_ai_text_model"
+                                       placeholder="Leave empty for provider default"/>
+                            </div>
+                        </setting>
+                        <setting string="Draws the images"
+                                 help="Vector art costs nothing extra; photoreal models bill per image."
+                                 invisible="not xb_social_ai_default_provider_id">
+                            <field name="xb_social_ai_image_engine"/>
+                            <div class="content-group mt-2"
+                                 invisible="xb_social_ai_image_engine in ('none', 'svg')">
+                                <label for="xb_social_ai_image_model"
+                                       class="o_light_label"/>
+                                <field name="xb_social_ai_image_model"
+                                       placeholder="e.g. gpt-image-1"/>
+                                <br/>
+                                <label for="xb_social_ai_image_quality"
+                                       class="o_light_label"/>
+                                <field name="xb_social_ai_image_quality"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="API Keys (Bring Your Own Key)"
                            name="xb_social_ai_keys">
-                        <setting string="AI Text API Key"
-                                 help="Key for the text/strategy provider (e.g. Claude).">
+                        <setting string="Text API Key"
+                                 help="Key for the engine that writes the copy. Not needed by the Claude Code CLI engine.">
                             <field name="xb_social_ai_api_key" password="True"/>
                         </setting>
-                        <setting string="AI Image API Key"
-                                 help="Optional key for the image-generation provider.">
+                        <setting string="Image API Key"
+                                 help="Key for the image engine. Not needed by the key-free vector option.">
                             <field name="xb_social_ai_image_api_key" password="True"/>
                         </setting>
-                        <setting string="Default AI Provider">
-                            <field name="xb_social_ai_default_provider_id"/>
-                        </setting>
+                        <div class="text-muted">
+                            Keys are stored per company and never leave this
+                            database.
+                        </div>
                     </block>
                 </app>
             </xpath>

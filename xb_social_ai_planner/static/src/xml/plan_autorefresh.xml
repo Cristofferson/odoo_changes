@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- The widget is a behaviour, not a control: it draws nothing. -->
+    <t t-name="xb_social_ai_planner.PlanAutoRefresh">
+        <span class="d-none"/>
+    </t>
+</templates>

@@ -53,11 +53,44 @@
                         </group>
                     </group>
                     <notebook>
+                        <!-- What the post will actually look like, first thing
+                             you see: reviewing a month means reading posts,
+                             not fields. -->
+                        <page string="Preview" name="preview">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="card shadow-sm mb-3">
+                                        <field name="preview_image_url"
+                                               widget="image_url" nolabel="1"
+                                               class="card-img-top"
+                                               options="{'size': [480, 480]}"
+                                               invisible="not preview_image_url"/>
+                                        <div class="card-body">
+                                            <field name="message" nolabel="1"
+                                                   readonly="1"
+                                                   placeholder="The copy will appear here once the AI has written it."/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="alert alert-light" role="status"
+                                         invisible="preview_image_url">
+                                        No image yet. Use <b>Generate Image</b>,
+                                        or attach one in the Images tab.
+                                    </div>
+                                    <group>
+                                        <field name="cta" readonly="1"/>
+                                        <field name="hashtags" readonly="1"/>
+                                    </group>
+                                </div>
+                            </div>
+                        </page>
                         <page string="Copy" name="copy">
                             <group>
                                 <field name="message" placeholder="Ready-to-post text…"/>
                                 <field name="cta"/>
                                 <field name="hashtags"/>
+                                <field name="length_summary" readonly="1"/>
                             </group>
                         </page>
                         <page string="Per Network" name="per_network">
@@ -75,9 +108,23 @@
                             </group>
                         </page>
                         <page string="Images" name="images">
-                            <field name="generated_image_ids" widget="many2many_binary"/>
-                            <separator string="Selected for posting"/>
-                            <field name="selected_image_ids" widget="many2many_binary"/>
+                            <separator string="Generated variants"/>
+                            <div class="text-muted mb-2">
+                                Everything the AI has drawn for this post.
+                                Generating again adds to this list instead of
+                                replacing it, so you can compare.
+                            </div>
+                            <field name="generated_image_ids" widget="many2many_binary"
+                                   nolabel="1"/>
+                            <separator string="Published with the post"/>
+                            <div class="text-muted mb-2">
+                                Only what is here gets attached when the post is
+                                pushed. The first generated image is picked
+                                automatically — drop a different one here to
+                                change it.
+                            </div>
+                            <field name="selected_image_ids" widget="many2many_binary"
+                                   nolabel="1"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -92,9 +139,14 @@
         <field name="arch" type="xml">
             <list string="Plan Items" editable="bottom">
                 <header>
+                    <button name="action_approve" type="object" string="Approve"/>
+                    <button name="action_reject" type="object" string="Reject"/>
                     <button name="action_open_refine_wizard" type="object"
                             string="Refine with AI"/>
-                    <button name="action_approve" type="object" string="Approve"/>
+                    <button name="action_generate_image" type="object"
+                            string="Generate Image"/>
+                    <button name="action_push_to_social" type="object"
+                            string="Push to Social"/>
                 </header>
                 <field name="sequence" widget="handle"/>
                 <field name="planned_date"/>
@@ -115,22 +167,52 @@
         <field name="name">xb.social.plan.item.kanban</field>
         <field name="model">xb.social.plan.item</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="week_number" class="o_kanban_small_column">
+            <!--
+                The review screen. A month is 12+ posts; opening each one to
+                see its picture is what made reviewing feel like work, so the
+                card carries the thumbnail, the copy and the two buttons that
+                actually get used.
+            -->
+            <kanban default_group_by="state" class="o_kanban_small_column"
+                    quick_create="false">
                 <field name="state"/>
                 <field name="week_number"/>
+                <field name="preview_attachment_id"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_global_click">
-                            <div class="o_kanban_record_title">
-                                <strong><field name="theme"/></strong>
+                        <div class="d-flex">
+                            <img t-if="record.preview_attachment_id.raw_value"
+                                 t-att-src="'/web/image/ir.attachment/' + record.preview_attachment_id.raw_value + '/datas/160x160'"
+                                 class="rounded me-2 flex-shrink-0"
+                                 style="width: 64px; height: 64px; object-fit: cover;"
+                                 alt="Post image"/>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="o_kanban_record_title">
+                                    <strong><field name="theme"/></strong>
+                                </div>
+                                <div class="text-muted small">
+                                    <field name="planned_date"/>
+                                </div>
+                                <div class="text-truncate">
+                                    <field name="message"/>
+                                </div>
                             </div>
-                            <div class="text-muted">
-                                <field name="planned_date"/>
-                            </div>
-                            <div><field name="message"/></div>
-                            <div class="mt-2">
-                                <field name="state" widget="label_selection"
-                                       options="{'classes': {'approved': 'success', 'needs_review': 'warning', 'failed': 'danger', 'pushed': 'info', 'posted': 'success'}}"/>
+                        </div>
+                        <div class="mt-2 d-flex align-items-center">
+                            <field name="state" widget="label_selection"
+                                   options="{'classes': {'approved': 'success', 'needs_review': 'warning', 'failed': 'danger', 'pushed': 'info', 'posted': 'success'}}"/>
+                            <field name="length_warning" class="ms-2 text-danger small"/>
+                            <div class="ms-auto">
+                                <button name="action_approve" type="object"
+                                        class="btn btn-sm btn-primary"
+                                        invisible="state not in ('generated','needs_review')">
+                                    Approve
+                                </button>
+                                <button name="action_open_refine_wizard" type="object"
+                                        class="btn btn-sm btn-secondary"
+                                        invisible="state in ('draft','pushed','posted')">
+                                    Refine
+                                </button>
                             </div>
                         </div>
                     </t>
@@ -143,17 +225,74 @@
         <field name="name">xb.social.plan.item.calendar</field>
         <field name="model">xb.social.plan.item</field>
         <field name="arch" type="xml">
-            <calendar string="Planner" date_start="planned_date" color="plan_id"
-                      mode="month" quick_create="0">
+            <!--
+                The month grid every social team asks for. Dragging an event
+                writes planned_date, and the model propagates that to the
+                native social.post when the post was already pushed.
+            -->
+            <calendar string="Content Grid" date_start="planned_date"
+                      color="state" mode="month" quick_create="0"
+                      event_open_popup="1">
                 <field name="theme"/>
                 <field name="state"/>
+                <field name="plan_id"/>
+                <field name="account_ids" widget="many2many_tags"/>
+                <field name="message"/>
             </calendar>
         </field>
     </record>
 
+    <record id="xb_social_plan_item_view_search" model="ir.ui.view">
+        <field name="name">xb.social.plan.item.search</field>
+        <field name="model">xb.social.plan.item</field>
+        <field name="arch" type="xml">
+            <search string="Posts">
+                <field name="theme" string="Angle / Text"
+                       filter_domain="['|', ('theme', 'ilike', self), ('message', 'ilike', self)]"/>
+                <field name="plan_id"/>
+                <field name="account_ids"/>
+                <filter name="filter_to_approve" string="To Approve"
+                        domain="[('state', 'in', ('generated', 'needs_review'))]"/>
+                <filter name="filter_approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter name="filter_scheduled" string="Scheduled"
+                        domain="[('state', 'in', ('pushed', 'posted'))]"/>
+                <filter name="filter_failed" string="Failed"
+                        domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter name="filter_with_image" string="With Image"
+                        domain="[('selected_image_ids', '!=', False)]"/>
+                <filter name="filter_without_image" string="Without Image"
+                        domain="[('selected_image_ids', '=', False)]"/>
+                <separator/>
+                <filter name="filter_upcoming" string="Upcoming"
+                        domain="[('planned_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_month" string="This Month"
+                        domain="[('planned_date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('planned_date', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <group name="group_by">
+                    <filter name="group_plan" string="Plan" context="{'group_by': 'plan_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_date" string="Planned Date"
+                            context="{'group_by': 'planned_date:week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="action_xb_social_plan_item" model="ir.actions.act_window">
-        <field name="name">Posts</field>
+        <field name="name">Content Grid</field>
         <field name="res_model">xb.social.plan.item</field>
-        <field name="view_mode">kanban,calendar,list,form</field>
+        <field name="view_mode">calendar,kanban,list,form</field>
+        <field name="search_view_id" ref="xb_social_plan_item_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing scheduled yet</p>
+            <p>
+                This is the month grid of everything the AI planned. Use
+                <b>Generate Month</b> to fill it, then drag a post to move it
+                to another day — posts already scheduled for publishing move
+                with it.
+            </p>
+        </field>
     </record>
 </odoo>

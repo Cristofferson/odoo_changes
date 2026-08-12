@@ -32,6 +32,28 @@ def _html_to_text(html):
     return text.strip()
 
 
+def fetch_public_text(url, limit=20000):
+    """Fetch a public page and reduce it to plain text.
+
+    Shared with the brand profile's "draft me from my own website" action:
+    same HTTP hygiene, same reducer, one place to fix. Returns
+    ``(normalised_url, text)``."""
+    url = (url or "").strip()
+    if not url:
+        raise UserError(_("No URL to read."))
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    try:
+        resp = requests.get(
+            url, timeout=30,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; OdooBot)"},
+        )
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as exc:
+        raise UserError(_("Could not fetch the page: %s") % exc)
+    return url, _html_to_text(resp.text)[:limit]
+
+
 class XbSocialCompetitor(models.Model):
     _name = "xb.social.competitor"
     _description = "Social Competitor"
@@ -75,19 +97,7 @@ class XbSocialCompetitor(models.Model):
         for comp in self:
             if not comp.website:
                 raise UserError(_("Set a public website/URL to scrape."))
-            url = comp.website.strip()
-            if not url.startswith(("http://", "https://")):
-                url = "https://" + url
-            try:
-                resp = requests.get(
-                    url, timeout=30,
-                    headers={"User-Agent": "Mozilla/5.0 (compatible; OdooBot)"},
-                )
-                resp.raise_for_status()
-            except requests.exceptions.RequestException as exc:
-                comp.message_post(body=_("Scrape failed: %s") % exc)
-                raise UserError(_("Could not fetch the page: %s") % exc)
-            text = _html_to_text(resp.text)[:20000]
+            url, text = fetch_public_text(comp.website)
             comp.write({
                 "scraped_content": text,
                 "last_scraped": fields.Datetime.now(),

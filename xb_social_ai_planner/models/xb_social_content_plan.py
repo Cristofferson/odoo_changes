@@ -70,6 +70,7 @@ class XbSocialContentPlan(models.Model):
          ("pushed", "Pushed"),
          ("done", "Done")],
         default="draft", required=True, tracking=True,
+        compute="_compute_state", store=True, readonly=False,
     )
     monthly_theme = fields.Text(string="Monthly Theme")
     strategy_summary = fields.Html(string="Strategy Summary")
@@ -84,6 +85,24 @@ class XbSocialContentPlan(models.Model):
     item_count = fields.Integer(compute="_compute_counts")
     approved_count = fields.Integer(compute="_compute_counts")
     pushed_count = fields.Integer(compute="_compute_counts")
+
+    # ----- live progress while the AI works ---------------------------------
+    jobs_pending = fields.Integer(
+        string="Queued Jobs", compute="_compute_progress")
+    jobs_failed = fields.Integer(
+        string="Failed Jobs", compute="_compute_progress")
+    copy_done_count = fields.Integer(
+        string="Texts Written", compute="_compute_progress")
+    image_done_count = fields.Integer(
+        string="Images Drawn", compute="_compute_progress")
+    progress_percent = fields.Integer(
+        string="Progress", compute="_compute_progress")
+    progress_label = fields.Char(
+        string="Progress Detail", compute="_compute_progress")
+    is_generating = fields.Boolean(
+        string="AI Working", compute="_compute_is_generating",
+        help="Drives the auto-refresh of the form while the queue drains.",
+    )
 
     # ----- compute ----------------------------------------------------------
     @api.depends("brand_profile_id", "plan_date")
@@ -106,6 +125,69 @@ class XbSocialContentPlan(models.Model):
                 if plan.use_performance_feedback and plan.brand_profile_id
                 else False
             )
+
+    @api.depends("item_ids.state", "generation_job_ids.state")
+    def _compute_state(self):
+        """Derive the plan's state from its posts and its queue.
+
+        It used to be written by hand at each step, which meant pushing from
+        the posts list left the plan stuck in 'generating' forever — and any
+        job finishing afterwards would then hand the reviewer an activity for
+        a plan that was already live. Deriving it also lets a plan close
+        itself once the month has actually published."""
+        for plan in self:
+            if plan.generation_job_ids.filtered(
+                    lambda j: j.state in ("queued", "running")):
+                plan.state = "generating"
+                continue
+            if not plan.item_ids:
+                plan.state = "draft"
+                continue
+            live = plan.item_ids.filtered(lambda i: i.state != "rejected")
+            if not live:
+                plan.state = "generated"
+            elif all(i.state == "posted" for i in live):
+                plan.state = "done"
+            elif all(i.state in ("pushed", "posted") for i in live):
+                plan.state = "pushed"
+            elif all(i.state in ("approved", "pushed", "posted") for i in live):
+                plan.state = "approved"
+            else:
+                plan.state = "generated"
+
+    @api.depends("state")
+    def _compute_is_generating(self):
+        for plan in self:
+            plan.is_generating = plan.state == "generating"
+
+    @api.depends("generation_job_ids.state", "generation_job_ids.job_type",
+                 "item_ids.message", "item_ids.generated_image_ids")
+    def _compute_progress(self):
+        for plan in self:
+            jobs = plan.generation_job_ids
+            items = plan.item_ids
+            plan.jobs_pending = len(jobs.filtered(
+                lambda j: j.state in ("queued", "running")))
+            plan.jobs_failed = len(jobs.filtered(lambda j: j.state == "failed"))
+            plan.copy_done_count = len(items.filtered(lambda i: i.message))
+            plan.image_done_count = len(
+                items.filtered(lambda i: i.generated_image_ids))
+            finished = len(jobs.filtered(
+                lambda j: j.state in ("done", "failed")))
+            plan.progress_percent = (
+                round(100.0 * finished / len(jobs)) if jobs else 0)
+
+            # The bit people actually read: how many posts are written, not
+            # how many opaque "jobs" are left.
+            expected = len(items) or plan.target_post_count
+            parts = [_("%(done)s of %(total)s texts",
+                       done=plan.copy_done_count, total=expected)]
+            if plan.also_generate_images:
+                parts.append(_("%(done)s of %(total)s images",
+                               done=plan.image_done_count, total=expected))
+            if plan.jobs_failed:
+                parts.append(_("%s failed") % plan.jobs_failed)
+            plan.progress_label = " · ".join(parts)
 
     @api.depends("item_ids.state")
     def _compute_counts(self):
@@ -153,12 +235,19 @@ class XbSocialContentPlan(models.Model):
         return result
 
     def _planned_dates(self, count):
-        """Spread `count` posting datetimes across the plan's month, honouring
-        the brand's posting days and times. Never schedules in the past: slots
-        already elapsed are skipped, so a plan created mid-month still pushes
-        cleanly. Returned datetimes are UTC, ready to store."""
         self.ensure_one()
-        brand = self.brand_profile_id
+        return self._plan_dates_for(self.brand_profile_id, self.plan_date, count)
+
+    @api.model
+    def _plan_dates_for(self, brand, plan_date, count):
+        """Spread `count` posting datetimes across a month, honouring the
+        brand's posting days and times. Never schedules in the past: slots
+        already elapsed are skipped, so a plan created mid-month still pushes
+        cleanly. Returned datetimes are UTC, ready to store.
+
+        Takes its inputs as arguments rather than reading a plan, so the
+        Generate Month dialog can show the exact dates before a plan (or a
+        single token) exists."""
         weekdays = brand._posting_weekdays()
         times = brand._posting_times()
         tz = pytz.timezone(brand._tz())
@@ -180,7 +269,7 @@ class XbSocialContentPlan(models.Model):
                         found.append(local)
             return found
 
-        first = self.plan_date.replace(day=1)
+        first = plan_date.replace(day=1)
         candidates = slots_from(
             first, calendar.monthrange(first.year, first.month)[1])
         # Fallback: the plan's month is already over (or fully elapsed) — roll
@@ -222,7 +311,8 @@ class XbSocialContentPlan(models.Model):
                 lambda i: i.state in ("draft", "generated", "needs_review",
                                       "rejected", "failed")
             ).unlink()
-            plan.state = "generating"
+            # No need to set the state: creating the job below puts something
+            # in the queue, and the state is derived from that.
             self.env["xb.social.generation.job"].create({
                 "plan_id": plan.id,
                 "company_id": plan.company_id.id,
@@ -342,15 +432,14 @@ class XbSocialContentPlan(models.Model):
         return usage
 
     def _refresh_state_after_generation(self):
-        """Move plans to 'generated' once no copy job is left pending, and hand
-        the finished plan to its reviewer."""
+        """Hand a finished plan to its reviewer.
+
+        The state itself is derived (see _compute_state); all that is left
+        here is the one side effect that must happen exactly once — the review
+        activity — and only for a plan that is genuinely waiting for review,
+        never for one already approved or published."""
         for plan in self:
-            if plan.state != "generating":
-                continue
-            pending = plan.generation_job_ids.filtered(
-                lambda j: j.state in ("queued", "running"))
-            if not pending and plan.item_ids:
-                plan.state = "generated"
+            if plan.state == "generated" and plan.item_ids:
                 plan._notify_reviewer()
 
     def _notify_reviewer(self):
@@ -382,10 +471,6 @@ class XbSocialContentPlan(models.Model):
             plan.item_ids.filtered(
                 lambda i: i.state in ("generated", "needs_review")
             ).action_approve()
-            if plan.state == "generated" and all(
-                    i.state in ("approved", "pushed", "posted", "rejected")
-                    for i in plan.item_ids):
-                plan.state = "approved"
         return True
 
     def action_push_approved(self):
@@ -394,8 +479,79 @@ class XbSocialContentPlan(models.Model):
             if not to_push:
                 raise UserError(_("No approved posts to push."))
             to_push.action_push_to_social()
-            plan.state = "pushed"
         return True
+
+    # ----- the queue, from the plan itself ----------------------------------
+    # How many queued jobs a click may run in the request. Kept small: an
+    # image call can take ~20 s and the worker has a wall-clock limit.
+    _SYNC_JOB_LIMIT = 3
+
+    def action_run_pending_jobs(self):
+        """Run the next few queued jobs right now.
+
+        The cron picks the queue up every 2 minutes, which is fine unattended
+        but reads as 'nothing happened' when you have just clicked Generate."""
+        self.ensure_one()
+        queued = self.generation_job_ids.filtered(lambda j: j.state == "queued")
+        if not queued:
+            raise UserError(_("Nothing is queued for this plan right now."))
+        for job in queued.sorted("id")[:self._SYNC_JOB_LIMIT]:
+            # Never raise: one bad job must not abort the others, and the
+            # failure is already recorded on the job and shown on the plan.
+            job._run()
+        self._refresh_state_after_generation()
+        left = len(self.generation_job_ids.filtered(
+            lambda j: j.state == "queued"))
+        message = (
+            _("%s job(s) still queued — they run on their own within a couple "
+              "of minutes.") % left
+            if left else _("The queue for this plan is empty.")
+        )
+        return self._notify(message, "info" if left else "success")
+
+    def action_retry_failed(self):
+        """Put every failed job back in the queue and unstick its post."""
+        self.ensure_one()
+        failed = self.generation_job_ids.filtered(lambda j: j.state == "failed")
+        if not failed:
+            raise UserError(_("No failed job to retry."))
+        failed.action_requeue()
+        failed.mapped("item_id").filtered(
+            lambda i: i.state == "failed"
+        ).write({"state": "draft", "error_message": False})
+        return self._notify(
+            _("%s job(s) queued again.") % len(failed), "success")
+
+    def _notify(self, message, kind="info"):
+        """Toast + refresh, so the numbers on screen match what just ran."""
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "type": kind,
+                "message": message,
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            },
+        }
+
+    def action_open_grid(self):
+        """Open this plan's posts in the month grid.
+
+        The native calendar only shows posts once they are pushed; this one
+        works from the moment the AI drafts them, which is when the month
+        actually gets reviewed and reshuffled."""
+        self.ensure_one()
+        action = self.env["ir.actions.act_window"]._for_xml_id(
+            "xb_social_ai_planner.action_xb_social_plan_item")
+        action["name"] = _("Grid — %s") % self.display_name
+        action["domain"] = [("plan_id", "=", self.id)]
+        action["context"] = {
+            "default_plan_id": self.id,
+            # The calendar deserialises this as a datetime, not a date.
+            "initial_date": fields.Datetime.to_string(
+                datetime.combine(self.plan_date, datetime.min.time())),
+        }
+        return action
 
     def action_open_native_calendar(self):
         """Open the native social.post calendar filtered to this plan's posts."""

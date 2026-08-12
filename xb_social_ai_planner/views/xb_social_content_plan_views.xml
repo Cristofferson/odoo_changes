@@ -15,6 +15,14 @@
                     <button name="action_push_approved" type="object"
                             string="Push Approved" class="btn-primary"
                             invisible="state not in ('generated','approved')"/>
+                    <button name="action_run_pending_jobs" type="object"
+                            string="Process Now"
+                            invisible="not jobs_pending"
+                            help="Run the next queued jobs immediately instead
+                                  of waiting for the background queue."/>
+                    <button name="action_retry_failed" type="object"
+                            string="Retry Failed"
+                            invisible="not jobs_failed"/>
                     <button name="action_open_native_calendar" type="object"
                             string="Native Calendar"
                             invisible="state not in ('pushed','done')"/>
@@ -22,7 +30,43 @@
                            statusbar_visible="draft,generating,generated,approved,pushed"/>
                 </header>
                 <sheet>
+                    <!-- What the AI is doing right now, in posts rather than jobs -->
+                    <div class="alert alert-info" role="status"
+                         invisible="state != 'generating'">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-cog fa-spin fa-2x me-3" title="Working"/>
+                            <div class="flex-grow-1">
+                                <b>The AI is working on this month.</b>
+                                <field name="progress_label" class="oe_inline"/>
+                                <field name="progress_percent"
+                                       widget="progressbar" class="mt-1"/>
+                            </div>
+                        </div>
+                        <div class="text-muted mt-2">
+                            Generation runs in the background — you can close
+                            this and come back. <b>Process Now</b> runs the next
+                            few straight away.
+                        </div>
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not jobs_failed or state == 'generating'">
+                        <b>Some AI jobs failed.</b>
+                        Use <b>Retry Failed</b> above, or open the AI Activity
+                        tab to read the error.
+                        <field name="jobs_failed" invisible="1"/>
+                    </div>
+                    <field name="jobs_pending" invisible="1"/>
+                    <!-- Reloads the form on its own while the queue drains. -->
+                    <field name="is_generating" widget="xb_plan_autorefresh"
+                           nolabel="1"/>
                     <div class="oe_button_box" name="button_box">
+                        <button name="action_open_grid" type="object"
+                                class="oe_stat_button" icon="fa-calendar"
+                                invisible="not item_count">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Grid</span>
+                            </div>
+                        </button>
                         <button class="oe_stat_button" icon="fa-file-text-o" disabled="1">
                             <field name="item_count" widget="statinfo" string="Posts"/>
                         </button>
@@ -74,8 +118,14 @@
                             <field name="item_ids" mode="kanban,list">
                                 <list editable="bottom">
                                     <header>
+                                        <button name="action_approve" type="object"
+                                                string="Approve"/>
+                                        <button name="action_reject" type="object"
+                                                string="Reject"/>
                                         <button name="action_open_refine_wizard"
                                                 type="object" string="Refine with AI"/>
+                                        <button name="action_generate_image"
+                                                type="object" string="Generate Image"/>
                                     </header>
                                     <field name="sequence" widget="handle"/>
                                     <field name="planned_date"/>
@@ -90,14 +140,23 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Generation Jobs" name="jobs"
+                        <page string="AI Activity" name="jobs"
                               groups="xb_social_ai_planner.group_xb_social_planner_manager">
                             <field name="generation_job_ids">
                                 <list>
+                                    <header>
+                                        <button name="action_requeue" type="object"
+                                                string="Queue Again"/>
+                                    </header>
+                                    <field name="create_date"/>
                                     <field name="job_type"/>
-                                    <field name="state" widget="badge"/>
-                                    <field name="token_usage_input"/>
-                                    <field name="token_usage_output"/>
+                                    <field name="item_id" optional="hide"/>
+                                    <field name="state" widget="badge"
+                                           decoration-danger="state == 'failed'"
+                                           decoration-info="state in ('queued','running')"
+                                           decoration-success="state == 'done'"/>
+                                    <field name="token_usage_input" optional="hide"/>
+                                    <field name="token_usage_output" optional="hide"/>
                                     <field name="error_message"/>
                                 </list>
                             </field>
@@ -156,7 +215,11 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create your first content plan</p>
-            <p>Use <b>Generate Month</b> to let AI build a full monthly plan.</p>
+            <p>
+                <b>Start Here</b> walks you through what the planner needs;
+                <b>Generate Month</b> then builds a whole month — strategy,
+                copy, hashtags and images — for you to review and approve.
+            </p>
         </field>
     </record>
 </odoo>

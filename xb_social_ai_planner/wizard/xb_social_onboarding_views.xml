@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_social_onboarding_view_form" model="ir.ui.view">
+        <field name="name">xb.social.onboarding.form</field>
+        <field name="model">xb.social.onboarding</field>
+        <field name="arch" type="xml">
+            <form string="Start Here" create="0" edit="0">
+                <sheet>
+                    <div class="oe_title mb-3">
+                        <h1>Plan a month of social content with AI</h1>
+                        <p class="text-muted">
+                            Four things have to be in place before the first
+                            plan can be generated. Everything green means you
+                            are ready.
+                        </p>
+                    </div>
+
+                    <!-- 1. a connected social account -->
+                    <div class="alert alert-success d-flex align-items-center"
+                         role="status" invisible="not has_accounts">
+                        <i class="fa fa-check-circle fa-2x me-3" title="Done"/>
+                        <div class="flex-grow-1">
+                            <b>1. Social accounts connected</b><br/>
+                            <field name="accounts_status" class="oe_inline"/>
+                        </div>
+                        <button name="action_open_accounts" type="object"
+                                string="Manage" class="btn btn-link"/>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center"
+                         role="alert" invisible="has_accounts">
+                        <i class="fa fa-exclamation-circle fa-2x me-3" title="To do"/>
+                        <div class="flex-grow-1">
+                            <b>1. Connect a social account</b><br/>
+                            The planner writes the posts; Odoo's own Social
+                            Marketing publishes them. Link at least one
+                            Facebook, Instagram, LinkedIn or X account first.
+                        </div>
+                        <button name="action_open_accounts" type="object"
+                                string="Connect" class="btn btn-primary"/>
+                    </div>
+
+                    <!-- 2. an AI engine, with a key when it needs one -->
+                    <div class="alert alert-success d-flex align-items-center"
+                         role="status" invisible="not has_engine or needs_key">
+                        <i class="fa fa-check-circle fa-2x me-3" title="Done"/>
+                        <div class="flex-grow-1">
+                            <b>2. AI engine ready</b><br/>
+                            <field name="engine_status" class="oe_inline"/>
+                        </div>
+                        <button name="action_open_settings" type="object"
+                                string="Change" class="btn btn-link"
+                                groups="xb_social_ai_planner.group_xb_social_planner_manager"/>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center"
+                         role="alert" invisible="has_engine">
+                        <i class="fa fa-exclamation-circle fa-2x me-3" title="To do"/>
+                        <div class="flex-grow-1">
+                            <b>2. Choose an AI engine</b><br/>
+                            Pick which model writes the copy and draws the
+                            images.
+                        </div>
+                        <button name="action_open_engine" type="object"
+                                string="Configure" class="btn btn-primary"
+                                groups="xb_social_ai_planner.group_xb_social_planner_manager"/>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center"
+                         role="alert" invisible="not has_engine or not needs_key">
+                        <i class="fa fa-key fa-2x me-3" title="To do"/>
+                        <div class="flex-grow-1">
+                            <b>2. Add the API key</b><br/>
+                            <field name="key_status" class="oe_inline"/>
+                        </div>
+                        <button name="action_open_settings" type="object"
+                                string="Add key" class="btn btn-primary"
+                                groups="xb_social_ai_planner.group_xb_social_planner_manager"/>
+                    </div>
+
+                    <!-- 3. a brand profile worth reading -->
+                    <div class="alert alert-success d-flex align-items-center"
+                         role="status" invisible="not has_brand">
+                        <i class="fa fa-check-circle fa-2x me-3" title="Done"/>
+                        <div class="flex-grow-1">
+                            <b>3. Brand profile</b><br/>
+                            <field name="brand_status" class="oe_inline"/>
+                        </div>
+                        <button name="action_open_brand" type="object"
+                                string="Improve" class="btn btn-link"
+                                invisible="brand_completeness >= 100"/>
+                        <button name="action_open_brands" type="object"
+                                string="Brands" class="btn btn-link"
+                                invisible="brand_completeness &lt; 100"/>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center"
+                         role="alert" invisible="has_brand">
+                        <i class="fa fa-exclamation-circle fa-2x me-3" title="To do"/>
+                        <div class="flex-grow-1">
+                            <b>3. Describe your brand</b><br/>
+                            Voice, audience and value proposition. This is the
+                            context every prompt is built on — and it can be
+                            drafted for you from your own website.
+                        </div>
+                        <button name="action_new_brand" type="object"
+                                string="Create brand" class="btn btn-primary"/>
+                    </div>
+
+                    <!-- 4. go -->
+                    <div class="alert alert-info d-flex align-items-center"
+                         role="status" invisible="not ready">
+                        <i class="fa fa-magic fa-2x me-3" title="Ready"/>
+                        <div class="flex-grow-1">
+                            <b>4. Generate your month</b><br/>
+                            The AI writes the monthly strategy and one post per
+                            slot. Nothing is published until you approve it.
+                            <field name="plan_status" class="oe_inline"/>
+                        </div>
+                        <button name="action_open_plans" type="object"
+                                string="Existing plans" class="btn btn-link"
+                                invisible="not plan_count"/>
+                        <button name="action_generate_month" type="object"
+                                string="Generate month" class="btn btn-primary"/>
+                    </div>
+                    <div class="alert alert-light d-flex align-items-center"
+                         role="status" invisible="ready">
+                        <i class="fa fa-hourglass-half fa-2x me-3" title="Waiting"/>
+                        <div class="flex-grow-1">
+                            <b>4. Generate your month</b><br/>
+                            Available once the steps above are green.
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-muted">
+                        <button name="action_open_help" type="object"
+                                string="How does it work?" class="btn btn-link ps-0"
+                                icon="fa-question-circle"/>
+                        ·
+                        <button name="action_open_grid" type="object"
+                                string="Open the content grid" class="btn btn-link"
+                                icon="fa-calendar"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xb_social_onboarding" model="ir.actions.act_window">
+        <field name="name">Start Here</field>
+        <field name="res_model">xb.social.onboarding</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

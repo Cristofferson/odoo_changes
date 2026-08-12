@@ -13,3 +13,4 @@ access_xb_social_generation_job_user,xb.social.generation.job user,model_xb_soci
 access_xb_social_generation_job_manager,xb.social.generation.job manager,model_xb_social_generation_job,group_xb_social_planner_manager,1,1,1,1
 access_xb_social_generate_month_wizard_user,xb.social.generate.month.wizard user,model_xb_social_generate_month_wizard,group_xb_social_planner_user,1,1,1,1
 access_xb_social_refine_wizard_user,xb.social.refine.wizard user,model_xb_social_refine_wizard,group_xb_social_planner_user,1,1,1,1
+access_xb_social_onboarding_user,xb.social.onboarding user,model_xb_social_onboarding,group_xb_social_planner_user,1,1,1,1

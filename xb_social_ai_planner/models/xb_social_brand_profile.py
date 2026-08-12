@@ -4,8 +4,11 @@ import re
 from datetime import timedelta
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.addons.base.models.res_partner import _tz_get
+from odoo.addons.xb_social_ai_planner.models.xb_social_competitor import (
+    fetch_public_text,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -26,6 +29,12 @@ class XbSocialBrandProfile(models.Model):
         default=lambda self: self.env.company,
     )
 
+    website = fields.Char(
+        string="Website",
+        help="Your own public site. 'Draft From Website' reads it and fills "
+             "in the profile below so you correct a draft instead of facing "
+             "an empty form.",
+    )
     industry = fields.Char(
         string="Industry",
         help="Drives the AI-inferred seasonal/industry trends and hashtags.",
@@ -144,6 +153,49 @@ class XbSocialBrandProfile(models.Model):
     )
     competitor_count = fields.Integer(compute="_compute_competitor_count")
 
+    completeness = fields.Integer(
+        string="Profile Completeness", compute="_compute_completeness",
+        help="How much of what the AI actually reads is filled in. "
+             "A thin profile produces generic copy.",
+    )
+    completeness_missing = fields.Char(
+        string="Still Missing", compute="_compute_completeness",
+    )
+    completeness_label = fields.Char(
+        string="Completeness Detail", compute="_compute_completeness",
+        help="The whole sentence, computed here rather than assembled in the "
+             "view: interleaving fields with text splits it into fragments no "
+             "translator can work with.",
+    )
+
+    # What the AI genuinely leans on, in the order it matters. Anything not
+    # listed here (autopilot, brand kit, competitors) is optional polish.
+    _COMPLETENESS_FIELDS = (
+        ("industry", "Industry"),
+        ("brand_voice", "Brand voice"),
+        ("target_audience", "Target audience"),
+        ("value_proposition", "Value proposition"),
+        ("keywords", "Keywords"),
+        ("cta_style", "CTA style"),
+        ("default_account_ids", "Default accounts"),
+        ("posting_times", "Posting times"),
+    )
+
+    @api.depends(lambda self: [fname for fname, _lbl in self._COMPLETENESS_FIELDS])
+    def _compute_completeness(self):
+        total = len(self._COMPLETENESS_FIELDS)
+        for profile in self:
+            missing = [label for fname, label in self._COMPLETENESS_FIELDS
+                       if not profile[fname]]
+            profile.completeness = round(100.0 * (total - len(missing)) / total)
+            profile.completeness_missing = ", ".join(missing)
+            profile.completeness_label = self.env._(
+                "Profile %(percent)s%% complete. Still missing: %(missing)s. "
+                "The thinner this is, the more generic the copy.",
+                percent=profile.completeness,
+                missing=profile.completeness_missing,
+            ) if missing else ""
+
     @api.depends("competitor_ids")
     def _compute_competitor_count(self):
         for profile in self:
@@ -175,6 +227,123 @@ class XbSocialBrandProfile(models.Model):
             "domain": [("brand_profile_id", "=", self.id)],
             "context": {"default_brand_profile_id": self.id},
         }
+
+    # ----- draft the profile from the brand's own website --------------------
+    # What the AI is allowed to fill in, and only when it is still empty.
+    _AUTOFILL_FIELDS = ("industry", "brand_voice", "target_audience",
+                        "value_proposition", "keywords", "cta_style")
+
+    def _resolve_provider(self):
+        self.ensure_one()
+        provider = (
+            self.company_id.xb_social_ai_default_provider_id
+            or self.env["xb.social.ai.provider"].search(
+                [("company_id", "in", (self.company_id.id, False))], limit=1)
+        )
+        if not provider:
+            raise UserError(self.env._(
+                "No AI engine configured. Set one in Settings ▸ AI Social "
+                "Planner."))
+        return provider
+
+    def _autofill_schema(self):
+        return {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "industry": {
+                    "type": "string",
+                    "description": "The sector, in a few words.",
+                },
+                "brand_voice": {
+                    "type": "string",
+                    "description": "Tone of voice, 1-2 sentences.",
+                },
+                "target_audience": {
+                    "type": "string",
+                    "description": "Who this brand sells to, 1-2 sentences.",
+                },
+                "value_proposition": {
+                    "type": "string",
+                    "description": "What makes it worth choosing, 1-2 "
+                                   "sentences.",
+                },
+                "keywords": {
+                    "type": "string",
+                    "description": "6-12 recurring themes, comma separated.",
+                },
+                "cta_style": {
+                    "type": "string",
+                    "description": "How the site asks people to act.",
+                },
+            },
+            "required": list(self._AUTOFILL_FIELDS),
+        }
+
+    def action_autofill_from_website(self):
+        """Draft the profile from the brand's own public site.
+
+        Facing an empty thirty-field form is the main reason profiles end up
+        thin, and a thin profile is exactly what makes the copy generic. The
+        site already says who the brand is, so let the model read it — but
+        only into fields that are still empty, so nothing a human wrote is
+        ever overwritten."""
+        self.ensure_one()
+        if not self.website:
+            raise UserError(self.env._(
+                "Set the brand's website first, then run this again."))
+        url, text = fetch_public_text(self.website)
+        if len(text) < 200:
+            raise UserError(self.env._(
+                "There was almost no readable text at %s. Try the page that "
+                "actually describes the brand.") % url)
+
+        provider = self._resolve_provider()
+        system = (
+            "You profile a brand for a social-media content planner, reading "
+            "only the text of its own public website.\n"
+            "Base every answer strictly on that text. Never invent awards, "
+            "certifications, guarantees, prices, statistics, testimonials or "
+            "claims about materials or origin that the page does not state. "
+            "If the page does not support a field, describe only what it does "
+            "support, briefly.\n"
+            "Write in the same language as the website."
+        )
+        user = "Brand name: %s\nWebsite: %s\n\nPage text:\n%s" % (
+            self.name or "", url, text)
+
+        transport = self.env["xb.social.ai.transport"]._get_transport(provider)
+        parsed, _usage = transport.generate_text(
+            provider, system, user, self._autofill_schema())
+
+        filled, skipped = [], []
+        vals = {}
+        for fname in self._AUTOFILL_FIELDS:
+            label = self._fields[fname].string
+            value = (parsed.get(fname) or "").strip()
+            if not value:
+                continue
+            if self[fname]:
+                skipped.append(label)
+            else:
+                vals[fname] = value
+                filled.append(label)
+        if vals:
+            self.write(vals)
+
+        body = (
+            self.env._("Drafted from %(url)s: %(fields)s.",
+                       url=url, fields=", ".join(filled))
+            if filled else
+            self.env._("Read %(url)s but found nothing new to fill in.",
+                       url=url)
+        )
+        if skipped:
+            body += " " + self.env._(
+                "Left untouched because they were already written: %s."
+            ) % ", ".join(skipped)
+        self.message_post(body=body)
+        return True
 
     # ----- posting windows --------------------------------------------------
     _WEEKDAY_FIELDS = ("post_mon", "post_tue", "post_wed", "post_thu",

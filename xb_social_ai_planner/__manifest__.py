@@ -76,7 +76,7 @@ AI video (v2) plugs in through the same pluggable media layer.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Marketing/Social Marketing",
-    "version": "19.0.1.4.0",
+    "version": "19.0.1.5.0",
     "license": "OPL-1",
     "depends": [
         "social",
@@ -94,6 +94,7 @@ AI video (v2) plugs in through the same pluggable media layer.
         "data/ir_cron_data.xml",
         "data/xb_social_ai_provider_data.xml",
         "wizard/xb_social_generate_month_wizard_views.xml",
+        "wizard/xb_social_onboarding_views.xml",
         "wizard/xb_social_refine_wizard_views.xml",
         "views/xb_social_brand_profile_views.xml",
         "views/xb_social_competitor_views.xml",
@@ -104,6 +105,12 @@ AI video (v2) plugs in through the same pluggable media layer.
         "views/res_config_settings_views.xml",
         "views/xb_social_ai_planner_menus.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "xb_social_ai_planner/static/src/js/plan_autorefresh.js",
+            "xb_social_ai_planner/static/src/xml/plan_autorefresh.xml",
+        ],
+    },
     "images": [
         "static/description/banner.png",
         "static/description/icon.png",

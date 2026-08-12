@@ -1,6 +1,45 @@
 Changelog
 =========
 
+19.0.1.5.0 (2026-08)
+--------------------
+Usability release. The features were all there; finding and following them was
+the problem.
+
+* **Content Grid.** The month calendar of everything the AI planned, reachable
+  from its own menu and from a button on the plan. Drag a post to another day
+  to reschedule it — and if it had already been pushed, its scheduled
+  ``social.post`` moves with it instead of publishing on the old date.
+  (The calendar view had existed since 1.0.0 but was wired to nothing.)
+* **Start Here.** A first screen that checks the four things a plan needs —
+  a connected account, an engine, its key, a brand profile — says which are
+  missing and gives each one the button that fixes it.
+* **One menu, in order.** Everything now hangs off a single *AI Planner* menu
+  numbered in the order a month is actually run, with the technical records
+  (engine, AI activity, competitors) moved to Configuration.
+* **Visible progress.** A plan being generated shows a progress bar and how
+  many texts and images are done, refreshes itself while the queue drains, and
+  offers *Process Now* to run the next jobs immediately instead of waiting for
+  the cron, plus *Retry Failed* with the error in plain sight.
+* **The plan's state is derived from its posts.** Pushing from the posts list
+  used to leave the plan stuck in *Generating* forever, which could later hand
+  the reviewer a review activity for a month that was already live. A plan also
+  closes itself once every post has published.
+* **Review at a glance.** The post cards carry the generated image, the copy
+  and Approve/Refine buttons; a *Preview* tab shows the post as it will look
+  with a per-network character count; Approve, Reject, Refine, Generate Image
+  and Push work on a whole selection.
+* **Configuration in one screen.** Engine, models, image quality and both API
+  keys now live together in Settings, with the full engine record one click
+  away. A company with no engine selected adopts the installed one instead of
+  failing at generation time.
+* **Draft a brand from its own website.** Reads your public site and fills in
+  industry, voice, audience, value proposition, keywords and CTA style —
+  strictly from what the page says, and only into fields still empty. A
+  completeness indicator says what the AI is still missing.
+* The Generate Month dialog now states how many posts will be produced and the
+  exact dates they will land on, before anything is generated.
+
 19.0.1.4.0 (2026-07)
 --------------------
 * **The planner learns from what worked.** Real engagement figures reported by

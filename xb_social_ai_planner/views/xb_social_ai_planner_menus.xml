@@ -1,58 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!--
-        This module complements the native Social Marketing app: all menus are
-        nested under social.menu_social_global (no separate application).
-    -->
+        This module complements the native Social Marketing app: everything
+        hangs off social.menu_social_global (no separate application).
 
-    <!-- Top-level entries under "Social Marketing" -->
-    <menuitem id="menu_xb_social_generate_month"
-              name="AI: Generate Month"
+        The entries are grouped under one parent and numbered in the order a
+        month is actually run — start, generate, review, look at the grid —
+        because a flat list of seven items gives a newcomer no clue where to
+        begin. Anything technical stays in the native Configuration menu.
+    -->
+    <menuitem id="menu_xb_social_root"
+              name="AI Planner"
               parent="social.menu_social_global"
-              action="action_xb_social_generate_month_wizard"
               groups="group_xb_social_planner_user"
               sequence="11"/>
 
+    <menuitem id="menu_xb_social_onboarding"
+              name="Start Here"
+              parent="menu_xb_social_root"
+              action="action_xb_social_onboarding"
+              groups="group_xb_social_planner_user"
+              sequence="1"/>
+
+    <menuitem id="menu_xb_social_generate_month"
+              name="Generate Month"
+              parent="menu_xb_social_root"
+              action="action_xb_social_generate_month_wizard"
+              groups="group_xb_social_planner_user"
+              sequence="2"/>
+
     <menuitem id="menu_xb_social_content_plan"
-              name="AI Content Plans"
-              parent="social.menu_social_global"
+              name="Content Plans"
+              parent="menu_xb_social_root"
               action="action_xb_social_content_plan"
               groups="group_xb_social_planner_user"
-              sequence="12"/>
+              sequence="3"/>
 
-    <!-- Planning data under the native Configuration menu -->
+    <!-- The month grid. The view existed from day one but had no way in. -->
+    <menuitem id="menu_xb_social_plan_item"
+              name="Content Grid"
+              parent="menu_xb_social_root"
+              action="action_xb_social_plan_item"
+              groups="group_xb_social_planner_user"
+              sequence="4"/>
+
     <menuitem id="menu_xb_social_brand_profile"
-              name="Brand Profiles"
-              parent="social.menu_social_configuration"
+              name="Brands"
+              parent="menu_xb_social_root"
               action="action_xb_social_brand_profile"
               groups="group_xb_social_planner_user"
-              sequence="40"/>
+              sequence="5"/>
 
+    <!-- Configuration -->
     <menuitem id="menu_xb_social_competitor"
               name="Competitors"
               parent="social.menu_social_configuration"
               action="action_xb_social_competitor"
               groups="group_xb_social_planner_user"
-              sequence="41"/>
+              sequence="40"/>
 
     <menuitem id="menu_xb_social_ai_provider"
-              name="AI Providers"
+              name="AI Engine"
               parent="social.menu_social_configuration"
               action="action_xb_social_ai_provider"
               groups="group_xb_social_planner_manager"
-              sequence="42"/>
+              sequence="41"/>
 
     <menuitem id="menu_xb_social_generation_job"
-              name="AI Generation Jobs"
+              name="AI Activity"
               parent="social.menu_social_configuration"
               action="action_xb_social_generation_job"
               groups="group_xb_social_planner_manager"
-              sequence="43"/>
+              sequence="42"/>
 
     <menuitem id="menu_xb_social_settings"
               name="AI Planner Settings"
               parent="social.menu_social_configuration"
               action="action_xb_social_settings"
               groups="group_xb_social_planner_manager"
-              sequence="44"/>
+              sequence="43"/>
 </odoo>

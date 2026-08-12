@@ -5,6 +5,14 @@
         <field name="model">xb.social.brand.profile</field>
         <field name="arch" type="xml">
             <form string="Brand Profile">
+                <header>
+                    <button name="action_autofill_from_website" type="object"
+                            string="Draft From Website" class="btn-primary"
+                            invisible="not website"
+                            help="Reads your public site and fills in the
+                                  empty fields below. Nothing you already
+                                  wrote is overwritten."/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_plans" type="object"
@@ -20,9 +28,18 @@
                         <label for="name"/>
                         <h1><field name="name" placeholder="e.g. Acme Coffee"/></h1>
                     </div>
+                    <!-- Everything the prompts are built from lives on this
+                         form; say out loud how much of it is actually there. -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="completeness >= 100">
+                        <field name="completeness_label" class="oe_inline"/>
+                    </div>
                     <group>
                         <group>
-                            <field name="industry"/>
+                            <field name="website" widget="url"
+                                   placeholder="https://www.acmecoffee.com"/>
+                            <field name="industry"
+                                   placeholder="e.g. Handmade wedding jewellery"/>
                             <field name="default_language"/>
                             <field name="emoji_policy"/>
                             <field name="hashtag_policy"/>
@@ -36,11 +53,18 @@
                     </group>
                     <notebook>
                         <page string="Voice &amp; Audience" name="voice">
+                            <div class="text-muted mb-2" invisible="not website">
+                                Empty? <b>Draft From Website</b> above fills
+                                these in from your own site.
+                            </div>
                             <group>
                                 <field name="brand_voice" placeholder="Friendly, expert, concise…"/>
-                                <field name="target_audience"/>
-                                <field name="value_proposition"/>
-                                <field name="cta_style"/>
+                                <field name="target_audience"
+                                       placeholder="e.g. Couples aged 25-40 about to marry, who value handmade work that lasts"/>
+                                <field name="value_proposition"
+                                       placeholder="e.g. Made by hand in our own workshop, with a lifetime guarantee"/>
+                                <field name="cta_style"
+                                       placeholder="e.g. Invite to book a fitting, never pushy"/>
                             </group>
                         </page>
                         <page string="Keywords" name="keywords">
@@ -123,6 +147,7 @@
             <list string="Brand Profiles">
                 <field name="name"/>
                 <field name="industry"/>
+                <field name="completeness" widget="progressbar"/>
                 <field name="plan_count"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </list>

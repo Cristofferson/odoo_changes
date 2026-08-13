@@ -93,14 +93,22 @@
                                     </div>
                                 </group>
                             </group>
+                            <group string="Review">
+                                <group>
+                                    <field name="autopilot_user_id"/>
+                                    <div class="text-muted" colspan="2">
+                                        Whoever is named here gets an activity to
+                                        review and approve every plan of this brand,
+                                        whether the autopilot made it or you did.
+                                    </div>
+                                </group>
+                            </group>
                             <group string="Autopilot">
                                 <group>
                                     <field name="autopilot"/>
                                     <field name="autopilot_day"
                                            invisible="not autopilot"
                                            required="autopilot"/>
-                                    <field name="autopilot_user_id"
-                                           invisible="not autopilot"/>
                                 </group>
                                 <group>
                                     <field name="autopilot_posts_per_week"
@@ -112,8 +120,8 @@
                             <div class="text-muted" invisible="not autopilot">
                                 From that day of the month onwards, next month's plan is
                                 generated automatically using the default accounts, and
-                                the person above gets an activity to review and approve
-                                it. Nothing is published without approval.
+                                the reviewer named above gets an activity to review and
+                                approve it. Nothing is published without approval.
                             </div>
                         </page>
                         <page string="Visual / Brand Kit" name="visual">

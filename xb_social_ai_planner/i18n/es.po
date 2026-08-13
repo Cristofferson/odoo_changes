@@ -202,42 +202,42 @@ msgstr "<b>La IA está trabajando en este mes.</b>"
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
 msgid "<i class=\"fa fa-calendar me-2\" title=\"Schedule\"/>"
-msgstr "<i class=\\\"fa fa-calendar me-2\\\" title=\\\"Programación\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-calendar me-2\\\\\\\" title=\\\\\\\"Programación\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
 msgid "<i class=\"fa fa-check-circle fa-2x me-3\" title=\"Done\"/>"
-msgstr "<i class=\\\"fa fa-check-circle fa-2x me-3\\\" title=\\\"Listo\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-check-circle fa-2x me-3\\\\\\\" title=\\\\\\\"Listo\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid "<i class=\"fa fa-cog fa-spin fa-2x me-3\" title=\"Working\"/>"
-msgstr "<i class=\\\"fa fa-cog fa-spin fa-2x me-3\\\" title=\\\"Trabajando\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-cog fa-spin fa-2x me-3\\\\\\\" title=\\\\\\\"Trabajando\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
 msgid "<i class=\"fa fa-exclamation-circle fa-2x me-3\" title=\"To do\"/>"
-msgstr "<i class=\\\"fa fa-exclamation-circle fa-2x me-3\\\" title=\\\"Pendiente\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-exclamation-circle fa-2x me-3\\\\\\\" title=\\\\\\\"Pendiente\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
 msgid "<i class=\"fa fa-hourglass-half fa-2x me-3\" title=\"Waiting\"/>"
-msgstr "<i class=\\\"fa fa-hourglass-half fa-2x me-3\\\" title=\\\"En espera\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-hourglass-half fa-2x me-3\\\\\\\" title=\\\\\\\"En espera\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
 msgid "<i class=\"fa fa-key fa-2x me-3\" title=\"To do\"/>"
-msgstr "<i class=\\\"fa fa-key fa-2x me-3\\\" title=\\\"Pendiente\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-key fa-2x me-3\\\\\\\" title=\\\\\\\"Pendiente\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_onboarding_view_form
 msgid "<i class=\"fa fa-magic fa-2x me-3\" title=\"Ready\"/>"
-msgstr "<i class=\\\"fa fa-magic fa-2x me-3\\\" title=\\\"Listo\\\"/>"
+msgstr "<i class=\\\\\\\"fa fa-magic fa-2x me-3\\\\\\\" title=\\\\\\\"Listo\\\\\\\"/>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid "<span class=\"o_stat_text\">Grid</span>"
-msgstr "<span class=\\\"o_stat_text\\\">Parrilla</span>"
+msgstr "<span class=\\\\\\\"o_stat_text\\\\\\\">Parrilla</span>"
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_competitor_view_form
@@ -1261,9 +1261,9 @@ msgstr "Cercana, experta, concisa…"
 msgid ""
 "From that day of the month onwards, next month's plan is\n"
 "                                generated automatically using the default accounts, and\n"
-"                                the person above gets an activity to review and approve\n"
-"                                it. Nothing is published without approval."
-msgstr "A partir de ese día del mes, el plan del mes siguiente se genera solo con las cuentas predeterminadas, y la persona de arriba recibe una actividad para revisarlo y aprobarlo. Nada se publica sin aprobación."
+"                                the reviewer named above gets an activity to review and\n"
+"                                approve it. Nothing is published without approval."
+msgstr "A partir de ese día del mes, el plan del mes siguiente se genera solo con las cuentas predeterminadas, y el revisor de arriba recibe una actividad para revisarlo y aprobarlo. Nada se publica sin aprobación."
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_generate_month_wizard_form
@@ -1360,8 +1360,10 @@ msgstr "La generación corre en segundo plano: puedes cerrar esto y volver despu
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
-msgid "Gets an activity to review the plan once the AI is done."
-msgstr "Recibe una actividad para revisar el plan cuando la IA termina."
+msgid ""
+"Gets an activity to review the plan once the AI is done. Taken from the "
+"brand, and editable per plan."
+msgstr "Recibe una actividad para revisar el plan cuando la IA termina. Se toma de la marca y se puede cambiar en cada plan."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields.selection,name:xb_social_ai_planner.selection__xb_social_ai_provider__image_provider_type__gemini_images
@@ -1476,7 +1478,7 @@ msgid ""
 "How post images are produced.\n"
 "• Vector design: the text model draws an on-brand graphic that is rasterised locally. No image API key and no per-image billing, but it is graphic design, not photography.\n"
 "• OpenAI / Gemini: real photoreal image models. Needs an image API key and is billed per image by the provider."
-msgstr "Cómo se producen las imágenes de las publicaciones.\\\\\\\\\\\\\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\\\\\\\\\\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
+msgstr "Cómo se producen las imágenes de las publicaciones.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__id
@@ -2129,11 +2131,6 @@ msgid "Nothing scheduled yet"
 msgstr "Todavía no hay nada programado"
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
-msgid "Notify"
-msgstr "Avisar a"
-
-#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction_counter
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_needaction_counter
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_needaction_counter
@@ -2704,12 +2701,18 @@ msgid "Retry Failed"
 msgstr "Reintentar fallidos"
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Review"
+msgstr "Revisión"
+
+#. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
 msgid "Review the AI content plan"
 msgstr "Revisar el plan de contenido de la IA"
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
 msgid "Reviewer"
 msgstr "Revisor"
@@ -2817,7 +2820,7 @@ msgid ""
 "• Anthropic API / OpenAI API: pay-per-use, needs an API key.\n"
 "• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing).\n"
 "• Custom: any endpoint that speaks the OpenAI chat API."
-msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\\\\\\\\\\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\\\\\\\\\\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
+msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__sequence
@@ -2907,7 +2910,7 @@ msgid ""
 "Overdue: Due date is already passed\n"
 "Today: Activity date is today\n"
 "Planned: Future activities."
-msgstr "Estado según las actividades\\\\\\\\\\\\\\\\nVencida: ya pasó la fecha límite\\\\\\\\\\\\\\\\nHoy: hoy es la fecha de la actividad\\\\\\\\\\\\\\\\nPlaneada: futuras actividades."
+msgstr "Estado según las actividades\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\nVencida: ya pasó la fecha límite\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\nHoy: hoy es la fecha de la actividad\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\nPlaneada: futuras actividades."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__completeness_missing
@@ -3157,7 +3160,7 @@ msgstr "El plan mensual al que pertenece esta publicación."
 msgid ""
 "The post is considered as 'Posted' when all its sub-posts (one per social "
 "account) are either 'Failed' or 'Posted'"
-msgstr "Se cuenta como \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"publicado\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
+msgstr "Se cuenta como \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"publicado\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
 
 #. module: xb_social_ai_planner
 #. odoo-python
@@ -3442,8 +3445,18 @@ msgstr "Qué modelo escribe la estrategia y las publicaciones."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
-msgid "Who gets the review activity once the plan is generated."
-msgstr "Quién recibe la actividad de revisión cuando se genera el plan."
+msgid ""
+"Who gets the review activity once a plan of this brand is generated — the "
+"ones you create by hand too, not just the autopilot's."
+msgstr "Quién recibe la actividad de revisión cuando se genera un plan de esta marca — también los que creas a mano, no solo los del piloto automático."
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid ""
+"Whoever is named here gets an activity to\n"
+"                                        review and approve every plan of this brand,\n"
+"                                        whether the autopilot made it or you did."
+msgstr "Quien esté aquí recibe una actividad para revisar y aprobar todos los planes de esta marca, los haya hecho el piloto automático o tú."
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_plan_item_view_search

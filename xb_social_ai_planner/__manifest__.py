@@ -76,7 +76,7 @@ AI video (v2) plugs in through the same pluggable media layer.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Marketing/Social Marketing",
-    "version": "19.0.1.5.0",
+    "version": "19.0.1.5.1",
     "license": "OPL-1",
     "depends": [
         "social",

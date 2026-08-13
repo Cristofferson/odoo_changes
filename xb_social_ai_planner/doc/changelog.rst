@@ -1,6 +1,21 @@
 Changelog
 =========
 
+19.0.1.5.1 (2026-08)
+--------------------
+The reviewer was never told the plan was ready.
+
+* A plan made by hand now takes its reviewer from the brand. Only the
+  autopilot used to carry it over, so every plan created by hand was born
+  without one and the "your plan is ready" activity was silently never
+  scheduled. The reviewer is still editable plan by plan.
+* The brand's reviewer is no longer hidden behind the autopilot switch — with
+  the autopilot off there was no way to name one at all. It has its own
+  Review section now.
+* The month in that activity is written in the reader's language. It came
+  from ``strftime``, which names it in the server's locale, so a Spanish
+  sentence announced the plan for "September 2026".
+
 19.0.1.5.0 (2026-08)
 --------------------
 Usability release. The features were all there; finding and following them was

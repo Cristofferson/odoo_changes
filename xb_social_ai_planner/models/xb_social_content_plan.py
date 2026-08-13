@@ -7,6 +7,7 @@ import pytz
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import format_date
 
 
 class XbSocialContentPlan(models.Model):
@@ -54,7 +55,9 @@ class XbSocialContentPlan(models.Model):
     created_by_autopilot = fields.Boolean(readonly=True, copy=False)
     review_user_id = fields.Many2one(
         "res.users", string="Reviewer", copy=False,
-        help="Gets an activity to review the plan once the AI is done.",
+        compute="_compute_review_user_id", store=True, readonly=False,
+        help="Gets an activity to review the plan once the AI is done. "
+             "Taken from the brand, and editable per plan.",
     )
     target_post_count = fields.Integer(
         string="Target Posts", compute="_compute_target_post_count",
@@ -120,6 +123,17 @@ class XbSocialContentPlan(models.Model):
     def _compute_target_post_count(self):
         for plan in self:
             plan.target_post_count = max(1, (plan.posts_per_week or 3)) * 4
+
+    @api.depends("brand_profile_id")
+    def _compute_review_user_id(self):
+        """Carry the brand's reviewer over to the plan.
+
+        Only the autopilot used to do it, so every plan made by hand was born
+        without a reviewer and nobody was ever told it was ready. Falls back to
+        whoever is already set, so picking a reviewer by hand survives."""
+        for plan in self:
+            plan.review_user_id = (
+                plan.brand_profile_id.autopilot_user_id or plan.review_user_id)
 
     @api.depends("brand_profile_id", "use_performance_feedback")
     def _compute_performance_preview(self):
@@ -465,11 +479,22 @@ class XbSocialContentPlan(models.Model):
         if not self.review_user_id or self.activity_ids.filtered(
                 lambda a: a.user_id == self.review_user_id):
             return
+        # The reviewer reads this, not whoever triggered the generation — and
+        # the cron triggers most of them as OdooBot anyway.
+        self.with_context(
+            lang=self.review_user_id.lang or self.env.lang
+        )._schedule_review_activity()
+
+    def _schedule_review_activity(self):
+        self.ensure_one()
         failed = len(self.generation_job_ids.filtered(
             lambda j: j.state == "failed"))
         note = _(
             "The AI plan for %(month)s is ready: %(count)s posts to review "
-            "and approve.", month=self.plan_date.strftime("%B %Y"),
+            "and approve.",
+            # strftime would name the month in the server's locale — English —
+            # inside an otherwise translated sentence.
+            month=format_date(self.env, self.plan_date, date_format="MMMM y"),
             count=len(self.item_ids))
         if failed:
             note += " " + _("%s generation job(s) failed.") % failed

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-13 00:50+0000\n"
-"PO-Revision-Date: 2026-08-13 00:50+0000\n"
+"POT-Creation-Date: 2026-08-13 16:36+0000\n"
+"PO-Revision-Date: 2026-08-13 16:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1265,8 +1265,8 @@ msgstr ""
 msgid ""
 "From that day of the month onwards, next month's plan is\n"
 "                                generated automatically using the default accounts, and\n"
-"                                the person above gets an activity to review and approve\n"
-"                                it. Nothing is published without approval."
+"                                the reviewer named above gets an activity to review and\n"
+"                                approve it. Nothing is published without approval."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1364,7 +1364,9 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
-msgid "Gets an activity to review the plan once the AI is done."
+msgid ""
+"Gets an activity to review the plan once the AI is done. Taken from the "
+"brand, and editable per plan."
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -2133,11 +2135,6 @@ msgid "Nothing scheduled yet"
 msgstr ""
 
 #. module: xb_social_ai_planner
-#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
-msgid "Notify"
-msgstr ""
-
-#. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__message_needaction_counter
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_competitor__message_needaction_counter
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__message_needaction_counter
@@ -2708,12 +2705,18 @@ msgid "Retry Failed"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid "Review"
+msgstr ""
+
+#. module: xb_social_ai_planner
 #. odoo-python
 #: code:addons/xb_social_ai_planner/models/xb_social_content_plan.py:0
 msgid "Review the AI content plan"
 msgstr ""
 
 #. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__review_user_id
 msgid "Reviewer"
 msgstr ""
@@ -3446,7 +3449,17 @@ msgstr ""
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_brand_profile__autopilot_user_id
-msgid "Who gets the review activity once the plan is generated."
+msgid ""
+"Who gets the review activity once a plan of this brand is generated — the "
+"ones you create by hand too, not just the autopilot's."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_brand_profile_view_form
+msgid ""
+"Whoever is named here gets an activity to\n"
+"                                        review and approve every plan of this brand,\n"
+"                                        whether the autopilot made it or you did."
 msgstr ""
 
 #. module: xb_social_ai_planner

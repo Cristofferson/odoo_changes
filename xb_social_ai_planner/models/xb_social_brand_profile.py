@@ -126,8 +126,10 @@ class XbSocialBrandProfile(models.Model):
         help="Day of the month the next month's plan is generated on.",
     )
     autopilot_user_id = fields.Many2one(
-        "res.users", string="Notify",
-        help="Who gets the review activity once the plan is generated.",
+        "res.users", string="Reviewer",
+        help="Who gets the review activity once a plan of this brand is "
+             "generated — the ones you create by hand too, not just the "
+             "autopilot's.",
     )
     autopilot_posts_per_week = fields.Integer(
         string="Autopilot Posts / Week", default=3,

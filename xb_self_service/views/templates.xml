@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Cart panel: route by basket value (reserve vs. book an advisor) -->
+    <!-- Cart panel: customer chooses — reserve in store, or book an advisor -->
     <template id="cart_self_service" inherit_id="website_sale.cart"
-              name="Self-Service: reserve or book by value">
+              name="Self-Service: reserve or book">
         <xpath expr="//t[@t-call='website_sale.cart_lines']" position="after">
             <t t-if="website.self_service_enabled and website_sale_order and website_sale_order.order_line">
-                <t t-set="ss_total" t-value="website_sale_order.amount_total"/>
-                <t t-set="ss_threshold" t-value="website.self_service_threshold or 0.0"/>
                 <div class="card border-0 shadow-sm mt-4 xb-selfservice">
                     <div class="card-body text-center py-4">
-                        <t t-if="ss_total &lt; ss_threshold">
-                            <h4 class="mb-2">¿Te enamoraste de tu selección?</h4>
-                            <p class="text-muted mb-3">Apártala sin pago y recógela en el mostrador.</p>
-                            <form action="/jewelry/reserve" method="post" class="mb-0">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fa fa-bookmark me-2"/>Apartar en tienda
-                                </button>
-                            </form>
-                        </t>
-                        <t t-else="">
-                            <h4 class="mb-2">Una pieza especial merece atención especial</h4>
-                            <p class="text-muted mb-3">Te acompañamos con un asesor experto para tu pieza de alto valor.</p>
-                            <a t-att-href="website.self_service_appointment_url or '/appointment'"
-                               class="btn btn-primary btn-lg">
-                                <i class="fa fa-calendar me-2"/>Agendar asesoría
-                            </a>
-                        </t>
+                        <h4 class="mb-2">¿Lista tu selección?</h4>
+                        <p class="text-muted mb-4">Tú decides cómo continuar. En ambos casos te atendemos en la tienda, sin pago en línea.</p>
+                        <div class="row justify-content-center g-3">
+                            <div class="col-12 col-sm-6 col-md-5">
+                                <form action="/jewelry/reserve" method="post" class="mb-0">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fa fa-bookmark me-2"/>Apartar en tienda
+                                    </button>
+                                </form>
+                                <small class="d-block text-muted mt-2">Resérvala sin pago y recógela en el mostrador.</small>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-5">
+                                <a t-att-href="website.self_service_appointment_url or '/appointment'"
+                                   class="btn btn-outline-primary btn-lg w-100">
+                                    <i class="fa fa-calendar me-2"/>Agendar asesoría
+                                </a>
+                                <small class="d-block text-muted mt-2">Te acompaña un asesor experto, cuando gustes.</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </t>

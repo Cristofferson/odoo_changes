@@ -10,7 +10,6 @@ _logger = logging.getLogger(__name__)
 _COLUMNS = [
     ('sale_order', 'self_service_reserved', 'BOOLEAN DEFAULT FALSE'),
     ('website', 'self_service_enabled', 'BOOLEAN DEFAULT FALSE'),
-    ('website', 'self_service_threshold', 'DOUBLE PRECISION DEFAULT 5000.0'),
     ('website', 'self_service_appointment_url', 'VARCHAR'),
     ('website', 'self_service_team_id', 'INTEGER'),
 ]

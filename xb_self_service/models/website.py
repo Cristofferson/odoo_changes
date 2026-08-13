@@ -7,14 +7,8 @@ class Website(models.Model):
 
     self_service_enabled = fields.Boolean(
         string='Self-Service Reserve/Book', default=False,
-        help="Show the reserve / book-an-advisor call-to-action on the cart, "
-             "routed by the value threshold below.",
-    )
-    self_service_threshold = fields.Float(
-        string='Assisted-Sale Threshold', default=5000.0,
-        help="Basket totals at or above this amount route the customer to book "
-             "an advisor instead of reserving. Below it, they can reserve for "
-             "counter pickup.",
+        help="Show both call-to-action buttons on the cart so the customer can "
+             "choose: reserve in store, or book an advisor.",
     )
     self_service_appointment_url = fields.Char(
         string='Advisor Booking URL', default='/appointment',

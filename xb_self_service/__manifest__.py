@@ -1,26 +1,25 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Self-Service: Reserve or Book by Value',
-    'version': '19.0.1.0.0',
+    'name': 'Self-Service: Reserve or Book',
+    'version': '19.0.1.1.0',
     'category': 'Website/eCommerce',
-    'summary': 'On the web store, route the customer by basket value: reserve low-value pieces for counter pickup, or book an advisor for high-value ones.',
+    'summary': 'On the web store, let the customer choose: reserve in store for counter pickup, or book an advisor. No online payment.',
     'description': """
-Self-Service — Reserve or Book by Value
-=======================================
+Self-Service — Reserve or Book
+==============================
 
 Turns the online store into a self-service counter assistant. When a customer
-(e.g. from the videowall QR) assembles a selection, a configurable threshold
-routes them:
+(e.g. from the videowall QR) assembles a selection, the cart shows two
+call-to-action buttons and lets the customer choose how to continue:
 
-* **Below the threshold → "Reserve in store"**: the cart is kept as a
-  quotation tagged for a salesperson, who closes it at the counter. No online
-  payment.
-* **At/above the threshold → "Book an advisor"**: the customer is sent to the
-  appointment page to be assisted with a high-value piece.
+* **"Reserve in store"**: the cart is kept as a quotation tagged for a
+  salesperson, who closes it at the counter. No online payment.
+* **"Book an advisor"**: the customer is sent to the appointment page to be
+  assisted in person.
 
-Configurable per website: on/off, threshold amount, appointment URL, and the
-sales team that receives reservations. Designed for jewelry and other
-high-touch, high-value catalogs.
+Both paths end with a human closing the sale at the store — there is no online
+payment. Configurable per website: on/off, appointment URL, and the sales team
+that receives reservations. Designed for jewelry and other high-touch catalogs.
 """,
     'author': 'Cristofferson',
     'website': 'https://www.xubax.com',

@@ -6,16 +6,11 @@
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//app[@name='website']" position="inside">
-                <block id="xb_self_service_section" title="Self-Service (Reserve / Book by Value)"
-                       help="On the web store, route the customer by basket value: reserve low-value pieces for counter pickup, or book an advisor for high-value ones.">
+                <block id="xb_self_service_section" title="Self-Service (Reserve / Book)"
+                       help="On the web store, let the customer choose how to continue: reserve in store for counter pickup, or book an advisor. No online payment.">
                     <setting string="Enable Self-Service Reserve/Book"
-                             help="Show the reserve / book-an-advisor call-to-action on the cart.">
+                             help="Show both call-to-action buttons on the cart so the customer can choose.">
                         <field name="self_service_enabled"/>
-                    </setting>
-                    <setting string="Assisted-Sale Threshold"
-                             help="Baskets at/above this amount route to 'Book an advisor'; below it, to 'Reserve in store'."
-                             invisible="not self_service_enabled">
-                        <field name="self_service_threshold"/>
                     </setting>
                     <setting string="Advisor Booking URL"
                              help="Where the 'Book an advisor' button sends the customer."

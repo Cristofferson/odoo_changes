@@ -7,8 +7,6 @@ class ResConfigSettings(models.TransientModel):
 
     self_service_enabled = fields.Boolean(
         related='website_id.self_service_enabled', readonly=False)
-    self_service_threshold = fields.Float(
-        related='website_id.self_service_threshold', readonly=False)
     self_service_appointment_url = fields.Char(
         related='website_id.self_service_appointment_url', readonly=False)
     self_service_team_id = fields.Many2one(

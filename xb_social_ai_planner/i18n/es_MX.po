@@ -181,10 +181,10 @@ msgstr "<b>4. Genera tu mes</b><br/> La IA escribe la estrategia del mes y una p
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid ""
-"<b>Some AI jobs failed.</b>\n"
+"<b>Some AI jobs failed or were left mid-flight.</b>\n"
 "                        Use <b>Retry Failed</b> above, or open the AI Activity\n"
 "                        tab to read the error."
-msgstr "<b>Algunos trabajos de la IA fallaron.</b> Usa <b>Reintentar fallidos</b> arriba, o abre la pestaña Actividad de la IA para leer el error."
+msgstr "<b>Algunos trabajos de la IA fallaron o quedaron a medias.</b> Usa <b>Reintentar fallidos</b> arriba, o abre la pestaña Actividad de la IA para leer el error."
 
 #. module: xb_social_ai_planner
 #: model_terms:ir.actions.act_window,help:xb_social_ai_planner.action_xb_social_content_plan
@@ -433,6 +433,11 @@ msgstr "Llaves de API (usa tu propia llave)"
 #: model:ir.model.fields,help:xb_social_ai_planner.field_res_config_settings__xb_social_ai_image_api_key
 msgid "API key for the image-generation provider (optional)."
 msgstr "Clave de API del proveedor de generación de imágenes (opcional)."
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__jobs_stale
+msgid "Abandoned Jobs"
+msgstr "Trabajos abandonados"
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_onboarding__account_count
@@ -1471,7 +1476,7 @@ msgid ""
 "How post images are produced.\n"
 "• Vector design: the text model draws an on-brand graphic that is rasterised locally. No image API key and no per-image billing, but it is graphic design, not photography.\n"
 "• OpenAI / Gemini: real photoreal image models. Needs an image API key and is billed per image by the provider."
-msgstr "Cómo se producen las imágenes de las publicaciones.\\\\\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
+msgstr "Cómo se producen las imágenes de las publicaciones.\\\\\\\\\\\\\\\\n• Diseño vectorial: el modelo de texto dibuja un gráfico de marca que se rasteriza localmente. Sin clave de API de imágenes y sin cobro por imagen, pero es diseño gráfico, no fotografía.\\\\\\\\\\\\\\\\n• OpenAI / Gemini: modelos de imagen foto-realistas de verdad. Requieren clave de API de imágenes y el proveedor cobra por imagen."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_res_company__id
@@ -1701,6 +1706,13 @@ msgstr "Publicaciones"
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__job_type
 msgid "Job Type"
 msgstr "Tipo de trabajo"
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__jobs_stale
+msgid ""
+"Jobs left mid-flight by a worker that died. Without this the plan would sit "
+"on 'Generating' for good."
+msgstr "Trabajos que dejó a medias un proceso que murió. Sin esto el plan se quedaría en «Generando» para siempre."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_onboarding__key_status
@@ -2805,7 +2817,7 @@ msgid ""
 "• Anthropic API / OpenAI API: pay-per-use, needs an API key.\n"
 "• Claude Code CLI: reuses a Claude Code / Max subscription already installed on the server (no API key, no per-call billing).\n"
 "• Custom: any endpoint that speaks the OpenAI chat API."
-msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
+msgstr "Selecciona la implementación de transporte usada para llamar al modelo.\\\\\\\\\\\\\\\\n• API de Anthropic: pago por uso, requiere una clave API.\\\\\\\\\\\\\\\\n• Claude Code CLI: reutiliza una suscripción Claude Code / Max ya instalada en el servidor (sin clave API, sin cobro por llamada)."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_ai_provider__sequence
@@ -2895,7 +2907,7 @@ msgid ""
 "Overdue: Due date is already passed\n"
 "Today: Activity date is today\n"
 "Planned: Future activities."
-msgstr "Estado según las actividades\\\\\\\\nVencida: ya pasó la fecha límite\\\\\\\\nHoy: hoy es la fecha de la actividad\\\\\\\\nPlaneada: futuras actividades."
+msgstr "Estado según las actividades\\\\\\\\\\\\\\\\nVencida: ya pasó la fecha límite\\\\\\\\\\\\\\\\nHoy: hoy es la fecha de la actividad\\\\\\\\\\\\\\\\nPlaneada: futuras actividades."
 
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_brand_profile__completeness_missing
@@ -3145,7 +3157,7 @@ msgstr "El plan mensual al que pertenece esta publicación."
 msgid ""
 "The post is considered as 'Posted' when all its sub-posts (one per social "
 "account) are either 'Failed' or 'Posted'"
-msgstr "Se cuenta como \\\\\\\\\\\\\\\"publicado\\\\\\\\\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
+msgstr "Se cuenta como \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"publicado\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" cuando todas las publicaciones subordinadas (en cada red social) están en 'Error' o 'Publicado'"
 
 #. module: xb_social_ai_planner
 #. odoo-python

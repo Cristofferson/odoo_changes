@@ -16,6 +16,14 @@ the problem.
   the plan's accounts and campaign, it can be approved straight from draft,
   and regenerating the month no longer deletes it — only what the AI itself
   wrote is cleared.
+* **Fixed a bug that could be paid for over and over.** The generation cron
+  called ``registry.in_test_mode()``, which no longer exists in Odoo 19 — and
+  because the AttributeError fired *after* the AI had answered, every tick
+  bought a response, threw it away with the rollback, left the job queued, and
+  bought it again two minutes later. Jobs are now claimed durably before
+  anything is spent, so a crash leaves the work visibly abandoned instead of
+  replaying it; *Retry Failed* picks those up, and the plan says so rather
+  than sitting on *Generating* for good.
 * Two fields nobody could interpret now say what they are: *Inferred Trends*
   is *Angle the AI Leaned On*, and *Split Per Network* is *Different Text Per
   Network*, both with help explaining when they matter.

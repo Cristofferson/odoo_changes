@@ -22,7 +22,7 @@
                                   of waiting for the background queue."/>
                     <button name="action_retry_failed" type="object"
                             string="Retry Failed"
-                            invisible="not jobs_failed"/>
+                            invisible="not jobs_failed and not jobs_stale"/>
                     <button name="action_open_native_calendar" type="object"
                             string="Native Calendar"
                             invisible="state not in ('pushed','done')"/>
@@ -49,11 +49,12 @@
                         </div>
                     </div>
                     <div class="alert alert-warning" role="alert"
-                         invisible="not jobs_failed or state == 'generating'">
-                        <b>Some AI jobs failed.</b>
+                         invisible="not jobs_failed and not jobs_stale">
+                        <b>Some AI jobs failed or were left mid-flight.</b>
                         Use <b>Retry Failed</b> above, or open the AI Activity
                         tab to read the error.
                         <field name="jobs_failed" invisible="1"/>
+                        <field name="jobs_stale" invisible="1"/>
                     </div>
                     <field name="jobs_pending" invisible="1"/>
                     <!-- Reloads the form on its own while the queue drains. -->

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, modules
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -122,9 +122,23 @@ class XbSocialGenerationJob(models.Model):
         doesn't roll back completed work."""
         jobs = self.search([("state", "=", "queued")], limit=limit, order="id")
         for job in jobs:
+            # Claim the job durably *before* spending anything. If the worker
+            # dies, or any line after the AI call raises, the job is left
+            # 'running' for a human to find — not 'queued' for the next tick
+            # to buy the same answer all over again.
+            job.write({"state": "running", "started_at": fields.Datetime.now()})
+            if not modules.module.current_test:
+                self.env.cr.commit()
             job._run()
-            # commit so each AI call's result is durable independently
-            if not self.env.registry.in_test_mode():
+            # Commit so each AI call's result is durable independently.
+            # Read current_test through the module (not `from ... import`):
+            # it is a flag flipped at runtime, so a captured copy is always
+            # False. `registry.in_test_mode()` used to do this job but no
+            # longer exists in Odoo 19 — and because the AttributeError fired
+            # *after* the call to the model, every cron tick paid for an AI
+            # response and then rolled it away, leaving the job queued to be
+            # paid for again two minutes later.
+            if not modules.module.current_test:
                 self.env.cr.commit()
         # roll plans whose items have all been generated up to 'generated'
         plans = jobs.mapped("plan_id") | jobs.mapped("item_id.plan_id")

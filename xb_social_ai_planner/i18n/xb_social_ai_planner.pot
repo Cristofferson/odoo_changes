@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 23:36+0000\n"
-"PO-Revision-Date: 2026-08-12 23:36+0000\n"
+"POT-Creation-Date: 2026-08-13 00:50+0000\n"
+"PO-Revision-Date: 2026-08-13 00:50+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -185,7 +185,7 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model_terms:ir.ui.view,arch_db:xb_social_ai_planner.xb_social_content_plan_view_form
 msgid ""
-"<b>Some AI jobs failed.</b>\n"
+"<b>Some AI jobs failed or were left mid-flight.</b>\n"
 "                        Use <b>Retry Failed</b> above, or open the AI Activity\n"
 "                        tab to read the error."
 msgstr ""
@@ -436,6 +436,11 @@ msgstr ""
 #: model:ir.model.fields,help:xb_social_ai_planner.field_res_company__xb_social_ai_image_api_key
 #: model:ir.model.fields,help:xb_social_ai_planner.field_res_config_settings__xb_social_ai_image_api_key
 msgid "API key for the image-generation provider (optional)."
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_content_plan__jobs_stale
+msgid "Abandoned Jobs"
 msgstr ""
 
 #. module: xb_social_ai_planner
@@ -1704,6 +1709,13 @@ msgstr ""
 #. module: xb_social_ai_planner
 #: model:ir.model.fields,field_description:xb_social_ai_planner.field_xb_social_generation_job__job_type
 msgid "Job Type"
+msgstr ""
+
+#. module: xb_social_ai_planner
+#: model:ir.model.fields,help:xb_social_ai_planner.field_xb_social_content_plan__jobs_stale
+msgid ""
+"Jobs left mid-flight by a worker that died. Without this the plan would sit "
+"on 'Generating' for good."
 msgstr ""
 
 #. module: xb_social_ai_planner

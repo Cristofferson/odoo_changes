@@ -91,6 +91,10 @@ class XbSocialContentPlan(models.Model):
         string="Queued Jobs", compute="_compute_progress")
     jobs_failed = fields.Integer(
         string="Failed Jobs", compute="_compute_progress")
+    jobs_stale = fields.Integer(
+        string="Abandoned Jobs", compute="_compute_progress",
+        help="Jobs left mid-flight by a worker that died. Without this the "
+             "plan would sit on 'Generating' for good.")
     copy_done_count = fields.Integer(
         string="Texts Written", compute="_compute_progress")
     image_done_count = fields.Integer(
@@ -169,6 +173,11 @@ class XbSocialContentPlan(models.Model):
             plan.jobs_pending = len(jobs.filtered(
                 lambda j: j.state in ("queued", "running")))
             plan.jobs_failed = len(jobs.filtered(lambda j: j.state == "failed"))
+            cutoff = fields.Datetime.now() - timedelta(
+                minutes=self._STALE_RUNNING_MINUTES)
+            plan.jobs_stale = len(jobs.filtered(
+                lambda j: j.state == "running" and j.started_at
+                and j.started_at < cutoff))
             plan.copy_done_count = len(items.filtered(lambda i: i.message))
             plan.image_done_count = len(
                 items.filtered(lambda i: i.generated_image_ids))
@@ -516,10 +525,18 @@ class XbSocialContentPlan(models.Model):
         )
         return self._notify(message, "info" if left else "success")
 
+    # A job still 'running' after this long was abandoned by a worker that
+    # died mid-flight; nothing here takes minutes.
+    _STALE_RUNNING_MINUTES = 30
+
     def action_retry_failed(self):
-        """Put every failed job back in the queue and unstick its post."""
+        """Put every failed — or abandoned — job back in the queue."""
         self.ensure_one()
-        failed = self.generation_job_ids.filtered(lambda j: j.state == "failed")
+        cutoff = fields.Datetime.now() - timedelta(
+            minutes=self._STALE_RUNNING_MINUTES)
+        failed = self.generation_job_ids.filtered(
+            lambda j: j.state == "failed" or (
+                j.state == "running" and j.started_at and j.started_at < cutoff))
         if not failed:
             raise UserError(_("No failed job to retry."))
         failed.action_requeue()

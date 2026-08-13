@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- Diseno de etiqueta mariposa de LAMUR (recuperado de la instalacion
+             en Odoo 17, donde vivia como modificacion directa de la vista
+             stock.label_product_product_view y se perdio en la migracion a 19).
+
+             Fisicamente: 711 x 136 dots @ 203 dpi = 89 x 17 mm.
+             La plantilla maestra stock.label_product_product_view ya abre con
+             ^XA^CI28 y cierra con ^XZ, por eso este bloque cierra la seccion de
+             configuracion con su propio ^XZ y vuelve a abrir con ^XA. -->
+        <template id="lamur_zpl_label">
+            <t t-translation="off">
+~TA000
+~JSN
+^LT0
+^MNW
+^MTT
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR2,6
+~SD25
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW711
+^LL136
+^LS0
+^FT5,108
+^FB155,5,0^A0N,20,21^FH\^CI28^FD<t t-out="product_info['display_name_markup']"/>^FS
+<t t-if="price_included">
+^FT210,105^A0B,35,30^FH\^CI28^FD<t t-esc="currency_id.symbol"/><t t-esc="pricelist._get_product_price(product, 1, currency=currency_id)" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 0}"/>^FS^CI27  
+</t>
+<t t-if="barcode">
+^BY1,3,31^FT501,94^BCN,,Y,N
+^FH\^FD<t t-out="barcode"/>^FS
+</t>
+<t t-else="">
+^BY1,3,31^FT501,94^BCN,,Y,N
+^FH\^FD<t t-out="product_info['default_code'][0]"/>^FS 
+</t>
+^FO495,14^GFA,685,1012,23,:Z64:eJy90k2L00AYAOB3HNjsoTQLXqqGBv9BloIWtjT6T7IE3MuKAS+VLclczHrYuldPXv0bA4XtaenVIouDlfWkThBkxJjxnXy0Gu/OYZg8DJP3C25Aa1laAfjaHAOgOYCdaUH1uS4A3MKwrFgmnBRE+QyoRCW4IbvcBZiAsvmWY2SGPARliYop/mSMDBXTv9lvc27sH7amJSc1k4ZHyGzDze0dfPg+A93iLvKAw7LFnb5hcl6zVafj4Oe+2HKdvGMD3BXUrhn3kns2g0A2rPOah4bVTpt9jTzpNo80nGgO0bTTcFxzhCFFI6dhv+YAE4jGvZK9bSTCcH9Y1jvC7tRxc8Out+EqS8KxlNIVLuC9qGlaB1mCtCsWWCpp2CGsZOw7RoRMVMmUgQJpGRaEI+emuxNrw1SV5wJcrZWLI2bllCUCtAargIT5yL6k+rSgTEtICrCxd9wD2KsmlfwxtLw9xv9h9eI4WyzP8gnMv74Hf5Rd7/24OARn/SHc/Xx28QDmYQ/2vVV6a3YdMofz8NXjWRrAGjnwVqcHNnKf82dvk1kakfXahWCUfTqwvh+xMeeB4eHDb/Pbu4GXvflpvT7i94QIpk8u0x4Z4CORt3r+bvbyEQ/j+GT5Jc8VHTztYySX+dWv9FiE4/HJIp1OJL1zswv2aPHxhWLHwW8W/RJy:28EB
+<t t-set="lamur_tmpl_id" t-value="product.id if product._name == 'product.template' else product.product_tmpl_id.id"/>
+<t t-set="lamur_site" t-value="(product.env['website'].sudo().search([('company_id', '=', product.company_id.id)], limit=1).domain or product.env['ir.config_parameter'].sudo().get_param('web.base.url') or '').rstrip('/')"/>
+^FT370,110,2^BQN,2,3
+^FH\^FDLA,<t t-out="lamur_site"/>/shop/<t t-out="lamur_tmpl_id"/>^FS
+^FO241,1^GFA,749,3488,32,:Z64:eJzd1zGO2kAUBuD/MRZ24TBbUhBMtBdwSYEwRwEpB0BKs0UUhm22yQFScZRoVmlS7CGGG1ipvJKFM2OIIckbvFqiTZSReML6ZMvwvxmPV5V37GDHyu+VanHzu5c4DlmcdyrPOz60eNLissVD1eL6vIsLncwL+I7yrjDvE9qJfPWzo3Ysu6QnEjdkeE8DUtZTr0cCY+vCZJwP0iKTRRiPKu3xQFqPfD5MAyHzO7xZ3ya8d60LLNbK43Lt3Hh8kFZbaQTm90ryv69cdEYUpQvwvgQp2sZXJHnPIRSZuA8Zck55EGqx7Q2Q3DHuUk0e6/prvo178j+evy8l5yUoR2ELVZq7/9K10Y37voLgXWMMaExBPu8DCkOAd7X3gc+ByB3F9dGfdxt9hI4tgnWqMJdqWnt2xk1EPjdP8hjc/CrR5qJxbv4cvQeu/0+dz/+HS3D9e+KK74/GNd8fjRs+/8Zz1pv/zz5vPPkdvDzvEd8fp35Rvs/3Q/+ReqbPpMowi73Xh3Pf/Gh35byevz5PDs7np51r3/rgPHOe8esL2X3ISmWusP1HVWEvkbnC9a9bGuW+FNz8ecr6+j97OZ70Z+JW9l6V6Yjxwi3+pDpB8JXNv3ahMIdWAdN/j3qMRfgJubl/2Hj82p6fmy+lz0WoAu/5VECIzdul1g8fGS/sw+eaNnMEUay5/h1Prt6Jz9+6w8Fr8w/m8xf9RfavF/il+/O29wPZ4m3vJ1P7+Q7h2849:D43B
+            </t>
+        </template>
+
+        <!-- Engancha el diseno al desplegable "Plantilla ZPL" sin tocar las
+             cuatro plantillas nativas de Odoo. -->
+        <template id="label_product_product_view_lamur"
+                  inherit_id="stock.label_product_product_view">
+            <xpath expr="//t[@t-call='stock.jewelry_zpl_label']" position="after">
+                <t t-elif="'lamur' in zpl_template" t-call="lamur_labels.lamur_zpl_label"/>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

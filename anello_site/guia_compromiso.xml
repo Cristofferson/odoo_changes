@@ -1,0 +1,154 @@
+<t t-name="anbn.guia_compromiso">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Guía del anillo de compromiso</t>
+    <div id="wrap" class="oe_structure gd">
+
+<section class="gd-hero">
+  <div class="anbn-w">
+    <div>
+      <div class="gd-crumb"><a href="/guias">Guías</a> · Anillo de compromiso</div>
+      <div class="anbn-eb" style="color:var(--bn-gold-d)">Guía del anillo de compromiso</div>
+      <h1>Cómo elegir el anillo para el «sí»</h1>
+      <p class="lead">Un anillo de compromiso tiene tres decisiones: el metal, el estilo y la piedra. Aquí te explicamos cada una con ejemplos reales de nuestro taller.</p>
+      <div class="gd-min">
+        <b>En 1 minuto</b>
+        <ul>
+          <li><b>Metal:</b> oro amarillo, blanco o rosa, de 10 a 18 kilates, o platino. Más kilates = más oro puro.</li>
+          <li><b>Estilo:</b> fíjate en las joyas que ya usa: ¿sencillas, con brillos, vintage?</li>
+          <li><b>Piedra:</b> zirconia, diamante de laboratorio o natural. Lee nuestra <a href="/guias/diamantes">guía de diamantes</a>.</li>
+          <li><b>Medida:</b> confírmala antes de pedirlo con nuestra <a href="/guias/medida-de-anillo">guía de medidas</a>.</li>
+          <li>Todos nuestros anillos llevan <b>certificado ICERT</b> y el número <b>grabado con láser</b> en la piedra.</li>
+        </ul>
+      </div>
+    </div>
+    <img src="{{hero-still-treviso.jpg}}" alt="Anillo de compromiso Anello"/>
+  </div>
+</section>
+
+<div class="anbn-w gd-body">
+  <nav class="gd-toc" aria-label="Contenido">
+    <b>Contenido</b>
+    <a href="#significado">Qué simboliza</a><a href="#diferencia">Compromiso o argolla</a><a href="#metal">El metal</a>
+    <a href="#estilos">Estilos</a><a href="#piedra">La piedra</a><a href="#presupuesto">Presupuesto</a>
+    <a href="#personalizar">Hazlo único</a><a href="#medida">La medida</a><a href="#preguntas">Preguntas frecuentes</a>
+  </nav>
+  <div class="gd-main">
+
+<section id="significado">
+  <h2><small>Un poco de historia</small>Qué simboliza</h2>
+  <p>El anillo es un círculo sin principio ni fin: por eso se asocia con un amor que no termina. La tradición de usarlo en el dedo anular viene de la antigua creencia de que una vena de ese dedo iba directo al corazón. Hoy, más que seguir reglas, lo importante es que el anillo cuente su historia.</p>
+</section>
+
+<section id="diferencia">
+  <h2><small>Se confunden mucho</small>Anillo de compromiso o argolla de matrimonio</h2>
+  <div class="gd-3">
+    <div class="hl"><h4>Anillo de compromiso</h4><p>Se entrega al pedir matrimonio. Normalmente lleva una piedra protagonista y lo usa quien recibe la propuesta.</p></div>
+    <div><h4>Argollas de matrimonio</h4><p>Se intercambian en la boda y las usan los dos. Suelen ser más sencillas; pueden ser lisas, mate, bitono o con piedras.</p></div>
+    <div><h4>Usarlos juntos</h4><p>Muchas personas usan el anillo de compromiso y la argolla en el mismo dedo. Si es tu caso, elige diseños que combinen. <a href="/shop/category/joyeria-de-boda-14">Ver argollas</a>.</p></div>
+  </div>
+</section>
+
+<section id="metal">
+  <h2><small>Decisión 1</small>El metal</h2>
+  <p>El oro puro (24 kilates) es demasiado blando para un anillo de uso diario, por eso se mezcla con otros metales. Los kilates indican cuánto oro puro tiene la pieza:</p>
+  <table class="gd-table">
+    <thead><tr><th>Kilates</th><th>Oro puro</th><th>Cómo es</th></tr></thead>
+    <tbody>
+      <tr><td><b>10 k</b></td><td>41.7 %</td><td>El más resistente a golpes y el más accesible.</td></tr>
+      <tr><td><b>14 k</b></td><td>58.5 %</td><td>El equilibrio ideal entre color, resistencia y precio.</td></tr>
+      <tr><td><b>18 k</b></td><td>75 %</td><td>Color más intenso y más valor; un poco más blando.</td></tr>
+      <tr><td><b>22 k</b></td><td>91.6 %</td><td>Color muy intenso; más blando, ideal para diseños sencillos.</td></tr>
+      <tr><td><b>Platino</b></td><td>95 % o más</td><td>Blanco natural, el más pesado y hipoalergénico.</td></tr>
+    </tbody>
+  </table>
+  <div class="gd-3">
+    <div><h4>Oro amarillo</h4><p>Clásico y cálido. Combina con todos los tonos de piel y hace que los diamantes con un poco de color se vean blancos.</p></div>
+    <div><h4>Oro blanco</h4><p>Moderno y luminoso. Lleva un baño de rodio que lo hace muy blanco; conviene renovarlo cada uno o dos años en el taller.</p></div>
+    <div><h4>Platino</h4><p>Blanco por naturaleza, sin baño. Es más denso y duradero, y el mejor para pieles sensibles.</p></div>
+  </div>
+  <div class="gd-tip"><b>Nuestro consejo:</b> elige el color que más use en sus otras joyas (aretes, relojes, pulseras). Si no sabes, el oro blanco y el amarillo son los más versátiles.</div>
+</section>
+
+<section id="estilos">
+  <h2><small>Decisión 2</small>Los estilos</h2>
+  <p>Estos son los estilos más elegidos, con un ejemplo real de nuestro catálogo. Toca cualquiera para verlo.</p>
+  <div class="gd-styles">
+    <a href="/shop/4259"><img src="/web/image/product.template/4259/image_512" alt="Trento" loading="lazy"/><h4>Solitario</h4><p>Una sola piedra protagonista. Atemporal y elegante.</p><span>Ej. Trento</span></a>
+    <a href="/shop/4317"><img src="/web/image/product.template/4317/image_512" alt="Arona" loading="lazy"/><h4>Catedral</h4><p>El aro sube como arcos para sostener la piedra, que se ve más alta.</p><span>Ej. Arona</span></a>
+    <a href="/shop/4280"><img src="/web/image/product.template/4280/image_512" alt="Treviso" loading="lazy"/><h4>Pavé</h4><p>Pequeñas piedras a lo largo del aro, como un camino de brillo.</p><span>Ej. Treviso</span></a>
+    <a href="/shop/2838"><img src="/web/image/product.template/2838/image_512" alt="Ravello" loading="lazy"/><h4>Tres piedras</h4><p>Pasado, presente y futuro. Más brillo y presencia.</p><span>Ej. Ravello</span></a>
+    <a href="/shop/4281"><img src="/web/image/product.template/4281/image_512" alt="Radda" loading="lazy"/><h4>Cinco piedras</h4><p>Una fila de piedras al frente: brillo de lado a lado.</p><span>Ej. Radda</span></a>
+    <a href="/shop/4230"><img src="/web/image/product.template/4230/image_512" alt="Bolonia" loading="lazy"/><h4>Bisel</h4><p>Un aro de metal rodea la piedra. Moderno y muy protector.</p><span>Ej. Bolonia</span></a>
+    <a href="/shop/4282"><img src="/web/image/product.template/4282/image_512" alt="Asolo" loading="lazy"/><h4>Canal</h4><p>Piedras dentro de un canal del aro, sin garras que se atoren.</p><span>Ej. Asolo</span></a>
+    <a href="/shop/4313"><img src="/web/image/product.template/4313/image_512" alt="Sestri" loading="lazy"/><h4>Tensión</h4><p>La piedra parece flotar entre los dos extremos del aro.</p><span>Ej. Sestri</span></a>
+    <a href="/shop/4318"><img src="/web/image/product.template/4318/image_512" alt="Carrara" loading="lazy"/><h4>Cruzado</h4><p>El aro envuelve la piedra en una curva. Romántico y diferente.</p><span>Ej. Carrara</span></a>
+    <a href="/shop/4347"><img src="/web/image/product.template/4347/image_512" alt="Procida" loading="lazy"/><h4>Vintage</h4><p>Filigrana, perlado y detalles de época.</p><span>Ej. Procida</span></a>
+    <a href="/shop/4349"><img src="/web/image/product.template/4349/image_512" alt="Como" loading="lazy"/><h4>Banda dividida</h4><p>El aro se abre en dos cerca de la piedra. Delicado y con movimiento.</p><span>Ej. Como</span></a>
+    <a href="/shop/4323"><img src="/web/image/product.template/4323/image_512" alt="Verona" loading="lazy"/><h4>Pavé en los hombros</h4><p>Piedras pequeñas que suben hasta la piedra central: brillo extra a los costados.</p><span>Ej. Verona</span></a>
+  </div>
+  <p><a href="/shop/category/anillos-de-compromiso-18">Ver todos los anillos de compromiso</a></p>
+</section>
+
+<section id="piedra">
+  <h2><small>Decisión 3</small>La piedra</h2>
+  <p>Cada anillo de Anello se puede hacer con <b>zirconia</b>, <b>diamante de laboratorio</b> o <b>diamante natural</b>. La zirconia es la opción incluida en el precio que ves en línea; los diamantes los cotiza tu asesor según su tamaño y calidad.</p>
+  <p>Para elegir un diamante, lo más importante es su <b>corte</b> (el brillo). Te lo explicamos paso a paso en nuestra <a href="/guias/diamantes">guía de diamantes</a>.</p>
+</section>
+
+<section id="presupuesto">
+  <h2><small>Sin reglas</small>¿Cuánto invertir?</h2>
+  <p>No hay una cantidad «correcta»: la vieja regla de «tres sueldos» es un mito publicitario. Lo mejor es decidir un presupuesto cómodo y repartirlo bien. Lo que más mueve el precio, en orden:</p>
+  <ol class="gd-steps">
+    <li><span><b>El tipo de piedra:</b> zirconia, diamante de laboratorio o natural.</span></li>
+    <li><span><b>El tamaño de la piedra</b> (quilates) y su calidad.</span></li>
+    <li><span><b>Los kilates del oro</b> o el platino.</span></li>
+    <li><span><b>El diseño:</b> los anillos con pavé, varias piedras o detalles llevan más trabajo.</span></li>
+  </ol>
+  <div class="gd-tip"><b>Truco:</b> un anillo con zirconia hoy y diamante después también es válido; en nuestro taller podemos cambiar la piedra más adelante.</div>
+</section>
+
+<section id="personalizar">
+  <h2><small>Solo en Anello</small>Hazlo único</h2>
+  <ul>
+    <li><b>Grabado láser en la piedra:</b> el número de tu ICERT viene incluido, y puedes sumar un «Te amo», una fecha o un ícono. <a href="/grabado-laser">Ver más</a>.</li>
+    <li><b>Certificado ICERT:</b> tu anillo se verifica con el celular, con funciones antirrobo y de recuerdos. <a href="/icert">Ver más</a>.</li>
+    <li><b>Diseño a la medida:</b> partimos de tu idea y la dibujamos contigo. <a href="/appointment">Agenda tu cita</a>.</li>
+  </ul>
+</section>
+
+<section id="medida">
+  <h2><small>El último paso</small>La medida</h2>
+  <p>Como cada anillo se fabrica a la medida, confírmala antes de pedirlo. Te explicamos cómo medir en casa, e incluso cómo saber su medida en secreto, en nuestra <a href="/guias/medida-de-anillo">guía de medidas</a>.</p>
+</section>
+
+<section id="preguntas">
+  <h2><small>Dudas comunes</small>Preguntas frecuentes</h2>
+  <div class="gd-faq">
+    <details><summary>¿En qué mano se usa el anillo de compromiso?</summary><p>En México lo más común es el dedo anular de la mano izquierda, aunque hay quien lo usa en la derecha. Lo importante es la medida de ese dedo.</p></details>
+    <details><summary>¿Cuánto tarda en estar listo?</summary><p>Depende del modelo y la piedra. Tu asesor te confirma la fecha de entrega al hacer tu pedido.</p></details>
+    <details><summary>¿Puedo ver los anillos en persona?</summary><p>Sí, en nuestro Estudio de Morelia, o por videollamada si estás en otra ciudad. <a href="/appointment">Agenda tu cita</a>.</p></details>
+    <details><summary>¿El oro blanco se pone amarillo?</summary><p>Con los años, el baño de rodio se desgasta y aparece un tono ligeramente cálido. Se renueva en nuestro taller y queda como nuevo.</p></details>
+  </div>
+</section>
+
+  </div>
+</div>
+
+<section class="gd-cta">
+  <div class="anbn-w">
+    <h2>Diseñemos juntos tu anillo</h2>
+    <p>Visítanos en el Estudio de Morelia o conéctate por videollamada. Te mostramos metales, estilos y piedras con calma.</p>
+    <div class="bn-btns"><a class="anbn-btn white" href="/appointment">Agenda tu cita</a><a class="anbn-btn lt" href="/shop/category/anillos-de-compromiso-18">Ver anillos de compromiso</a></div>
+  </div>
+</section>
+<script><![CDATA[
+(function () {
+  var links = document.querySelectorAll('.gd-toc a'); if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {}; links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.remove('on'); }); var a = map[e.target.id]; if (a) a.classList.add('on'); } }); }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.gd-main section[id]').forEach(function (s) { io.observe(s); });
+})();
+]]></script>
+    </div>
+  </t>
+</t>

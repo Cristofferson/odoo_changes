@@ -1,0 +1,184 @@
+<t t-name="anbn.guia_diamantes">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Guía de diamantes: las 4C</t>
+    <div id="wrap" class="oe_structure gd">
+
+<section class="gd-hero">
+  <div class="anbn-w">
+    <div>
+      <div class="gd-crumb"><a href="/guias">Guías</a> · Diamantes</div>
+      <div class="anbn-eb" style="color:var(--bn-gold-d)">Guía de diamantes</div>
+      <h1>Cómo elegir tu diamante, sin tecnicismos</h1>
+      <p class="lead">Todo diamante se describe con cuatro características, las «4C»: corte, color, claridad y quilates. Entenderlas te ayuda a elegir la piedra más bonita para tu presupuesto.</p>
+      <div class="gd-min">
+        <b>En 1 minuto</b>
+        <ul>
+          <li>El <b>corte</b> es lo que más se nota: es lo que hace brillar al diamante.</li>
+          <li>En <b>color</b>, de la G a la J se ve blanco a simple vista y cuesta menos que D–F.</li>
+          <li>En <b>claridad</b>, busca que sea «limpio a simple vista» (VS2 o SI1 suelen bastar).</li>
+          <li>Los <b>quilates</b> son peso, no tamaño: el corte y la forma cambian cuánto se ve.</li>
+          <li>Pide siempre un <b>certificado</b>: en Anello, tu anillo incluye ICERT.</li>
+        </ul>
+      </div>
+    </div>
+    <img src="{{bn-diamantes.jpg}}" alt="Diamantes sueltos de distintas formas"/>
+  </div>
+</section>
+
+<div class="anbn-w gd-body">
+  <nav class="gd-toc" aria-label="Contenido">
+    <b>Contenido</b>
+    <a href="#corte">Corte</a><a href="#color">Color</a><a href="#claridad">Claridad</a><a href="#quilates">Quilates</a>
+    <a href="#formas">Formas</a><a href="#tipos">Natural, laboratorio o zirconia</a><a href="#certificado">Certificado</a>
+    <a href="#consejos">Consejos para elegir</a><a href="#preguntas">Preguntas frecuentes</a>
+  </nav>
+  <div class="gd-main">
+
+<section id="corte">
+  <h2><small>La 1ª C</small>Corte: el brillo</h2>
+  <p>El corte no es la forma (redondo, oval…), sino qué tan bien están pulidas y alineadas las caras del diamante. Un buen corte hace que la luz entre, rebote dentro de la piedra y salga hacia tus ojos: eso es el brillo. Un corte pobre deja escapar la luz por los lados o por abajo, y el diamante se ve apagado aunque tenga buen color.</p>
+  <div class="gd-scale gd-colors">
+    <div class="best" style="background:#F6F1E6">Excelente<small>Máximo brillo</small></div>
+    <div style="background:#F8F4EC">Muy bueno<small>Casi igual</small></div>
+    <div style="background:#FAF7F1">Bueno<small>Buen brillo</small></div>
+    <div style="background:#FCFAF6">Regular<small>Brillo menor</small></div>
+    <div style="background:#FEFDFB">Pobre<small>Se ve apagado</small></div>
+  </div>
+  <div class="gd-tip"><b>Nuestro consejo:</b> si vas a invertir más en una sola C, que sea en el corte. Un diamante Excelente o Muy bueno se ve más grande y más blanco de lo que su ficha dice.</div>
+</section>
+
+<section id="color">
+  <h2><small>La 2ª C</small>Color: qué tan blanco es</h2>
+  <p>Los diamantes blancos se califican de la <b>D</b> (totalmente incoloro) a la <b>Z</b> (con un tono amarillo claro). Las diferencias entre letras vecinas son tan sutiles que casi nadie las nota sin comparar piedras lado a lado.</p>
+  <div class="gd-scale gd-colors">
+    <div class="best" style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #eee">D · E · F<small>Incoloro</small></div>
+    <div class="best" style="background:#FFFEF7">G · H · I · J<small>Casi incoloro</small></div>
+    <div style="background:#FFF9E3">K · L · M<small>Tinte ligero</small></div>
+    <div style="background:#FFF3C9">N – R<small>Tinte visible</small></div>
+    <div style="background:#FBEAAF">S – Z<small>Amarillo claro</small></div>
+  </div>
+  <div class="gd-legend"><span>Más escaso y más caro</span><span>Más común</span></div>
+  <div class="gd-tip"><b>Truco del metal:</b> en oro amarillo o rosa, un diamante H, I o J se ve tan blanco como uno D, porque el metal le da su tono cálido. En oro blanco o platino conviene quedarse entre D y H.</div>
+</section>
+
+<section id="claridad">
+  <h2><small>La 3ª C</small>Claridad: las marcas internas</h2>
+  <p>Casi todos los diamantes tienen pequeñas marcas naturales por dentro (inclusiones) o por fuera. La claridad mide qué tantas son y qué tan visibles. La mayoría solo se ven con lupa de 10 aumentos.</p>
+  <div class="gd-scale gd-clar">
+    <div><i></i>FL · IF<small>Sin marcas</small></div>
+    <div><i></i>VVS1 · VVS2<small>Casi imposibles de ver con lupa</small></div>
+    <div class="best"><i></i>VS1 · VS2<small>Difíciles de ver con lupa</small></div>
+    <div class="best"><i></i>SI1 · SI2<small>Visibles con lupa</small></div>
+    <div><i></i>I1 · I2 · I3<small>Pueden verse a simple vista</small></div>
+  </div>
+  <div class="gd-legend"><span>Más escaso</span><span>Más común</span></div>
+  <div class="gd-tip"><b>Lo importante:</b> que el diamante sea «limpio a simple vista», es decir, que no veas marcas sin lupa. Eso casi siempre se logra en VS2 o SI1, y te ahorra dinero frente a VVS o FL, que se ven igual en la mano.</div>
+</section>
+
+<section id="quilates">
+  <h2><small>La 4ª C</small>Quilates: el peso</h2>
+  <p>El quilate (ct) mide el <b>peso</b> del diamante: 1 quilate equivale a 0.2 gramos. No es una medida de tamaño, pero un diamante redondo bien cortado mide aproximadamente esto de lado a lado:</p>
+  <div class="gd-carats">
+    <div><i style="width:29px;height:29px"></i>0.25 ct<small>≈ 4.1 mm</small></div>
+    <div><i style="width:36px;height:36px"></i>0.50 ct<small>≈ 5.2 mm</small></div>
+    <div><i style="width:41px;height:41px"></i>0.75 ct<small>≈ 5.8 mm</small></div>
+    <div><i style="width:46px;height:46px"></i>1.00 ct<small>≈ 6.5 mm</small></div>
+    <div><i style="width:52px;height:52px"></i>1.50 ct<small>≈ 7.4 mm</small></div>
+    <div><i style="width:57px;height:57px"></i>2.00 ct<small>≈ 8.2 mm</small></div>
+  </div>
+  <p class="gd-legend" style="display:block">Proporción entre tamaños; el tamaño en pantalla depende de tu dispositivo.</p>
+  <h3>Cómo rinde más tu presupuesto</h3>
+  <ul>
+    <li>El precio sube mucho en los números «redondos»: un diamante de 0.90 ct se ve casi igual que uno de 1.00 ct y cuesta bastante menos.</li>
+    <li>Las formas alargadas (oval, pera, marquesa) se ven más grandes que una redonda del mismo peso.</li>
+    <li>Un aro delgado o un halo de piedras pequeñas hacen que la piedra central luzca mayor.</li>
+  </ul>
+</section>
+
+<section id="formas">
+  <h2><small>Más allá de las 4C</small>Las formas del diamante</h2>
+  <p>La forma es cuestión de gusto. El redondo es el que más brilla; las formas alargadas estilizan la mano; las cuadradas y rectangulares se ven modernas o clásicas según el corte.</p>
+  <div class="gd-shapes">
+    <div><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24"/></svg>Redondo<small>El de más brillo</small></div>
+    <div><svg viewBox="0 0 60 60"><rect x="7" y="7" width="46" height="46"/></svg>Princesa<small>Cuadrado y moderno</small></div>
+    <div><svg viewBox="0 0 60 60"><ellipse cx="30" cy="30" rx="18" ry="25"/></svg>Oval<small>Se ve más grande</small></div>
+    <div><svg viewBox="0 0 60 60"><rect x="8" y="8" width="44" height="44" rx="13"/></svg>Cojín<small>Romántico, esquinas suaves</small></div>
+    <div><svg viewBox="0 0 60 60"><polygon points="20,4 40,4 48,12 48,48 40,56 20,56 12,48 12,12"/></svg>Esmeralda<small>Elegante, tipo espejo</small></div>
+    <div><svg viewBox="0 0 60 60"><path d="M30 4 C44 22 50 32 50 40 A20 20 0 0 1 10 40 C10 32 16 22 30 4 Z"/></svg>Pera<small>Estiliza el dedo</small></div>
+    <div><svg viewBox="0 0 60 60"><path d="M30 3 C46 18 46 42 30 57 C14 42 14 18 30 3 Z"/></svg>Marquesa<small>La que más luce por quilate</small></div>
+    <div><svg viewBox="0 0 60 60"><polygon points="16,6 44,6 50,12 50,48 44,54 16,54 10,48 10,12"/></svg>Radiante<small>Brillo de redondo, forma rectangular</small></div>
+    <div><svg viewBox="0 0 60 60"><polygon points="18,6 42,6 54,18 54,42 42,54 18,54 6,42 6,18"/></svg>Asscher<small>Cuadrado vintage</small></div>
+    <div><svg viewBox="0 0 60 60"><path d="M30 52 C10 38 4 28 4 20 A12 12 0 0 1 30 14 A12 12 0 0 1 56 20 C56 28 50 38 30 52 Z"/></svg>Corazón<small>Para un mensaje claro</small></div>
+  </div>
+</section>
+
+<section id="tipos">
+  <h2><small>Tu decisión más importante</small>Natural, de laboratorio o zirconia</h2>
+  <p>En Anello cada anillo se puede hacer con tres tipos de piedra. Así se comparan:</p>
+  <div class="gd-3">
+    <div class="hl"><h4>Diamante natural</h4><ul><li>Se formó en la tierra durante millones de años.</li><li>El más escaso y el que mejor conserva su valor.</li><li>Se califica con las 4C y tiene certificado.</li></ul></div>
+    <div class="hl"><h4>Diamante de laboratorio</h4><ul><li>Es diamante real: misma composición, dureza y brillo que el natural.</li><li>Se crea en semanas, por eso cuesta bastante menos.</li><li>Se califica con las mismas 4C y también se certifica.</li></ul></div>
+    <div><h4>Zirconia</h4><ul><li>No es diamante: es una piedra creada que lo imita.</li><li>Brilla mucho y es la opción más económica (la incluida en el precio que ves en línea).</li><li>Es menos dura, así que con los años se raya más que un diamante.</li></ul></div>
+  </div>
+  <table class="gd-table">
+    <thead><tr><th/><th>Natural</th><th>Laboratorio</th><th>Zirconia</th></tr></thead>
+    <tbody>
+      <tr><td>¿Es diamante?</td><td>Sí</td><td>Sí</td><td>No</td></tr>
+      <tr><td>Dureza (escala de Mohs)</td><td>10</td><td>10</td><td>8 – 8.5</td></tr>
+      <tr><td>Se califica con las 4C</td><td>Sí</td><td>Sí</td><td>No</td></tr>
+      <tr><td>Precio</td><td>El más alto</td><td>Medio</td><td>El más bajo</td></tr>
+    </tbody>
+  </table>
+  <p>El diamante natural y el de laboratorio los cotiza tu asesor según las 4C que elijas. <a href="/appointment">Agenda una cita</a> y te mostramos opciones de los dos.</p>
+</section>
+
+<section id="certificado">
+  <h2><small>Tu garantía</small>El certificado</h2>
+  <p>Un certificado es el reporte de un laboratorio independiente que confirma las 4C de tu diamante. Los más reconocidos en el mundo son <b>GIA</b> e <b>IGI</b>. Sin certificado, solo tienes la palabra del vendedor.</p>
+  <p>Todos los anillos de Anello incluyen además el <a href="/icert">certificado digital ICERT</a>: una tarjeta con chip NFC que verificas con tu celular, y el número del certificado <a href="/grabado-laser">grabado con láser</a> en la piedra, para que siempre sepas que es la tuya.</p>
+</section>
+
+<section id="consejos">
+  <h2><small>Resumen práctico</small>Consejos para elegir</h2>
+  <ol class="gd-steps">
+    <li><span><b>Define tu presupuesto</b> antes de ver piedras: así comparas con calma.</span></li>
+    <li><span><b>Elige la forma</b> que te guste; es la decisión más personal.</span></li>
+    <li><span><b>Prioriza el corte</b> (Excelente o Muy bueno): es lo que hace brillar.</span></li>
+    <li><span><b>Ahorra en color y claridad</b> donde no se nota: G–J en color y VS2–SI1 en claridad suelen verse perfectos.</span></li>
+    <li><span><b>Juega con el peso:</b> 0.90 ct en lugar de 1.00 ct se ve casi igual y cuesta menos.</span></li>
+    <li><span><b>Pide el certificado</b> y compáralo con la piedra.</span></li>
+  </ol>
+</section>
+
+<section id="preguntas">
+  <h2><small>Dudas comunes</small>Preguntas frecuentes</h2>
+  <div class="gd-faq">
+    <details><summary>¿Cuál de las 4C es la más importante?</summary><p>El corte, porque es lo que da el brillo. Un diamante bien cortado se ve más blanco, más limpio y más grande.</p></details>
+    <details><summary>¿Cuál importa menos?</summary><p>Normalmente la claridad: mientras el diamante sea limpio a simple vista, las marcas que solo se ven con lupa no cambian cómo luce en tu mano.</p></details>
+    <details><summary>¿Un diamante de laboratorio es «falso»?</summary><p>No. Es diamante real, con la misma composición química, dureza y brillo que uno natural. La diferencia es su origen, y por eso su precio.</p></details>
+    <details><summary>¿Los diamantes de laboratorio se certifican?</summary><p>Sí. Laboratorios como IGI y GIA los califican con las mismas 4C, y el certificado indica que su origen es de laboratorio.</p></details>
+    <details><summary>¿Puedo cambiar la zirconia por un diamante después?</summary><p>Sí. En nuestro taller podemos cambiar la piedra de tu anillo más adelante. Pregunta a tu asesor por las opciones.</p></details>
+  </div>
+</section>
+
+  </div>
+</div>
+
+<section class="gd-cta">
+  <div class="anbn-w">
+    <h2>¿Te ayudamos a elegir?</h2>
+    <p>Ven al Estudio o conéctate por videollamada: tu asesor te muestra diamantes reales y te explica cada certificado.</p>
+    <div class="bn-btns"><a class="anbn-btn white" href="/appointment">Agenda tu cita</a><a class="anbn-btn lt" href="/shop/category/anillos-de-compromiso-18">Ver anillos de compromiso</a></div>
+  </div>
+</section>
+<script><![CDATA[
+(function () {
+  var links = document.querySelectorAll('.gd-toc a'); if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {}; links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.remove('on'); }); var a = map[e.target.id]; if (a) a.classList.add('on'); } }); }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.gd-main section[id]').forEach(function (s) { io.observe(s); });
+})();
+]]></script>
+    </div>
+  </t>
+</t>

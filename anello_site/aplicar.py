@@ -112,6 +112,7 @@ want = [('Anillos de compromiso', '/shop/category/anillos-de-compromiso-18'),
         ('Aretes', '/shop/category/aretes-12'),
         ('Joyería', '/shop'),
         ('Diseño a la medida', APT_URL),
+        ('Guías', '/guias'),
         ('Nosotros', '/nosotros'),
         ('Contacto', '/contacto')]
 cur = W.menu_id.child_id.sorted('sequence')
@@ -167,7 +168,11 @@ put(V_CON, arch_c)
 # 5b) páginas nuevas: /icert y /grabado-laser
 Page = env['website.page'].sudo()
 for url, key, fname, title in (('/icert', 'anbn.page_icert', 'page_icert.xml', 'Certificado ICERT'),
-                               ('/grabado-laser', 'anbn.page_grabado', 'page_grabado.xml', 'Grabado láser')):
+                               ('/grabado-laser', 'anbn.page_grabado', 'page_grabado.xml', 'Grabado láser'),
+                               ('/guias', 'anbn.guias', 'guias.xml', 'Guías'),
+                               ('/guias/diamantes', 'anbn.guia_diamantes', 'guia_diamantes.xml', 'Guía de diamantes'),
+                               ('/guias/medida-de-anillo', 'anbn.guia_medida', 'guia_medida.xml', 'Cómo medir tu anillo'),
+                               ('/guias/anillo-de-compromiso', 'anbn.guia_compromiso', 'guia_compromiso.xml', 'Guía del anillo de compromiso')):
     arch = fill(rd(fname))
     v = View.with_context(active_test=False).search([('key', '=', key), ('website_id', '=', 1)], limit=1)
     if v:

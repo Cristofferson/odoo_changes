@@ -1,0 +1,171 @@
+<t t-name="anbn.guia_medida">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Cómo medir tu anillo</t>
+    <div id="wrap" class="oe_structure gd">
+
+<section class="gd-hero">
+  <div class="anbn-w">
+    <div>
+      <div class="gd-crumb"><a href="/guias">Guías</a> · Medida de anillo</div>
+      <div class="anbn-eb" style="color:var(--bn-gold-d)">Guía de medidas</div>
+      <h1>Encuentra la medida de tu anillo</h1>
+      <p class="lead">Tres formas de saber tu medida: con un anillo que ya te quede, con un hilo y una regla, o en nuestro Estudio. Abajo tienes la tabla completa y una calculadora.</p>
+      <div class="gd-min">
+        <b>En 1 minuto</b>
+        <ul>
+          <li>La forma más exacta: <b>mide por dentro un anillo que ya te quede</b> y busca el diámetro en la tabla.</li>
+          <li>Mide al <b>final del día</b>, con las manos tibias: los dedos cambian de tamaño.</li>
+          <li>Si dudas entre dos medidas, <b>elige la mayor</b>.</li>
+          <li>Para aros anchos (6 mm o más), pide <b>media medida más</b>.</li>
+          <li>Manejamos medidas del <b>3 al 15</b>, también medias.</li>
+        </ul>
+      </div>
+    </div>
+    <img src="{{lifestyle-pareja-merano.jpg}}" alt="Anillo de compromiso en la mano"/>
+  </div>
+</section>
+
+<div class="anbn-w gd-body">
+  <nav class="gd-toc" aria-label="Contenido">
+    <b>Contenido</b>
+    <a href="#calculadora">Calculadora</a><a href="#anillo">Con un anillo</a><a href="#hilo">Con hilo y regla</a>
+    <a href="#tabla">Tabla de medidas</a><a href="#secreto">Medida en secreto</a><a href="#consejos">Consejos</a>
+    <a href="#ajuste">¿Y si no queda?</a><a href="#preguntas">Preguntas frecuentes</a>
+  </nav>
+  <div class="gd-main">
+
+<section id="calculadora">
+  <h2><small>Rápido</small>Calculadora de medida</h2>
+  <p>Escribe <b>el diámetro interior</b> de un anillo que te quede, o <b>la circunferencia</b> de tu dedo, en milímetros.</p>
+  <div class="gd-calc">
+    <div><label for="gd-d">Diámetro interior (mm)</label><input id="gd-d" type="number" step="0.1" min="12" max="25" inputmode="decimal" placeholder="Ej. 16.5"/></div>
+    <div><label for="gd-c">o circunferencia del dedo (mm)</label><input id="gd-c" type="number" step="0.5" min="40" max="75" inputmode="decimal" placeholder="Ej. 52"/></div>
+    <div class="out" id="gd-out">Tu medida aparecerá aquí<small>Escribe una de las dos medidas.</small></div>
+  </div>
+</section>
+
+<section id="anillo">
+  <h2><small>Método 1 · el más exacto</small>Con un anillo que ya te quede</h2>
+  <ol class="gd-steps">
+    <li><span>Elige un anillo que te quede cómodo <b>en el mismo dedo</b> donde usarás el nuevo.</span></li>
+    <li><span>Con una regla, mide el <b>diámetro interior</b>: de orilla a orilla por dentro, pasando por el centro, sin contar el metal.</span></li>
+    <li><span>Busca ese número en la <a href="#tabla">tabla</a> o escríbelo en la <a href="#calculadora">calculadora</a>.</span></li>
+  </ol>
+</section>
+
+<section id="hilo">
+  <h2><small>Método 2</small>Con un hilo o tira de papel</h2>
+  <ol class="gd-steps">
+    <li><span>Rodea la base de tu dedo con un hilo o una tira de papel delgada. Debe quedar ajustado pero que se deslice sobre el nudillo.</span></li>
+    <li><span>Marca con pluma el punto donde se junta.</span></li>
+    <li><span>Estira el hilo y mide con una regla en milímetros: esa es la <b>circunferencia</b>.</span></li>
+    <li><span>Escríbela en la <a href="#calculadora">calculadora</a>. Repite dos o tres veces para confirmar.</span></li>
+  </ol>
+  <div class="gd-tip"><b>Ojo:</b> el hilo puede estirarse y dar medidas un poco mayores. Si tienes un anillo que te quede, el método 1 es más confiable.</div>
+</section>
+
+<section id="tabla">
+  <h2><small>Referencia</small>Tabla de medidas</h2>
+  <p>Equivalencias que usamos en nuestro taller (escala estadounidense, la más usada en México).</p>
+  <table class="gd-table">
+    <thead><tr><th>Medida</th><th>Diámetro interior</th><th>Circunferencia</th></tr></thead>
+    <tbody>
+        <tr><td><b>3</b></td><td>14.0 mm</td><td>43.9 mm</td></tr>
+        <tr><td><b>3.5</b></td><td>14.4 mm</td><td>45.2 mm</td></tr>
+        <tr><td><b>4</b></td><td>14.8 mm</td><td>46.5 mm</td></tr>
+        <tr><td><b>4.5</b></td><td>15.2 mm</td><td>47.7 mm</td></tr>
+        <tr><td><b>5</b></td><td>15.6 mm</td><td>49.0 mm</td></tr>
+        <tr><td><b>5.5</b></td><td>16.0 mm</td><td>50.3 mm</td></tr>
+        <tr><td><b>6</b></td><td>16.4 mm</td><td>51.6 mm</td></tr>
+        <tr><td><b>6.5</b></td><td>16.8 mm</td><td>52.9 mm</td></tr>
+        <tr><td><b>7</b></td><td>17.2 mm</td><td>54.1 mm</td></tr>
+        <tr><td><b>7.5</b></td><td>17.6 mm</td><td>55.4 mm</td></tr>
+        <tr><td><b>8</b></td><td>18.0 mm</td><td>56.7 mm</td></tr>
+        <tr><td><b>8.5</b></td><td>18.4 mm</td><td>58.0 mm</td></tr>
+        <tr><td><b>9</b></td><td>18.9 mm</td><td>59.2 mm</td></tr>
+        <tr><td><b>9.5</b></td><td>19.3 mm</td><td>60.5 mm</td></tr>
+        <tr><td><b>10</b></td><td>19.7 mm</td><td>61.8 mm</td></tr>
+        <tr><td><b>10.5</b></td><td>20.1 mm</td><td>63.1 mm</td></tr>
+        <tr><td><b>11</b></td><td>20.5 mm</td><td>64.3 mm</td></tr>
+        <tr><td><b>11.5</b></td><td>20.9 mm</td><td>65.6 mm</td></tr>
+        <tr><td><b>12</b></td><td>21.3 mm</td><td>66.9 mm</td></tr>
+        <tr><td><b>12.5</b></td><td>21.7 mm</td><td>68.2 mm</td></tr>
+        <tr><td><b>13</b></td><td>22.1 mm</td><td>69.4 mm</td></tr>
+        <tr><td><b>13.5</b></td><td>22.5 mm</td><td>70.7 mm</td></tr>
+        <tr><td><b>14</b></td><td>22.9 mm</td><td>72.0 mm</td></tr>
+        <tr><td><b>14.5</b></td><td>23.3 mm</td><td>73.3 mm</td></tr>
+        <tr><td><b>15</b></td><td>23.7 mm</td><td>74.6 mm</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="secreto">
+  <h2><small>Para una sorpresa</small>Cómo saber su medida en secreto</h2>
+  <ul>
+    <li><b>Toma prestado un anillo</b> que use en el dedo anular (de preferencia de la mano izquierda) y mídelo por dentro, o tráelo al Estudio y lo medimos en segundos.</li>
+    <li><b>Marca el anillo en un papel:</b> traza el contorno interior con una pluma fina y mide el diámetro del círculo.</li>
+    <li><b>Pide ayuda</b> a un familiar o amiga que conozca su medida.</li>
+    <li><b>Compara con tu dedo:</b> si su anillo te entra en algún dedo, fíjate hasta dónde llega y mide ahí.</li>
+  </ul>
+  <div class="gd-tip"><b>Si no logras saberla:</b> elige una medida promedio (6 para mujer, 9 o 10 para hombre) y ajústalo después de la entrega.</div>
+</section>
+
+<section id="consejos">
+  <h2><small>Antes de decidir</small>Consejos para medir bien</h2>
+  <ul>
+    <li><b>Hora y temperatura:</b> por la mañana y con frío los dedos son más delgados; mide por la tarde.</li>
+    <li><b>Nudillo grande:</b> mide el nudillo y la base del dedo y elige una medida intermedia, que pase el nudillo sin quedar floja.</li>
+    <li><b>Aros anchos:</b> un aro de 6 mm o más se siente más apretado; pide media medida más.</li>
+    <li><b>Mano dominante:</b> sus dedos suelen ser un poco más grandes.</li>
+  </ul>
+</section>
+
+<section id="ajuste">
+  <h2><small>Tranquilidad</small>¿Y si no me queda?</h2>
+  <p>La mayoría de los anillos se pueden ajustar en nuestro taller. Algunos diseños son más difíciles o no se pueden ajustar, como los que llevan piedras alrededor de todo el aro o los de tensión; en esos, confirma bien tu medida antes de pedirlo.</p>
+  <p>Como los anillos de compromiso se fabrican a tu medida, te recomendamos confirmarla antes de comprar. Revisa nuestra política de <a href="/envios-y-devoluciones">envíos y devoluciones</a> o <a href="/appointment">agenda una cita</a> y te medimos sin costo.</p>
+</section>
+
+<section id="preguntas">
+  <h2><small>Dudas comunes</small>Preguntas frecuentes</h2>
+  <div class="gd-faq">
+    <details><summary>¿Qué medida es la más común?</summary><p>En mujer, entre 5 y 7; en hombre, entre 8 y 11. Úsalas solo como referencia: lo mejor es medir.</p></details>
+    <details><summary>¿Mi medida es igual en ambas manos?</summary><p>No siempre. Mide el dedo donde vas a usar el anillo.</p></details>
+    <details><summary>Estoy entre dos medidas, ¿cuál elijo?</summary><p>La mayor. Es más cómodo usar un anillo ligeramente holgado que uno apretado.</p></details>
+    <details><summary>¿Me pueden medir en el Estudio?</summary><p>Sí, con medidores profesionales y en minutos. <a href="/appointment">Agenda tu cita</a>.</p></details>
+  </div>
+</section>
+
+  </div>
+</div>
+
+<section class="gd-cta">
+  <div class="anbn-w">
+    <h2>Te medimos sin costo</h2>
+    <p>Visítanos en el Estudio de Morelia o pregúntanos por WhatsApp: te ayudamos a encontrar tu medida exacta.</p>
+    <div class="bn-btns"><a class="anbn-btn white" href="/appointment">Agenda tu cita</a><a class="anbn-btn lt" href="/shop/category/anillos-de-compromiso-18">Ver anillos</a></div>
+  </div>
+</section>
+<script><![CDATA[
+(function () {
+  var d = document.getElementById('gd-d'), c = document.getElementById('gd-c'), o = document.getElementById('gd-out');
+  if (d && c && o) {
+    var show = function (diam) {
+      if (!diam || diam < 12 || diam > 25) { o.innerHTML = 'Revisa el número<small>El diámetro debe estar entre 12 y 25 mm.</small>'; return; }
+      var s = Math.round(((diam - 11.54) / 0.8128) * 2) / 2;
+      if (s < 3) { o.innerHTML = 'Menor a la medida 3<small>Escríbenos y lo vemos contigo.</small>'; return; }
+      if (s > 15) { o.innerHTML = 'Mayor a la medida 15<small>Escríbenos y lo vemos contigo.</small>'; return; }
+      o.innerHTML = 'Tu medida: ' + s + '<small>Diámetro ' + diam.toFixed(1) + ' mm · circunferencia ' + (Math.PI * diam).toFixed(1) + ' mm</small>';
+    };
+    d.addEventListener('input', function () { c.value = ''; show(parseFloat(d.value)); });
+    c.addEventListener('input', function () { d.value = ''; show(parseFloat(c.value) / Math.PI); });
+  }
+  var links = document.querySelectorAll('.gd-toc a'); if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {}; links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.remove('on'); }); var a = map[e.target.id]; if (a) a.classList.add('on'); } }); }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('.gd-main section[id]').forEach(function (s) { io.observe(s); });
+})();
+]]></script>
+    </div>
+  </t>
+</t>

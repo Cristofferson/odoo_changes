@@ -1,0 +1,28 @@
+<t t-name="anbn.guias">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Guías</t>
+    <div id="wrap" class="oe_structure gd">
+<section class="gd-hero">
+  <div class="anbn-w" style="grid-template-columns:1fr">
+    <div>
+      <div class="anbn-eb" style="color:var(--bn-gold-d)">Guías Anello</div>
+      <h1>Todo lo que necesitas saber, explicado fácil</h1>
+      <p class="lead">Elegir un anillo es emocionante, y también puede abrumar. Reunimos lo esencial en tres guías cortas, sin tecnicismos.</p>
+    </div>
+  </div>
+</section>
+<div class="anbn-w gd-hub">
+  <a href="/guias/anillo-de-compromiso"><div class="ph"><img src="{{hero-still-treviso.jpg}}" alt="" loading="lazy"/></div><h3>Guía del anillo de compromiso</h3><p>Metales y kilates, los estilos más elegidos con ejemplos reales y cómo repartir tu presupuesto.</p><span class="anbn-lnk">Leer la guía</span></a>
+  <a href="/guias/diamantes"><div class="ph"><img src="{{bn-diamantes.jpg}}" alt="" loading="lazy"/></div><h3>Guía de diamantes</h3><p>Las 4C (corte, color, claridad y quilates), las formas, y la diferencia entre natural, laboratorio y zirconia.</p><span class="anbn-lnk">Leer la guía</span></a>
+  <a href="/guias/medida-de-anillo"><div class="ph"><img src="{{lifestyle-pareja-merano.jpg}}" alt="" loading="lazy"/></div><h3>Cómo medir tu anillo</h3><p>Calculadora, tabla de medidas del 3 al 15 y cómo saber su medida en secreto.</p><span class="anbn-lnk">Leer la guía</span></a>
+</div>
+<section class="gd-cta">
+  <div class="anbn-w">
+    <h2>¿Prefieres que te lo expliquemos?</h2>
+    <p>Agenda una cita en el Estudio o por videollamada, o escríbenos por WhatsApp.</p>
+    <div class="bn-btns"><a class="anbn-btn white" href="/appointment">Agenda tu cita</a></div>
+  </div>
+</section>
+    </div>
+  </t>
+</t>

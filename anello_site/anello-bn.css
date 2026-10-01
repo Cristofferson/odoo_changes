@@ -485,3 +485,112 @@ body.o_showroom_has_bar .anbn-wa-bubble { bottom: 154px; }
   .ab-funcs { grid-template-columns: 1fr; margin-top: 40px; }
 }
 .ab-card.wide::after { background: linear-gradient(90deg, rgba(20,17,14,.85) 0%, rgba(20,17,14,.45) 45%, rgba(20,17,14,0) 70%); } .ab-card.wide .ab-card-in { max-width: 52%; }  @media (max-width: 991px){ .ab-card.wide .ab-card-in { max-width: none; } .ab-card.wide::after { background: linear-gradient(180deg, rgba(20,17,14,0) 30%, rgba(20,17,14,.85) 100%); } }
+
+/* ===================== Guías ===================== */
+.gd { background: #fff; color: var(--bn-ink); font-family: var(--bn-sans); }
+.gd a { color: var(--bn-gold-d); }
+.gd-hero { background: var(--bn-cream); padding: 64px 0 56px; }
+.gd-hero .anbn-w { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: center; }
+.gd-crumb { font: 400 13px var(--bn-sans); color: var(--bn-grey); margin-bottom: 18px; }
+.gd-crumb a { color: var(--bn-grey); text-decoration: underline; }
+.gd-hero h1 { font: 500 52px/1.05 'Cormorant Garamond', Georgia, serif !important; text-transform: none !important; letter-spacing: 0 !important; margin: 10px 0 16px; color: var(--bn-ink); }
+.gd-hero p.lead { font: 300 18px/1.6 var(--bn-sans); margin: 0; max-width: 52ch; }
+.gd-hero img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.gd-min { background: #fff; border-left: 3px solid var(--bn-gold); padding: 22px 26px; margin-top: 28px; }
+.gd-min > b { display: block; font: 500 12px/1 var(--bn-sans); letter-spacing: .18em; text-transform: uppercase; color: var(--bn-gold-d); margin-bottom: 12px; }
+.gd-min ul { margin: 0; padding-left: 18px; font: 300 15px/1.7 var(--bn-sans); }
+.gd-body { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 64px; padding-block: 64px 96px; }
+.gd-toc { position: sticky; top: 24px; align-self: start; font: 400 14px/1.4 var(--bn-sans); }
+.gd-toc b { display: block; font: 500 12px/1 var(--bn-sans); letter-spacing: .18em; text-transform: uppercase; color: var(--bn-grey); margin-bottom: 14px; }
+.gd-toc a { display: block; padding: 9px 0 9px 14px; border-left: 1px solid var(--bn-line); color: var(--bn-ink) !important; text-decoration: none; }
+.gd-toc a:hover, .gd-toc a.on { border-left: 2px solid var(--bn-gold); color: var(--bn-gold-d) !important; }
+.gd-main section { padding: 8px 0 56px; scroll-margin-top: 24px; }
+.gd-main section + section { border-top: 1px solid var(--bn-line); padding-top: 52px; }
+.gd-main h2 { font: 500 38px/1.1 'Cormorant Garamond', Georgia, serif !important; text-transform: none !important; letter-spacing: 0 !important; margin: 0 0 14px; color: var(--bn-ink); }
+.gd-main h2 small { display: block; font: 500 12px/1 var(--bn-sans); letter-spacing: .2em; text-transform: uppercase; color: var(--bn-gold-d); margin-bottom: 12px; }
+.gd-main h3 { font: 500 17px/1.3 var(--bn-sans) !important; text-transform: none !important; letter-spacing: .01em !important; margin: 26px 0 8px; color: var(--bn-ink); }
+.gd-main p, .gd-main li { font: 300 16px/1.7 var(--bn-sans); max-width: 68ch; }
+.gd-main ul, .gd-main ol { padding-left: 20px; }
+.gd-tip { background: var(--bn-cream); padding: 18px 22px; margin: 22px 0; font: 300 15px/1.6 var(--bn-sans); max-width: 68ch; }
+.gd-tip b { font-weight: 500; color: var(--bn-gold-d); }
+/* escalas */
+.gd-scale { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; margin: 22px 0 8px; max-width: 760px; }
+.gd-scale > div { padding: 14px 6px 12px; text-align: center; font: 500 13px/1.2 var(--bn-sans); }
+.gd-scale > div small { display: block; font: 300 11px/1.3 var(--bn-sans); margin-top: 4px; }
+.gd-scale .best { outline: 2px solid var(--bn-gold); outline-offset: -2px; }
+.gd-legend { display: flex; justify-content: space-between; max-width: 760px; font: 300 12.5px var(--bn-sans); color: var(--bn-grey); }
+.gd-colors > div { color: var(--bn-ink); }
+.gd-clar > div { background: var(--bn-cream); }
+.gd-clar i { display: block; height: 28px; width: 28px; margin: 0 auto 8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff 0%, #F1F2F4 55%, #D9DCE0 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); position: relative; }
+/* quilates a escala */
+.gd-carats { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; margin: 26px 0 6px; }
+.gd-carats div { text-align: center; font: 500 13px/1.3 var(--bn-sans); }
+.gd-carats i { display: block; margin: 0 auto 10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff 0%, #EEF0F3 50%, #C9CDD3 100%); box-shadow: 0 2px 6px rgba(0,0,0,.12), inset 0 0 0 1px rgba(0,0,0,.08); }
+.gd-carats small { display: block; font: 300 12px var(--bn-sans); color: var(--bn-grey); }
+/* formas */
+.gd-shapes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 24px 0; max-width: 820px; }
+.gd-shapes div { border: 1px solid var(--bn-line); padding: 18px 8px 14px; text-align: center; font: 500 13.5px var(--bn-sans); }
+.gd-shapes svg { width: 52px; height: 52px; display: block; margin: 0 auto 10px; stroke: var(--bn-ink); stroke-width: 1.4; fill: #F6F7F9; }
+.gd-shapes small { display: block; font: 300 12px/1.35 var(--bn-sans); color: var(--bn-grey); margin-top: 4px; }
+/* tablas y comparativos */
+.gd-table { width: 100%; max-width: 760px; border-collapse: collapse; margin: 18px 0; font: 300 15px/1.4 var(--bn-sans); }
+.gd-table th { font: 500 12.5px var(--bn-sans); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--bn-ink); }
+.gd-table td { padding: 12px 10px; border-bottom: 1px solid var(--bn-line); }
+.gd-table tr:nth-child(even) td { background: #FBF9F5; }
+.gd-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 22px 0; }
+.gd-3 > div { border: 1px solid var(--bn-line); padding: 22px 20px; }
+.gd-3 > div.hl { border-color: var(--bn-gold); background: #FFFDF8; }
+.gd-3 h4 { font: 500 22px/1.15 'Cormorant Garamond', Georgia, serif; margin: 0 0 10px; }
+.gd-3 p, .gd-3 li { font-size: 14.5px !important; line-height: 1.6 !important; }
+/* estilos con anillos reales */
+.gd-styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 22px 0; }
+.gd-styles a { display: block; color: var(--bn-ink) !important; text-decoration: none; }
+.gd-styles img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #F3F1EE; mix-blend-mode: multiply; }
+.gd-styles h4 { font: 500 21px/1.15 'Cormorant Garamond', Georgia, serif; margin: 12px 0 4px; }
+.gd-styles p { font-size: 14px !important; line-height: 1.55 !important; margin: 0 0 4px; }
+.gd-styles span { font: 500 11.5px var(--bn-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--bn-gold-d); }
+/* calculadora de medida */
+.gd-calc { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 760px; background: var(--bn-cream); padding: 26px; margin: 22px 0; }
+.gd-calc label { display: block; font: 500 13px var(--bn-sans); margin-bottom: 8px; }
+.gd-calc input { width: 100%; height: 48px; border: 1px solid var(--bn-line); padding: 0 14px; font: 400 16px var(--bn-sans); background: #fff; }
+.gd-calc .out { grid-column: 1 / -1; font: 500 30px/1.1 'Cormorant Garamond', Georgia, serif; }
+.gd-calc .out small { display: block; font: 300 13.5px var(--bn-sans); color: var(--bn-grey); margin-top: 6px; }
+.gd-steps { counter-reset: s; list-style: none; padding: 0 !important; display: grid; gap: 14px; margin: 18px 0; max-width: 720px; }
+.gd-steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; }
+.gd-steps li::before { content: counter(s); width: 34px; height: 34px; border: 1px solid var(--bn-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 500 13px var(--bn-sans); color: var(--bn-gold-d); }
+.gd-faq details { border-bottom: 1px solid var(--bn-line); padding: 16px 0; max-width: 760px; }
+.gd-faq summary { font: 500 16px var(--bn-sans); cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 18px; }
+.gd-faq summary::after { content: "+"; color: var(--bn-gold); font-size: 20px; line-height: 1; }
+.gd-faq details[open] summary::after { content: "–"; }
+.gd-faq summary::-webkit-details-marker { display: none; }
+.gd-faq p { margin: 10px 0 0; }
+.gd-cta { background: var(--bn-espresso); color: #fff; padding: 64px 0; text-align: center; }
+.gd-cta h2 { font: 500 36px/1.1 'Cormorant Garamond', Georgia, serif !important; text-transform: none !important; letter-spacing: 0 !important; color: #fff; margin: 0 0 12px; }
+.gd-cta p { color: #D9D0C3; font: 300 16px/1.6 var(--bn-sans); margin: 0 auto 26px; max-width: 52ch; }
+.gd-cta .bn-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+/* portada de guías */
+.gd-hub { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; padding-block: 56px 96px; }
+.gd-hub a { display: block; color: var(--bn-ink) !important; text-decoration: none; }
+.gd-hub img { width: 100%; aspect-ratio: 4/5; object-fit: cover; transition: transform .7s; }
+.gd-hub .ph { overflow: hidden; }
+.gd-hub a:hover img { transform: scale(1.04); }
+.gd-hub h3 { font: 500 28px/1.1 'Cormorant Garamond', Georgia, serif !important; text-transform: none !important; letter-spacing: 0 !important; margin: 18px 0 8px; }
+.gd-hub p { font: 300 15px/1.6 var(--bn-sans); margin: 0 0 12px; }
+@media (max-width: 991px) {
+  .gd-hero { padding: 40px 0; }
+  .gd-hero .anbn-w { grid-template-columns: 1fr; gap: 26px; }
+  .gd-hero h1 { font-size: 36px !important; }
+  .gd-body { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 32px 64px; }
+  .gd-toc { position: static; display: flex; gap: 8px; overflow-x: auto; margin-bottom: 26px; padding-bottom: 6px; }
+  .gd-toc b { display: none; }
+  .gd-toc a { flex: none; border: 1px solid var(--bn-line); border-radius: 999px; padding: 8px 14px; white-space: nowrap; }
+  .gd-main h2 { font-size: 30px !important; }
+  .gd-scale { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); }
+  .gd-shapes { grid-template-columns: repeat(3, 1fr); }
+  .gd-3, .gd-styles, .gd-hub { grid-template-columns: 1fr; }
+  .gd-styles { grid-template-columns: 1fr 1fr; }
+  .gd-calc { grid-template-columns: 1fr; }
+  .gd-table { font-size: 13.5px; }
+}
+
+.gd-min li b { font-weight: 500; }

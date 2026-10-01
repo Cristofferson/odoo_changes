@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- «Desde» delante del precio cuando es el de la combinación más económica -->
+    <template id="products_item_desde" inherit_id="website_sale.products_item" name="Joyería por peso: precio «Desde»">
+        <xpath expr="//*[@t-out=&quot;template_price_vals['price_reduce']&quot;]" position="before">
+            <small t-if="template_price_vals.get('xb_desde')" class="xb-desde text-muted me-1">Desde</small>
+        </xpath>
+    </template>
+</odoo>

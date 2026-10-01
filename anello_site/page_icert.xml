@@ -1,0 +1,119 @@
+<t t-name="anbn.page_icert">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Certificado ICERT</t>
+    <div id="wrap" class="oe_structure anbn anbn-page">
+
+<section class="pg-hero cream">
+  <div class="anbn-w pg-hero-in">
+    <div class="pg-hero-txt">
+      <div class="anbn-eb">Incluido con todos los anillos Anello</div>
+      <h1>ICERT, el certificado que vive en tu joya</h1>
+      <p>ICERT es el certificado de autenticidad digital de tu anillo: una tarjeta con chip NFC que guarda toda la información de tu piedra y te da funciones únicas en la joyería.</p>
+      <div class="bn-btns">
+        <a class="anbn-btn solid" href="#verificar">Verifica un certificado</a>
+        <a class="anbn-btn" href="#funciones">Ver funciones</a>
+      </div>
+    </div>
+    <div class="pg-hero-card">
+      <img src="{{icert-frente.jpg}}" alt="Tarjeta ICERT, frente" class="c1"/>
+      <img src="{{icert-reverso.jpg}}" alt="Tarjeta ICERT, reverso con código QR" class="c2"/>
+    </div>
+  </div>
+</section>
+
+<section class="pg-sec">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">Cómo funciona</div>
+      <h2>Acércalo a tu celular. Eso es todo.</h2>
+      <p>ICERT funciona por proximidad (NFC): sin instalar apps ni crear contraseñas. Tú mismo verificas la información de tu piedra, cuantas veces quieras.</p>
+    </div>
+    <div class="pg-steps">
+      <div><span>1</span><h3>Recibe tu certificado</h3><p>Tu anillo llega con su tarjeta ICERT física, con chip NFC integrado.</p></div>
+      <div><span>2</span><h3>Acércala a tu celular</h3><p>Cualquier celular compatible con NFC la lee al instante. También puedes escanear el código QR del reverso.</p></div>
+      <div><span>3</span><h3>Consulta el reporte</h3><p>Tipo de gema, número de reporte, forma y estilo del corte, y las 4C de tu piedra.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="bn-split grey">
+  <div class="bn-txt" style="align-items:flex-start;text-align:left">
+    <div class="anbn-eb">En tus manos</div>
+    <h2 style="margin-top:14px">Una tarjeta, toda la historia de tu piedra</h2>
+    <p style="margin-top:18px">Al frente, el emblema ICERT y el número de tu certificado. Atrás, un código QR que lleva al mismo registro. Y dentro, el chip NFC que lo hace todo con solo acercar tu celular.</p>
+  </div>
+  <div class="bn-media"><img src="{{bn4-icert.jpg}}" alt="Celular leyendo una tarjeta ICERT" loading="lazy"/></div>
+</section>
+
+<section class="pg-sec" id="funciones">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">Funciones</div>
+      <h2>Mucho más que un papel</h2>
+      <p>Innovación, confianza y seguridad: esto es lo que tu ICERT hace por tu anillo.</p>
+    </div>
+    <div class="pg-grid">
+      <div><i class="fa fa-check-circle-o"/><h3>Legitimidad</h3><p>Corrobora que tu pieza es auténtica y revisa las características de la piedra (las 4C) directamente contra el registro DIAMANE.</p></div>
+      <div><i class="fa fa-shield"/><h3>Antirrobo</h3><p>Si tu joya se pierde o te la roban, márcala como robada o extraviada: su comercialización queda bloqueada y su valor protegido.</p></div>
+      <div><i class="fa fa-map-marker"/><h3>Geolocalización</h3><p>Confirma la ubicación de la pieza mediante su último escaneo.</p></div>
+      <div><i class="fa fa-picture-o"/><h3>Interactividad</h3><p>Guarda y comparte imágenes, textos y videos en tu joya, y entre joyas: la foto de la pedida, una fecha, un video.</p></div>
+      <div><i class="fa fa-heart-o"/><h3>Legado</h3><p>Hereda la joya virtualmente: puede cambiar de dueño o de montura, pero conserva los recuerdos que le añadiste.</p></div>
+      <div><i class="fa fa-diamond"/><h3>Respaldo DIAMANE</h3><p>Detrás de cada ICERT está el dictamen de DIAMANE: la piedra que dice tu certificado es la piedra que tienes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="bn-split blush">
+  <div class="bn-media"><img src="{{bn4-grabado.jpg}}" alt="Número ICERT grabado en la piedra, visto con lupa" loading="lazy"/></div>
+  <div class="bn-txt" style="align-items:flex-start;text-align:left">
+    <div class="anbn-eb">Certificado y piedra, unidos</div>
+    <h2 style="margin-top:14px">El número de tu ICERT, grabado en tu piedra</h2>
+    <p style="margin-top:18px">En todos nuestros anillos grabamos con láser el número de tu certificado en el filete de la piedra. Así nadie puede cambiar la piedra sin que se note.</p>
+    <div class="bn-btns" style="justify-content:flex-start"><a class="anbn-btn" href="/grabado-laser">Conoce el grabado láser</a></div>
+  </div>
+</section>
+
+<section class="pg-sec">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">¿ICERT o GIA / IGI?</div>
+      <h2>No compiten: se complementan</h2>
+      <p>El laboratorio internacional dictamina la piedra; ICERT la mantiene viva, verificable y protegida en tu bolsillo.</p>
+    </div>
+    <table class="pg-table">
+      <thead><tr><th/><th>GIA · IGI</th><th>ICERT</th></tr></thead>
+      <tbody>
+        <tr><td>Dictamen gemológico (4C)</td><td>Sí</td><td>Sí</td></tr>
+        <tr><td>Verificación instantánea con el celular (NFC)</td><td>—</td><td>Sí</td></tr>
+        <tr><td>Antirrobo y geolocalización</td><td>—</td><td>Sí</td></tr>
+        <tr><td>Recuerdos y legado digital</td><td>—</td><td>Sí</td></tr>
+        <tr><td>Reconocimiento internacional</td><td>Sí</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="pg-verify" id="verificar">
+  <div class="anbn-w">
+    <div class="anbn-eb">Verificación en línea</div>
+    <h2>¿No traes la tarjeta? Verifica con el número</h2>
+    <p>El chip NFC es la vía rápida, pero no la única. Escribe el número del certificado ICERT, el del laboratorio (GIA, IGI, AGS, EGL, HRD) o el impreso en la tarjeta.</p>
+    <form method="get" action="/report-check" onsubmit="this.action='/report-check/' + this.cert.value" class="pg-form" role="search">
+      <input type="text" name="cert" placeholder="Número de reporte" aria-label="Número de reporte" minlength="4" maxlength="14" required="required"/>
+      <button type="submit" class="anbn-btn solid">Verificar</button>
+    </form>
+  </div>
+</section>
+
+<section class="bn-store" style="height:auto!important">
+  <img src="{{bn-hero.jpg}}" alt="" loading="lazy"/>
+  <div class="bn-in anbn-w" style="padding:110px 16px">
+    <h2>Tu anillo, con su ICERT incluido</h2>
+    <p>Todos los anillos Anello llevan su certificado ICERT y el número grabado en la piedra.</p>
+    <a class="anbn-btn white" href="/shop/category/anillos-de-compromiso-18">Ver anillos de compromiso</a>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>

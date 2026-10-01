@@ -1,0 +1,67 @@
+<data>
+  <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="after">
+    <div class="anbn-cta2">
+      <div class="anbn-cta-row"><a class="anbn-btn anbn-wa-ask" href="https://wa.me/524433244511" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592z"/></svg> Pregunta por WhatsApp</a><a class="anbn-btn" href="/contacto#cita">Agenda una cita</a></div>
+      <ul class="anbn-perks">
+        <li><i class="fa fa-diamond"/> Hecho a mano por orfebres mexicanos</li>
+        <li><i class="fa fa-calendar-o"/> Agenda una cita en nuestro Estudio de Morelia</li>
+      </ul>
+    </div>
+    <script><![CDATA[
+    (function () {
+      /* La franja «Showroom» (mandar al muro) es fija abajo, pero vive dentro de #product_details, que es
+         sticky y crea su propio contexto de apilado: la galería la tapaba. Se cuelga directo de <body>. */
+      function liftBar() {
+        document.querySelectorAll('#product_detail .o_showroom_bar, #product_details .o_showroom_bar').forEach(function (b) { document.body.appendChild(b); });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', liftBar); else liftBar();
+    })();
+    (function () {
+      /* El video 360° del anillo vive en la descripción. Se muestra arriba de la galería, a todo el ancho,
+         y al hacer clic se abre en grande (como el zoom de las fotos). */
+      /* «Pregunta por WhatsApp»: mismo mensaje que el botón flotante (anillo + metal elegido + liga) */
+      var ask = document.querySelector('.anbn-wa-ask');
+      if (ask) ask.addEventListener('click', function () {
+        var h1 = document.querySelector('#product_details h1');
+        var metal = document.querySelector('.js_main_product input[data-attribute-name="Metal"]:checked');
+        var med = document.querySelector('.js_main_product input[data-attribute-name="Medida"]:checked');
+        var msg = 'Hola Anello, tengo una pregunta sobre el anillo «' + (h1 ? h1.textContent.trim() : '') + '»'
+                + (metal ? ' en ' + metal.dataset.valueName : '') + (med ? ', medida ' + med.dataset.valueName.replace(/\.0$/, '') : '')
+                + ': ' + location.origin + location.pathname;
+        ask.href = 'https://wa.me/524433244511?text=' + encodeURIComponent(msg);
+        if (window.anbnWaBeacon) window.anbnWaBeacon('product');
+      });
+      var src = document.querySelector('#product_details .o_anello_video video');
+      if (!src) return;
+      var url = src.getAttribute('src');
+      src.closest('.o_anello_video').style.display = 'none';
+      function open() {
+        var o = document.createElement('div');
+        o.className = 'anbn-vbox';
+        o.innerHTML = '<button type="button" aria-label="Cerrar">&times;</button><video controls autoplay muted loop playsinline></video>';
+        o.querySelector('video').src = url;
+        function close() { o.remove(); document.removeEventListener('keydown', esc); }
+        function esc(e) { if (e.key === 'Escape') close(); }
+        o.addEventListener('click', function (e) { if (e.target === o || e.target.tagName === 'BUTTON') close(); });
+        document.addEventListener('keydown', esc);
+        document.body.appendChild(o);
+      }
+      function place() {
+        var g = document.querySelector('.o_wsale_product_images');
+        if (!g || g.querySelector('.anbn-video')) return;
+        var w = document.createElement('div');
+        w.className = 'anbn-video';
+        w.setAttribute('role', 'button');
+        w.setAttribute('aria-label', 'Ver video 360° en grande');
+        w.innerHTML = '<video autoplay muted loop playsinline preload="metadata"></video><span>360°</span><i class="fa fa-expand"></i>';
+        w.querySelector('video').src = url;
+        w.addEventListener('click', open);
+        g.insertBefore(w, g.firstChild);
+      }
+      place();
+      var g = document.querySelector('.o_wsale_product_images');
+      if (g) new MutationObserver(place).observe(g, { childList: true, subtree: true });
+    })();
+    ]]></script>
+  </xpath>
+</data>

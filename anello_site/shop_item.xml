@@ -1,0 +1,14 @@
+<data>
+  <xpath expr="//h2[hasclass('o_wsale_products_item_title')]" position="after">
+    <t t-set="xb_vals" t-value="product.sudo().attribute_line_ids.filtered(lambda l: l.attribute_id.id in (9, 38)).mapped('value_ids')"/>
+    <t t-set="xb_m" t-value="' '.join(xb_vals.filtered(lambda v: v.attribute_id.id == 9).mapped('name')).lower()"/>
+    <t t-set="xb_p" t-value="' '.join(xb_vals.filtered(lambda v: v.attribute_id.id == 38).mapped('name')).lower()"/>
+    <div class="anbn-dots" t-if="xb_m">
+      <i t-if="'amarillo' in xb_m" class="ma" title="Oro amarillo"/>
+      <i t-if="'blanco' in xb_m" class="mb" title="Oro blanco"/>
+      <i t-if="'rosa' in xb_m" class="mr" title="Oro rosa"/>
+      <i t-if="'platino' in xb_m" class="mp" title="Platino">Pt</i>
+    </div>
+    <div class="anbn-tag" t-if="'laboratorio' in xb_p">+ Diamante de laboratorio</div>
+  </xpath>
+</data>

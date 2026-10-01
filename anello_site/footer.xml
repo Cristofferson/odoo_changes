@@ -1,0 +1,109 @@
+<xpath expr="//div[@id='footer']" position="replace">
+<div id="footer" class="oe_structure oe_structure_solo">
+<div class="anbn-foot">
+  <div class="anbn-w">
+    <div class="anbn-cols">
+      <div>
+        <h4>Atención a clientes</h4>
+        <ul>
+          <li><a href="tel:+524433244511"><i class="fa fa-phone"/> 443 324 4511</a></li>
+          <li><a href="mailto:hola@anello.mx"><i class="fa fa-envelope-o"/> hola@anello.mx</a></li>
+          <li><a href="/contacto"><i class="fa fa-map-marker"/> Contacto</a></li>
+          <li><a href="/contacto#cita"><i class="fa fa-calendar-o"/> Agenda tu cita</a></li>
+          <li><a href="/nosotros#verificar"><i class="fa fa-check-circle-o"/> Verifica tu joya</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Comprar</h4>
+        <ul>
+          <li><a href="/shop/category/anillos-de-compromiso-18">Anillos de compromiso</a></li>
+          <li><a href="/shop/category/joyeria-de-boda-14">Argollas de boda</a></li>
+          <li><a href="/shop/category/aretes-12">Aretes</a></li>
+          <li><a href="/shop">Toda la joyería</a></li>
+          <li><a href="/shop/wishlist">Lista de deseos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Anello</h4>
+        <ul>
+          <li><a href="/nosotros">Nosotros</a></li>
+          <li><a href="/icert">Certificado ICERT</a></li>
+          <li><a href="/grabado-laser">Grabado láser</a></li>
+          <li><a href="/envios-y-devoluciones">Envíos y devoluciones</a></li>
+          <li><a href="/aviso-de-privacidad">Aviso de privacidad</a></li>
+          <li><a href="/terminos">Términos y condiciones</a></li>
+        </ul>
+      </div>
+      <div class="anbn-news">
+        <h4>Únete a la lista de Anello</h4>
+        <p>Novedades y lanzamientos, directo a tu correo.</p>
+        <div class="s_newsletter_subscribe_form s_newsletter_list js_subscribe" data-vxml="001" data-list-id="1" data-name="Newsletter Form">
+          <div class="js_subscribed_wrap d-none"><p class="text-success mb-0"><i class="fa fa-check-circle-o"/> ¡Gracias! Ya estás en la lista.</p></div>
+          <div class="js_subscribe_wrap">
+            <div class="input-group">
+              <input type="email" name="email" class="s_newsletter_subscribe_form_input js_subscribe_value form-control" placeholder="Tu correo electrónico"/>
+              <a role="button" href="#" class="js_subscribe_btn o_submit btn">Unirme</a>
+            </div>
+          </div>
+        </div>
+        <p class="anbn-legal-note">Al unirte aceptas nuestro <a href="/aviso-de-privacidad"><u>Aviso de privacidad</u></a>. Puedes darte de baja cuando quieras.</p>
+      </div>
+    </div>
+    <div class="anbn-bottom">
+      <div class="anbn-copy">
+        <img t-att-src="'/web/image/website/%s/logo' % website.id" alt="Anello"/>
+        <span>© 2026 Anello · Av. Ventura Puente 1843 E16, Morelia, Mich.</span>
+      </div>
+      <nav>
+        <a href="/terminos">Términos y condiciones</a>
+        <a href="/aviso-de-privacidad">Aviso de privacidad</a>
+        <a href="/envios-y-devoluciones">Envíos y devoluciones</a>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Botón flotante de WhatsApp (Anello +52 443 324 4511; llega al WhatsApp de Odoo) -->
+<a class="anbn-wa" href="https://wa.me/524433244511?text=Hola%20Anello%2C%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n." target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" data-wa="524433244511">
+  <svg viewBox="0 0 16 16" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+</a>
+<div class="anbn-wa-bubble" role="status" hidden="hidden"><button type="button" aria-label="Cerrar">&#215;</button><b>¿Te ayudamos a elegir?</b><span class="anbn-wa-txt">Escríbenos por WhatsApp: te contestamos todos los días de 8:00 a 21:00.</span></div>
+<script><![CDATA[
+(function () {
+  var a = document.querySelector('.anbn-wa'); if (!a) return;
+  var p = location.pathname;
+  /* en el pago no estorba: se oculta */
+  if (/^\/shop\/(checkout|payment|confirmation|address|extra_info)/.test(p)) { a.remove(); return; }
+  /* mensaje según la página: en la ficha de un anillo, el nombre y la liga de esa pieza */
+  var h1 = document.querySelector('#product_details h1');
+  var msg = h1 ? 'Hola Anello, me interesa el anillo «' + h1.textContent.trim() + '»: ' + location.origin + p
+               : 'Hola Anello, vi su página anello.mx y me gustaría recibir información.';
+  a.href = 'https://wa.me/' + a.dataset.wa + '?text=' + encodeURIComponent(msg);
+  /* burbuja de saludo, una sola vez por visitante */
+  var b = document.querySelector('.anbn-wa-bubble'), k = 'anbn_wa_bubble';
+  var seen = false; try { seen = localStorage.getItem(k); } catch (e) {}
+  /* horario de WhatsApp: 8:00 a 21:00 todos los días, hora del centro de México */
+  try {
+    var hr = +new Intl.DateTimeFormat('es-MX', { hour: 'numeric', hour12: false, timeZone: 'America/Mexico_City' }).format(new Date()) % 24;
+    if ((hr < 8 || hr >= 21) && b) {
+      b.querySelector('b').textContent = 'Déjanos tu mensaje';
+      b.querySelector('.anbn-wa-txt').textContent = 'Ahora estamos fuera de horario. Escríbenos y te contestamos a partir de las 8:00.';
+    }
+  } catch (e) {}
+  if (b && !seen) setTimeout(function () { b.hidden = false; }, 8000);
+  function done() { if (b) b.hidden = true; try { localStorage.setItem(k, '1'); } catch (e) {} }
+  if (b) { b.querySelector('button').addEventListener('click', done); b.addEventListener('click', function (e) { if (e.target.tagName !== 'BUTTON') { done(); a.click(); } }); }
+  /* contador de clics (xb_whatsapp_web_leads) */
+  window.anbnWaBeacon = function (kind) {
+    try {
+      var f = new FormData(); f.append('path', location.pathname); f.append('kind', kind);
+      var t = document.querySelector('.js_main_product input.product_template_id, input[name=product_template_id]');
+      if (t && t.value) f.append('product_tmpl_id', t.value);
+      navigator.sendBeacon('/xb_wa/click', f);
+    } catch (e) {}
+  };
+  a.addEventListener('click', function () { done(); window.anbnWaBeacon('float'); });
+})();
+]]></script>
+</div>
+</xpath>

@@ -1,0 +1,37 @@
+<data inherit_id="website.layout" name="Template Header Default" active="True">
+    <xpath expr="//header//nav" position="replace">
+        <div class="anbn-top d-none d-lg-block">
+            <div class="anbn-w">
+                <div class="anbn-l"><a href="tel:+524433244511"><i class="fa fa-phone"/> 443 324 4511</a></div>
+                <div class="anbn-c">Anillos hechos a mano por orfebres mexicanos</div>
+                <div class="anbn-r">
+                    <a href="/contacto"><i class="fa fa-map-marker"/> Estudio Morelia · 11:00 a 19:00</a>
+                    <a href="/contacto#cita"><i class="fa fa-calendar-o"/> Agenda tu cita</a>
+                </div>
+            </div>
+        </div>
+        <t t-call="website.navbar">
+            <t t-set="_navbar_classes" t-valuef="d-none d-lg-block anbn-nav"/>
+            <div id="o_main_nav" class="o_main_nav anbn-main">
+                <div class="anbn-row1">
+                    <div class="anbn-left"/>
+                    <t t-call="website.placeholder_header_brand" _link_class.f="anbn-brand"/>
+                    <ul class="navbar-nav anbn-tools">
+                        <!-- Search Bar -->
+                        <t t-call="website.placeholder_header_search_box" _layout.f="modal" _input_classes.f="border border-end-0 p-3" _submit_classes.f="border border-start-0 px-4 bg-o-color-4" _button_classes.f="o_navlink_background text-reset"/>
+                        <li class="anbn-user" t-if="request.env.user._is_public()">
+                            <a href="/web/login" aria-label="Iniciar sesión" title="Iniciar sesión"><i class="fa fa-user-o"/></a>
+                        </li>
+                        <t t-call="portal.user_dropdown" _user_name="False" _item_class.f="dropdown anbn-user" _link_class.f="nav-link border-0" _dropdown_menu_class.f="dropdown-menu-end"/>
+                    </ul>
+                </div>
+                <t t-call="website.navbar_nav" _nav_class.f="anbn-menu">
+                    <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                        <t t-call="website.submenu" item_class.f="nav-item" link_class.f="nav-link"/>
+                    </t>
+                </t>
+            </div>
+        </t>
+        <t t-call="website.template_header_mobile"/>
+    </xpath>
+</data>

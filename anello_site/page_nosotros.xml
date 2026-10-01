@@ -1,0 +1,138 @@
+<t t-name="theme_anello.page_nosotros">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Nosotros</t>
+    <div id="wrap" class="oe_structure anbn anbn-page">
+
+<section class="ab-hero">
+  <img src="{{trio-terciopelo.jpg}}" alt="Anillos de compromiso Anello" fetchpriority="high"/>
+  <div class="anbn-w">
+    <div class="ab-hero-txt">
+      <div class="anbn-eb">Joyería mexicana desde 1999</div>
+      <h1>Acerca de Anello</h1>
+      <p>Somos un taller de joyería fina hecha a mano en Morelia. Desde 2006 acompañamos a parejas y familias en sus momentos más importantes, con anillos que se fabrican pieza por pieza y una tecnología que protege tu joya para siempre.</p>
+      <a class="anbn-btn solid" href="/shop/category/anillos-de-compromiso-18">Ver anillos de compromiso</a>
+    </div>
+  </div>
+</section>
+
+<section class="pg-sec" id="historia">
+  <div class="anbn-w">
+    <div class="pg-head" style="max-width:900px">
+      <div class="anbn-eb">Nuestra historia</div>
+      <h2>Oficio joyero, con tecnología propia</h2>
+      <p>Nacimos en el mostrador de una joyería de Morelia y crecimos con el gremio. Hoy somos taller y marca de joyería fina, y junto con DIAMANE, la casa de diamantes de nuestro grupo, desarrollamos tecnología para que comprar joyería sea más seguro y transparente.</p>
+    </div>
+    <ol class="ab-time">
+      <li><b>1999</b><span>Nace la joyería La Esfinge, nuestro origen en el mostrador.</span></li>
+      <li><b>2006</b><span>Evoluciona a Anello, taller y marca de joyería fina.</span></li>
+      <li><b>2007</b><span>Abrimos nuestra tienda en internet, de las primeras del gremio.</span></li>
+      <li><b>2013</b><span>Nace DIAMANE, la casa de diamantes del grupo.</span></li>
+      <li><b>2020</b><span>Desarrollamos STIJ, nuestra tecnología de joyería inteligente.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="ab-dif">
+  <div class="anbn-w">
+    <div class="ab-dif-head">
+      <div class="anbn-eb">La diferencia Anello</div>
+      <h2>Lo que hace distinto a tu anillo</h2>
+      <p>No es solo una joya bonita: es una pieza hecha para ti, certificada, firmada y protegida.</p>
+    </div>
+    <div class="ab-dif-grid">
+      <a class="ab-card big" href="/nosotros#historia">
+        <img src="{{bn-orfebre.jpg}}" alt="Orfebre engastando un anillo" loading="lazy"/>
+        <div class="ab-card-in"><span>01</span><h3>Hecho a mano, pieza por pieza</h3><p>Cada anillo se fabrica sobre pedido, en el metal y la medida que elijas, en manos de orfebres mexicanos.</p></div>
+      </a>
+      <a class="ab-card" href="/icert">
+        <img src="{{bn4-icert.jpg}}" alt="Tarjeta ICERT" loading="lazy" style="object-position:60% 55%"/>
+        <div class="ab-card-in"><span>02</span><h3>Certificado ICERT incluido</h3><p>Verifica tu anillo con solo acercar tu celular.</p></div>
+      </a>
+      <a class="ab-card" href="/grabado-laser">
+        <img src="{{bn4-grabado.jpg}}" alt="Grabado láser en la piedra" loading="lazy" style="object-position:40% 50%"/>
+        <div class="ab-card-in"><span>03</span><h3>Tu piedra, firmada con láser</h3><p>El número de tu ICERT en el filete, y si quieres, tu mensaje.</p></div>
+      </a>
+      <a class="ab-card wide" href="/appointment">
+        <img src="{{estudio-interactivo-ancho.jpg}}" alt="Estudio interactivo de Anello" loading="lazy" style="object-position:60% 35%"/>
+        <div class="ab-card-in"><span>04</span><h3>Estudio interactivo en Morelia</h3><p>Tu asesor proyecta los anillos en pantallas gigantes y los compara contigo. O conéctate por videollamada.</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="ab-stij2" id="stij">
+  <div class="anbn-w">
+    <div class="ab-stij-top">
+      <div>
+        <div class="anbn-eb">STIJ · Sistema de Transmisión de Información Joyera</div>
+        <h2>La joya y tu celular, comunicándose</h2>
+        <p>Un chip NFC de apenas 5.3 mm, escondido dentro de la joya. Acerca tu anillo a un celular compatible y verifica la pieza, sin apps ni contraseñas.</p>
+        <ol class="ab-steps">
+          <li><b>1</b><span>El chip va integrado en la joya, invisible.</span></li>
+          <li><b>2</b><span>Acercas tu anillo al celular.</span></li>
+          <li><b>3</b><span>Se abre la información de tu pieza y sus funciones.</span></li>
+        </ol>
+      </div>
+      <div class="ab-chip"><div class="glow"></div><img src="{{stij-chip.png}}" alt="Chip STIJ de 5.3 mm" loading="lazy"/><span class="ab-size">5.3 mm</span></div>
+    </div>
+    <div class="ab-funcs">
+      <div><i class="fa fa-check-circle-o"/><h3>Legitimidad</h3><p>Corrobora metal, gemas, garantías y propietario de forma infalsificable.</p></div>
+      <div><i class="fa fa-shield"/><h3>Antirrobo</h3><p>Reporta la joya como robada o extraviada y bloquea su venta en la red STIJ.</p></div>
+      <div><i class="fa fa-map-marker"/><h3>Geolocalización</h3><p>Aviso y ubicación cuando una pieza reportada vuelve a escanearse.</p></div>
+      <div><i class="fa fa-picture-o"/><h3>Interactividad</h3><p>Guarda imágenes, textos y videos en la joya, y compártelos entre joyas.</p></div>
+      <div><i class="fa fa-heart-o"/><h3>Legado</h3><p>Cambia de joya o de dueño conservando los recuerdos: también se heredan en digital.</p></div>
+      <div><i class="fa fa-archive"/><h3>Alhajero y chat</h3><p>Organiza tus piezas en un alhajero digital y habla directo con tu joyería.</p></div>
+    </div>
+    <div class="ab-stij-cta"><a class="anbn-btn white" href="/appointment">Pregunta qué piezas pueden llevar STIJ</a></div>
+  </div>
+</section>
+
+<section class="pg-verify" id="verificar">
+  <div class="anbn-w">
+    <div class="anbn-eb">Verificador de joyas</div>
+    <h2>Verifica la autenticidad de tu joya</h2>
+    <p>Escribe el número de tu certificado ICERT, el del laboratorio (GIA, IGI, AGS, EGL, HRD) o el impreso en tu tarjeta y consulta su registro al instante.</p>
+    <form method="get" action="/report-check" onsubmit="this.action='/report-check/' + this.cert.value" class="pg-form" role="search">
+      <input type="text" name="cert" placeholder="Número de certificado" aria-label="Número de certificado" minlength="4" maxlength="14" required="required"/>
+      <button type="submit" class="anbn-btn solid">Verificar</button>
+    </form>
+  </div>
+</section>
+
+<section class="pg-sec">
+  <div class="anbn-w" style="max-width:920px">
+    <div class="pg-head"><div class="anbn-eb">Preguntas frecuentes</div><h2>Lo que más nos preguntan</h2></div>
+    <div class="ab-faq">
+      <details><summary>¿Puedo personalizar mi anillo de compromiso?</summary><p>Sí. Eliges el metal, el kilataje, la piedra y la medida, y además podemos diseñar una pieza desde tu idea. <a href="/contacto#cita">Agenda una cita</a> y lo vemos juntos.</p></details>
+      <details><summary>¿Me ayudan a elegir las argollas de boda?</summary><p>Claro: tenemos argollas lisas, mate, bitono y con piedras, y te ayudamos a combinarlas con tu anillo de compromiso. <a href="/shop/category/joyeria-de-boda-14">Ver argollas</a>.</p></details>
+      <details><summary>¿Qué es el certificado ICERT?</summary><p>Es el certificado de autenticidad digital que incluye cada anillo Anello: una tarjeta con chip NFC que verificas con tu celular. <a href="/icert">Conoce ICERT</a>.</p></details>
+      <details><summary>¿El grabado láser daña la piedra?</summary><p>No. Es microscópico, invisible a simple vista y no altera el peso, la claridad ni el brillo de la piedra. <a href="/grabado-laser">Conoce el grabado láser</a>.</p></details>
+      <details><summary>¿Venden solo en línea?</summary><p>Puedes comprar en anello.mx o visitarnos en nuestro Estudio en Av. Ventura Puente 1843 E16, Col. Electricistas, Morelia.</p></details>
+      <details><summary>¿Cómo verifico que mi joya es auténtica?</summary><p>Acerca tu tarjeta ICERT a un celular con NFC, o escribe el número de tu certificado en el <a href="#verificar">verificador de joyas</a>.</p></details>
+      <details><summary>¿Cuáles son las opciones de envío y devolución?</summary><p>Consulta los detalles en <a href="/envios-y-devoluciones">Envíos y devoluciones</a>.</p></details>
+      <details><summary>¿Desde cuándo existe Anello?</summary><p>Nuestro origen es la joyería La Esfinge, en 1999. En 2006 nos convertimos en Anello, y en 2007 abrimos nuestra tienda en internet.</p></details>
+    </div>
+    <p class="pg-note" style="margin-top:28px">¿No encontraste tu respuesta? Escríbenos a <a href="mailto:hola@anello.mx">hola@anello.mx</a> o llámanos al <a href="tel:+524433244511">443 324 4511</a>.</p>
+  </div>
+</section>
+
+<section class="ab-only">
+  <div class="anbn-w">
+    <h2>Solo en Anello</h2>
+    <p class="ab-only-sub">Queremos que elegir tu anillo sea tan especial como el momento en que lo vas a entregar.</p>
+    <div class="ab-only-cards">
+      <a href="/contacto"><img src="{{bn-showroom.jpg}}" alt="" loading="lazy"/><div><b>Visita el Estudio</b><span>Ver ubicación</span></div><p>Conoce los anillos en persona y pruébatelos con calma, en Morelia.</p></a>
+      <a href="/contacto#cita"><img src="{{bn2-asesoria.jpg}}" alt="" loading="lazy"/><div><b>Agenda una cita</b><span>Agendar</span></div><p>Un asesor te dedica el tiempo completo para elegir metal, piedra y medida.</p></a>
+    </div>
+    <div class="ab-only-props">
+      <div><b>Hecho a mano</b><span>Orfebres mexicanos, pieza por pieza.</span></div>
+      <div><b>ICERT incluido</b><span>Certificado digital en todos los anillos.</span></div>
+      <div><b>Grabado láser</b><span>El número de tu ICERT, en tu piedra.</span></div>
+      <div><b>Desde 1999</b><span>Más de 25 años en el gremio joyero.</span></div>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>

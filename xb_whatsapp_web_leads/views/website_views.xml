@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="website_form_xb_wa" model="ir.ui.view">
+        <field name="name">website.form.xb_wa</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="WhatsApp: prospectos y carritos" name="xb_wa">
+                    <group string="Prospectos desde WhatsApp">
+                        <field name="xb_wa_leads_enabled"/>
+                        <field name="xb_wa_lead_user_id"/>
+                        <field name="xb_wa_lead_tag_web_id"/>
+                        <field name="xb_wa_lead_tag_ad_id"/>
+                    </group>
+                    <group string="Carrito abandonado">
+                        <field name="xb_wa_cart_enabled"/>
+                        <field name="xb_wa_cart_template_id"/>
+                        <field name="xb_wa_cart_delay_hours"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

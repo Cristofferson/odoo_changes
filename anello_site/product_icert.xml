@@ -1,0 +1,43 @@
+<data>
+  <xpath expr="//div[@id='product_full_description']" position="after">
+    <t t-set="xb_has_stone" t-value="any(l.attribute_id.id == 38 for l in product.sudo().attribute_line_ids) or any(c.id == 18 or c.parent_id.id == 18 for c in product.sudo().public_categ_ids)"/>
+    <section t-if="xb_has_stone" class="anbn-pdp">
+      <div class="anbn-w">
+        <div class="anbn-pdp-row">
+          <div class="anbn-pdp-media"><img src="{{bn4-icert.jpg}}" alt="Tarjeta ICERT leída con un celular" loading="lazy"/></div>
+          <div class="anbn-pdp-txt">
+            <div class="anbn-eb">Incluido con tu anillo</div>
+            <h2>Certificado de autenticidad ICERT</h2>
+            <p>Tu anillo viaja con su certificado ICERT: una tarjeta con chip NFC. Acércala a tu celular y consulta al instante la información de tu piedra, sin apps ni contraseñas, cuantas veces quieras.</p>
+            <ul class="anbn-benef">
+              <li><i class="fa fa-check-circle-o"/><b>Legitimidad</b><span>Verifica la pieza y las características de la piedra contra el registro DIAMANE.</span></li>
+              <li><i class="fa fa-shield"/><b>Antirrobo</b><span>Marca tu joya como robada o extraviada para bloquear su venta.</span></li>
+              <li><i class="fa fa-map-marker"/><b>Geolocalización</b><span>Consulta la ubicación de su último escaneo.</span></li>
+              <li><i class="fa fa-picture-o"/><b>Interactividad</b><span>Guarda fotos, textos y videos en tu joya.</span></li>
+              <li><i class="fa fa-heart-o"/><b>Legado</b><span>Hereda la joya con sus recuerdos, aunque cambie de dueño.</span></li>
+            </ul>
+            <a class="anbn-lnk" href="/icert">Conoce ICERT y sus funciones</a>
+          </div>
+        </div>
+        <div class="anbn-pdp-row rev">
+          <div class="anbn-pdp-media"><img src="{{bn4-grabado.jpg}}" alt="Número ICERT grabado en la piedra, visto con lupa" loading="lazy"/></div>
+          <div class="anbn-pdp-txt">
+            <div class="anbn-eb">Incluido con tu anillo</div>
+            <h2>Tu piedra, grabada con láser</h2>
+            <p>Grabamos con láser el número de tu certificado ICERT en el filete de la piedra. Así el certificado y la piedra quedan unidos para siempre.</p>
+            <ul class="anbn-checks">
+              <li>Microscópico: invisible a simple vista, se verifica con lupa 20x.</li>
+              <li>No altera el peso, la claridad ni el brillo de la piedra.</li>
+              <li>Facilita identificarla y disuade el robo.</li>
+            </ul>
+            <div class="anbn-extra">
+              <b>Hazlo personal</b>
+              <span>Con un costo adicional agregamos un mensaje: un «Te amo», una fecha especial o un ícono.</span>
+            </div>
+            <a class="anbn-lnk" href="/grabado-laser#personaliza">Conoce el grabado personalizado</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </xpath>
+</data>

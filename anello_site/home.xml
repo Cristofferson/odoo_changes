@@ -1,0 +1,105 @@
+<t t-name="theme_anello.page_inicio">
+  <t t-call="website.layout">
+    <div id="wrap" class="oe_structure anbn">
+
+<section class="bn-hero">
+  <img src="{{bn-hero.jpg}}" alt="Anillo de compromiso Anello en la mano" fetchpriority="high"/>
+  <div class="anbn-w">
+    <div class="anbn-eb">Hechos a mano en México</div>
+    <h1>Para el sí que ya imaginaste</h1>
+    <div class="bn-btns">
+      <a class="anbn-btn lt" href="/shop/category/anillos-de-compromiso-18">Anillos de compromiso</a>
+      <a class="anbn-btn lt" href="/shop/category/joyeria-de-boda-14">Argollas de boda</a>
+    </div>
+  </div>
+</section>
+
+<section class="bn-split blush">
+  <div class="bn-txt">
+    <img class="bn-brand" t-att-src="'/web/image/website/%s/logo' % website.id" alt="Anello"/>
+    <div class="bn-sub">Asesoría personal</div>
+    <div class="bn-rule"><span/></div>
+    <h2>Elige tu anillo con un asesor de Anello</h2>
+    <div class="bn-btns">
+      <a class="anbn-btn solid" href="/contacto#cita">Agenda tu cita</a>
+      <a class="anbn-btn" href="/nosotros">Conoce Anello</a>
+    </div>
+    <p>Te ayudamos a elegir metal, piedra y medida en nuestro Estudio de Morelia.</p>
+  </div>
+  <div class="bn-media"><img src="{{bn2-mano-rostro.jpg}}" alt="" loading="lazy" style="object-position:70% 50%"/></div>
+</section>
+
+<section class="bn-cats">
+  <div class="bn-arrows"><button type="button" class="bn-prev" aria-label="Anterior">‹</button><button type="button" class="bn-next" aria-label="Siguiente">›</button></div>
+  <div class="bn-track">
+    <a href="/shop/category/anillos-de-compromiso-18"><div class="bn-ph"><img src="{{hero-still-treviso.jpg}}" alt="" loading="lazy"/></div><h3>Anillos de compromiso</h3></a>
+    <a href="/shop/category/joyeria-de-boda-14"><div class="bn-ph"><img src="{{bn2-argollas.jpg}}" alt="" loading="lazy"/></div><h3>Argollas de boda</h3></a>
+    <a href="/shop/category/aretes-12"><div class="bn-ph"><img src="{{bn2-aretes.jpg}}" alt="" loading="lazy"/></div><h3>Aretes</h3></a>
+    <a href="/contacto#cita"><div class="bn-ph"><img src="{{bn-diamantes.jpg}}" alt="" loading="lazy"/></div><h3>Diamantes</h3></a>
+    <a href="/contacto#cita"><div class="bn-ph"><img src="{{taller-parma.jpg}}" alt="" loading="lazy"/></div><h3>Diseño a la medida</h3></a>
+    <a href="/shop"><div class="bn-ph"><img src="{{trio-terciopelo.jpg}}" alt="" loading="lazy"/></div><h3>Toda la joyería</h3></a>
+  </div>
+</section>
+
+<section class="bn-split grey">
+  <div class="bn-txt">
+    <div class="anbn-eb">¿Te interesa un diamante de laboratorio?</div>
+    <h2 style="margin-top:18px">Zirconia, diamante de laboratorio o diamante natural</h2>
+    <div class="bn-btns"><a class="anbn-btn" href="/shop/category/anillos-de-compromiso-18">Elige tu anillo</a></div>
+  </div>
+  <div class="bn-media"><img src="{{bn2-laboratorio.jpg}}" alt="" loading="lazy" style="object-position:70% 50%"/></div>
+</section>
+
+<section class="bn-mosaic">
+  <div class="bn-full"><img src="{{bn2-estuche-diamantes.jpg}}" alt="" loading="lazy"/></div>
+  <div class="bn-card">
+    <img src="{{bn2-formas.jpg}}" alt="Formas de diamante" loading="lazy"/>
+    <h3>Explora las formas del diamante</h3>
+    <a class="anbn-btn" href="/contacto#cita">Cotiza tu diamante</a>
+  </div>
+  <div class="bn-card">
+    <img class="tall" src="{{lifestyle-pareja-merano.jpg}}" alt="" loading="lazy" style="aspect-ratio:4/5"/>
+    <h3>Joyería de boda</h3>
+    <a class="bn-link" href="/shop/category/joyeria-de-boda-14">Ver colección</a>
+  </div>
+  <div class="bn-full"><img src="{{bn2-anillo-estuche-oscuro.jpg}}" alt="" loading="lazy"/></div>
+  <div class="bn-full"><img src="{{bn2-argollas-oscuro.jpg}}" alt="" loading="lazy"/><a class="anbn-btn white" href="/shop/category/joyeria-de-boda-14">Argollas de boda</a></div>
+  <div class="bn-full"><img src="{{bn2-regalo.jpg}}" alt="" loading="lazy" style="object-position:50% 70%"/><a class="anbn-btn white" href="/shop">Ideas para regalar</a></div>
+</section>
+
+<section class="bn-store">
+  <img src="{{bn2-asesoria.jpg}}" alt="" loading="lazy"/>
+  <div class="bn-in anbn-w">
+    <h2>Visítanos en el Estudio</h2>
+    <p>Av. Ventura Puente 1843 E16, Col. Electricistas, Morelia.</p>
+    <a class="anbn-btn white" href="/contacto#cita">Agenda tu cita</a>
+  </div>
+</section>
+
+<section class="bn-only bn-cats">
+  <h2>Solo en Anello</h2>
+  <div class="bn-arrows"><button type="button" class="bn-prev" aria-label="Anterior">‹</button><button type="button" class="bn-next" aria-label="Siguiente">›</button></div>
+  <div class="bn-track">
+    <a href="/nosotros"><div class="bn-ph"><img src="{{bn-orfebre.jpg}}" alt="" loading="lazy"/></div><h3>Hecho a mano</h3><p>Cada anillo se fabrica sobre pedido, en el metal y la medida que elijas, en manos de orfebres mexicanos.</p></a>
+    <a href="/icert"><div class="bn-ph"><img src="{{bn4-icert.jpg}}" alt="" loading="lazy" style="object-position:62% 50%"/></div><h3>Certificado ICERT incluido</h3><p>Tu anillo llega con su certificado digital: acércalo a tu celular o escribe su número en nuestro verificador para comprobar que es auténtico.</p></a>
+    <a href="/grabado-laser"><div class="bn-ph"><img src="{{bn4-grabado.jpg}}" alt="" loading="lazy" style="object-position:40% 50%"/></div><h3>Grabado láser en tu piedra</h3><p>El número de tu ICERT grabado en el filete de la piedra, y si quieres, un mensaje que solo ustedes conocen.</p></a>
+    <a href="/contacto#cita"><div class="bn-ph"><img src="{{estudio-interactivo.jpg}}" alt="Estudio Anello: los anillos se muestran en pantallas gigantes" loading="lazy"/></div><h3>Estudio interactivo</h3><p>En nuestro estudio de Morelia, tu asesor proyecta los anillos en pantallas gigantes y los compara lado a lado contigo.</p></a>
+    <a href="/contacto#cita"><div class="bn-ph"><img src="{{taller-parma.jpg}}" alt="" loading="lazy"/></div><h3>Diseño a la medida</h3><p>Partimos de tu idea y la convertimos en una pieza única, dibujada para ti.</p></a>
+  </div>
+</section>
+
+<script>
+(function () {
+  document.querySelectorAll('.anbn .bn-cats').forEach(function (s) {
+    var t = s.querySelector('.bn-track');
+    if (!t) return;
+    var step = function (d) { var c = t.firstElementChild; t.scrollBy({ left: d * (c ? c.getBoundingClientRect().width + 12 : 300), behavior: 'smooth' }); };
+    var p = s.querySelector('.bn-prev'), n = s.querySelector('.bn-next');
+    if (p) p.addEventListener('click', function () { step(-1); });
+    if (n) n.addEventListener('click', function () { step(1); });
+  });
+})();
+</script>
+    </div>
+  </t>
+</t>

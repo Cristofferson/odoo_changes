@@ -1,0 +1,111 @@
+<t t-name="anbn.page_grabado">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Grabado láser en la piedra</t>
+    <div id="wrap" class="oe_structure anbn anbn-page">
+
+<section class="bn-hero">
+  <img src="{{bn4-grabado.jpg}}" alt="Número ICERT grabado en el filete de la piedra, visto con lupa" fetchpriority="high" style="object-position:40% 50%"/>
+  <div class="anbn-w">
+    <div class="anbn-eb">Incluido en todos nuestros anillos</div>
+    <h1>Tu piedra, firmada con láser</h1>
+    <div class="bn-btns">
+      <a class="anbn-btn lt" href="#personaliza">Hazlo personal</a>
+      <a class="anbn-btn lt" href="/contacto#cita">Agenda tu cita</a>
+    </div>
+  </div>
+</section>
+
+<section class="pg-sec">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">Qué es</div>
+      <h2>Un grabado microscópico en el filete de tu piedra</h2>
+      <p>El filete es el borde delgado que rodea la piedra, donde se unen la parte superior y la inferior. Ahí grabamos con láser el número de tu certificado ICERT: es tan pequeño que no se ve a simple vista, pero con una lupa de 20 aumentos se lee con claridad.</p>
+    </div>
+    <div class="pg-real">
+      <figure><img src="{{laser-icert-1.jpg}}" alt="Grabado ICERT 80902348 visto al microscopio" loading="lazy"/></figure>
+      <figure><img src="{{laser-icert-2.jpg}}" alt="Grabado ICERT 80902298 visto al microscopio" loading="lazy"/></figure>
+      <figure><img src="{{laser-icert-3.jpg}}" alt="Grabado ICERT visto al microscopio" loading="lazy"/></figure>
+    </div>
+    <p class="pg-note">Fotografías reales de piedras grabadas, vistas al microscopio.</p>
+  </div>
+</section>
+
+<section class="pg-sec cream">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">Beneficios</div>
+      <h2>Por qué grabamos todas nuestras piedras</h2>
+    </div>
+    <div class="pg-grid">
+      <div><i class="fa fa-link"/><h3>Certificado y piedra, unidos</h3><p>El número grabado es el mismo de tu ICERT: tu certificado y tu piedra quedan unidos para siempre.</p></div>
+      <div><i class="fa fa-search"/><h3>La reconoces en cualquier lugar</h3><p>Si tu anillo va al taller, a limpieza o a reparación, puedes confirmar con una lupa que la piedra que regresa es la tuya.</p></div>
+      <div><i class="fa fa-shield"/><h3>Disuade el robo</h3><p>Una piedra grabada es fácil de identificar, lo que dificulta revenderla y facilita la identificación pericial.</p></div>
+      <div><i class="fa fa-diamond"/><h3>No altera tu piedra</h3><p>El grabado no cambia el peso, la claridad ni el brillo de la piedra.</p></div>
+      <div><i class="fa fa-eye-slash"/><h3>Invisible a simple vista</h3><p>Nadie lo nota al ver tu anillo: solo aparece cuando lo buscas con lupa.</p></div>
+      <div><i class="fa fa-gift"/><h3>Sin costo adicional</h3><p>El grabado del número ICERT viene incluido en todos los anillos Anello.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="pg-sec" id="personaliza">
+  <div class="anbn-w pg-two">
+    <div>
+      <div class="anbn-eb">Hazlo personal</div>
+      <h2>Un mensaje que solo ustedes conocen</h2>
+      <p>Además del número ICERT, podemos grabar en la piedra un mensaje personal, con un costo adicional. Un detalle invisible para los demás, que acompaña al anillo para siempre.</p>
+      <ul class="anbn-checks">
+        <li><b>Una frase corta:</b> un «Te amo», un «Sí» o sus iniciales.</li>
+        <li><b>Una fecha especial:</b> el día que se conocieron, la pedida o la boda.</li>
+        <li><b>Un ícono:</b> un corazón, un infinito o un símbolo que signifique algo para ustedes.</li>
+      </ul>
+      <p>El espacio del filete es muy pequeño, por eso el mensaje debe ser breve. Tu asesor te ayuda a elegir qué cabe en tu piedra y te confirma el costo.</p>
+      <div class="bn-btns" style="justify-content:flex-start">
+        <a class="anbn-btn solid" href="/contacto#cita">Pregunta a tu asesor</a>
+      </div>
+    </div>
+    <div class="pg-girdles" aria-label="Ejemplos de grabado personalizado">
+      <div class="gd"><span>ICERT 80902348</span><small>Incluido</small></div>
+      <div class="gd"><span>TE AMO ♥</span><small>Frase</small></div>
+      <div class="gd"><span>14 · 02 · 2026</span><small>Fecha</small></div>
+      <div class="gd"><span>A ∞ M</span><small>Iniciales e ícono</small></div>
+      <p class="pg-note">Ilustración de cómo se vería cada grabado en el filete.</p>
+    </div>
+  </div>
+  <div class="anbn-w">
+    <div class="pg-real two">
+      <figure><img src="{{laser-personal-1.jpg}}" alt="Grabado real: número ICERT y la frase MI ESTRELLA" loading="lazy"/><figcaption>«MI ESTRELLA»</figcaption></figure>
+      <figure><img src="{{laser-personal-2.jpg}}" alt="Grabado real: número y las iniciales F&amp;S 2022" loading="lazy"/><figcaption>«F&amp;S 2022»</figcaption></figure>
+    </div>
+    <p class="pg-note">Grabados personalizados reales, vistos al microscopio.</p>
+  </div>
+</section>
+
+<section class="pg-sec cream">
+  <div class="anbn-w">
+    <div class="pg-head">
+      <div class="anbn-eb">Cómo se hace</div>
+      <h2>De tu idea a tu piedra</h2>
+    </div>
+    <div class="pg-steps">
+      <div><span>1</span><h3>Elige tu anillo</h3><p>Todos nuestros anillos incluyen el grabado del número ICERT.</p></div>
+      <div><span>2</span><h3>Personalízalo, si quieres</h3><p>Dile a tu asesor el mensaje, la fecha o el ícono que quieres sumar.</p></div>
+      <div><span>3</span><h3>Grabamos con láser</h3><p>Grabamos con láser el número ICERT y, si lo pediste, tu mensaje.</p></div>
+      <div><span>4</span><h3>Compruébalo tú</h3><p>Con una lupa de 20 aumentos lees el grabado, y con tu tarjeta ICERT confirmas que coincide.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="bn-split grey">
+  <div class="bn-txt" style="align-items:flex-start;text-align:left">
+    <div class="anbn-eb">Va de la mano con</div>
+    <h2 style="margin-top:14px">Tu certificado ICERT</h2>
+    <p style="margin-top:18px">El número grabado en tu piedra es el mismo de tu tarjeta ICERT, el certificado digital que verificas con solo acercar tu celular.</p>
+    <div class="bn-btns" style="justify-content:flex-start"><a class="anbn-btn" href="/icert">Conoce ICERT</a></div>
+  </div>
+  <div class="bn-media"><img src="{{bn4-icert.jpg}}" alt="Tarjeta ICERT leída con un celular" loading="lazy"/></div>
+</section>
+
+    </div>
+  </t>
+</t>

@@ -6,4 +6,11 @@
             <small t-if="template_price_vals.get('xb_desde')" class="xb-desde text-muted me-1">Desde</small>
         </xpath>
     </template>
+
+    <!-- Filtro de la tienda: solo valores usados por productos publicados y no ocultos en la web -->
+    <template id="filter_valores_xb" inherit_id="website_sale.filter_radio_and_multi_attributes" name="Filtro: solo valores de la categoría, sin ocultos">
+        <xpath expr="//t[@t-set='sorted_values']" position="attributes">
+            <attribute name="t-value">sorted(a.value_ids._xb_para_filtro(category or None), key=lambda v: v.id not in attrib_set)</attribute>
+        </xpath>
+    </template>
 </odoo>

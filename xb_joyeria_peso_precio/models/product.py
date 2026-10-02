@@ -51,6 +51,28 @@ class ProductTemplate(models.Model):
         return res
 
     @api.model
+    def _get_combination_info(self, combination=False, product_id=False, add_qty=1.0, uom_id=False,
+                              only_template=False):
+        """La «Ficha de la pieza» (peso y metal fino, de stij_website) se calculaba con la
+        variante. Con atributos dinámicos o «sin variante» (medida) la combinación elegida
+        casi nunca existe como variante → llegaba vacía y el peso se quedaba fijo. Aquí se
+        proyecta con la combinación COMPLETA que eligió el cliente."""
+        info = super()._get_combination_info(combination=combination, product_id=product_id,
+                                             add_qty=add_qty, uom_id=uom_id, only_template=only_template)
+        if only_template or 'dmn_peso' not in info:
+            return info
+        ptavs = combination or self.env['product.template.attribute.value']
+        if not ptavs and info.get('product_id'):
+            ptavs = self.env['product.product'].browse(info['product_id']).product_template_attribute_value_ids
+        if ptavs:
+            peso, fino, metal = self._xb_proyectar_ptavs(ptavs)
+            if peso:
+                info['dmn_peso'] = '%.2f g' % peso
+                info['dmn_fino'] = '%.2f g' % fino
+                info['dmn_peso_detalle'] = '%.2f g de %s, con %.2f g de %s puro' % (
+                    peso, metal.name, fino, (metal.x_metal or 'metal').lower())
+        return info
+
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
         if res and 'xb_precio_por_metal' not in res:   # lista vacía = «todos los campos»: no tocar

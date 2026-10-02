@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_attribute_view_form_xb_ocultar_web" model="ir.ui.view">
+        <field name="name">product.attribute.form.xb_ocultar_web</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.product_attribute_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='value_ids']/list/field[@name='default_extra_price']" position="before">
+                <field name="xb_ocultar_web" string="Ocultar en web" width="110px"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

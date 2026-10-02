@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Joyería por peso — precio en la tienda y en la caja",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "summary": "Las joyas cotizadas por metal (xb_precio_por_metal) muestran «Desde» en la tienda "
                "y la caja cobra el mismo precio que la web, calculado en el servidor",
     "description": """
@@ -14,13 +14,16 @@ calcular en el servidor, así que:
 * **Caja**: al agregar la joya al ticket se pide el precio al servidor con la
   combinación elegida y la lista de precios de la orden (antes cobraba $0 porque
   el TPV usaba el costo de la ficha, que es 0).
+* **Ocultar en el sitio web**: casilla en cada valor de atributo (p. ej. «Plata»).
+  Los valores marcados no se muestran ni se pueden elegir en la tienda en línea,
+  pero siguen disponibles en la caja, Ventas y el backend.
 """,
     "category": "Sales/Point of Sale",
     "author": "XUBAX",
     "website": "https://www.xubax.com",
     "license": "OPL-1",
     "depends": ["xb_joyeria_peso", "website_sale", "point_of_sale"],
-    "data": ["views/templates.xml"],
+    "data": ["views/templates.xml", "views/product_attribute_views.xml"],
     "assets": {
         "point_of_sale._assets_pos": ["xb_joyeria_peso_precio/static/src/app/pos_store_patch.js"],
     },

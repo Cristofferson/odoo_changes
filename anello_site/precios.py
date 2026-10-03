@@ -1,4 +1,4 @@
-# odoo shell -d <BD> < precios.py — precio de los anillos «por metal» = costo × 2, web con IVA incluido. Idempotente.
+# odoo shell -d <BD> < precios.py — precio de los anillos «por metal» = costo × 2.28, web con IVA incluido. Idempotente.
 #   costo = metal fino del día × precio del oro + lista de materiales (hechura y piedras)
 #   Antes: lista 2 «Anello (Retail)», regla base Costo con +226 % (= ×3.26).
 import json, os
@@ -18,12 +18,12 @@ if not os.path.exists(bk):
                'impuestos': {t.id: t.taxes_id.ids for t in anillos},
                'web_iva': env['website'].browse(1).show_line_subtotals_tax_selection}, open(bk, 'w'))
 
-# 1) ×2 = costo + 100 %
-reglas.write({'price_markup': 100.0})
+# 1) ×2.28 = costo + 128 % (antes ×2)
+reglas.write({'price_markup': 128.0})   # 3-oct: el usuario lo subió de 100 a 128
 faltan = anillos.filtered(lambda t: t.id not in reglas.mapped('product_tmpl_id').ids)
 for t in faltan:
     Item.create({'pricelist_id': PL.id, 'applied_on': '1_product', 'product_tmpl_id': t.id,
-                 'compute_price': 'formula', 'base': 'standard_price', 'price_markup': 100.0})
+                 'compute_price': 'formula', 'base': 'standard_price', 'price_markup': 128.0})
 
 # 2) impuestos: los que traían impuesto de COMPRA en «impuestos de cliente» → IVA 16 % de venta
 iva = env['account.tax'].sudo().browse(12)

@@ -1,0 +1,14 @@
+{
+ "373307": {"nombre": "Pisa", "lineas": [[32, "0.01"]], "veo": "Pavé de tres hileras en cada hombro, unas 16 piedras por lado.", "viejo": "32 piedras de 0.01–0.02"},
+ "373309": {"nombre": "Noto", "lineas": [[6, "0.04"], [10, "0.02"]], "veo": "Una hilera graduada por hombro, 8 piedras por lado: las 3 más cercanas a la cabeza son más grandes.", "viejo": "6 de 0.02–0.04 y 4 de 0.01–0.02"},
+ "373311": {"nombre": "Todi", "lineas": [], "veo": "Solitario en semibisel. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373312": {"nombre": "Gubbio", "lineas": [], "veo": "Princesa de cuatro garras. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373313": {"nombre": "Assisi", "lineas": [[40, "0.01"]], "veo": "Banda dividida: 4 hileras (dos por lado) de unas 10 piedras cada una.", "viejo": "28 piedras de 0.01–0.02"},
+ "373314": {"nombre": "Ragusa", "lineas": [[60, "0.01"]], "veo": "Banda dividida: 4 hileras de unas 15 piedras muy pequeñas.", "viejo": "60 piedras de 0.01–0.02"},
+ "373315": {"nombre": "Cortina", "lineas": [], "veo": "Solitario catedral. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373324": {"nombre": "Bardolino", "lineas": [[2, "0.02"]], "veo": "Una piedrita dentro de cada voluta de los hombros: 2 en total.", "viejo": "sin dato"},
+ "373327": {"nombre": "Ortisei", "lineas": [], "veo": "Solitario fino de cuatro garras. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373331": {"nombre": "Alghero", "lineas": [], "veo": "Bypass con solitario. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373333": {"nombre": "Lazise", "lineas": [], "veo": "Solitario alto de cuatro garras. Banda lisa, sin acentos.", "viejo": "sin acentos"},
+ "373334": {"nombre": "Recanati", "lineas": [[2, "0.13"]], "veo": "Trilogía en cascada: además de la central, 2 piedras grandes casi del mismo tamaño. Propongo la más grande del catálogo (0.13 qt); quizá convenga cotizarla aparte.", "viejo": "sin dato"}
+}

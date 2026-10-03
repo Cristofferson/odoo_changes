@@ -594,3 +594,10 @@ body.o_showroom_has_bar .anbn-wa-bubble { bottom: 154px; }
 }
 
 .gd-min li b { font-weight: 500; }
+
+/* 3-oct: descripción persuasiva bajo el nombre y liga de cita dentro de la frase */
+#product_details .anbn-pitch { font: 400 15px/1.6 var(--bn-sans); color: #5d5446; margin: 6px 0 14px; max-width: 60ch; }
+#product_details .anbn-perk-link { color: inherit; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+#product_details .anbn-perk-link:hover { color: var(--bn-gold); }
+#product_details #xb_diamantes li { margin-bottom: 2px; }
+/* v3-oct-b */

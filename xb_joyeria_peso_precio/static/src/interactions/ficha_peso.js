@@ -12,5 +12,20 @@ patch(WebsiteSale.prototype, {
                 el.textContent = combination[key];
             }
         }
+        // Piedras y diamantes de la combinación elegida (cambian con la piedra central)
+        const gem = document.getElementById("xb_gemas");
+        if (gem && combination.xb_gemas !== undefined) {
+            gem.textContent = combination.xb_gemas || "";
+            gem.closest("li")?.classList.toggle("d-none", !combination.xb_gemas);
+        }
+        const ul = document.getElementById("xb_diamantes");
+        if (ul && combination.xb_diamantes !== undefined) {
+            ul.replaceChildren(...(combination.xb_diamantes || []).map((txt) => {
+                const li = document.createElement("li");
+                li.textContent = txt;
+                return li;
+            }));
+            ul.closest("li")?.classList.toggle("d-none", !(combination.xb_diamantes || []).length);
+        }
     },
 });

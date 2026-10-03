@@ -91,5 +91,11 @@
 
 /* 3-oct: tamaños del diamante de laboratorio dentro de su tarjeta */
 .xbv-labwrap { display: grid; gap: 8px; }
-.xbv-labsizes { padding: 0 0 4px 2.9rem; max-width: 520px; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
-.xbv-labsizes button { height: auto; min-height: 40px; padding: 8px 6px; white-space: nowrap; line-height: 1.2; }
+.xbv-labwrap, .xbv-labsizes { min-width: 0; }
+.xbv-labsizes { padding: 0 0 4px 2.9rem; max-width: 520px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.xbv-labsizes button { min-width: 0; height: auto; min-height: 40px; padding: 8px 2px; white-space: nowrap; line-height: 1.2; text-align: center; }
+@media (max-width: 575px) {
+  .xbv-labsizes { padding: 0 0 4px; max-width: none; gap: 5px; }
+  .xbv-labsizes button { font-size: .8rem; padding: 8px 0; }
+}
+.xbv-cards .xbv-labsizes button { display: block; text-align: center; padding: 8px 0; }

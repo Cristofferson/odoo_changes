@@ -96,6 +96,17 @@ class ProductTemplate(models.Model):
         for linea in (bom.bom_line_ids if bom else []):
             if self._xb_linea_aplica(linea.bom_product_template_attribute_value_ids, ptavs):
                 acentos[linea.product_id] = acentos.get(linea.product_id, 0) + linea.product_qty
+        # El diamante central elegido por tamaño («Diamante de laboratorio 1.00 ct») es una línea más de
+        # la lista de materiales: se separa de los acentos.
+        centro = None
+        mc = re.search(r'([\d.]+)\s*ct', central.name or '', re.I)
+        if mc:
+            for prod in list(acentos):
+                mq = re.search(r'([\d.]+)\s*Qts?', prod.name or '', re.I)
+                if mq and abs(float(mq.group(1)) - float(mc.group(1))) < 1e-6:
+                    centro = prod
+                    acentos.pop(prod)
+                    break
         n = int(sum(acentos.values()))
         primero = next(iter(acentos), None)
         nombres = primero.name if primero else ''
@@ -109,7 +120,13 @@ class ProductTemplate(models.Model):
             texto = '%d piedras' % n if n else ''
         renglones = []
         cn = (central.name or '').lower()
-        if 'diamante' in cn:
+        mcen = centro and re.search(r'Diamante\s+(LAB|NAT)\s+([\d.]+)\s*Qts?\s+(\S+)\s+(\S+)\s+(\S+)', centro.name or '', re.I)
+        if mcen:
+            tipo, qt, pureza, color, corte = mcen.groups()
+            renglones.append('Diamante central %s de %s ct · corte %s · color %s · pureza %s · certificado ICERT' % (
+                'de laboratorio' if tipo.upper() == 'LAB' else 'natural', qt,
+                self._XB_CORTE.get(corte.upper(), corte), color, pureza))
+        elif 'diamante' in cn:
             origen = 'de laboratorio' if 'laboratorio' in cn else 'natural'
             renglones.append('Diamante central %s: quilataje, color y pureza a tu elección con tu asesor · '
                              'certificado ICERT' % origen)

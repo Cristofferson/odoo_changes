@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Joyería por peso — precio en la tienda y en la caja",
-    "version": "19.0.1.4.0",
+    "version": "19.0.1.4.1",
     "summary": "Las joyas cotizadas por metal (xb_precio_por_metal) muestran «Desde» en la tienda "
                "y la caja cobra el mismo precio que la web, calculado en el servidor",
     "description": """

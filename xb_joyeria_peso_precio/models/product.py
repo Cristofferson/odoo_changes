@@ -142,6 +142,28 @@ class ProductTemplate(models.Model):
                                  q * float(qt), self._XB_CORTE.get(corte.upper(), corte), pureza, color))
         return texto, renglones
 
+    def _xb_costo_combinacion(self, ptavs):
+        """El metal lleva un margen MENOR que la hechura y las piedras (4-oct, decisión del usuario: el oro es
+        materia prima que el cliente puede checar; las joyerías ganan en la mano de obra y las piedras).
+        La lista de precios aplica un solo margen sobre el costo (× 2.28), así que aquí el metal se reporta
+        ajustado: metal × (margen del metal / margen de la lista). Con 1.35 / 2.28, el precio final queda
+        metal × 1.35 + (hechura + piedras) × 2.28. Ambos se cambian en Ajustes → Parámetros del sistema:
+        ``xb_joyeria.margen_metal`` y ``xb_joyeria.margen_lista``."""
+        costo = super()._xb_costo_combinacion(ptavs)
+        if costo is None:
+            return costo
+        _peso, fino, metal = self._xb_proyectar_ptavs(ptavs)
+        metal_costo = fino * self._xb_cotizacion(metal) if metal else 0.0
+        icp = self.env['ir.config_parameter'].sudo()
+        try:
+            m_metal = float(icp.get_param('xb_joyeria.margen_metal', '1.35'))
+            m_lista = float(icp.get_param('xb_joyeria.margen_lista', '2.28'))
+        except ValueError:
+            return costo
+        if not m_lista:
+            return costo
+        return costo - metal_costo + metal_costo * (m_metal / m_lista)
+
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
         if res and 'xb_precio_por_metal' not in res:   # lista vacía = «todos los campos»: no tocar

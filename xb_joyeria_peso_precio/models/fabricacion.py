@@ -30,7 +30,10 @@ class PosOrder(models.Model):
     def _xb_lineas_a_fabricar(self):
         """Joyas por metal que no hay en existencia: se mandan a fabricar en vez de salir del inventario."""
         self.ensure_one()
+        # Las líneas que liquidan un pedido (sale_order_origin_id) NO: ese anillo ya se mandó a fabricar
+        # al confirmar el pedido y aquí solo se entrega.
         return self.lines.filtered(lambda l: l.qty > 0 and l.product_id.product_tmpl_id.xb_precio_por_metal
+                                   and not l.sale_order_origin_id
                                    and l.product_id.with_company(l.company_id).free_qty < l.qty)
 
     def _create_order_picking(self):
@@ -52,3 +55,41 @@ class PosOrder(models.Model):
             pickings = self.env['stock.picking']._create_picking_from_pos_order_lines(destino, resto, picking_type, self.partner_id)
             pickings.write({'pos_session_id': self.session_id.id, 'pos_order_id': self.id, 'origin': self.name})
         fab.sudo()._launch_stock_rule_from_pos_order_lines()
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    def action_confirm(self):
+        """Los pedidos creados desde la caja (xb_sale_order_from_pos, campo ``xb_so_kind``) se confirman SIN
+        regla de abastecimiento (no nace la entrega hasta que el cliente recoge). La joya igual hay que
+        fabricarla: aquí se crea su orden de fabricación directamente. Los pedidos normales de Ventas ya la
+        generan solos por la ruta «sobre pedido» y no pasan por aquí."""
+        res = super().action_confirm()
+        if 'xb_so_kind' in self._fields:
+            self.filtered(lambda o: o.xb_so_kind and o.state == 'sale')._xb_crear_fabricacion()
+        return res
+
+    def _xb_crear_fabricacion(self):
+        Production = self.env['mrp.production'].sudo()
+        for order in self:
+            ya = Production.search([('origin', '=', order.name)])
+            for line in order.order_line:
+                prod = line.product_id
+                if not prod.product_tmpl_id.xb_precio_por_metal or line.product_uom_qty <= 0:
+                    continue
+                if ya.filtered(lambda m: m.product_id == prod):
+                    continue
+                if prod.with_company(order.company_id).free_qty >= line.product_uom_qty:
+                    continue
+                bom = self.env['mrp.bom'].sudo()._bom_find(prod, company_id=order.company_id.id).get(prod)
+                if not bom:
+                    continue
+                wh = order.warehouse_id or self.env['stock.warehouse'].search([('company_id', '=', order.company_id.id)], limit=1)
+                mo = Production.with_company(order.company_id).create({
+                    'product_id': prod.id, 'product_qty': line.product_uom_qty, 'product_uom_id': line.product_uom_id.id,
+                    'bom_id': bom.id, 'origin': order.name, 'company_id': order.company_id.id,
+                    'picking_type_id': wh.manu_type_id.id,
+                })
+                mo.action_confirm()
+                order.message_post(body='Orden de fabricación %s creada para %s.' % (mo.name, prod.display_name))

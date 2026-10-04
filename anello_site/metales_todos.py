@@ -29,8 +29,9 @@ def color(v):
     return 'blanco' if 'blanco' in n else 'rosa' if 'rosa' in n else 'bitono' if 'bitono' in n else 'amarillo'
 def receta(p, lineas):
     b = Bom.search([('product_id', '=', p.id)], limit=1)
-    vals = {'product_tmpl_id': oro.id, 'product_id': p.id, 'product_qty': 1.0, 'product_uom_id': g.id, 'type': 'normal', 'company_id': cia.id,
-            'bom_line_ids': [(5, 0, 0)] + [(0, 0, {'product_id': c.id, 'product_qty': q, 'product_uom_id': g.id}) for c, q in lineas]}
+    # por 1000 g: las cantidades se guardan con 2 decimales (0.585 g quedaba en 0.59, ≈1 % de oro fino de más)
+    vals = {'product_tmpl_id': oro.id, 'product_id': p.id, 'product_qty': 1000.0, 'product_uom_id': g.id, 'type': 'normal', 'company_id': cia.id,
+            'bom_line_ids': [(5, 0, 0)] + [(0, 0, {'product_id': c.id, 'product_qty': round(q * 1000, 2), 'product_uom_id': g.id}) for c, q in lineas]}
     b.write(vals) if b else Bom.create(vals)
     p.with_company(cia).standard_price = round(sum(q * c.with_company(cia).standard_price for c, q in lineas), 2)
     o = OP.search([('product_id', '=', p.id), ('warehouse_id', '=', wh.id)], limit=1)

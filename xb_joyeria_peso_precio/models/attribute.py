@@ -10,6 +10,11 @@ class ProductAttributeValue(models.Model):
         'Ocultar en el sitio web',
         help='No se muestra ni se puede elegir en la tienda en línea. '
              'Sigue disponible en la caja, Ventas y el backend.')
+    xb_aleacion_id = fields.Many2one(
+        'product.product', 'Aleación que se consume',
+        help='Para el atributo Metal: el producto (en gramos) que la orden de fabricación descuenta del '
+             'inventario, por el peso proyectado de la pieza. Puede ser una aleación con su propia lista de '
+             'materiales (metal fino + liga) o el metal fino directamente.')
 
 
     def _xb_para_filtro(self, category=None):

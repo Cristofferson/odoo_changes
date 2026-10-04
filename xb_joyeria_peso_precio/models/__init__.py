@@ -1,1 +1,1 @@
-from . import product, attribute
+from . import product, attribute, fabricacion

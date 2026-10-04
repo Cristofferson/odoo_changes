@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Joyería por peso — precio en la tienda y en la caja",
-    "version": "19.0.1.4.1",
+    "version": "19.0.1.5.0",
     "summary": "Las joyas cotizadas por metal (xb_precio_por_metal) muestran «Desde» en la tienda "
                "y la caja cobra el mismo precio que la web, calculado en el servidor",
     "description": """
@@ -17,6 +17,9 @@ calcular en el servidor, así que:
 * **Ocultar en el sitio web**: casilla en cada valor de atributo (p. ej. «Plata»).
   Los valores marcados no se muestran ni se pueden elegir en la tienda en línea,
   pero siguen disponibles en la caja, Ventas y el backend.
+* **Fabricación**: la orden de fabricación de la joya consume su aleación (según el metal elegido) por el
+  peso proyectado; la aleación puede fabricarse desde metal fino + liga. En la caja, una joya sin existencia
+  genera su orden de fabricación igual que una venta «para enviar después».
 * **Ficha de la pieza**: el peso y el metal fino se recalculan al cambiar metal, ancho o
   medida (antes se quedaban fijos en la primera combinación).
 """,
@@ -24,7 +27,7 @@ calcular en el servidor, así que:
     "author": "XUBAX",
     "website": "https://www.xubax.com",
     "license": "OPL-1",
-    "depends": ["xb_joyeria_peso", "website_sale", "point_of_sale", "stij_website"],
+    "depends": ["xb_joyeria_peso", "website_sale", "point_of_sale", "stij_website", "mrp"],
     "data": ["views/templates.xml", "views/product_attribute_views.xml"],
     "assets": {
         "point_of_sale._assets_pos": ["xb_joyeria_peso_precio/static/src/app/pos_store_patch.js"],

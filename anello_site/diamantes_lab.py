@@ -52,6 +52,8 @@ for t in fichas:
 pl = env['product.pricelist'].browse(2)
 for ref in ('373721', '373307'):
     t = PT.search([('xb_ref_modelo', '=', ref), ('active', '=', True)], limit=1)
+    if not t:
+        continue
     met = t.attribute_line_ids.filtered(lambda l: l.attribute_id.id == 9).product_template_value_ids.filtered(lambda v: '14' in v.name)[:1]
     med = PTAV.search([('product_tmpl_id', '=', t.id), ('product_attribute_value_id.name', '=', '4.0')], limit=1)
     for pz in ['Zirconia'] + ['Diamante de laboratorio %s ct' % q for q, _ in TAM]:

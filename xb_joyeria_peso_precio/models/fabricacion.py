@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from odoo.exceptions import UserError
 from odoo import models
 
 
@@ -44,6 +45,10 @@ class PosOrder(models.Model):
         fab = self._xb_lineas_a_fabricar() if not self.shipping_date else self.env['pos.order.line']
         if not fab:
             return super()._create_order_picking()
+        if not self.partner_id:
+            raise UserError('Para vender una joya que se fabrica sobre pedido (%s) primero elige al cliente: '
+                            'la orden de fabricación y la entrega quedan a su nombre.'
+                            % ', '.join(fab.mapped('product_id.product_tmpl_id.name')))
         resto = self.lines - fab
         if resto and self._should_create_picking_real_time():
             picking_type = self.config_id.picking_type_id

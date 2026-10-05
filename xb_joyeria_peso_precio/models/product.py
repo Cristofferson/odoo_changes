@@ -215,6 +215,20 @@ class ProductTemplate(models.Model):
                 r['xb_precios_gramo'] = mapa
         return res
 
+    @api.model
+    def xb_pos_precio_combinacion(self, tmpl_id, ptav_ids, pricelist_id=False):
+        """Caja, ventana de opciones: precio de la joya con la combinación que se va eligiendo
+        ({'sin': sin IVA, 'con': con IVA}); el TPV no lo puede calcular solo."""
+        tmpl = self.browse(tmpl_id).exists()
+        pricelist = self.env['product.pricelist'].browse(pricelist_id).exists() if pricelist_id else False
+        if not tmpl or not pricelist or not tmpl.xb_precio_por_metal:
+            return False
+        ptavs = self.env['product.template.attribute.value'].browse(ptav_ids or []).exists()
+        precio = pricelist._get_product_price(tmpl.with_context(**tmpl._get_product_price_context(ptavs)), 1.0)
+        impuestos = tmpl.taxes_id._filter_taxes_by_company(pricelist.company_id or self.env.company)
+        total = impuestos.compute_all(precio, currency=pricelist.currency_id, quantity=1.0, product=tmpl)
+        return {'sin': precio, 'con': total['total_included']}
+
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
         for f in ('xb_precio_por_metal', 'xb_por_gramo', 'xb_precios_gramo'):

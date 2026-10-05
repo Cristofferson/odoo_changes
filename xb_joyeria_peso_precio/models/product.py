@@ -142,27 +142,43 @@ class ProductTemplate(models.Model):
                                  q * float(qt), self._XB_CORTE.get(corte.upper(), corte), pureza, color))
         return texto, renglones
 
+    # ------------------------------------------------------------------
+    # Precio = metal (a su precio de venta) + (hechura + piedras) × margen de la lista   (5-oct)
+    # El metal vale lo mismo suelto que dentro de una joya: se cobra con la regla de la lista para el
+    # metal suelto (p. ej. «Oro suelto por gramo»: costo + 8 %). El margen del joyero va en la hechura y
+    # las piedras: la regla de la joya («costo + 128 %») solo se aplica a ese costo. Todo se configura
+    # en la lista de precios; no hay parámetros aparte.
+    # ------------------------------------------------------------------
+    def _xb_metal_aleacion(self, ptavs):
+        """(aleación, gramos) de la combinación, o (False, 0) si el metal no tiene aleación ligada."""
+        self.ensure_one()
+        peso, _fino, metal = self._xb_proyectar_ptavs(ptavs)
+        aleacion = metal.xb_aleacion_id if metal and 'xb_aleacion_id' in metal._fields else False
+        return (aleacion, peso) if aleacion and peso else (False, 0.0)
+
     def _xb_costo_combinacion(self, ptavs):
-        """El metal lleva un margen MENOR que la hechura y las piedras (4-oct, decisión del usuario: el oro es
-        materia prima que el cliente puede checar; las joyerías ganan en la mano de obra y las piedras).
-        La lista de precios aplica un solo margen sobre el costo (× 2.28), así que aquí el metal se reporta
-        ajustado: metal × (margen del metal / margen de la lista). Con 1.35 / 2.28, el precio final queda
-        metal × 1.35 + (hechura + piedras) × 2.28. Ambos se cambian en Ajustes → Parámetros del sistema:
-        ``xb_joyeria.margen_metal`` y ``xb_joyeria.margen_lista``."""
+        """Costo que ve la regla de la joya: SOLO hechura y piedras cuando el metal tiene aleación
+        (el metal se suma aparte, a su precio de venta)."""
         costo = super()._xb_costo_combinacion(ptavs)
         if costo is None:
             return costo
+        aleacion, _g = self._xb_metal_aleacion(ptavs)
+        if not aleacion:
+            return costo
         _peso, fino, metal = self._xb_proyectar_ptavs(ptavs)
-        metal_costo = fino * self._xb_cotizacion(metal) if metal else 0.0
-        icp = self.env['ir.config_parameter'].sudo()
-        try:
-            m_metal = float(icp.get_param('xb_joyeria.margen_metal', '1.35'))
-            m_lista = float(icp.get_param('xb_joyeria.margen_lista', '2.28'))
-        except ValueError:
-            return costo
-        if not m_lista:
-            return costo
-        return costo - metal_costo + metal_costo * (m_metal / m_lista)
+        return costo - fino * self._xb_cotizacion(metal)
+
+    def _xb_metal_venta(self, ptavs, pricelist, date=False, currency=None):
+        """Lo que se cobra por el metal: gramos de la aleación × su precio en esa lista."""
+        aleacion, gramos = self._xb_metal_aleacion(ptavs)
+        if not aleacion or not pricelist:
+            return 0.0
+        # sudo: el visitante de la tienda no puede leer el COSTO del metal suelto (campo solo para
+        # empleados) y la regla del metal es «costo + 8 %». Se cotiza con la compañía de la lista.
+        cia = pricelist.company_id or self.company_id or self.env.company
+        pl = pricelist.sudo().with_company(cia)
+        precio_g = pl._get_product_price(aleacion.sudo().with_company(cia), gramos, currency=currency, date=date)
+        return precio_g * gramos
 
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
@@ -188,3 +204,27 @@ class ProductProduct(models.Model):
             return pricelist._get_product_price(prod, 1.0)
         costo = tmpl._xb_costo_combinacion(ptavs)
         return costo or False
+
+
+class ProductPricelistItem(models.Model):
+    _inherit = 'product.pricelist.item'
+
+    def _compute_price(self, product, quantity, uom, date, currency=None, **kwargs):
+        """Joya cotizada por metal con regla «sobre costo»: al resultado (hechura + piedras con margen)
+        se le suma el metal a su precio de venta en la misma lista."""
+        price = super()._compute_price(product, quantity, uom, date, currency=currency, **kwargs)
+        if not self or self.compute_price != 'formula' or self.base != 'standard_price':
+            return price
+        tmpl = product.product_tmpl_id if product._name == 'product.product' else product
+        if not tmpl.xb_precio_por_metal:
+            return price
+        ptavs = tmpl._xb_ptavs_del_contexto()
+        if not ptavs and product._name == 'product.product':
+            ptavs = product.product_template_attribute_value_ids
+        if not ptavs:
+            return price
+        moneda = currency or self.currency_id or self.env.company.currency_id
+        metal = tmpl._xb_metal_venta(ptavs, self.pricelist_id, date=date, currency=moneda)
+        if metal and product.uom_id != uom:
+            metal = product.uom_id._compute_price(metal, uom)
+        return price + metal

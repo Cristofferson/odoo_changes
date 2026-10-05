@@ -2,7 +2,7 @@
 import logging
 import re
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -180,10 +180,17 @@ class ProductTemplate(models.Model):
         precio_g = pl._get_product_price(aleacion.sudo().with_company(cia), gramos, currency=currency, date=date)
         return precio_g * gramos
 
+    xb_por_gramo = fields.Boolean(
+        'Se vende por gramo',
+        help='Pieza a la medida: la cantidad son gramos y la opción Metal elige la aleación. Precio por gramo = '
+             'el metal a su precio de venta (regla del metal suelto) + la mano de obra por gramo (costo de la '
+             'variante) con el margen de la lista. Su receta descuenta la aleación al fabricar.')
+
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
-        if res and 'xb_precio_por_metal' not in res:   # lista vacía = «todos los campos»: no tocar
-            res.append('xb_precio_por_metal')
+        for f in ('xb_precio_por_metal', 'xb_por_gramo'):
+            if res and f not in res:   # lista vacía = «todos los campos»: no tocar
+                res.append(f)
         return res
 
 
@@ -194,6 +201,9 @@ class ProductProduct(models.Model):
         """Precio SIN impuestos de esta joya con la combinación elegida en la caja."""
         self.ensure_one()
         tmpl = self.product_tmpl_id
+        if tmpl.xb_por_gramo:
+            pricelist = self.env['product.pricelist'].browse(pricelist_id).exists() if pricelist_id else False
+            return pricelist._get_product_price(self, 1.0) if pricelist else False
         if not tmpl.xb_precio_por_metal:
             return False
         ptavs = (self.product_template_attribute_value_ids
@@ -216,6 +226,17 @@ class ProductPricelistItem(models.Model):
         if not self or self.compute_price != 'formula' or self.base != 'standard_price':
             return price
         tmpl = product.product_tmpl_id if product._name == 'product.product' else product
+        if tmpl.xb_por_gramo and product._name == 'product.product':
+            # pieza a la medida: precio por gramo = mano de obra (costo de la variante) × margen + 1 g de la
+            # aleación a su precio de venta
+            metal = product.product_template_attribute_value_ids.filtered(lambda v: v.attribute_id.name == 'Metal')[:1]
+            aleacion = metal.product_attribute_value_id.xb_aleacion_id
+            if aleacion:
+                cia = self.pricelist_id.company_id or tmpl.company_id or self.env.company
+                moneda = currency or self.currency_id or self.env.company.currency_id
+                pl = self.pricelist_id.sudo().with_company(cia)
+                price += pl._get_product_price(aleacion.sudo().with_company(cia), 1.0, currency=moneda, date=date)
+            return price
         if not tmpl.xb_precio_por_metal:
             return price
         ptavs = tmpl._xb_ptavs_del_contexto()

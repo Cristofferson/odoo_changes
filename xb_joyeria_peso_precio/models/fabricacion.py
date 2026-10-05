@@ -32,7 +32,8 @@ class PosOrder(models.Model):
         self.ensure_one()
         # Las líneas que liquidan un pedido (sale_order_origin_id) NO: ese anillo ya se mandó a fabricar
         # al confirmar el pedido y aquí solo se entrega.
-        return self.lines.filtered(lambda l: l.qty > 0 and l.product_id.product_tmpl_id.xb_precio_por_metal
+        return self.lines.filtered(lambda l: l.qty > 0 and (l.product_id.product_tmpl_id.xb_precio_por_metal
+                                                            or l.product_id.product_tmpl_id.xb_por_gramo)
                                    and not l.sale_order_origin_id
                                    and l.product_id.with_company(l.company_id).free_qty < l.qty)
 
@@ -76,7 +77,7 @@ class SaleOrder(models.Model):
             ya = Production.search([('origin', '=', order.name)])
             for line in order.order_line:
                 prod = line.product_id
-                if not prod.product_tmpl_id.xb_precio_por_metal or line.product_uom_qty <= 0:
+                if not (prod.product_tmpl_id.xb_precio_por_metal or prod.product_tmpl_id.xb_por_gramo) or line.product_uom_qty <= 0:
                     continue
                 if ya.filtered(lambda m: m.product_id == prod):
                     continue

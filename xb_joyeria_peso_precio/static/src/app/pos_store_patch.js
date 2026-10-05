@@ -12,7 +12,7 @@ patch(PosStore.prototype, {
         try {
             const line = order.getSelectedOrderline();
             const tmpl = line?.product_id?.product_tmpl_id;
-            if (line && tmpl?.xb_precio_por_metal && line.price_type !== "manual") {
+            if (line && (tmpl?.xb_precio_por_metal || tmpl?.xb_por_gramo) && line.price_type !== "manual") {
                 const ids = [
                     ...(line.product_id.product_template_attribute_value_ids || []).map((v) => v.id),
                     ...(line.attribute_value_ids || []).map((v) => v.id),

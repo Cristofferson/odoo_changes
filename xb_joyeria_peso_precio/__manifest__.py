@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Joyería por peso — precio en la tienda y en la caja",
-    "version": "19.0.1.7.1",
+    "version": "19.0.1.8.0",
     "summary": "Las joyas cotizadas por metal (xb_precio_por_metal) muestran «Desde» en la tienda "
                "y la caja cobra el mismo precio que la web, calculado en el servidor",
     "description": """
@@ -28,7 +28,7 @@ calcular en el servidor, así que:
     "website": "https://www.xubax.com",
     "license": "OPL-1",
     "depends": ["xb_joyeria_peso", "website_sale", "point_of_sale", "stij_website", "mrp"],
-    "data": ["views/templates.xml", "views/product_attribute_views.xml"],
+    "data": ["views/templates.xml", "views/product_attribute_views.xml", "views/product_views.xml"],
     "assets": {
         "point_of_sale._assets_pos": ["xb_joyeria_peso_precio/static/src/app/pos_store_patch.js"],
         "web.assets_frontend": ["xb_joyeria_peso_precio/static/src/interactions/ficha_peso.js"],

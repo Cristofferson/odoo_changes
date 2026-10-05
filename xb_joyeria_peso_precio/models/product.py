@@ -136,9 +136,11 @@ class ProductTemplate(models.Model):
                 continue
             tipo, qt, pureza, color, corte = m.groups()
             q = int(qty)
-            renglones.append('%d diamantes de acento %s de %s qt (%.2f qt en total) · corte %s · pureza %s · '
+            mf = re.search(r'\b(Baguette|Princesa|Marquesa)\s*$', prod.name or '', re.I)
+            forma = (' ' + mf.group(1).lower()) if mf else ' redondos'
+            renglones.append('%d diamantes de acento%s %s de %s qt (%.2f qt en total) · corte %s · pureza %s · '
                              'color %s · certificado ICERT de la pieza' % (
-                                 q, 'de laboratorio' if tipo.upper() == 'LAB' else 'naturales', qt,
+                                 q, forma, 'de laboratorio' if tipo.upper() == 'LAB' else 'naturales', qt,
                                  q * float(qt), self._XB_CORTE.get(corte.upper(), corte), pureza, color))
         return texto, renglones
 

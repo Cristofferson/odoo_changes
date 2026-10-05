@@ -186,9 +186,36 @@ class ProductTemplate(models.Model):
              'el metal a su precio de venta (regla del metal suelto) + la mano de obra por gramo (costo de la '
              'variante) con el margen de la lista. Su receta descuenta la aleación al fabricar.')
 
+    xb_precios_gramo = fields.Json(
+        'Precios por gramo para la caja', compute='_compute_xb_precios_gramo',
+        help='Solo para la caja: {lista de precios: {variante: precio sin IVA}}. Se llena al cargar la caja.')
+
+    def _compute_xb_precios_gramo(self):
+        for tmpl in self:
+            tmpl.xb_precios_gramo = False
+
+    @api.model
+    def _load_pos_data_read(self, records, config):
+        res = super()._load_pos_data_read(records, config)
+        por_gramo = [r for r in res if r.get('xb_por_gramo')]
+        if por_gramo and config:
+            listas = (config.pricelist_id | config.available_pricelist_ids).sudo()
+            cia = config.company_id
+            for r in por_gramo:
+                variantes = self.env['product.template'].sudo().with_company(cia).browse(r['id']).product_variant_ids
+                mapa = {}
+                for pl in listas:
+                    pl = pl.with_company(cia)
+                    precios = {str(v.id): pl._get_product_price(v, 1.0) for v in variantes}
+                    if precios:
+                        precios['min'] = min(precios.values())
+                    mapa[str(pl.id)] = precios
+                r['xb_precios_gramo'] = mapa
+        return res
+
     def _load_pos_data_fields(self, config):
         res = super()._load_pos_data_fields(config)
-        for f in ('xb_precio_por_metal', 'xb_por_gramo'):
+        for f in ('xb_precio_por_metal', 'xb_por_gramo', 'xb_precios_gramo'):
             if res and f not in res:   # lista vacía = «todos los campos»: no tocar
                 res.append(f)
         return res

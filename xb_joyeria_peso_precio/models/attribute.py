@@ -45,6 +45,14 @@ class ProductAttributeValue(models.Model):
 class ProductTemplateAttributeValue(models.Model):
     _inherit = 'product.template.attribute.value'
 
+    xb_secuencia = fields.Integer(related='product_attribute_value_id.sequence', string='Orden del valor')
+
+    def _load_pos_data_fields(self, config):
+        res = super()._load_pos_data_fields(config)
+        if res and 'xb_secuencia' not in res:
+            res.append('xb_secuencia')
+        return res
+
     def _only_active(self):
         res = super()._only_active()
         # Solo en la tienda en línea (petición de frontend): la caja y el backend no pasan por aquí.

@@ -94,7 +94,8 @@ class ProductTemplate(models.Model):
             [('product_tmpl_id', '=', self.id), ('product_id', '=', False)], order='sequence, id', limit=1) \
             if 'mrp.bom' in self.env else None
         for linea in (bom.bom_line_ids if bom else []):
-            if self._xb_linea_aplica(linea.bom_product_template_attribute_value_ids, ptavs):
+            if (self._xb_linea_aplica(linea.bom_product_template_attribute_value_ids, ptavs)
+                    and not (linea.product_id.name or '').startswith('Zirconia central')):
                 acentos[linea.product_id] = acentos.get(linea.product_id, 0) + linea.product_qty
         # El diamante central elegido por tamaño («Diamante de laboratorio 1.00 ct») es una línea más de
         # la lista de materiales: se separa de los acentos.

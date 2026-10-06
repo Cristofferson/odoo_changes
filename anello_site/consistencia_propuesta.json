@@ -1,0 +1,9 @@
+{
+"373372": {"nombre":"Como","lineas":[[52,"0.01",""]],"grupo":"pave"},
+"373248": {"nombre":"Siena","lineas":[[16,"0.08","Baguette"],[64,"0.01",""]],"grupo":"pave"},
+"373249": {"nombre":"Capri","lineas":[[14,"0.08","Baguette"],[40,"0.01",""]],"grupo":"pave"},
+"373268": {"nombre":"Amalfi","lineas":[[80,"0.01",""]],"grupo":"pave"},
+"373240": {"nombre":"Perugia","lineas":[[20,"0.02",""]],"grupo":"pave"},
+"373234": {"nombre":"Portofino","lineas":[[8,"0.04","Princesa"],[16,"0.01",""]],"grupo":"princesa"},
+"373339": {"nombre":"Rímini","lineas":[[2,"0.06",""]],"grupo":"trilogia"}
+}

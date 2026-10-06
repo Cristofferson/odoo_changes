@@ -88,7 +88,10 @@ class ProductTemplate(models.Model):
         líneas que aplican a esa piedra). Los diamantes de acento se describen por su producto
         («Diamante LAB 0.02Qts SI1 G VG» → 0.02 qt, pureza SI1, color G, corte Muy bueno)."""
         self.ensure_one()
-        central = ptavs.filtered(lambda v: v.attribute_id.name == 'Piedra')[:1]
+        # Argollas sin piedra central (p. ej. brillantes incrustados): la opción «Piedra» solo elige el
+        # material de las piedras de la banda, no hay central que describir.
+        central = ptavs.filtered(lambda v: v.attribute_id.name == 'Piedra')[:1] if not self.xb_sin_central \
+            else self.env['product.template.attribute.value']
         acentos = {}
         bom = self.env['mrp.bom'].sudo().search(
             [('product_tmpl_id', '=', self.id), ('product_id', '=', False)], order='sequence, id', limit=1) \
@@ -117,8 +120,13 @@ class ProductTemplate(models.Model):
             texto = '1 central + %d de acento (%s)' % (n, tipo)
         elif central:
             texto = '1 piedra central'
+        elif n:
+            tipo = 'zirconias' if 'irconia' in nombres else (
+                'diamantes de laboratorio' if 'LAB' in nombres else 'diamantes naturales')
+            texto = ('%d %s %s' % (n, tipo, 'incrustadas' if tipo == 'zirconias' else 'incrustados')
+                     if self.xb_sin_central else '%d piedras' % n)
         else:
-            texto = '%d piedras' % n if n else ''
+            texto = ''
         renglones = []
         cn = (central.name or '').lower()
         mcen = centro and re.search(r'Diamante\s+(LAB|NAT)\s+([\d.]+)\s*Qts?\s+(\S+)\s+(\S+)\s+(\S+)', centro.name or '', re.I)
@@ -182,6 +190,11 @@ class ProductTemplate(models.Model):
         pl = pricelist.sudo().with_company(cia)
         precio_g = pl._get_product_price(aleacion.sudo().with_company(cia), gramos, currency=currency, date=date)
         return precio_g * gramos
+
+    xb_sin_central = fields.Boolean(
+        'Sin piedra central',
+        help='Argolla o anillo sin piedra central: la opción «Piedra» elige el material de las piedras '
+             'de la banda y la ficha web no habla de una central.')
 
     xb_por_gramo = fields.Boolean(
         'Se vende por gramo',

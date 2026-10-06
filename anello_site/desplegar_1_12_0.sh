@@ -1,5 +1,5 @@
 #!/bin/bash
-# xb_joyeria_peso_precio 1.12.0: la ficha no cuenta la zirconia central como acento
+# xb_joyeria_peso_precio 1.12.0: la ficha no cuenta la zirconia central como acento + casilla «Sin piedra central» (Ravello)
 set -e
 sudo rm -rf /tmp/dev-addons
 B=/opt/odoo/predeploy_backups/xb_joyeria_peso_precio-$(date +%Y%m%d-%H%M%S)

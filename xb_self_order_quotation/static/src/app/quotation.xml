@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- What the receipt printer prints: the quotation ticket image. -->
+    <t t-name="xb_self_order_quotation.Ticket">
+        <div class="pos-receipt xb_quote_ticket">
+            <img t-att-src="props.src" style="width: 100%; display: block;"/>
+        </div>
+    </t>
+
+    <t t-name="xb_self_order_quotation.CartButtons" t-inherit="pos_self_order.CartPage" t-inherit-mode="extension">
+        <xpath expr="//OrderWidget" position="before">
+            <div t-if="xbQuotation and selfOrder.currentOrder.lines.length" class="xb_quote_bar container o_self_container py-3">
+                <p class="xb_quote_hint mb-2">Get your quotation</p>
+                <div class="d-flex gap-2">
+                    <button t-if="xbQuotation.print" class="btn btn-lg btn-outline-primary flex-fill" t-on-click="() => this.xbQuote('print')">
+                        <i class="fa fa-print me-2" aria-hidden="true"/>Print it
+                    </button>
+                    <button t-if="xbQuotation.whatsapp" class="btn btn-lg btn-outline-primary flex-fill" t-on-click="() => this.xbQuote('whatsapp')">
+                        <i class="fa fa-whatsapp me-2" aria-hidden="true"/>Send it to my WhatsApp
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+    <t t-name="xb_self_order_quotation.Dialog">
+        <div class="xb_quote_backdrop bg-dark bg-opacity-25" t-on-click="() => !state.sending and props.close()"/>
+        <div class="xb_quote_dialog position-absolute fixed-bottom d-flex flex-column w-100 p-4 bg-white shadow-lg">
+            <t t-if="!state.done">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">Your quotation</h2>
+                    <button class="btn-close" aria-label="Close" t-on-click="props.close" t-att-disabled="state.sending"/>
+                </div>
+                <p class="text-muted">Leave us your name and mobile: your quotation is kept so that we can help you at the counter.</p>
+                <div class="d-flex flex-column gap-3">
+                    <input id="xb_quote_name" class="form-control form-control-lg" type="text" autocomplete="name" placeholder="Your name" t-model="state.name"/>
+                    <input id="xb_quote_phone" class="form-control form-control-lg" type="tel" inputmode="numeric" maxlength="14" autocomplete="tel" placeholder="Mobile (10 digits)" t-model="state.phone"/>
+                    <div class="d-flex flex-column gap-2">
+                        <label t-if="modos.print" class="xb_quote_check"><input type="checkbox" t-model="state.print"/> <span>Print it here</span></label>
+                        <label t-if="modos.whatsapp" class="xb_quote_check"><input type="checkbox" t-model="state.whatsapp"/> <span>Send it to my WhatsApp</span></label>
+                    </div>
+                    <label class="xb_quote_check xb_quote_privacy">
+                        <input type="checkbox" t-model="state.privacy"/>
+                        <span>I accept the <a href="/aviso-de-privacidad" target="_blank">privacy notice</a>.</span>
+                    </label>
+                    <div t-if="state.error" class="alert alert-warning mb-0" t-esc="state.error"/>
+                    <button class="btn btn-lg btn-primary" t-on-click="send" t-att-disabled="!canSend">
+                        <t t-if="state.sending">Preparing your quotation…</t>
+                        <t t-else="">Get my quotation</t>
+                    </button>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="text-center d-flex flex-column gap-3 py-3">
+                    <h2 class="mb-0">Done, <t t-esc="state.done.customer"/>!</h2>
+                    <p class="mb-0">Your quotation <b t-esc="state.done.name"/> is saved.</p>
+                    <p t-if="state.done.printed" class="mb-0">Pick it up at the counter printer.</p>
+                    <p t-if="state.done.printFailed" class="mb-0 text-warning">It could not be printed: ask for it at the counter with its number.</p>
+                    <p t-if="state.done.whatsapp" class="mb-0">We sent it to your WhatsApp.</p>
+                    <p t-if="state.done.whatsappFailed" class="mb-0 text-warning">It could not be sent by WhatsApp: ask for it at the counter with its number.</p>
+                    <button class="btn btn-lg btn-primary" t-on-click="finish">Done</button>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

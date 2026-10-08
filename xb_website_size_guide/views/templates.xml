@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product page: a link to the size guide next to the size option. -->
+    <template id="variants_size_guide" inherit_id="website_sale.variants" name="Size guide link">
+        <xpath expr="//h6[hasclass('attribute_name')]/span" position="after">
+            <a t-if="website.xb_size_guide_url and website._xb_is_size_attribute(ptal.attribute_id)"
+               t-att-href="website.xb_size_guide_url" target="_blank" class="xb_size_guide_link"><span class="xb_size_guide_icon" aria-hidden="true" t-translation="off">?</span><t t-translation="off" t-if="(request.env.lang or '').startswith('es')">Guía de medidas</t><t t-translation="off" t-else="">Size guide</t></a>
+        </xpath>
+    </template>
+</odoo>

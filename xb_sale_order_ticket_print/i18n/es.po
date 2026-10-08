@@ -1,0 +1,18 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xb_sale_order_ticket_print
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_sale_order_ticket_print 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xb_sale_order_ticket_print
+#: model:ir.actions.report,name:xb_sale_order_ticket_print.action_report_sale_order_ticket
+msgid "Ticket"
+msgstr "Ticket"

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- «Desde» before the price of jewels priced by their metal, as on anello.mx. -->
+    <t t-inherit="pos_self_order.ProductListPage" t-inherit-mode="extension">
+        <xpath expr="//span[hasclass('o-so-tabular-nums')]" position="before">
+            <span t-if="product._xb_desde" class="xb_an_desde" t-translation="off">Desde</span>
+        </xpath>
+    </t>
+
+    <!-- Product page: editorial mosaic, the video on top (or the main photo) and the photos
+         two by two; an odd last photo takes the whole row. -->
+    <t t-inherit="pos_self_order.ProductPage" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_self_product_image')]" position="replace">
+            <t t-set="xbMedia" t-value="product._xb_media or {}"/>
+            <t t-set="xbFotoPrincipal" t-value="'/web/image/product.template/' + product.id + '/image_1024?unique=' + product.write_date"/>
+            <t t-set="xbHayVideo" t-value="(xbMedia.video or []).length > 0"/>
+            <t t-set="xbFotos" t-value="xbHayVideo ? [xbFotoPrincipal].concat(xbMedia.fotos or []) : (xbMedia.fotos or [])"/>
+            <div class="xb_an_mosaic w-100">
+                <div class="xb_an_mosaic_big">
+                    <video t-if="xbHayVideo" class="xb_an_video" autoplay="" muted="" loop="" playsinline="" t-att-poster="xbFotoPrincipal">
+                        <t t-foreach="xbMedia.video" t-as="fuente" t-key="fuente.url">
+                            <source t-att-src="fuente.url" t-att-type="fuente.type"/>
+                        </t>
+                    </video>
+                    <img t-else="" t-att-src="xbFotoPrincipal" loading="lazy" t-att-alt="product.name"/>
+                </div>
+                <t t-foreach="xbFotos" t-as="foto" t-key="foto_index">
+                    <div class="xb_an_mosaic_cell" t-att-class="{'xb_an_mosaic_wide': foto_last and xbFotos.length % 2 === 1}">
+                        <img t-att-src="foto" loading="lazy" t-att-alt="product.name"/>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>

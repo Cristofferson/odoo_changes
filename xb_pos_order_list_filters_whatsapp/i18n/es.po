@@ -1,0 +1,35 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xb_pos_order_list_filters_whatsapp
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_pos_order_list_filters_whatsapp 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xb_pos_order_list_filters_whatsapp
+#: model_terms:ir.ui.view,arch_db:xb_pos_order_list_filters_whatsapp.view_sale_order_pos_list_xb_whatsapp
+msgid "Already told it is ready. Click to send another notice."
+msgstr "Ya se le avisó que está listo. Haz clic para mandarle otro aviso."
+
+#. module: xb_pos_order_list_filters_whatsapp
+#: model_terms:ir.ui.view,arch_db:xb_pos_order_list_filters_whatsapp.view_sale_order_pos_list_xb_whatsapp
+msgid "Notified"
+msgstr "Avisado"
+
+#. module: xb_pos_order_list_filters_whatsapp
+#: model_terms:ir.ui.view,arch_db:xb_pos_order_list_filters_whatsapp.view_sale_order_pos_list_xb_whatsapp
+msgid "Notify"
+msgstr "Avisar"
+
+#. module: xb_pos_order_list_filters_whatsapp
+#: model_terms:ir.ui.view,arch_db:xb_pos_order_list_filters_whatsapp.view_sale_order_pos_list_xb_whatsapp
+msgid ""
+"Send the customer a WhatsApp notice about this order: ready, balance due, "
+"late..."
+msgstr "Mandarle al cliente un aviso por WhatsApp sobre este pedido: listo, saldo, atraso..."

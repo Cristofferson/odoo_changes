@@ -172,7 +172,12 @@
     function buildSelect(li, inputs, title) {
         var val = el("b", "xbv-value");
         var box = el("div", "xbv-body");
-        li.appendChild(header(title, val));
+        var head = header(title, val);
+        // Liga a la guía de medidas (módulo xb_website_size_guide): viene dentro del
+        // encabezado nativo, que aquí se oculta; se pasa al encabezado propio.
+        var guia = li.querySelector(".attribute_name .xb_size_guide_link");
+        if (guia) head.appendChild(guia);
+        li.appendChild(head);
         var wrap = el("div", "xbv-select");
         var sel = el("select");
         sel.setAttribute("aria-label", title);

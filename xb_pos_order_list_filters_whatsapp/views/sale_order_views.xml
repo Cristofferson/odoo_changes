@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The POS list is its own view (not sale.sale_order_tree), so the WhatsApp button
+         added to the Sales list does not reach it: same buttons, same place. -->
+    <record id="view_sale_order_pos_list_xb_whatsapp" model="ir.ui.view">
+        <field name="name">sale.order.list.xb.pos.whatsapp</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="xb_pos_order_list_filters.view_sale_order_pos_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="xb_can_notify_wa" column_invisible="1"/>
+                <field name="xb_ready_notified_date" column_invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <button name="action_xb_notify_whatsapp" type="object" icon="fa-whatsapp"
+                        string="Notify"
+                        title="Send the customer a WhatsApp notice about this order: ready, balance due, late..."
+                        class="text-success"
+                        invisible="not xb_can_notify_wa or xb_ready_notified_date"/>
+                <button name="action_xb_notify_whatsapp" type="object" icon="fa-check"
+                        string="Notified"
+                        title="Already told it is ready. Click to send another notice."
+                        class="text-muted"
+                        invisible="not xb_can_notify_wa or not xb_ready_notified_date"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

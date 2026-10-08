@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The kiosk page declares itself as an installable app (manifest, icons, colors). -->
+    <template id="pos_self_order_index_anello" inherit_id="pos_self_order.index" name="Self-Order Kiosk: Anello app">
+        <xpath expr="//title" position="replace">
+            <title>Anello</title>
+            <link rel="manifest" t-attf-href="/xb-kiosk/{{ session_info['data']['config_id'] }}/manifest.webmanifest?access_token={{ access_token }}"/>
+            <link rel="apple-touch-icon" href="/xb_self_order_theme_anello/static/img/icon-192.png"/>
+            <link rel="icon" type="image/png" href="/xb_self_order_theme_anello/static/img/icon-192.png"/>
+            <meta name="theme-color" content="#ffffff"/>
+            <meta name="mobile-web-app-capable" content="yes"/>
+            <meta name="apple-mobile-web-app-capable" content="yes"/>
+        </xpath>
+    </template>
+</odoo>

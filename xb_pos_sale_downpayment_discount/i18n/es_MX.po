@@ -1,0 +1,35 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xb_pos_sale_downpayment_discount
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_pos_sale_downpayment_discount 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xb_pos_sale_downpayment_discount
+#: model:ir.model.fields,field_description:xb_pos_sale_downpayment_discount.field_sale_order_line__xb_pos_discount_line_id
+msgid "Discount from POS line"
+msgstr "Descuento de la línea del TPV"
+
+#. module: xb_pos_sale_downpayment_discount
+#: code:addons/xb_pos_sale_downpayment_discount/models/pos_order.py:0
+#. odoo-python
+msgid "POS discount (ticket %(ticket)s)"
+msgstr "Descuento en caja (ticket %(ticket)s)"
+
+#. module: xb_pos_sale_downpayment_discount
+#: code:addons/xb_pos_sale_downpayment_discount/models/pos_order.py:0
+#. odoo-python
+msgid "The cashier gave a %(percent)s%% discount (%(amount)s) on the down payment of ticket %(ticket)s: added to the order so its balance matches what the customer paid."
+msgstr "En caja se dio un descuento de %(percent)s%% (%(amount)s) en el anticipo del ticket %(ticket)s: se agregó al pedido para que su saldo cuadre con lo que pagó el cliente."
+
+#. module: xb_pos_sale_downpayment_discount
+#: model:ir.model.fields,help:xb_pos_sale_downpayment_discount.field_sale_order_line__xb_pos_discount_line_id
+msgid "The discounted down payment line of the POS ticket this discount comes from."
+msgstr "La línea de anticipo con descuento del ticket del TPV de la que viene este descuento."

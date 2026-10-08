@@ -1,0 +1,28 @@
+# Translation of Odoo Server.
+#	* xb_website_size_guide
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xb_website_size_guide 19.0\n"
+"Report-Msgid-Bugs-To: soporte@xubax.com\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xb_website_size_guide
+#: model:ir.model.fields,field_description:xb_website_size_guide.field_website__xb_size_guide_url
+#: model:ir.model.fields,field_description:xb_website_size_guide.field_res_config_settings__xb_size_guide_url
+msgid "Size guide"
+msgstr "Guía de medidas"
+
+#. module: xb_website_size_guide
+#: model_terms:ir.ui.view,arch_db:xb_website_size_guide.res_config_settings_view_form_size_guide
+msgid "Link shown next to the size option on the product page."
+msgstr "Liga que aparece junto a la medida en la ficha del producto."
+
+#. module: xb_website_size_guide
+#: model:ir.model.fields,help:xb_website_size_guide.field_website__xb_size_guide_url
+msgid "Page of this website that explains how to find the ring size. When set, the product page shows a link to it next to the size option."
+msgstr "Página de este sitio que explica cómo saber la medida del anillo. Si se llena, la ficha del producto muestra una liga junto a la medida."

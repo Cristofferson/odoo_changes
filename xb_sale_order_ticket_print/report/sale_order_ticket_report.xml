@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Print > Ticket. The PDF is not drawn from this template: _render_qweb_pdf
+         returns the WhatsApp ticket image instead (see ir_actions_report.py). -->
+    <template id="report_sale_order_ticket">
+        <t t-call="web.html_container"/>
+    </template>
+
+    <record id="action_report_sale_order_ticket" model="ir.actions.report">
+        <field name="name">Ticket</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_sale_order_ticket_print.report_sale_order_ticket</field>
+        <field name="report_file">xb_sale_order_ticket_print.report_sale_order_ticket</field>
+        <field name="print_report_name">'Ticket - %s' % object.name</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

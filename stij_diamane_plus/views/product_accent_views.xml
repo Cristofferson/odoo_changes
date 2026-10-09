@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Las piedras de acento, en la ficha de la joya. Un renglón por grupo:
+         un mismo anillo puede llevar 12 de 1.5 mm y 8 de 2 mm. -->
+    <record id="view_product_template_form_accent" model="ir.ui.view">
+        <field name="name">product.template.form.piedras.acento</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Piedras de acento" name="dmn_acento">
+                    <field name="dmn_accent_ids">
+                        <list editable="bottom">
+                            <field name="qty"/>
+                            <field name="size_mm"/>
+                            <field name="stone_type"/>
+                            <field name="carats_each"/>
+                            <field name="carats_total" readonly="1"/>
+                        </list>
+                    </field>
+                    <group>
+                        <field name="dmn_accent_qty" readonly="1"/>
+                        <field name="dmn_accent_carats" readonly="1"/>
+                        <field name="dmn_stones_summary" readonly="1"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

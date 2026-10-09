@@ -71,6 +71,56 @@
                         <input class="form-control form-control-lg" name="gema_codigo" id="dmn_q_gema" placeholder="Nº de la gema ya registrada"/>
                         <div class="form-text" id="dmn_q_gema_info">Si la joya lleva un diamante o gema ya dado de alta, teclea su número: el visor mostrará las dos fichas.</div>
                     </div>
+                    <!-- Las de acento no se rastrean una por una: una chispa de
+                         0.018 ct no lo amerita. Pero una misma joya puede llevar
+                         grupos de distinto tamaño, así que se capturan por grupo.
+                         Sin esto el certificado menciona una sola piedra. -->
+                    <div class="row">
+                        <div class="col-12"><label class="form-label fw-semibold">Piedras de acento</label></div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_qty_1" type="number" min="0" placeholder="Cantidad"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_mm_1" placeholder="Tamaño mm"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <select class="form-select" name="accent_type_1">
+                                <option value="zirconia">Zirconia</option>
+                                <option value="diamante_lab">Diamante lab</option>
+                                <option value="diamante_nat">Diamante natural</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_qty_2" type="number" min="0" placeholder="Cantidad"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_mm_2" placeholder="Tamaño mm"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <select class="form-select" name="accent_type_2">
+                                <option value="zirconia">Zirconia</option>
+                                <option value="diamante_lab">Diamante lab</option>
+                                <option value="diamante_nat">Diamante natural</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_qty_3" type="number" min="0" placeholder="Cantidad"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <input class="form-control" name="accent_mm_3" placeholder="Tamaño mm"/>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <select class="form-select" name="accent_type_3">
+                                <option value="zirconia">Zirconia</option>
+                                <option value="diamante_lab">Diamante lab</option>
+                                <option value="diamante_nat">Diamante natural</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                        </div>
+                        <div class="form-text">Un renglón por tamaño. Ej. 12 de 1.5 mm y 8 de 2 mm. Los quilates se estiman del diámetro.</div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Fotos de la pieza</label>
                         <!-- Sin `capture`: con ese atributo el teléfono abre la cámara

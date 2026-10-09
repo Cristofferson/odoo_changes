@@ -67,6 +67,22 @@ class StockLot(models.Model):
         "stock.lot", "dmn_gem_lot_id", string="Joyas que la llevan montada",
     )
 
+    # ----- Piedras de acento -------------------------------------------- #
+    # Viven en el PRODUCTO (product.template.dmn_accent_ids), no aquí: el
+    # marketplace crea producto sin lote y el PDF del certificado es un reporte
+    # sobre product.template. Aquí sólo se reexpone para el visor.
+    dmn_stones_summary = fields.Char(
+        string="Piedras que lleva", compute="_compute_dmn_stones_summary",
+    )
+
+    def _compute_dmn_stones_summary(self):
+        for lot in self:
+            lot.dmn_stones_summary = lot._dmn_stones_text()
+
+    def _dmn_stones_text(self):
+        self.ensure_one()
+        return self.product_id.product_tmpl_id._dmn_stones_text()
+
     def _dmn_is_gem(self):
         """Mismo criterio que el visor de STIJ: la categoría lleva 'Gema'."""
         self.ensure_one()
@@ -653,6 +669,9 @@ class StockLot(models.Model):
         - peso            -> texto libre (ej. "4.7 gr")
         - imagenes        -> lista de data-urls (varias)
         - gema_codigo     -> nº de una gema YA registrada, para ligarla (opcional)
+        - accent_qty_N    -> cuántas piedras del grupo N (1..3), opcional
+        - accent_mm_N     -> diámetro en mm de ese grupo
+        - accent_type_N   -> zirconia / diamante_lab / diamante_nat / otra
         """
         joya = (vals.get("joya") or "").strip()
         codigo = (vals.get("codigo") or vals.get("plastico") or "").strip()
@@ -665,6 +684,19 @@ class StockLot(models.Model):
         descripcion = (vals.get("descripcion") or "").strip()
         categ_id = vals.get("categ_id") or False
         gema_codigo = (vals.get("gema_codigo") or "").strip()
+        # Piedras de acento, por grupo: una misma joya puede llevar 12 de
+        # 1.5 mm y 8 de 2 mm. Sin esto el certificado menciona una sola piedra.
+        acentos = []
+        for i in (1, 2, 3):
+            n = str(vals.get("accent_qty_%d" % i) or "").strip()
+            if not n.isdigit() or int(n) <= 0:
+                continue
+            mm = str(vals.get("accent_mm_%d" % i) or "").replace(",", ".").strip()
+            acentos.append({
+                "qty": int(n),
+                "size_mm": float(mm) if mm.replace(".", "", 1).isdigit() else 0.0,
+                "stone_type": (vals.get("accent_type_%d" % i) or "zirconia").strip(),
+            })
         imagenes = vals.get("imagenes") or []
         if not imagenes and vals.get("foto"):  # compat: una sola foto
             imagenes = [vals.get("foto")]
@@ -781,6 +813,7 @@ class StockLot(models.Model):
         }
         if gem_lot:
             lot_vals["dmn_gem_lot_id"] = gem_lot.id
+
         for fname, fval in (
             ("x_studio_url_stij", codigo),
             ("x_studio_estatus", "Activo"),
@@ -792,6 +825,9 @@ class StockLot(models.Model):
         ):
             if fname in self._fields:
                 lot_vals[fname] = fval
+        if acentos:
+            product.product_tmpl_id.sudo().write({
+                "dmn_accent_ids": [(0, 0, a) for a in acentos]})
         lot = self.sudo().create(lot_vals)
 
         # Galería del visor: una stij.lot.image por imagen.

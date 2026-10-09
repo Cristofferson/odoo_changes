@@ -372,4 +372,64 @@
             ]]></script>
         </xpath>
     </template>
+
+    <!-- Datos de la joya en el visor: metal, ley, kinto y medida salen de la
+         VERSIÓN vendida (catálogo configurable) y el peso de la báscula («Peso
+         Exacto» de la serie). Ver stock.lot._dmn_jewel_spec. -->
+    <template id="dmn_visor_icert_jewel_spec" inherit_id="stij_website.page_visor_icert">
+        <xpath expr="//div[@t-if='jewel']" position="before">
+            <t t-set="dmn_spec" t-value="lot._dmn_jewel_spec() if lot else {}"/>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_metal_1']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('metal') or jewel.x_studio_metal_1"/>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_ley']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('ley') or jewel.x_studio_ley"/>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_kinto']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('kinto') or jewel.x_studio_kinto"/>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_medida_joya']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('medida') or jewel.x_studio_medida_joya"/>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_peso_joya']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('peso') or jewel.x_studio_peso_joya"/>
+        </xpath>
+    </template>
+
+    <template id="dmn_visor_stij_jewel_spec" inherit_id="stij_website.page_visor_stij">
+        <xpath expr="//li[@t-if='jewel.x_studio_id_joya']" position="before">
+            <t t-set="dmn_spec" t-value="lot._dmn_jewel_spec() if lot else {}"/>
+        </xpath>
+        <xpath expr="//li[@t-if='jewel.x_studio_metal_1']" position="attributes">
+            <attribute name="t-if">(dmn_spec or {}).get('metal') or jewel.x_studio_metal_1</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_metal_1']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('metal') or jewel.x_studio_metal_1"/>
+        </xpath>
+        <xpath expr="//li[@t-if='jewel.x_studio_ley']" position="attributes">
+            <attribute name="t-if">(dmn_spec or {}).get('ley') or jewel.x_studio_ley</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_ley']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('ley') or jewel.x_studio_ley"/>
+        </xpath>
+        <xpath expr="//li[@t-if='jewel.x_studio_kinto']" position="attributes">
+            <attribute name="t-if">(dmn_spec or {}).get('kinto') or jewel.x_studio_kinto</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_kinto']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('kinto') or jewel.x_studio_kinto"/>
+        </xpath>
+        <xpath expr="//li[@t-if='jewel.x_studio_medida_joya']" position="attributes">
+            <attribute name="t-if">(dmn_spec or {}).get('medida') or jewel.x_studio_medida_joya</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_medida_joya']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('medida') or jewel.x_studio_medida_joya"/>
+        </xpath>
+        <xpath expr="//li[@t-if='jewel.x_studio_peso_joya']" position="attributes">
+            <attribute name="t-if">(dmn_spec or {}).get('peso') or jewel.x_studio_peso_joya</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='jewel.x_studio_peso_joya']" position="replace">
+            <span class="ms-2" t-esc="(dmn_spec or {}).get('peso') or jewel.x_studio_peso_joya"/>
+        </xpath>
+    </template>
 </odoo>

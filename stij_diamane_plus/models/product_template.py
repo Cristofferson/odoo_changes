@@ -59,7 +59,13 @@ class ProductTemplate(models.Model):
         if lote:
             gema = lote.dmn_gem_lot_id
             tipo = (gema.product_id.categ_id.name or "gema").lower()
-            partes.append("1 %s central (%s)" % (tipo, gema.name))
+            ct = gema.product_id.x_studio_quilataje_c if (
+                "x_studio_quilataje_c" in gema.product_id._fields) else 0
+            if ct:
+                partes.append("1 %s central (%s) de %s ct" % (
+                    tipo, gema.name, ("%.3f" % ct).rstrip("0").rstrip(".")))
+            else:
+                partes.append("1 %s central (%s)" % (tipo, gema.name))
 
         # Qué piedra eligió esta combinación. Manda sobre el tipo guardado en
         # el grupo: el material es decisión del cliente, no del diseño.

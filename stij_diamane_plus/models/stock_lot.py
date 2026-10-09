@@ -149,6 +149,53 @@ class StockLot(models.Model):
         gem_lot = self.dmn_gem_lot_id
         return False, (gem_lot.product_id if gem_lot else False)
 
+    def _dmn_jewel_spec(self):
+        """Datos de la joya que pinta el visor, con su origen correcto.
+
+        Metal, ley, kinto y medida son del MODELO: en el catálogo configurable
+        de Anello no viven en la plantilla (que sirve a 10k, 14k, 18k y a todas
+        las tallas) sino en la versión que se vendió, en el valor del atributo.
+        El peso es de la PIEZA: se pesa cada una y va en «Peso Exacto» de la
+        serie. Lo que no se encuentre ahí cae a lo capturado en la plantilla,
+        así las piezas únicas de antes se ven igual que siempre.
+
+        Si el lote es la gema, los datos son los de la joya que la lleva.
+        """
+        self.ensure_one()
+        lot = self.dmn_jewel_lot_ids[:1] if self._dmn_is_gem() else self
+        if not lot:
+            return {}
+        product = lot.product_id
+        tmpl = product.product_tmpl_id
+
+        def de_plantilla(campo):
+            return (tmpl[campo] or "") if campo in tmpl._fields else ""
+
+        def valor(*atributos):
+            return product.product_template_attribute_value_ids.filtered(
+                lambda v: v.attribute_id.name in atributos
+            )[:1].product_attribute_value_id
+
+        def campo(registro, nombre):
+            return (registro[nombre] or "") if registro and nombre in registro._fields else ""
+
+        metal = valor("Metal")
+        medida = valor("Medida", "Talla")
+
+        nombre_metal = " ".join(
+            x for x in (campo(metal, "x_metal"), campo(metal, "x_color").lower()) if x
+        )
+        ley = campo(metal, "x_ley")
+        peso = lot.x_studio_peso_exacto if "x_studio_peso_exacto" in lot._fields else 0
+        return {
+            "metal": nombre_metal or de_plantilla("x_studio_metal_1") or metal.name or "",
+            "ley": ("%.3f" % ley) if ley else de_plantilla("x_studio_ley"),
+            "kinto": campo(metal, "x_kiltaje_oro") or de_plantilla("x_studio_kinto"),
+            "medida": medida.name or de_plantilla("x_studio_medida_joya"),
+            "peso": (("%.3f" % peso).rstrip("0").rstrip(".") + " g") if peso
+                    else de_plantilla("x_studio_peso_joya"),
+        }
+
     # ----- Fase 3: dedicatoria secreta (regalo) ------------------------ #
     dmn_dedication_text = fields.Text(
         string="Dedicatoria", copy=False,

@@ -293,6 +293,9 @@ class ProductPricelistItem(models.Model):
                 moneda = currency or self.currency_id or self.env.company.currency_id
                 pl = self.pricelist_id.sudo().with_company(cia)
                 price += pl._get_product_price(aleacion.sudo().with_company(cia), 1.0, currency=moneda, date=date)
+                # A centavos, como el precio de cualquier producto: la caja, el kiosco, la web y Ventas
+                # le suman el IVA al mismo número y el total cuadra al centavo en todos lados.
+                price = moneda.round(price)
             return price
         if not tmpl.xb_precio_por_metal:
             return price
@@ -305,4 +308,6 @@ class ProductPricelistItem(models.Model):
         metal = tmpl._xb_metal_venta(ptavs, self.pricelist_id, date=date, currency=moneda)
         if metal and product.uom_id != uom:
             metal = product.uom_id._compute_price(metal, uom)
-        return price + metal
+        # A centavos (ver arriba): sin esto la web y Ventas sumaban el IVA a 12,544.0345 ($14,551.08)
+        # y la caja y el kiosco a 12,544.03 ($14,551.07).
+        return moneda.round(price + metal)

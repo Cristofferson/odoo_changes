@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Arras 3888",
-    "version": "19.0.1.5.0",
+    "version": "19.0.1.5.1",
     "summary": "Arras personalizadas (juego de 13): peso por frente y tamaño, imitación sin metal fino "
                "y metales solo-arras visibles en la tienda",
     "description": """

@@ -5,11 +5,10 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <!-- Ya no es casilla: lo decide la categoría. La ficha lo avisa con una cinta y
-                 muestra la pestaña «Arras» con el frente y el metal de cada tamaño. -->
+            <!-- Ya no es casilla: lo decide la categoría. La ficha muestra la pestaña «Arras»
+                 con el frente y el metal de cada tamaño. -->
             <xpath expr="//sheet" position="inside">
                 <field name="xb_arras" invisible="1"/>
-                <widget name="web_ribbon" title="Arras 3888" bg_color="text-bg-warning" invisible="not xb_arras"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Arras" name="xb_arras" invisible="not xb_arras">

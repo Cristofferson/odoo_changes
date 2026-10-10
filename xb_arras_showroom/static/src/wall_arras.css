@@ -1,0 +1,37 @@
+/* Arras 3888 en el muro — mismas bandas que los anillos (band-gold / band-light / band-photo
+   de xb_showroom_wall); aquí sólo lo propio de las arras. Cada pantalla = 1920×1080, medidas en vh. */
+
+/* 1 · el juego en su estuche: la foto (3:2) cubre la pantalla y las 13 monedas van encima */
+.xbaw-scene {
+  position: absolute; left: 0; top: 50%; width: 100%; aspect-ratio: 3 / 2; transform: translateY(-50%);
+  background: center / 100% 100% no-repeat;
+}
+.xbaw-c13 { position: absolute; transform: translate(-50%, -50%); height: auto; background: transparent !important; }
+.xbaw-case .band-veil.top { height: 20vh; background: linear-gradient(to bottom, rgba(12,9,5,.55) 0%, rgba(12,9,5,0) 100%); }
+.xbaw-casetop { padding: 4.4vh 5vh 0; }
+.xbaw-logo { height: 7vh; width: auto; display: block; }
+
+/* 2 · el frente, grande, sobre fondo de estudio */
+.xbaw-hero { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-left: 28%; }
+.xbaw-big { height: 74vh; width: auto; max-width: 70%; object-fit: contain; background: transparent !important; }
+.xbaw-front .band-corner { max-width: 35%; }
+.xbaw-front .band-headline { font-size: 6.4vh; }
+.xbaw-front .band-headline .band-name { display: block; }
+.xbaw-front .band-strip.inline { flex-direction: column; align-items: flex-start; gap: 1.6vh; }
+.xbaw-mark { position: absolute; top: 5vh; left: 5.5vh; z-index: 3; }
+.xbaw-logo.dorado { height: 6.4vh; }
+
+/* 3 · la vuelta grabada, recostada sobre el satín */
+.xbaw-lying { position: absolute; left: 4%; top: 0; bottom: 0; width: 46%; display: flex; align-items: center; justify-content: center; perspective: 140vh; }
+.xbaw-vcoin { height: 66vh; width: auto; background: transparent !important; transform: rotateX(24deg) rotateZ(-9deg); transform-origin: 50% 60%; }
+.xbaw-scrim { background: linear-gradient(to left, rgba(20,16,10,.86) 0%, rgba(20,16,10,.62) 40%, rgba(20,16,10,.10) 66%, rgba(20,16,10,0) 80%); }
+.xbaw-back .band-over { width: 50%; gap: 2.6vh; }
+.xbaw-back .band-kicker { font-size: 1.9vh; }
+.xbaw-vals { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-size: 2.5vh; line-height: 1.55; color: #e9dcc3; max-width: 78vh; text-wrap: balance; }
+.xbaw-pricebox { display: flex; flex-direction: column; align-items: flex-end; gap: .8vh; margin-top: .6vh; }
+.xbaw-back .band-price { font-size: 5.4vh; }
+.xbaw-pnote { font-size: 1.9vh; letter-spacing: .08em; color: #d3c7b1; }
+.xbaw-alt { padding: 0; gap: 3.2vh; font-size: 1.7vh; letter-spacing: .16em; justify-content: flex-end; }
+.xbaw-alt .strip-item { flex-direction: column; align-items: flex-end; gap: .5vh; }
+.xbaw-alt b { font-size: 2.3vh; letter-spacing: .04em; }
+.xbaw-back .band-qr { width: 17vh; height: 17vh; }

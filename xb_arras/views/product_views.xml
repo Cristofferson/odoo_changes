@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_arras" model="ir.ui.view">
+        <field name="name">product.template.form.xb.arras</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Ya no es casilla: lo decide la categoría. La ficha lo avisa con una cinta y
+                 muestra la pestaña «Arras» con el frente y el metal de cada tamaño. -->
+            <xpath expr="//sheet" position="inside">
+                <field name="xb_arras" invisible="1"/>
+                <widget name="web_ribbon" title="Arras 3888" bg_color="text-bg-warning" invisible="not xb_arras"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Arras" name="xb_arras" invisible="not xb_arras">
+                    <group>
+                        <group string="Frente">
+                            <field name="xb_arras_frente" widget="image" options="{'size': [200, 200]}"/>
+                            <div colspan="2" class="text-muted">
+                                La moneda del frente con fondo transparente (PNG). La usan la ficha web,
+                                la página /arras y el muro.
+                            </div>
+                        </group>
+                        <group string="Metal por tamaño">
+                            <field name="xb_arras_tamano_ids" nolabel="1" colspan="2">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="name" string="Tamaño" readonly="1"/>
+                                    <field name="xb_factor_peso" string="× metal"/>
+                                    <field name="xb_arras_peso_juego" string="Juego 14K (g)"/>
+                                </list>
+                            </field>
+                            <div colspan="2" class="text-muted">
+                                El peso de 1.5 cm es el «Peso» de la ficha. Cambiar un factor cambia el precio
+                                de ese tamaño en la web, la caja y el muro.
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="ptav_form_arras" model="ir.ui.view">
+        <field name="name">product.template.attribute.value.form.xb.arras</field>
+        <field name="model">product.template.attribute.value</field>
+        <field name="inherit_id" ref="product.product_template_attribute_value_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_extra']" position="after">
+                <field name="xb_factor_peso" invisible="not product_tmpl_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="ptav_list_arras" model="ir.ui.view">
+        <field name="name">product.template.attribute.value.list.xb.arras</field>
+        <field name="model">product.template.attribute.value</field>
+        <field name="inherit_id" ref="product.product_template_attribute_value_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_extra']" position="after">
+                <field name="xb_factor_peso" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="product_category_form_arras" model="ir.ui.view">
+        <field name="name">product.category.form.xb.arras</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <field name="parent_id" position="after">
+                <field name="xb_arras_categoria" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+</odoo>

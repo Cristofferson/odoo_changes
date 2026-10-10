@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Ficha de Arras 3888: escenario (frente y vuelta) a la izquierda; pasos y resumen a la derecha.
+         Los controles nativos de website_sale siguen en el formulario (ocultos) y el script los mueve. -->
+    <template id="product_arras" inherit_id="website_sale.product" name="Arras 3888: configurador">
+        <xpath expr="//t[@t-call='website_sale.shop_product_images']" position="after">
+            <div t-if="product.xb_arras" class="xba-stage" aria-live="polite"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_wsale_product_details_content_section_cta')]" position="before">
+            <div t-if="product.xb_arras" class="xba-flow" t-att-data-xba="product._xb_arras_json()"/>
+        </xpath>
+    </template>
+</odoo>

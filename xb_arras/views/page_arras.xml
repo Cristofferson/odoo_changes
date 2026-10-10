@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="arras_page" name="Arras 3888 (página)">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'arras'"/>
+            <t t-set="additional_title">Arras 3888</t>
+            <t t-set="meta_description">Arras de boda personalizadas: 18 frentes, 8 vueltas, 3 tamaños y 9 metales. Juego de 13 arras listo en 3 semanas.</t>
+            <div id="wrap" class="xbap">
+                <section class="xbap-hero" style="background-image:url('/xb_arras/static/src/img/hero.webp')">
+                    <div>
+                        <img src="/xb_arras/static/src/img/logo-blanco.webp" alt="Arras 3888" class="xbap-hero-logo"/>
+                        <div class="xbap-eyebrow">18 frentes · 8 vueltas · 3 tamaños · 9 metales</div>
+                        <h1>Arras que llevan su nombre</h1>
+                        <div class="xbap-row">
+                            <a class="xbap-btn" href="#frentes">Elige tu frente</a>
+                            <a class="xbap-btn" href="#pasos">Cómo se hacen</a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="xbap-split" id="pasos">
+                    <div class="xbap-tx xbap-cream">
+                        <img src="/xb_arras/static/src/img/logo-tinta.webp" alt="Arras 3888" class="xbap-logo"/>
+                        <div class="xbap-orn">◇</div>
+                        <h2>Diseñen sus arras en cuatro pasos</h2>
+                        <ol class="xbap-steps">
+                            <li><b>1</b><span><strong>El frente.</strong> 18 diseños, religiosos y no religiosos.</span></li>
+                            <li><b>2</b><span><strong>La vuelta.</strong> Sus nombres, iniciales, fecha o los 13 valores.</span></li>
+                            <li><b>3</b><span><strong>El tamaño.</strong> 1.5, 2.0 o 2.5 cm.</span></li>
+                            <li><b>4</b><span><strong>El metal.</strong> De imitación a oro de 24 kilates.</span></li>
+                        </ol>
+                        <p>Aprueban el diseño y en 3 semanas están listas. Se entregan en juego de 13.</p>
+                        <div class="xbap-row xbap-center">
+                            <a class="xbap-btn xbap-gold" href="/contacto#cita">Agenda tu cita</a>
+                            <a class="xbap-btn xbap-dark" href="#frentes">Ver frentes</a>
+                        </div>
+                    </div>
+                    <div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/novios.webp')"/>
+                </section>
+
+                <section class="xbap-sec" id="frentes">
+                    <div class="xbap-head">
+                        <h2 class="xbap-serif">Arras</h2>
+                        <img src="/xb_arras/static/src/img/logo-dorado.webp" alt="Arras 3888"/>
+                    </div>
+                    <p class="xbap-lead">Elige el frente. La vuelta, el tamaño y el metal los escoges en la ficha. Precio por juego de 13.</p>
+                    <div class="xbap-pills" role="group" aria-label="Filtrar frentes">
+                        <button type="button" data-xbap-f="todos" aria-pressed="true">Todos</button>
+                        <button type="button" data-xbap-f="norel" aria-pressed="false">No religiosos</button>
+                        <button type="button" data-xbap-f="rel" aria-pressed="false">Religiosos</button>
+                    </div>
+                    <div class="xbap-cards">
+                        <t t-foreach="tarjetas" t-as="c">
+                            <a class="xbap-card" t-att-href="c['t'].website_url" t-att-data-rel="'1' if c['rel'] else '0'">
+                                <div class="xbap-im"><img t-attf-src="/web/image/product.template/{{c['t'].id}}/image_512" t-att-alt="c['corto']" loading="lazy"/></div>
+                                <h3><t t-out="c['corto']"/> · Arras 3888</h3>
+                                <div class="xbap-sw"><i class="plata"/><i class="oro"/></div>
+                                <small t-if="c['desde']">Desde <b t-out="c['desde']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/> el juego</small>
+                            </a>
+                        </t>
+                    </div>
+                </section>
+
+                <section class="xbap-split xbap-rev">
+                    <div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/vuelta.webp')"/>
+                    <div class="xbap-tx xbap-darkbg">
+                        <div class="xbap-eyebrow xbap-goldtxt">La vuelta</div>
+                        <h2>Su historia, grabada atrás</h2>
+                        <p>Ocho formas de escribir lo suyo: sus nombres, sus iniciales, la fecha de la boda o los 13 valores, uno en cada arra.</p>
+                        <div class="xbap-revs">
+                            <t t-foreach="vueltas" t-as="v"><div><img t-att-src="v[1]" alt="" loading="lazy"/><t t-out="v[0]"/></div></t>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="xbap-split">
+                    <div class="xbap-tx xbap-studio">
+                        <div class="xbap-eyebrow xbap-goldtxt">Tamaño y metal</div>
+                        <h2>Tres tamaños, nueve metales</h2>
+                        <div class="xbap-ruler">
+                            <div><i style="width:45px;height:45px"/><b>1.5 cm</b>Chica</div>
+                            <div><i style="width:60px;height:60px"/><b>2.0 cm</b>Mediana</div>
+                            <div><i style="width:75px;height:75px"/><b>2.5 cm</b>Grande</div>
+                        </div>
+                        <div class="xbap-mets"><t t-foreach="metales" t-as="m"><span t-out="m"/></t></div>
+                    </div>
+                    <div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/tamanos.webp')"/>
+                </section>
+
+                <section class="xbap-sec">
+                    <h2 class="xbap-up">Solo en Anello</h2>
+                    <div class="xbap-feat">
+                        <div><div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/vuelta.webp')"/><h3>Apruebas el diseño</h3><p>Antes de fabricar te enviamos cómo quedarán frente y vuelta, con su texto.</p></div>
+                        <div><div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/hero.webp')"/><h3>Listas en 3 semanas</h3><p>Se hacen sobre pedido en nuestro taller de Morelia: el juego completo de 13 arras.</p></div>
+                        <div><div class="xbap-ph" style="background-image:url('/xb_arras/static/src/img/novios.webp')"/><h3>Míralas en el Estudio</h3><p>Agenda una cita y míralas en el muro de nuestro Estudio, en tamaño real.</p></div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

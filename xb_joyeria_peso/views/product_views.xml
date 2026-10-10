@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- El interruptor, debajo del precio de venta. Va DESPUÉS del bloque del precio
+         (div list_price_uom): dentro de ese bloque Odoo no pone etiqueta a los campos y
+         los interruptores se veían sueltos, sin nombre. -->
+    <record id="view_product_template_form_peso" model="ir.ui.view">
+        <field name="name">product.template.form.peso.joyeria</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='list_price_uom']" position="after">
+                <field name="xb_precio_por_metal" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- El peso proyectado, en la ficha de la variante -->
+    <record id="view_product_variant_form_peso" model="ir.ui.view">
+        <field name="name">product.product.form.peso.joyeria</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <field name="lst_price" position="after">
+                <field name="xb_peso_proyectado" readonly="1"
+                       invisible="xb_peso_proyectado == 0"/>
+                <field name="xb_fino_proyectado" readonly="1"
+                       invisible="xb_fino_proyectado == 0"/>
+                <field name="xb_peso_detalle" readonly="1"
+                       invisible="not xb_peso_detalle"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Ley y densidad, en la lista de valores del atributo.
+         En Odoo 19 los valores de atributo no tienen formulario propio: se
+         editan en línea desde la ficha del atributo. -->
+    <record id="view_attribute_value_list_metal" model="ir.ui.view">
+        <field name="name">product.attribute.value.list.metal</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="x_ley" string="Ley" optional="show"/>
+                <field name="x_densidad" string="Densidad (g/cm³)" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

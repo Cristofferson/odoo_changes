@@ -88,9 +88,10 @@ class ProductTemplate(models.Model):
         líneas que aplican a esa piedra). Los diamantes de acento se describen por su producto
         («Diamante LAB 0.02Qts SI1 G VG» → 0.02 qt, pureza SI1, color G, corte Muy bueno)."""
         self.ensure_one()
-        # Argollas sin piedra central (p. ej. brillantes incrustados): la opción «Piedra» solo elige el
-        # material de las piedras de la banda, no hay central que describir.
-        central = ptavs.filtered(lambda v: v.attribute_id.name == 'Piedra')[:1] if not self.xb_sin_central \
+        # Las argollas y churumbelas (p. ej. brillantes incrustados) no tienen piedra central: la opción «Piedra» solo
+        # elige el material de las piedras de la banda.
+        sin_central = self._xb_sin_central()
+        central = ptavs.filtered(lambda v: v.attribute_id.name == 'Piedra')[:1] if not sin_central \
             else self.env['product.template.attribute.value']
         acentos = {}
         bom = self.env['mrp.bom'].sudo().search(
@@ -124,7 +125,7 @@ class ProductTemplate(models.Model):
             tipo = 'zirconias' if 'irconia' in nombres else (
                 'diamantes de laboratorio' if 'LAB' in nombres else 'diamantes naturales')
             texto = ('%d %s %s' % (n, tipo, 'incrustadas' if tipo == 'zirconias' else 'incrustados')
-                     if self.xb_sin_central else '%d piedras' % n)
+                     if sin_central else '%d piedras' % n)
         else:
             texto = ''
         renglones = []
@@ -191,10 +192,13 @@ class ProductTemplate(models.Model):
         precio_g = pl._get_product_price(aleacion.sudo().with_company(cia), gramos, currency=currency, date=date)
         return precio_g * gramos
 
-    xb_sin_central = fields.Boolean(
-        'Sin piedra central',
-        help='Argolla o anillo sin piedra central: la opción «Piedra» elige el material de las piedras '
-             'de la banda y la ficha web no habla de una central.')
+    _XB_SIN_CENTRAL = ('Anillo / Argolla', 'Anillo / Churumbela')
+
+    def _xb_sin_central(self):
+        """Las argollas y churumbelas (y sus subcategorías) no llevan piedra central."""
+        self.ensure_one()
+        nombre = self.categ_id.complete_name or ''
+        return any(nombre == c or nombre.startswith(c + ' /') for c in self._XB_SIN_CENTRAL)
 
     xb_por_gramo = fields.Boolean(
         'Se vende por gramo',

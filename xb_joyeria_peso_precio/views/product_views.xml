@@ -7,7 +7,6 @@
         <field name="arch" type="xml">
             <field name="xb_precio_por_metal" position="after">
                 <field name="xb_por_gramo" widget="boolean_toggle"/>
-                <field name="xb_sin_central" widget="boolean_toggle"/>
             </field>
         </field>
     </record>

@@ -32,4 +32,25 @@
             </div>
         </xpath>
     </t>
+
+    <!-- Words of a jewelry shop, not of a restaurant (fixed Spanish: inherited
+         templates do not take this module's .po). -->
+    <t t-inherit="pos_self_order.CartPage" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('cart_container')]/h1" position="replace">
+            <h1 class="ms-3 ms-sm-0 mb-3" t-translation="off">Tu selección</h1>
+        </xpath>
+    </t>
+    <t t-inherit="pos_self_order.ConfirmationPage" t-inherit-mode="extension">
+        <xpath expr="//h1[hasclass('mb-0')][not(@t-if)][not(@t-elif)]" position="replace">
+            <h1 class="mb-0" t-translation="off">¡Listo! Te esperamos en mostrador</h1>
+        </xpath>
+        <xpath expr="//div[@t-if=&quot;state.payment and confirmedOrder.state !== 'paid'&quot;]" position="replace">
+            <div t-if="state.payment and confirmedOrder.state !== 'paid'" class="px-4 py-3 m-n1 rounded-bottom rounded-4 border border-light bg-light text-body fw-bold" style="max-width: 95%; text-wrap: pretty;" t-translation="off">
+                Paga <span class="fw-bolder" t-esc="selfOrder.formatMonetary(confirmedOrder.amount_total || 0)"/> en caja
+            </div>
+        </xpath>
+        <xpath expr="//h3[hasclass('text-muted')]" position="replace">
+            <h3 class="d-block text-muted" t-translation="off">Tu número de pedido</h3>
+        </xpath>
+    </t>
 </templates>

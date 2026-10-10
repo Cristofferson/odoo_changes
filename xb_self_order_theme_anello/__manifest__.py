@@ -24,7 +24,7 @@ Fonts: Cormorant Garamond and Jost (SIL Open Font License), shipped with the mod
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Point of Sale",
-    "version": "19.0.1.2.2",
+    "version": "19.0.1.3.0",
     "license": "LGPL-3",
     "depends": ["pos_self_order"],
     "data": [
@@ -34,6 +34,7 @@ Fonts: Cormorant Garamond and Jost (SIL Open Font License), shipped with the mod
         "pos_self_order.assets": [
             "xb_self_order_theme_anello/static/src/js/kiosk_app.js",
             "xb_self_order_theme_anello/static/src/js/mosaic_video.js",
+            "xb_self_order_theme_anello/static/src/js/kiosk_labels.js",
             "xb_self_order_theme_anello/static/src/scss/anello_kiosk.scss",
             "xb_self_order_theme_anello/static/src/xml/anello_kiosk.xml",
         ],

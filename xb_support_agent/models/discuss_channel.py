@@ -440,8 +440,8 @@ class DiscussChannel(models.Model):
             lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
                           "videollamada o presencial. Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema."
-                          + (" Lo que sabes de su negocio por internet está en las notas: NO lo menciones ni lo uses para halagar; "
-                             "solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
+                          + (" Lo que sabes de su negocio por internet está en las notas. En tu PRIMER saludo nombra su negocio y suma UN dato curioso o simpático de su giro; "
+                             "lo demás NO lo menciones ni lo uses para halagar, solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
                              "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")
                           + (f" En nuestra base figura como «{self.whatsapp_partner_id.sudo().name}»: salúdale por su nombre."
                              if self.whatsapp_partner_id else ""))
@@ -1362,7 +1362,7 @@ class DiscussChannel(models.Model):
                    f"Su referido ideal: {entrada.get('referido_ideal') or '-'}\n"
                    f"Formato del 1 a 1: {entrada.get('formato') or 'por definir'}")
         if (entrada.get("ficha_publica") or "").strip():
-            detalle += f"\nLo público de su negocio (solo se menciona si lo pregunta): {entrada['ficha_publica'].strip()}"
+            detalle += f"\nLo público de su negocio (en el primer saludo solo el nombre y un dato curioso; lo demás si lo pregunta): {entrada['ficha_publica'].strip()}"
         self.sudo().write({"xb_sa_bni": True, "xb_sa_bni_notes": detalle})
         partner.message_post(body=Markup(tools.plaintext2html(detalle)), message_type="comment",
                              subtype_xmlid="mail.mt_note")

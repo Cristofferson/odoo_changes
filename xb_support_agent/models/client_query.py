@@ -195,14 +195,60 @@ def describir_modelo(env, rol, modelo, texto):
     return _dump(salida[:120])
 
 
+XB_SORT_POOL = 6000
+
+
+def _terminos_orden(model, orden):
+    """[(campo, descendente)] del texto «campo desc, otro»."""
+    salida = []
+    for trozo in (orden or "").split(","):
+        partes = trozo.split()
+        if not partes:
+            continue
+        if partes[0] not in model._fields:
+            raise ValueError(f"No se puede ordenar por {partes[0]!r}: el modelo {model._name} no tiene ese campo.")
+        salida.append((partes[0], len(partes) > 1 and partes[1].lower() == "desc"))
+    return salida
+
+
+def _buscar_ordenado(model, filtro, campos, orden, limite):
+    """search_read; si se ordena por un campo CALCULADO sin guardar (p. ej. existencias),
+    Odoo no puede ordenar en la base: se ordena aquí entre los primeros XB_SORT_POOL.
+    Devuelve (filas, nota)."""
+    terminos = _terminos_orden(model, orden)
+    if all(model._fields[c].store for c, _d in terminos):
+        return model.search_read(filtro, campos, order=orden or None, limit=limite), None
+    for c, _d in terminos:
+        if not _allowed_field(model, c, "owner"):
+            raise ValueError(f"No se puede ordenar por {c!r}.")
+    recs = model.search(filtro, limit=XB_SORT_POOL)
+    lista = list(recs)
+    for campo, desc in reversed(terminos):
+        def clave(r, campo=campo):
+            v = r[campo]
+            if hasattr(v, "ids"):
+                v = v.display_name if v else ""
+            return (0, 0) if v in (False, None) else (1, v)
+        lista = sorted(lista, key=clave, reverse=desc)
+    ids = [r.id for r in lista[:limite]]
+    por_id = {f["id"]: f for f in model.browse(ids).read(campos)}
+    nota = None
+    if len(recs) >= XB_SORT_POOL:
+        nota = f"Se ordenó entre los primeros {XB_SORT_POOL} que cumplen el filtro; afina el filtro para estar seguro."
+    return [por_id[i] for i in ids if i in por_id], nota
+
+
 def consultar_registros(env, rol, modelo, dominio, campos, orden, limite):
     model = _check_model(env, rol, modelo)
     campos = [c for c in (campos or []) if _allowed_field(model, c, rol)] or ["display_name"]
     limite = max(1, min(int(limite or 20), XB_MAX_ROWS))
     filtro = _domain(dominio)
-    filas = model.search_read(filtro, campos, order=orden or None, limit=limite)
-    return _dump({"total_que_cumplen": model.search_count(filtro), "mostrando": len(filas),
-                  "registros": [_clean(model, f) for f in filas]})
+    filas, nota = _buscar_ordenado(model, filtro, campos, orden, limite)
+    salida = {"total_que_cumplen": model.search_count(filtro), "mostrando": len(filas),
+              "registros": [_clean(model, f) for f in filas]}
+    if nota:
+        salida["nota"] = nota
+    return _dump(salida)
 
 
 def resumir_registros(env, rol, modelo, dominio, agrupar_por, totales, orden, limite):

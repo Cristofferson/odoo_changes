@@ -1352,13 +1352,13 @@ class DiscussChannel(models.Model):
         if not partner:
             return ""
         negocio = partner.company_name or (partner.parent_id.name if partner.parent_id else "")
-        giro = html2plaintext(partner.comment or "").strip()[:300]
+        giro = html2plaintext(partner.comment or "").strip()[:600]
         if not (negocio or giro):
             return ""
         return (" LISTA DEL CAPÍTULO (ya lo sabemos, NO se lo preguntes): "
                 + (f"negocio «{negocio}»" if negocio else "") + ("; " if negocio and giro else "")
                 + (f"giro: {giro}" if giro else "")
-                + ". Úsalo en tu primer saludo y haz la búsqueda de su negocio en internet.")
+                + ". Úsalo en tu primer saludo y haz la búsqueda de su negocio en internet. Si ahí viene su lema o su frase típica, úsala UNA sola vez en el primer saludo, con gracia y cariño, sin burlarte ni repetirla.")
 
     def _xb_sa_is_ex_bni(self):
         """Exmiembro: etiqueta «Ex-BNI» en su contacto o su oportunidad (la pone Josette o el equipo a mano)."""

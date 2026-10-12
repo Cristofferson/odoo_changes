@@ -1,0 +1,62 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* xb_gema_id
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-12 14:07+0000\n"
+"PO-Revision-Date: 2026-10-12 14:07+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xb_gema_id
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_category__xb_gema_id
+msgid "Assign gem ID"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_category__display_name
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_template__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_product__xb_gema_folder_done
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_template__xb_gema_folder_done
+msgid "Gem folder created"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.actions.server,name:xb_gema_id.ir_cron_gem_folders_ir_actions_server
+msgid "Gems: create missing cloud folders"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_category__id
+#: model:ir.model.fields,field_description:xb_gema_id.field_product_template__id
+msgid "ID"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model.fields,help:xb_gema_id.field_product_category__xb_gema_id
+msgid ""
+"New products of this category tracked by serial number get the next gem ID "
+"and their folder in the cloud."
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model,name:xb_gema_id.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: xb_gema_id
+#: model:ir.model,name:xb_gema_id.model_product_category
+msgid "Product Category"
+msgstr ""
+

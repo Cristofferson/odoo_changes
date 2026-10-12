@@ -453,7 +453,8 @@ class DiscussChannel(models.Model):
                              "lo demás NO lo menciones ni lo uses para halagar, solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
                              "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")
                           + (f" En nuestra base figura como «{self.whatsapp_partner_id.sudo().name}»: salúdale por su nombre."
-                             if self.whatsapp_partner_id else ""))
+                             if self.whatsapp_partner_id else "")
+                          + self._xb_sa_bni_lista())
         elif self._xb_sa_is_ex_bni():
             lineas.append("Esta persona es EXMIEMBRO de BNI: trátala con cordialidad como a cualquier persona que escribe, "
                           "sin video de bienvenida, sin HORLI, sin referido ideal y SIN 1 a 1 con Josette (si lo pide, explícale con "
@@ -1344,6 +1345,20 @@ class DiscussChannel(models.Model):
             ("message_type", "=", "whatsapp_message")], order="id desc", limit=1)
         texto = html2plaintext(ultimo.body or "").lower()
         return self._xb_sa_is_bni() or "bni" in texto
+
+    def _xb_sa_bni_lista(self):
+        """Lo que la lista del capítulo (contacto) ya dice del miembro: negocio y giro."""
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return ""
+        negocio = partner.company_name or (partner.parent_id.name if partner.parent_id else "")
+        giro = html2plaintext(partner.comment or "").strip()[:300]
+        if not (negocio or giro):
+            return ""
+        return (" LISTA DEL CAPÍTULO (ya lo sabemos, NO se lo preguntes): "
+                + (f"negocio «{negocio}»" if negocio else "") + ("; " if negocio and giro else "")
+                + (f"giro: {giro}" if giro else "")
+                + ". Úsalo en tu primer saludo y haz la búsqueda de su negocio en internet.")
 
     def _xb_sa_is_ex_bni(self):
         """Exmiembro: etiqueta «Ex-BNI» en su contacto o su oportunidad (la pone Josette o el equipo a mano)."""

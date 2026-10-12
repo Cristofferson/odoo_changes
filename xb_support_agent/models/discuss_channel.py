@@ -448,7 +448,7 @@ class DiscussChannel(models.Model):
                           "aunque la persona también sea cliente; solo información pública o lo que ella diga, salvo que ella pida soporte. "
                           "En BNI Josette está registrada como IMPLEMENTADORA DE ERP (Odoo): si preguntan a qué se dedican, dilo así; "
                           "NO ofrezcas, enumeres ni cotices otros servicios de XUBAX (sitios web, tiendas en línea, hosting, dominios, marketing, apps) ni des sus precios; "
-                          "si piden algo fuera del ERP Odoo, explica con amabilidad que en BNI su especialidad es el ERP y usa pasar_a_humano para que Josette lo vea."
+                          "si piden algo fuera del ERP Odoo, explica con amabilidad que en BNI su especialidad es el ERP, que el ERP sí hace varias cosas y que en el 1 a 1 Josette les explicará con detenimiento qué sí y qué no; invítalos a agendar o confirmar su 1 a 1 (sin pasar a humano) y anota lo que pidieron en el campo busca de marcar_miembro_bni."
                           + (" Lo que sabes de su negocio por internet está en las notas. Tu PRIMER saludo SIEMPRE incluye su nombre, el de su negocio (si es distinto) y su giro, más UN dato curioso o simpático si lo sabes; lo que no sepas, pregúntalo, no lo inventes; "
                              "lo demás NO lo menciones ni lo uses para halagar, solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
                              "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")

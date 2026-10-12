@@ -45,6 +45,7 @@ XB_VOZ_MODEL = "gpt-4o-mini-transcribe"
 XB_VOZ_MAX_BYTES = 8 * 1024 * 1024
 XB_VISION_TYPES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 XB_VISION_MAX = 3
+XB_WEB_SEARCH = {"type": "web_search_20260209", "name": "web_search", "max_uses": 2}
 XB_PDF_MAX = 4 * 1024 * 1024
 XB_HORLI_TYPES = ("application/pdf", "application/vnd.ms-powerpoint", "image/jpeg", "image/png",
                   "application/vnd.openxmlformats-officedocument.presentationml.presentation")
@@ -169,7 +170,10 @@ XB_TOOLS = [
            "giro": {"type": "string", "description": "A qué se dedica."},
            "busca": {"type": "string", "description": "Qué busca o para qué quiere el 1 a 1."},
            "referido_ideal": {"type": "string", "description": "Su referido ideal, si lo dijo."},
-           "formato": {"type": "string", "description": "videollamada, presencial o por definir."}}),
+           "formato": {"type": "string", "description": "videollamada, presencial o por definir."},
+           "ficha_publica": {"type": "string", "description":
+               "Solo si buscaste su NEGOCIO en internet: 2 o 3 líneas de lo público y profesional (qué hace, qué ofrece) y la "
+               "liga de donde salió. NADA personal. Cadena vacía si no buscaste o no estás seguro de que sea su negocio."}}),
     _tool("enviar_horli_xubax",
           "BNI: manda al miembro la HORLI de XUBAX (el documento de Josette) para que llegue sabiendo con quién va a hablar.",
           {}),
@@ -436,6 +440,9 @@ class DiscussChannel(models.Model):
             lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
                           "videollamada o presencial. Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema."
+                          + (" Lo que sabes de su negocio por internet está en las notas: NO lo menciones ni lo uses para halagar; "
+                             "solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
+                             "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")
                           + (f" En nuestra base figura como «{self.whatsapp_partner_id.sudo().name}»: salúdale por su nombre."
                              if self.whatsapp_partner_id else ""))
         if self.xb_sa_lead_id:
@@ -603,13 +610,14 @@ class DiscussChannel(models.Model):
         mensajes = historial + [{"role": "system",
                                  "content": self._xb_sa_context_text(contactos, contacto, proyecto)}]
         texto = ""
+        herramientas = XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
         for _ronda in range(XB_MAX_TOOL_ROUNDS):
             kwargs = dict(
                 model=acc.xb_sa_model,
                 max_tokens=16000,
                 system=system,
                 messages=mensajes,
-                tools=XB_TOOLS,
+                tools=herramientas,
                 output_config={"effort": acc.xb_sa_effort},
             )
             if acc.xb_sa_model == "claude-haiku-5-5":
@@ -628,6 +636,9 @@ class DiscussChannel(models.Model):
                 texto = "Gracias por escribir. Le paso su mensaje a una persona del equipo para que le ayude."
                 break
 
+            if resp.stop_reason == "pause_turn":  # la búsqueda en internet pidió más tiempo
+                mensajes.append({"role": "assistant", "content": resp.content})
+                continue
             usos = [b for b in resp.content if b.type == "tool_use"]
             if resp.stop_reason == "tool_use" and usos:
                 mensajes.append({"role": "assistant", "content": resp.content})
@@ -639,7 +650,11 @@ class DiscussChannel(models.Model):
                 mensajes.append({"role": "user", "content": resultados})
                 continue
 
-            texto = "\n\n".join(b.text for b in resp.content if b.type == "text").strip()
+            # Con búsqueda en internet puede haber texto antes de buscar: solo vale lo que viene después.
+            bloques = list(resp.content)
+            ultimo = max((i for i, b in enumerate(bloques)
+                          if b.type in ("server_tool_use", "web_search_tool_result")), default=-1)
+            texto = "\n\n".join(b.text for b in bloques[ultimo + 1:] if b.type == "text").strip()
             break
         else:
             job._xb_log("Se alcanzó el máximo de rondas de herramientas.")
@@ -1302,6 +1317,20 @@ class DiscussChannel(models.Model):
         self._xb_sa_post_image(datos, "tarjeta-xubax.jpg", "Te dejo esto: compártelo si le sirve a alguien más 🙂")
         return {"ok": True, "nota": "La tarjeta ya se mandó."}
 
+    def _xb_sa_first_bni_contact(self):
+        """¿Primer mensaje de alguien de BNI? Solo entonces el agente puede buscar su NEGOCIO en internet."""
+        self.ensure_one()
+        bot = self.env.ref("base.partner_root")
+        if self.env["mail.message"].sudo().search_count([
+                ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("author_id", "=", bot.id),
+                ("message_type", "=", "whatsapp_message")]):
+            return False
+        ultimo = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", self.id),
+            ("message_type", "=", "whatsapp_message")], order="id desc", limit=1)
+        texto = html2plaintext(ultimo.body or "").lower()
+        return self._xb_sa_is_bni() or "bni" in texto
+
     def _xb_sa_is_bni(self):
         """¿Es miembro de BNI? Marcado por el agente o por la etiqueta «BNI» en su contacto o su oportunidad."""
         self.ensure_one()
@@ -1332,6 +1361,8 @@ class DiscussChannel(models.Model):
                    f"A qué se dedica: {entrada.get('giro') or '-'}\nQué busca: {entrada.get('busca') or '-'}\n"
                    f"Su referido ideal: {entrada.get('referido_ideal') or '-'}\n"
                    f"Formato del 1 a 1: {entrada.get('formato') or 'por definir'}")
+        if (entrada.get("ficha_publica") or "").strip():
+            detalle += f"\nLo público de su negocio (solo se menciona si lo pregunta): {entrada['ficha_publica'].strip()}"
         self.sudo().write({"xb_sa_bni": True, "xb_sa_bni_notes": detalle})
         partner.message_post(body=Markup(tools.plaintext2html(detalle)), message_type="comment",
                              subtype_xmlid="mail.mt_note")

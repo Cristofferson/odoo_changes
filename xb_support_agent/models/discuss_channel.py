@@ -12,6 +12,7 @@ Seguridad, lo que NO depende del prompt:
 import base64
 import io
 import json
+import re
 import logging
 from datetime import datetime, timedelta
 
@@ -174,6 +175,9 @@ XB_TOOLS = [
            "ficha_publica": {"type": "string", "description":
                "Solo si buscaste su NEGOCIO en internet: 2 o 3 líneas de lo público y profesional (qué hace, qué ofrece) y la "
                "liga de donde salió. NADA personal. Cadena vacía si no buscaste o no estás seguro de que sea su negocio."}}),
+    _tool("avisar_salida_bni",
+          "BNI: la persona dice que ya no es miembro del capítulo (o que dejó BNI). Solo avisa a Josette para que lo confirme; no cambia nada por sí sola.",
+          {"comentario": {"type": "string", "description": "Lo que dijo la persona, en una frase."}}),
     _tool("enviar_horli_xubax",
           "BNI: manda al miembro la HORLI de XUBAX (el documento de Josette) para que llegue sabiendo con quién va a hablar.",
           {}),
@@ -206,7 +210,7 @@ XB_TOOLS = [
 
 # La API acepta como máximo 20 herramientas «strict»: las de BNI van sin ese modo
 # (los manejadores leen la entrada con .get, así que toleran campos faltantes).
-XB_NON_STRICT = {"marcar_miembro_bni", "enviar_horli_xubax", "guardar_horli_miembro",
+XB_NON_STRICT = {"marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
                  "registrar_referido_ideal", "enviar_tarjeta_bni"}
 for _herramienta in XB_TOOLS:
     if _herramienta["name"] in XB_NON_STRICT:
@@ -447,6 +451,11 @@ class DiscussChannel(models.Model):
                              "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")
                           + (f" En nuestra base figura como «{self.whatsapp_partner_id.sudo().name}»: salúdale por su nombre."
                              if self.whatsapp_partner_id else ""))
+        elif self._xb_sa_is_ex_bni():
+            lineas.append("Esta persona es EXMIEMBRO de BNI: trátala con cordialidad como a cualquier persona que escribe, "
+                          "sin video de bienvenida, sin HORLI, sin referido ideal y SIN 1 a 1 con Josette (si lo pide, explícale con "
+                          "amabilidad que son para miembros del capítulo y ofrécele, si le interesa, hablar de XUBAX como prospecto o cliente normal). "
+                          "Si es cliente y pide soporte, atiéndelo como a cualquier cliente.")
         if self.xb_sa_lead_id:
             lineas.append(f"Ya hay un registro en el CRM para esta plática: «{self.xb_sa_lead_id.name}».")
         # La agenda manda: si el equipo movió o canceló una cita, el historial ya no es cierto.
@@ -1333,9 +1342,28 @@ class DiscussChannel(models.Model):
         texto = html2plaintext(ultimo.body or "").lower()
         return self._xb_sa_is_bni() or "bni" in texto
 
+    def _xb_sa_is_ex_bni(self):
+        """Exmiembro: etiqueta «Ex-BNI» en su contacto o su oportunidad (la pone Josette o el equipo a mano)."""
+        self.ensure_one()
+        etiquetas = self.whatsapp_partner_id.sudo().category_id.mapped("name") + \
+            self.xb_sa_lead_id.sudo().tag_ids.mapped("name")
+        return any(re.sub(r"[^A-Z]", "", (n or "").upper()) in ("EXBNI", "EXMIEMBROBNI", "EXMIEMBRODEBNI") for n in etiquetas)
+
+    def _xb_sa_tool_avisar_salida_bni(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No se encontró el contacto de esta plática."}
+        self._xb_sa_notify(partner, acc.xb_sa_bni_user_id,
+                           f"Dice que ya no es de BNI: {partner.name}. Confirma y, si es cierto, ponle la etiqueta «Ex-BNI». "
+                           f"Dijo: {(entrada.get('comentario') or '')[:200]}")
+        return {"ok": True, "nota": "Ya se le avisó a Josette. Mientras ella lo confirma, atiéndelo con amabilidad sin ofrecerle el 1 a 1."}
+
     def _xb_sa_is_bni(self):
         """¿Es miembro de BNI? Marcado por el agente o por la etiqueta «BNI» en su contacto o su oportunidad."""
         self.ensure_one()
+        if self._xb_sa_is_ex_bni():
+            return False
         if self.xb_sa_bni:
             return True
         etiquetas = self.whatsapp_partner_id.sudo().category_id.mapped("name") + \
@@ -1355,6 +1383,9 @@ class DiscussChannel(models.Model):
         partner = self.whatsapp_partner_id.sudo()
         if not partner:
             return {"ok": False, "motivo": "No se encontró el contacto de esta plática."}
+        if self._xb_sa_is_ex_bni():
+            return {"ok": False, "motivo": "Esta persona figura como EXMIEMBRO de BNI: no la marques ni le ofrezcas 1 a 1 con Josette. "
+                                           "Atiéndela como a cualquier persona (prospecto o cliente)."}
         etiqueta = self.env["res.partner.category"].sudo().search([("name", "=", "BNI")], limit=1) or \
             self.env["res.partner.category"].sudo().create({"name": "BNI"})
         partner.category_id = [(4, etiqueta.id)]

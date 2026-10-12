@@ -24,7 +24,9 @@ from odoo import api, fields, models, sql_db, tools
 from odoo.tools import html2plaintext
 
 from .support_contact import xb_phone_key
-from . import client_query, client_write, screenshots, support_service
+import mimetypes
+
+from . import bni_card, client_query, client_write, screenshots, support_service
 
 _logger = logging.getLogger(__name__)
 
@@ -43,6 +45,9 @@ XB_VOZ_MODEL = "gpt-4o-mini-transcribe"
 XB_VOZ_MAX_BYTES = 8 * 1024 * 1024
 XB_VISION_TYPES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 XB_VISION_MAX = 3
+XB_PDF_MAX = 4 * 1024 * 1024
+XB_HORLI_TYPES = ("application/pdf", "application/vnd.ms-powerpoint", "image/jpeg", "image/png",
+                  "application/vnd.openxmlformats-officedocument.presentationml.presentation")
 XB_VISION_SIDE = 1568
 XB_FALLBACK_BETA = "server-side-fallback-2026-07-01"
 XB_TZ = "America/Mexico_City"
@@ -156,6 +161,29 @@ XB_TOOLS = [
            "ciudad": {"type": "string"},
            "correo": {"type": "string"},
            "necesidad": {"type": "string", "description": "Qué busca y qué le duele hoy."}}),
+    _tool("marcar_miembro_bni",
+          "La persona es miembro de BNI (dice serlo, viene de parte de Josette o quiere un 1 a 1). La marca con la etiqueta BNI, "
+          "y avisa a Josette; lo que se sabe queda en su contacto y en la cita (no crea oportunidad: no es una venta). Usa cadena vacía en lo que no sepas.",
+          {"nombre": {"type": "string"},
+           "negocio": {"type": "string", "description": "Nombre de su empresa o negocio."},
+           "giro": {"type": "string", "description": "A qué se dedica."},
+           "busca": {"type": "string", "description": "Qué busca o para qué quiere el 1 a 1."},
+           "referido_ideal": {"type": "string", "description": "Su referido ideal, si lo dijo."},
+           "formato": {"type": "string", "description": "videollamada, presencial o por definir."}}),
+    _tool("enviar_horli_xubax",
+          "BNI: manda al miembro la HORLI de XUBAX (el documento de Josette) para que llegue sabiendo con quién va a hablar.",
+          {}),
+    _tool("guardar_horli_miembro",
+          "BNI: guarda la HORLI que el miembro acaba de mandar (PDF, PowerPoint o imagen) en su contacto y en la cita de Josette.",
+          {"resumen": {"type": "string", "description": "Qué dice su HORLI: quién es, qué ofrece y qué busca, en 3 líneas."}}),
+    _tool("registrar_referido_ideal",
+          "BNI: guarda el referido ideal del miembro y deja a Josette una actividad para buscárselo.",
+          {"referido": {"type": "string", "description": "El perfil de persona o negocio que le serviría conocer."}}),
+    _tool("enviar_tarjeta_bni",
+          "BNI: manda al miembro una tarjeta personalizada «3 cosas que XUBAX automatizaría en tu negocio». "
+          "Usa SOLO cosas que XUBAX hace según la base de conocimiento; cada una en menos de 100 caracteres.",
+          {"persona": {"type": "string"}, "negocio": {"type": "string"},
+           "cosa1": {"type": "string"}, "cosa2": {"type": "string"}, "cosa3": {"type": "string"}}),
     _tool("registrar_interes_compra",
           "Un cliente actual quiere contratar algo más: registra la oportunidad en el CRM para que un asesor cotice.",
           {"resumen": {"type": "string", "description": "Una línea."},
@@ -170,6 +198,16 @@ XB_TOOLS = [
            "nombre": {"type": "string"},
            "correo": {"type": "string", "description": "Cadena vacía si no lo dio."}}),
 ]
+
+
+# La API acepta como máximo 20 herramientas «strict»: las de BNI van sin ese modo
+# (los manejadores leen la entrada con .get, así que toleran campos faltantes).
+XB_NON_STRICT = {"marcar_miembro_bni", "enviar_horli_xubax", "guardar_horli_miembro",
+                 "registrar_referido_ideal", "enviar_tarjeta_bni"}
+for _herramienta in XB_TOOLS:
+    if _herramienta["name"] in XB_NON_STRICT:
+        _herramienta.pop("strict", None)
+assert sum(1 for _h in XB_TOOLS if _h.get("strict")) <= 20, "Demasiadas herramientas strict (máx. 20)"
 
 
 class DiscussChannel(models.Model):
@@ -313,6 +351,9 @@ class DiscussChannel(models.Model):
             return self._xb_sa_resume_note()
         return super().message_post(*args, body=body, message_type=message_type, **kwargs)
     xb_sa_lead_id = fields.Many2one("crm.lead", string="Prospecto u oportunidad", copy=False)
+    xb_sa_bni = fields.Boolean("Miembro de BNI", copy=False)
+    xb_sa_bni_welcomed = fields.Boolean("Ya recibió el video de Josette", copy=False)
+    xb_sa_bni_notes = fields.Text("Lo que se sabe del miembro de BNI", copy=False)
 
     # ------------------------------------------------------------------
     # Entrada
@@ -391,6 +432,12 @@ class DiscussChannel(models.Model):
                 f"SERVICIO COTIZADO ESPERANDO EL SÍ: id {pendiente.id} «{pendiente.name}», ${pendiente.amount:,.2f} más IVA. "
                 f"Si el último mensaje del cliente es SÍ (o equivalente), llama ejecutar_servicio con servicio_id={pendiente.id} "
                 "y NO vuelvas a cotizar. Solo cotiza de nuevo si el cliente cambió lo que pidió.")
+        if self._xb_sa_is_bni():
+            lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
+                          "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
+                          "videollamada o presencial. Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema."
+                          + (f" En nuestra base figura como «{self.whatsapp_partner_id.sudo().name}»: salúdale por su nombre."
+                             if self.whatsapp_partner_id else ""))
         if self.xb_sa_lead_id:
             lineas.append(f"Ya hay un registro en el CRM para esta plática: «{self.xb_sa_lead_id.name}».")
         # La agenda manda: si el equipo movió o canceló una cita, el historial ya no es cierto.
@@ -424,6 +471,12 @@ class DiscussChannel(models.Model):
         imagenes = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")) \
             .attachment_ids.filtered(lambda a: (a.mimetype or "") in XB_VISION_TYPES)
         vistas = set(imagenes.sorted("id", reverse=True)[:XB_VISION_MAX].ids)
+        # Miembros de BNI: la HORLI en PDF más reciente se le da a Claude para que la lea.
+        pdf_vistos = set()
+        if self._xb_sa_is_bni():
+            pdfs = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")) \
+                .attachment_ids.filtered(lambda a: a.mimetype == "application/pdf" and a.file_size <= XB_PDF_MAX)
+            pdf_vistos = set(pdfs.sorted("id", reverse=True)[:1].ids)
         turnos = []
         for msg in mensajes:
             ensayo = msg.message_type == "comment"
@@ -441,6 +494,11 @@ class DiscussChannel(models.Model):
                     bloques.append(bloque)
                 else:
                     otros |= adjunto
+            for adjunto in otros.filtered(lambda a: a.id in pdf_vistos):
+                bloques.append({"type": "document", "source": {
+                    "type": "base64", "media_type": "application/pdf",
+                    "data": base64.b64encode(adjunto.sudo().raw).decode()}})
+                otros -= adjunto
             for adjunto in otros.filtered(lambda a: (a.mimetype or "").startswith("audio/")
                                           and msg.wa_message_ids.filtered(lambda w: w.message_type == "inbound")):
                 voz = self._xb_sa_transcribe(adjunto)
@@ -448,7 +506,7 @@ class DiscussChannel(models.Model):
                     texto = f"{texto}\n[Nota de voz transcrita]: {voz}".strip()
                     otros -= adjunto
             if otros:
-                tipos = ", ".join(sorted({(a.mimetype or "archivo").split("/")[0] for a in otros}))
+                tipos = ", ".join(sorted({self._xb_sa_attach_label(a) for a in otros}))
                 texto = f"{texto}\n[Adjuntó: {tipos}]".strip()
             if not texto and not bloques:
                 continue
@@ -1132,12 +1190,168 @@ class DiscussChannel(models.Model):
         self._xb_sa_notify(lead, lead.user_id or acc.xb_sa_sales_user_ids, f"Oportunidad de cliente actual: {lead.name}")
         return {"ok": True, "nota": "Oportunidad registrada; un asesor preparará la cotización."}
 
+    @api.model
+    def _xb_sa_attach_label(self, adjunto):
+        m = adjunto.mimetype or ""
+        if m == "application/pdf":
+            return "documento PDF"
+        if "presentation" in m or "powerpoint" in m:
+            return "presentación de PowerPoint (no la puedes leer; si es una HORLI, guárdala y pide también el PDF)"
+        return {"image": "imagen", "audio": "audio", "video": "video"}.get(m.split("/")[0], "archivo")
+
+    def _xb_sa_post_file(self, datos, nombre, pie):
+        """Archivo (video, PDF, presentación…) al cliente; en ensayo, como nota con el archivo."""
+        self.ensure_one()
+        acc = self.wa_account_id.sudo()
+        tipo = mimetypes.guess_type(nombre)[0] or "application/octet-stream"
+        adjunto = self.env["ir.attachment"].sudo().create({
+            "name": nombre.replace("/", "-"), "raw": datos, "mimetype": tipo,
+            "res_model": "discuss.channel", "res_id": self.id})
+        cuerpo = Markup(tools.plaintext2html(pie)) if pie else ""
+        if acc.xb_sa_shadow:
+            self.sudo().message_post(
+                body=Markup(XB_DRAFT_HTML) + (cuerpo or Markup("<p>(archivo)</p>")), message_type="comment",
+                author_id=self.env.ref("base.partner_root").id, subtype_xmlid="mail.mt_note",
+                attachment_ids=adjunto.ids)
+        else:
+            self.sudo().message_post(
+                body=cuerpo, message_type="whatsapp_message", author_id=self.env.ref("base.partner_root").id,
+                subtype_xmlid="mail.mt_comment", attachment_ids=adjunto.ids)
+
+    def _xb_sa_bni_event(self):
+        """La próxima cita de 1 a 1 de este miembro."""
+        partner = self.whatsapp_partner_id.sudo()
+        tipo = self.wa_account_id.sudo().xb_sa_bni_appointment_type_id
+        if not (partner and tipo):
+            return self.env["calendar.event"]
+        return self.env["calendar.event"].sudo().search([
+            ("appointment_type_id", "=", tipo.id), ("partner_ids", "in", partner.id),
+            ("start", ">", fields.Datetime.now())], order="start", limit=1)
+
+    def _xb_sa_bni_sync_event(self, adjuntos=None):
+        """Pone en la cita de Josette lo que se sabe del miembro y sus archivos."""
+        evento = self._xb_sa_bni_event()
+        if not evento:
+            return evento
+        texto = f"Agendada por el agente de WhatsApp.\nWhatsApp: {self.whatsapp_number}\n\n{self.xb_sa_bni_notes or ''}"
+        evento.description = Markup(tools.plaintext2html(texto))
+        for a in adjuntos or []:
+            if not self.env["ir.attachment"].sudo().search_count([
+                    ("res_model", "=", "calendar.event"), ("res_id", "=", evento.id), ("checksum", "=", a.checksum)]):
+                a.sudo().copy({"res_model": "calendar.event", "res_id": evento.id})
+        return evento
+
+    def _xb_sa_tool_enviar_horli_xubax(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        if not acc.xb_sa_bni_horli:
+            return {"ok": False, "motivo": "La HORLI de XUBAX todavía no está cargada: dile que Josette se la comparte "
+                                           "en el 1 a 1, y pídele la suya."}
+        self._xb_sa_post_file(base64.b64decode(acc.xb_sa_bni_horli), acc.xb_sa_bni_horli_name or "HORLI XUBAX.pdf",
+                              "Esta es nuestra HORLI, para que llegues sabiendo con quién vas a hablar 🙂")
+        return {"ok": True, "nota": "Ya se la mandaste. Pídele la suya (PDF, PowerPoint o imagen)."}
+
+    def _xb_sa_tool_guardar_horli_miembro(self, job, entrada):
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No se encontró el contacto de esta plática."}
+        mensajes = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("message_type", "=", "whatsapp_message"),
+        ], order="id desc", limit=15)
+        archivo = self.env["ir.attachment"]
+        for m in mensajes:
+            if not m.wa_message_ids.filtered(lambda w: w.message_type == "inbound"):
+                continue
+            archivo = m.attachment_ids.filtered(lambda a: a.mimetype in XB_HORLI_TYPES)[:1]
+            if archivo:
+                break
+        if not archivo:
+            return {"ok": False, "motivo": "No encuentro un archivo reciente (PDF, PowerPoint o imagen) de esta persona."}
+        archivo = archivo.sudo()
+        if not self.env["ir.attachment"].sudo().search_count([
+                ("res_model", "=", "res.partner"), ("res_id", "=", partner.id), ("checksum", "=", archivo.checksum)]):
+            copia = archivo.copy({"res_model": "res.partner", "res_id": partner.id})
+            partner.message_post(body=Markup(tools.plaintext2html(
+                f"HORLI recibida por WhatsApp.\n{entrada.get('resumen') or ''}")), message_type="comment",
+                subtype_xmlid="mail.mt_note", attachment_ids=copia.ids)
+        self.sudo().xb_sa_bni_notes = (self.xb_sa_bni_notes or "") + f"\nSu HORLI dice: {entrada.get('resumen') or '(sin resumen)'}"
+        evento = self._xb_sa_bni_sync_event([archivo])
+        return {"ok": True, "en_la_cita": bool(evento),
+                "nota": "Guardada en su contacto" + (" y en la cita de Josette." if evento else ". Aún no tiene 1 a 1 agendado.")}
+
+    def _xb_sa_tool_registrar_referido_ideal(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No se encontró el contacto de esta plática."}
+        referido = (entrada.get("referido") or "").strip()
+        self.sudo().xb_sa_bni_notes = (self.xb_sa_bni_notes or "") + f"\nSu referido ideal: {referido}"
+        evento = self._xb_sa_bni_sync_event()
+        limite = evento.start.date() if evento else fields.Date.today() + timedelta(days=3)
+        if acc.xb_sa_bni_user_id:
+            partner.activity_schedule(
+                "mail.mail_activity_data_todo", date_deadline=limite,
+                summary=f"Buscar un referido para {partner.name}", user_id=acc.xb_sa_bni_user_id.id,
+                note=Markup(tools.plaintext2html(f"Perfil: {referido}" + (" Tenerlo presente en su 1 a 1." if evento else ""))))
+        partner.message_post(body=Markup(tools.plaintext2html(f"Su referido ideal: {referido}")),
+                             message_type="comment", subtype_xmlid="mail.mt_note")
+        return {"ok": True, "nota": "Josette lo tendrá presente."}
+
+    def _xb_sa_tool_enviar_tarjeta_bni(self, job, entrada):
+        datos = bni_card.tomar_tarjeta(entrada.get("persona"), entrada.get("negocio"),
+                                       entrada.get("cosa1"), entrada.get("cosa2"), entrada.get("cosa3"))
+        self._xb_sa_post_image(datos, "tarjeta-xubax.jpg", "Te dejo esto: compártelo si le sirve a alguien más 🙂")
+        return {"ok": True, "nota": "La tarjeta ya se mandó."}
+
+    def _xb_sa_is_bni(self):
+        """¿Es miembro de BNI? Marcado por el agente o por la etiqueta «BNI» en su contacto o su oportunidad."""
+        self.ensure_one()
+        if self.xb_sa_bni:
+            return True
+        etiquetas = self.whatsapp_partner_id.sudo().category_id.mapped("name") + \
+            self.xb_sa_lead_id.sudo().tag_ids.mapped("name")
+        return any((n or "").strip().upper() == "BNI" for n in etiquetas)
+
+    def _xb_sa_appt_type(self):
+        acc = self.wa_account_id.sudo()
+        if self._xb_sa_is_bni() and acc.xb_sa_bni_appointment_type_id:
+            return acc.xb_sa_bni_appointment_type_id
+        return acc.xb_sa_appointment_type_id
+
+    def _xb_sa_tool_marcar_miembro_bni(self, job, entrada):
+        """Miembro de BNI: etiqueta en su contacto y aviso a la titular. NO crea oportunidad
+        en el CRM (no es una venta); lo que cuenta se queda en el contacto y en la cita."""
+        acc = self.wa_account_id.sudo()
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No se encontró el contacto de esta plática."}
+        etiqueta = self.env["res.partner.category"].sudo().search([("name", "=", "BNI")], limit=1) or \
+            self.env["res.partner.category"].sudo().create({"name": "BNI"})
+        partner.category_id = [(4, etiqueta.id)]
+        detalle = ("Miembro de BNI (registrado por el agente de WhatsApp)\n"
+                   f"Nombre: {entrada.get('nombre') or '-'}\nNegocio: {entrada.get('negocio') or '-'}\n"
+                   f"A qué se dedica: {entrada.get('giro') or '-'}\nQué busca: {entrada.get('busca') or '-'}\n"
+                   f"Su referido ideal: {entrada.get('referido_ideal') or '-'}\n"
+                   f"Formato del 1 a 1: {entrada.get('formato') or 'por definir'}")
+        self.sudo().write({"xb_sa_bni": True, "xb_sa_bni_notes": detalle})
+        partner.message_post(body=Markup(tools.plaintext2html(detalle)), message_type="comment",
+                             subtype_xmlid="mail.mt_note")
+        job.mode = "prospect"
+        if acc.xb_sa_bni_video and not self.xb_sa_bni_welcomed:
+            self._xb_sa_post_file(base64.b64decode(acc.xb_sa_bni_video), acc.xb_sa_bni_video_name or "bienvenida.mp4",
+                                  "Un saludo de Josette para ti 🙂")
+            self.sudo().xb_sa_bni_welcomed = True
+        self._xb_sa_notify(partner, acc.xb_sa_bni_user_id,
+                           f"Miembro de BNI por WhatsApp: {entrada.get('nombre') or self.whatsapp_number}")
+        return {"ok": True, "nota": "Registrado como miembro de BNI" +
+                (" y ya recibió el video de Josette." if self.xb_sa_bni_welcomed else ".") +
+                " Sigue: ofrécele su 1 a 1 con ver_horarios_demo."}
+
     def _xb_sa_demo_slots(self, desde=None):
         """Horarios libres de la cita nativa (app Citas): [(inicio UTC, usuario)].
 
         Pocos y repartidos: mañana, mediodía y tarde de cada día; 8 en total.
         """
-        tipo = self.wa_account_id.sudo().xb_sa_appointment_type_id
+        tipo = self._xb_sa_appt_type()
         if not tipo:
             return []
         tz = pytz.timezone(XB_TZ)
@@ -1162,12 +1376,12 @@ class DiscussChannel(models.Model):
         return elegidos[:8]
 
     def _xb_sa_appointment_url(self):
-        tipo = self.wa_account_id.sudo().xb_sa_appointment_type_id
+        tipo = self._xb_sa_appt_type()
         base = tipo.website_id.domain or tipo.get_base_url()
         return f"{base.rstrip('/')}/appointment/{tipo.id}"
 
     def _xb_sa_tool_ver_horarios_demo(self, job, entrada):
-        tipo = self.wa_account_id.sudo().xb_sa_appointment_type_id
+        tipo = self._xb_sa_appt_type()
         if not tipo:
             return {"ok": False, "motivo": "No hay una cita configurada para demos; registra el prospecto y pasa a humano."}
         desde = None
@@ -1182,11 +1396,12 @@ class DiscussChannel(models.Model):
         return {"horarios": [f"{t.astimezone(tz):%Y-%m-%d %H:%M} ({XB_DIAS[t.astimezone(tz).weekday()]})" for t, _u in libres],
                 "duracion_minutos": round(tipo.appointment_duration * 60),
                 "se_puede_agendar_hasta_dias": tipo.max_schedule_days,
-                "liga_para_escoger_otro_horario": self._xb_sa_appointment_url()}
+                # La cita de BNI no es pública: sin liga, el agente agenda por aquí.
+                **({"liga_para_escoger_otro_horario": self._xb_sa_appointment_url()} if tipo.is_published else {})}
 
     def _xb_sa_tool_agendar_demo(self, job, entrada):
         acc = self.wa_account_id.sudo()
-        tipo = acc.xb_sa_appointment_type_id
+        tipo = self._xb_sa_appt_type()
         if not tipo:
             return {"ok": False, "motivo": "No hay una cita configurada para demos."}
         tz = pytz.timezone(XB_TZ)
@@ -1211,7 +1426,8 @@ class DiscussChannel(models.Model):
             cliente.email = entrada["correo"]
         fin = inicio + timedelta(hours=tipo.appointment_duration)
         vals = tipo._prepare_calendar_event_values(
-            1, [], Markup(tools.plaintext2html(f"Agendada por el agente de WhatsApp.\nWhatsApp: {self.whatsapp_number}")),
+            1, [], Markup(tools.plaintext2html(f"Agendada por el agente de WhatsApp.\nWhatsApp: {self.whatsapp_number}"
+            + (f"\n\n{self.xb_sa_bni_notes}" if self.xb_sa_bni_notes else ""))),
             tipo.appointment_duration, False, self.env["appointment.invite"], None, nombre, cliente, usuario,
             inicio.replace(tzinfo=None), fin.replace(tzinfo=None))
         if self.xb_sa_lead_id:

@@ -21,6 +21,8 @@ XB_DEFAULT_INSTRUCTIONS = """Eres el asistente de WhatsApp de {empresa}. Atiende
 2. VENTAS a clientes actuales: si un cliente quiere algo más (otro módulo, más usuarios, otra sucursal, un desarrollo), entiende qué necesita, usa registrar_interes_compra y dile que un asesor le prepara la cotización.
 3. PROSPECTOS nuevos (número que no está autorizado en ningún sistema): explica qué hace {empresa} usando SOLO la base de conocimiento, haz pocas preguntas para entender su negocio (giro, ciudad, cuántas sucursales o usuarios, qué usa hoy, qué le duele), regístralo con registrar_prospecto y ofrécele una cita o demo: consulta ver_horarios_demo, ofrece 2 o 3 opciones y agenda con agendar_demo cuando elija.
 
+4. MIEMBROS DE BNI (red de networking; la titular de la membresía de {empresa} es Josette Salinas Gil): pueden escribir estén o no en nuestra base, para agendar un 1 a 1, conocer la empresa o preguntar algo de Josette. Si dice ser de BNI, venir de parte de Josette o querer un 1 a 1, usa marcar_miembro_bni (esa herramienta también le manda el video de bienvenida de Josette, una sola vez). Trátalo como colega: cálido y breve, sin vender, saludándolo por su nombre, y preséntate como el asistente de inteligencia artificial de {empresa}. Sigue este orden sin que parezca formulario: (a) el 1 a 1: ver_horarios_demo y agendar_demo (cita de 1 hora con Josette); pregunta si lo prefiere por videollamada o presencial. (b) Antes del 1 a 1 pídele su HORLI (la hoja que dice quién es y qué busca; puede ser PDF, PowerPoint o imagen) y mándale la de {empresa} con enviar_horli_xubax. Cuando te mande la suya, usa guardar_horli_miembro con un resumen de lo que dice; si es PowerPoint, guárdala y pídele también un PDF. (c) Pregúntale su referido ideal y regístralo con registrar_referido_ideal: Josette lo tendrá presente. (d) Si te cuenta a qué se dedica y qué usa hoy, puedes mandarle su tarjeta con enviar_tarjeta_bni: tres cosas que {empresa} automatizaría en su negocio, SOLO de lo que aparece en la base de conocimiento. Dudas de la membresía, del capítulo, de referidos o lo que no sepas: pasar_a_humano (le llega a Josette). Un miembro de BNI no tiene acceso a ningún sistema ni a precios de clientes.
+
 Reglas que no se rompen:
 - Nunca des información de un sistema a quien no está autorizado en él. Si alguien dice ser de una empresa pero su número no está autorizado, no reveles nada: explícale que el titular de la cuenta puede autorizarlo escribiendo desde su número, y usa pasar_a_humano con motivo "otro" para avisar al equipo.
 - Precios: solo puedes dar los precios «desde» que aparecen en la base de conocimiento, aclarando que la cotización exacta la prepara un asesor. Nunca inventes precios, descuentos ni plazos.
@@ -98,6 +100,17 @@ class WhatsappAccount(models.Model):
     xb_sa_demo_user_ids = fields.Many2many(
         "res.users", "xb_sa_demo_users_rel", "account_id", "user_id",
         string="Quién da las demos", domain=[("share", "=", False)])
+    xb_sa_bni_appointment_type_id = fields.Many2one(
+        "appointment.type", string="Cita para 1 a 1 de BNI",
+        help="Cita de la app Citas que se ofrece a los miembros de BNI (por omisión la de demos).")
+    xb_sa_bni_user_id = fields.Many2one(
+        "res.users", string="Titular de BNI", domain=[("share", "=", False)],
+        help="Quien recibe a los miembros de BNI: se le avisa cuando uno escribe (no se crean oportunidades).")
+    xb_sa_bni_video = fields.Binary("Video de bienvenida de Josette", attachment=True, copy=False,
+                                    groups="base.group_system")
+    xb_sa_bni_video_name = fields.Char(groups="base.group_system")
+    xb_sa_bni_horli = fields.Binary("HORLI de XUBAX", attachment=True, copy=False, groups="base.group_system")
+    xb_sa_bni_horli_name = fields.Char(groups="base.group_system")
     xb_sa_appointment_type_id = fields.Many2one(
         "appointment.type", string="Cita para demos",
         help="Cita de la app Citas: de ahí salen los horarios, el encargado y la oportunidad en el CRM.")

@@ -67,6 +67,18 @@
                     <setting help="Cita de la app Citas: horarios, encargado y oportunidad en el CRM salen de ahí.">
                         <field name="xb_sa_appointment_type_id"/>
                     </setting>
+                    <setting help="Miembros de BNI: la cita de 1 a 1 y quién los recibe.">
+                        <field name="xb_sa_bni_appointment_type_id"/>
+                        <field name="xb_sa_bni_user_id"/>
+                    </setting>
+                    <setting help="Se manda una sola vez a cada miembro de BNI que escribe por primera vez." groups="base.group_system">
+                        <field name="xb_sa_bni_video" filename="xb_sa_bni_video_name"/>
+                        <field name="xb_sa_bni_video_name" invisible="1"/>
+                    </setting>
+                    <setting help="De preferencia en PDF. Se manda a cada miembro de BNI antes de su 1 a 1." groups="base.group_system">
+                        <field name="xb_sa_bni_horli" filename="xb_sa_bni_horli_name"/>
+                        <field name="xb_sa_bni_horli_name" invisible="1"/>
+                    </setting>
                 </div>
                 <div class="row mt16 o_settings_container" id="xb_sa_prompt">
                     <setting>

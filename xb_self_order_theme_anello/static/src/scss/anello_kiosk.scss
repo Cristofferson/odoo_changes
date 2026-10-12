@@ -306,3 +306,15 @@ body {
     .text-primary { color: $an-ink !important; }
 }
 
+
+// ---------------------------------------------------------------- Filters (xb_self_order_tag_filters)
+.o_self_product_list_page {
+    --xb-tf-ink: #{$an-ink};
+    --xb-tf-accent: #{$an-gold};
+    --xb-tf-soft: #{$an-cream};
+    --xb-tf-line: #{$an-line};
+    --xb-tf-muted: #{$an-grey};
+    --xb-tf-title-font: #{$an-serif};
+}
+.xb_tf_fab, .xb_tf_go, .xb_tf_title { font-family: $an-sans; font-weight: 500; }
+.xb_tf_link { color: $an-gold-d; }

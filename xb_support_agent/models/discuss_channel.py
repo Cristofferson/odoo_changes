@@ -445,7 +445,10 @@ class DiscussChannel(models.Model):
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
                           "videollamada o presencial. Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema. "
                           "En esta plática de BNI NO uses ni menciones datos del sistema de un cliente ni pendientes de soporte o servicios, "
-                          "aunque la persona también sea cliente; solo información pública o lo que ella diga, salvo que ella pida soporte."
+                          "aunque la persona también sea cliente; solo información pública o lo que ella diga, salvo que ella pida soporte. "
+                          "En BNI Josette está registrada como IMPLEMENTADORA DE ERP (Odoo): si preguntan a qué se dedican, dilo así; "
+                          "NO ofrezcas, enumeres ni cotices otros servicios de XUBAX (sitios web, tiendas en línea, hosting, dominios, marketing, apps) ni des sus precios; "
+                          "si piden algo fuera del ERP Odoo, explica con amabilidad que en BNI su especialidad es el ERP y usa pasar_a_humano para que Josette lo vea."
                           + (" Lo que sabes de su negocio por internet está en las notas. Tu PRIMER saludo SIEMPRE incluye su nombre, el de su negocio (si es distinto) y su giro, más UN dato curioso o simpático si lo sabes; lo que no sepas, pregúntalo, no lo inventes; "
                              "lo demás NO lo menciones ni lo uses para halagar, solo si la persona pregunta qué sabes de ella o de su negocio, y entonces di de dónde salió. "
                              "Notas: " + (self.xb_sa_bni_notes or "")[:900] if self.xb_sa_bni_notes else "")

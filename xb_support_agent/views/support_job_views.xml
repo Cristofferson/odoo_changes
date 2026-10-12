@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xb_support_job_list" model="ir.ui.view">
+        <field name="name">xb.support.job.list</field>
+        <field name="model">xb.support.job</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'error'" decoration-muted="state == 'skipped'">
+                <field name="create_date" string="Fecha"/>
+                <field name="whatsapp_number"/>
+                <field name="contact_id"/>
+                <field name="project_id"/>
+                <field name="mode"/>
+                <field name="reply"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'" decoration-danger="state == 'error'"/>
+                <field name="cost_usd" sum="Total" optional="show"/>
+                <field name="duration" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xb_support_job_form" model="ir.ui.view">
+        <field name="name">xb.support.job.form</field>
+        <field name="model">xb.support.job</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="channel_id"/>
+                            <field name="whatsapp_number"/>
+                            <field name="contact_id"/>
+                            <field name="project_id"/>
+                            <field name="mode"/>
+                            <field name="reason" invisible="not reason"/>
+                        </group>
+                        <group>
+                            <field name="model_name"/>
+                            <field name="cost_usd"/>
+                            <field name="duration"/>
+                            <field name="attempts"/>
+                            <field name="input_tokens"/>
+                            <field name="output_tokens"/>
+                            <field name="cache_read_tokens"/>
+                            <field name="cache_write_tokens"/>
+                        </group>
+                    </group>
+                    <group string="Respuesta">
+                        <field name="reply" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Lo que revisó">
+                        <field name="log" nolabel="1" colspan="2" class="font-monospace"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_xb_support_job_search" model="ir.ui.view">
+        <field name="name">xb.support.job.search</field>
+        <field name="model">xb.support.job</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="whatsapp_number"/>
+                <field name="contact_id"/>
+                <field name="project_id"/>
+                <filter name="answered" string="Con respuesta" domain="[('state', 'in', ('done', 'draft'))]"/>
+                <filter name="errors" string="Con error" domain="[('state', '=', 'error')]"/>
+                <group>
+                    <filter name="by_mode" string="Tipo de plática" context="{'group_by': 'mode'}"/>
+                    <filter name="by_day" string="Día" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_xb_support_job" model="ir.actions.act_window">
+        <field name="name">Bitácora del agente</field>
+        <field name="res_model">xb.support.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_answered': 1}</field>
+    </record>
+</odoo>

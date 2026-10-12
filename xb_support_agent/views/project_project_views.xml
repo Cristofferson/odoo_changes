@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="edit_project_xb_support_contacts" model="ir.ui.view">
+        <field name="name">project.project.form.xb.support.contacts</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="despacho_db_manager.edit_project_despacho"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="xb_support_contacts" string="Soporte WhatsApp" invisible="not database_hosting">
+                    <group>
+                        <field name="xb_support_active"/>
+                    </group>
+                    <p class="text-muted">
+                        El agente reconoce a cada persona por el celular de su ficha de usuario en ESTE sistema
+                        (Ajustes › Usuarios). Quien esté en el grupo «Autoriza servicios XUBAX» puede autorizar
+                        servicios con costo. Aquí aparecen las personas ya identificadas.
+                    </p>
+                    <field name="xb_support_contact_ids" context="{'default_project_id': id}">
+                        <list create="0" delete="0" editable="bottom">
+                            <field name="name" readonly="1"/>
+                            <field name="phone" readonly="1"/>
+                            <field name="remote_login" readonly="1"/>
+                            <field name="role" readonly="1"/>
+                            <field name="confirmed" readonly="1"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

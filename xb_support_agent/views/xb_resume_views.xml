@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_view_form_xb_support_agent" model="ir.ui.view">
+        <field name="name">crm.lead.form.xb.support.agent</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <field name="xb_sa_paused_channel_ids" invisible="1"/>
+                <button name="action_xb_sa_resume" type="object" string="Devolver al agente" icon="fa-reply"
+                        invisible="not xb_sa_paused_channel_ids"
+                        help="Ya terminaste con el cliente: el agente de WhatsApp vuelve a contestarle."/>
+            </header>
+        </field>
+    </record>
+
+    <!-- WhatsApp › Conversaciones: una fila por plática; el clic abre la plática completa. -->
+    <record id="discuss_channel_view_list_xb_wa_conversations" model="ir.ui.view">
+        <field name="name">discuss.channel.list.xb.wa.conversations</field>
+        <field name="model">discuss.channel</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0" default_order="xb_wa_last_dt desc"
+                  action="action_xb_open_chat" type="object"
+                  decoration-bf="xb_wa_last_inbound" decoration-warning="xb_sa_is_paused">
+                <field name="name" string="Conversación"/>
+                <field name="whatsapp_number" string="Número"/>
+                <field name="wa_account_id" string="Número de la empresa" optional="show"/>
+                <field name="xb_wa_last_inbound" column_invisible="1"/>
+                <field name="xb_wa_last_text"/>
+                <field name="xb_wa_last_dt"/>
+                <field name="xb_sa_lead_id" string="Oportunidad" optional="hide"/>
+                <field name="xb_wa_attended_by" widget="badge"
+                       decoration-warning="xb_wa_attended_by == 'person'" decoration-info="xb_wa_attended_by == 'agent'"/>
+                <field name="xb_wa_origin" widget="badge"
+                       decoration-success="xb_wa_origin == 'ad'" decoration-primary="xb_wa_origin == 'web'"/>
+                <field name="xb_wa_origin_detail" optional="show"/>
+                <field name="xb_sa_is_paused" column_invisible="1"/>
+                <field name="xb_sa_paused_until" string="El agente vuelve solo" optional="hide"/>
+                <button name="action_xb_sa_resume" type="object" string="Devolver al agente" icon="fa-reply"
+                        class="btn-primary" invisible="not xb_sa_is_paused"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="discuss_channel_view_search_xb_wa_conversations" model="ir.ui.view">
+        <field name="name">discuss.channel.search.xb.wa.conversations</field>
+        <field name="model">discuss.channel</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Conversación"/>
+                <field name="whatsapp_number" string="Número"/>
+                <field name="whatsapp_partner_id" string="Contacto"/>
+                <filter name="paused" string="Atendidas por una persona" domain="[('xb_sa_is_paused', '=', True)]"/>
+                <separator/>
+                <filter name="from_ad" string="Desde anuncio de Meta" domain="[('xb_wa_origin', '=', 'ad')]"/>
+                <filter name="from_web" string="Desde el sitio web" domain="[('xb_wa_origin', '=', 'web')]"/>
+                <filter name="direct" string="Escribieron directo" domain="[('xb_wa_origin', '=', 'direct')]"/>
+                <separator/>
+                <filter name="group_origin" string="Origen" context="{'group_by': 'xb_wa_origin'}"/>
+                <filter name="group_account" string="Número de la empresa" context="{'group_by': 'wa_account_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_xb_wa_conversations" model="ir.actions.act_window">
+        <field name="name">Conversaciones</field>
+        <field name="res_model">discuss.channel</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="discuss_channel_view_list_xb_wa_conversations"/>
+        <field name="search_view_id" ref="discuss_channel_view_search_xb_wa_conversations"/>
+        <field name="domain">[("channel_type", "=", "whatsapp"), ("xb_wa_last_dt", "!=", False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavía no hay conversaciones de WhatsApp.</p>
+            <p>Dale clic a una conversación para ver todos sus mensajes y contestar.
+               Las de color son las que atiende una persona: al terminar, dale «Devolver al agente»
+               o escribe <b>#agente</b> en el chat (no se le manda al cliente).</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_xb_wa_conversations" name="Conversaciones"
+              parent="whatsapp.whatsapp_menu_main" action="action_xb_wa_conversations" sequence="-1"/>
+
+    <!-- Lo que antes eran menús sueltos (cada mensaje, cada clic) queda como reporte. -->
+    <menuitem id="menu_xb_wa_reports" name="Reportes" parent="whatsapp.whatsapp_menu_main" sequence="8"/>
+    <record id="whatsapp.whatsapp_message_menu" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_xb_wa_reports"/>
+        <field name="name">Mensajes uno por uno</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="xb_whatsapp_web_leads.xb_wa_click_menu" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_xb_wa_reports"/>
+        <field name="name">Clics al botón de WhatsApp</field>
+        <field name="sequence">2</field>
+    </record>
+</odoo>

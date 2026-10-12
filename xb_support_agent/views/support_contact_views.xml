@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xb_support_contact_list" model="ir.ui.view">
+        <field name="name">xb.support.contact.list</field>
+        <field name="model">xb.support.contact</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="project_id"/>
+                <field name="role"/>
+                <field name="can_billing"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="note" optional="hide"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xb_support_contact_search" model="ir.ui.view">
+        <field name="name">xb.support.contact.search</field>
+        <field name="model">xb.support.contact</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="project_id"/>
+                <filter name="owners" string="Titulares" domain="[('role', '=', 'owner')]"/>
+                <filter name="archived" string="Archivados" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="by_project" string="Sistema" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_xb_support_contact" model="ir.actions.act_window">
+        <field name="name">Números autorizados</field>
+        <field name="res_model">xb.support.contact</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Autoriza el primer número</p>
+            <p>Cada fila liga un celular con un sistema. El agente solo revisa el sistema
+               de quien le escribe desde un número autorizado.</p>
+        </field>
+    </record>
+</odoo>

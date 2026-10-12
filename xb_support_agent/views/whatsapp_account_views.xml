@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="whatsapp_account_view_form_xb_support_agent" model="ir.ui.view">
+        <field name="name">whatsapp.account.view.form.xb.support.agent</field>
+        <field name="model">whatsapp.account</field>
+        <field name="inherit_id" ref="whatsapp.whatsapp_account_view_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_xb_sa_open_jobs" type="object" class="oe_stat_button" icon="fa-commenting-o"
+                        invisible="not xb_sa_enabled and not xb_sa_job_count">
+                    <field name="xb_sa_job_count" string="Agente IA" widget="statinfo"/>
+                </button>
+            </div>
+            <xpath expr="//sheet" position="inside">
+                <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small">
+                    Agente de IA (soporte y ventas)
+                </div>
+                <div class="alert alert-warning mb-3" role="status" invisible="not xb_sa_enabled or not xb_sa_shadow">
+                    <b>Modo ensayo:</b> el agente NO le envía nada al cliente; deja su respuesta como nota interna en la conversación.
+                </div>
+                <div class="row mt16 o_settings_container" id="xb_sa_main">
+                    <setting help="El agente atiende los mensajes que llegan a este número.">
+                        <field name="xb_sa_enabled"/>
+                    </setting>
+                    <setting help="Respuestas como nota interna, sin enviarse. Apágalo cuando estés conforme.">
+                        <field name="xb_sa_shadow"/>
+                    </setting>
+                    <setting help="Para probar: solo atiende a estos números, separados por coma. Vacío = a todos.">
+                        <field name="xb_sa_only_numbers" placeholder="443 123 4567, 55 7013 1853"/>
+                    </setting>
+                    <setting help="Se saca en console.anthropic.com → API Keys. Ponle un tope de gasto mensual allá." groups="base.group_system">
+                        <field name="xb_sa_api_key" password="True"/>
+                    </setting>
+                    <setting help="Para pasar a texto las notas de voz del cliente (el audio se manda a OpenAI)." groups="base.group_system">
+                        <field name="xb_sa_openai_key" password="True"/>
+                    </setting>
+                    <setting help="Opus contesta mejor; Sonnet cuesta la mitad.">
+                        <field name="xb_sa_model"/>
+                    </setting>
+                    <setting help="Cuánto piensa antes de contestar.">
+                        <field name="xb_sa_effort"/>
+                    </setting>
+                    <setting help="Si alguien del equipo contesta, el agente se calla estas horas en esa conversación.">
+                        <field name="xb_sa_pause_hours"/>
+                    </setting>
+                    <setting help="Si el cliente insiste mientras espera a una persona: se le contesta esto (máx. cada 2 h) y se vuelve a avisar al equipo.">
+                        <field name="xb_sa_hold_message"/>
+                    </setting>
+                </div>
+                <div class="row mt16 o_settings_container" id="xb_sa_people">
+                    <setting help="Reciben propuestas de arreglo y lo que el agente pasa a humano.">
+                        <field name="xb_sa_support_user_ids" widget="many2many_tags"/>
+                    </setting>
+                    <setting help="Opcional: además de avisar, se crea un ticket en este equipo.">
+                        <field name="xb_sa_helpdesk_team_id"/>
+                    </setting>
+                    <setting help="Se reparten prospectos y oportunidades por turnos.">
+                        <field name="xb_sa_sales_user_ids" widget="many2many_tags"/>
+                    </setting>
+                    <setting help="Si nadie de ventas contesta al prospecto en estos minutos, se les avisa.">
+                        <field name="xb_sa_sales_backup_user_ids" widget="many2many_tags"/>
+                        <div><field name="xb_sa_sales_backup_minutes" class="oe_inline"/> minutos</div>
+                    </setting>
+                    <setting>
+                        <field name="xb_sa_sales_team_id"/>
+                    </setting>
+                    <setting help="Cita de la app Citas: horarios, encargado y oportunidad en el CRM salen de ahí.">
+                        <field name="xb_sa_appointment_type_id"/>
+                    </setting>
+                </div>
+                <div class="row mt16 o_settings_container" id="xb_sa_prompt">
+                    <setting>
+                        <field name="xb_sa_company_name"/>
+                    </setting>
+                </div>
+                <label for="xb_sa_instructions" string="Instrucciones del agente" class="fw-bold mt-3"/>
+                <field name="xb_sa_instructions" nolabel="1" placeholder="Cómo debe comportarse el agente..."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

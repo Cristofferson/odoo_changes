@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xb_support_proposal_list" model="ir.ui.view">
+        <field name="name">xb.support.proposal.list</field>
+        <field name="model">xb.support.proposal</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="urgency == 'high' and state == 'pending'" decoration-muted="state in ('done', 'rejected')">
+                <field name="create_date" string="Fecha"/>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="project_id"/>
+                <field name="contact_id"/>
+                <field name="urgency"/>
+                <field name="state" widget="badge" decoration-warning="state == 'pending'" decoration-info="state == 'approved'" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_xb_support_proposal_form" model="ir.ui.view">
+        <field name="name">xb.support.proposal.form</field>
+        <field name="model">xb.support.proposal</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" string="Aprobar" type="object" class="btn-primary" invisible="state != 'pending'"/>
+                    <button name="action_done_notify" string="Hecho y avisar al cliente" type="object" class="btn-primary" invisible="state != 'approved'"/>
+                    <button name="action_done" string="Hecho" type="object" invisible="state not in ('pending', 'approved') or kind == 'add_number'"/>
+                    <button name="action_reject" string="Rechazar" type="object" invisible="state not in ('pending', 'approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved,done"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="kind != 'fix' or state != 'approved'">
+                        Por ahora el arreglo se hace a mano. Cuando quede, usa «Hecho y avisar al cliente».
+                    </div>
+                    <h1><field name="name"/></h1>
+                    <group>
+                        <group>
+                            <field name="kind"/>
+                            <field name="urgency"/>
+                            <field name="project_id" readonly="state != 'pending'"/>
+                        </group>
+                        <group>
+                            <field name="contact_id"/>
+                            <field name="whatsapp_number"/>
+                            <field name="channel_id"/>
+                            <field name="decided_by_id" invisible="not decided_by_id"/>
+                            <field name="decided_date" invisible="not decided_date"/>
+                        </group>
+                    </group>
+                    <group string="Número a autorizar" invisible="kind != 'add_number'">
+                        <field name="new_name" readonly="state != 'pending'"/>
+                        <field name="new_phone" readonly="state != 'pending'"/>
+                        <field name="new_role" readonly="state != 'pending'"/>
+                    </group>
+                    <group string="Qué encontró el agente" invisible="kind != 'fix'">
+                        <field name="problem" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Qué propone" invisible="kind != 'fix'">
+                        <field name="suggestion" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_xb_support_proposal_search" model="ir.ui.view">
+        <field name="name">xb.support.proposal.search</field>
+        <field name="model">xb.support.proposal</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter name="open" string="Por atender" domain="[('state', 'in', ('pending', 'approved'))]"/>
+                <filter name="urgent" string="Urgentes" domain="[('urgency', '=', 'high')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_xb_support_proposal" model="ir.actions.act_window">
+        <field name="name">Propuestas del agente</field>
+        <field name="res_model">xb.support.proposal</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+</odoo>

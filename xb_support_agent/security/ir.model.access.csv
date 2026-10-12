@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xb_support_contact_user,xb.support.contact usuario,model_xb_support_contact,base.group_user,1,1,1,1
+access_xb_support_knowledge_user,xb.support.knowledge usuario,model_xb_support_knowledge,base.group_user,1,1,1,1
+access_xb_support_proposal_user,xb.support.proposal usuario,model_xb_support_proposal,base.group_user,1,1,1,0
+access_xb_support_proposal_admin,xb.support.proposal admin,model_xb_support_proposal,base.group_system,1,1,1,1
+access_xb_support_job_user,xb.support.job usuario,model_xb_support_job,base.group_user,1,0,0,0
+access_xb_support_job_admin,xb.support.job admin,model_xb_support_job,base.group_system,1,1,1,1
+access_xb_support_service_user,xb.support.service usuario,model_xb_support_service,base.group_user,1,0,0,0
+access_xb_support_service_admin,xb.support.service admin,model_xb_support_service,base.group_system,1,1,1,1

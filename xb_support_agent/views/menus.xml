@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_xb_support_agent_root" name="Agente IA"
+              parent="whatsapp.whatsapp_menu_main" sequence="5"
+              groups="whatsapp.group_whatsapp_admin"/>
+    <menuitem id="menu_xb_support_proposal" name="Propuestas"
+              parent="menu_xb_support_agent_root" action="action_xb_support_proposal" sequence="1"/>
+    <menuitem id="menu_xb_support_job" name="Bitácora"
+              parent="menu_xb_support_agent_root" action="action_xb_support_job" sequence="2"/>
+    <menuitem id="menu_xb_support_contact" name="Números autorizados"
+              parent="menu_xb_support_agent_root" action="action_xb_support_contact" sequence="3"/>
+    <menuitem id="menu_xb_support_knowledge" name="Base de conocimiento"
+              parent="menu_xb_support_agent_root" action="action_xb_support_knowledge" sequence="4"/>
+    <menuitem id="menu_xb_support_service" name="Servicios cobrados"
+              parent="menu_xb_support_agent_root" action="action_xb_support_service" sequence="2"/>
+</odoo>

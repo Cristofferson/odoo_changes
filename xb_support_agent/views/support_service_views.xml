@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_support_service_view_list" model="ir.ui.view">
+        <field name="name">xb.support.service.list</field>
+        <field name="model">xb.support.service</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-muted="state == 'cancelled'" decoration-warning="state == 'team'">
+                <header>
+                    <button name="action_create_sale_orders" type="object" string="Crear órdenes de venta"
+                            class="btn-primary"/>
+                </header>
+                <field name="quote_dt" string="Fecha"/>
+                <field name="project_id"/>
+                <field name="partner_id"/>
+                <field name="contact_id"/>
+                <field name="name"/>
+                <field name="executor"/>
+                <field name="minutes" sum="Total"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-warning="state == 'team'" decoration-info="state == 'quoted'"/>
+                <field name="sale_order_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_support_service_view_form" model="ir.ui.view">
+        <field name="name">xb.support.service.form</field>
+        <field name="model">xb.support.service</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_done_notify" type="object" string="Hecho y avisar" class="btn-primary"
+                            invisible="state != 'team'"/>
+                    <button name="action_done" type="object" string="Hecho" invisible="state != 'team'"/>
+                    <button name="action_cancel" type="object" string="Cancelar"
+                            invisible="state not in ('quoted', 'team') or sale_order_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="quoted,team,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="partner_id"/>
+                            <field name="contact_id"/>
+                            <field name="whatsapp_number"/>
+                            <field name="channel_id"/>
+                        </group>
+                        <group>
+                            <field name="executor"/>
+                            <field name="minutes"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount"/>
+                            <field name="quote_dt"/>
+                            <field name="authorized_dt"/>
+                            <field name="authorization_message_id"/>
+                            <field name="done_dt"/>
+                            <field name="sale_order_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lo que se le enseñó" name="preview"><field name="preview"/></page>
+                        <page string="Lo que se hizo" name="result"><field name="result"/></page>
+                        <page string="Operaciones" name="ops" groups="base.group_no_one"><field name="operations"/></page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="xb_support_service_view_search" model="ir.ui.view">
+        <field name="name">xb.support.service.search</field>
+        <field name="model">xb.support.service</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="partner_id"/>
+                <filter name="to_bill" string="Por cobrar" domain="[('state', '=', 'done'), ('sale_order_id', '=', False)]"/>
+                <filter name="team" string="Para el equipo" domain="[('state', '=', 'team')]"/>
+                <separator/>
+                <filter name="group_partner" string="Cliente" context="{'group_by': 'partner_id'}"/>
+                <filter name="group_month" string="Mes" context="{'group_by': 'done_dt:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_xb_support_service" model="ir.actions.act_window">
+        <field name="name">Servicios cobrados</field>
+        <field name="res_model">xb.support.service</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"search_default_to_bill": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no hay servicios cobrados.</p>
+            <p>Cuando un titular le pide al agente que hagamos algo por él, aquí queda lo cotizado, su «SÍ» y lo
+               que se hizo. Selecciona los de un mes y pica «Crear órdenes de venta» para cobrarlos.</p>
+        </field>
+    </record>
+</odoo>

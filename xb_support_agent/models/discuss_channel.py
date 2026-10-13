@@ -117,7 +117,7 @@ XB_TOOLS = [
           "Errores técnicos recientes del servidor en el sistema del cliente (cuando dice que «algo marca error»).",
           {"horas": {"type": "integer", "description": "Cuántas horas hacia atrás (máx. 168)."}}),
     _tool("enviar_captura",
-          "Le manda al cliente (solo titular) una captura REAL de una pantalla de su sistema, con un texto resaltado "
+          "Le manda al cliente (titular o su invitado) una captura REAL de una pantalla de su sistema, con un texto resaltado "
           "en rojo, para enseñarle dónde picar. Úsala cuando no encuentre algo o pida «capturas». Va antes de tu texto.",
           {"menu": {"type": "string", "description": "Ruta del menú como se ve en Odoo, p. ej. «Punto de venta» o "
                                                       "«Punto de venta / Pedidos / Sesiones»."},
@@ -146,12 +146,15 @@ XB_TOOLS = [
            "propuesta": {"type": "string", "description": "Qué sugieres hacer, paso a paso."},
            "urgente": {"type": "boolean"}}),
     _tool("proponer_alta_numero",
-          "Solo para el titular: propone autorizar el celular de otra persona en el sistema actual. Queda pendiente de aprobación.",
+          "Solo para el titular (quien autoriza servicios): da acceso de CONSULTA a otra persona que no tiene usuario en el "
+          "sistema actual, o se lo quita (quitar=true). El invitado consulta (sin dinero) y recibe capturas; si pide un cambio "
+          "con costo, lo autoriza el titular desde su número. "
+          "Antes de usarla, confirma con el titular nombre y celular y que de verdad quiere compartir la consulta.",
           {"nombre": {"type": "string"},
            "celular": {"type": "string", "description": "10 dígitos."},
-           "tipo": {"type": "string", "enum": ["employee", "owner"]}}),
+           "quitar": {"type": "boolean", "description": "true = quitarle el acceso."}}),
     _tool("pasar_a_humano",
-          "Pasa la conversación a una persona del equipo con un resumen. Después de usarla, el agente deja de contestar en esta conversación por unas horas.",
+          "Pasa la conversación a una persona del equipo con un resumen. Después de usarla sigues contestando al cliente lo demás (dudas generales, otros temas); solo no repitas el mismo aviso.",
           {"motivo": {"type": "string", "enum": ["no_sabe", "dinero", "pide_humano", "caida_grave", "otro"]},
            "resumen": {"type": "string", "description": "Qué pide el cliente y qué revisaste ya."},
            "urgente": {"type": "boolean"}}),
@@ -445,18 +448,38 @@ class DiscussChannel(models.Model):
             for c in contactos:
                 rol = dict(c._fields["role"].selection)[c.role]
                 dinero = "sí" if c.can_billing else "no"
-                lineas.append(f"- {c.name} (usuario {c.remote_login}) · {rol} · sistema «{c.project_id.name}» (base {c.database_name}) · ve temas de dinero y autoriza servicios: {dinero}")
+                lineas.append(f"- {c.name} ({'INVITADO sin usuario propio: consulta sin dinero, capturas y puede pedir cambios que autoriza el titular' if c.guest else 'usuario ' + (c.remote_login or '')}) · {rol} · sistema «{c.project_id.name}» (base {c.database_name}) · ve temas de dinero y autoriza servicios: {dinero}")
             if proyecto:
                 lineas.append(f"Sistema de esta plática: «{proyecto.name}» (base {proyecto.database_name}).")
             else:
                 lineas.append("Todavía no se sabe de cuál sistema habla: pregúntale y usa seleccionar_sistema.")
         pendiente = self.env["xb.support.service"].sudo().search(
             [("channel_id", "=", self.id), ("state", "=", "quoted")], order="id desc", limit=1)
-        if pendiente:
+        de_invitado = self.env["xb.support.service"].sudo().search(
+            [("approver_id", "in", contactos.ids), ("state", "=", "quoted"),
+             ("quote_dt", ">", fields.Datetime.now() - timedelta(hours=24))], order="id desc", limit=1)
+        if de_invitado:
+            lineas.append(
+                f"SERVICIO PEDIDO POR UN INVITADO ESPERANDO EL SÍ DE ESTA PERSONA: id {de_invitado.id} «{de_invitado.name}», "
+                f"lo pidió {de_invitado.contact_id.name}, ${de_invitado.amount:,.2f} más IVA. Si el último mensaje de esta persona "
+                f"es SÍ (o equivalente), llama ejecutar_servicio con servicio_id={de_invitado.id}. Si dice que no, no hagas nada.")
+        if pendiente and pendiente.approver_id:
+            lineas.append(
+                f"SERVICIO PEDIDO POR ESTA PERSONA (invitada) ESPERANDO EL SÍ DE {pendiente.approver_id.name}: id {pendiente.id} "
+                f"«{pendiente.name}». Tú NO puedes autorizarlo: NO llames ejecutar_servicio en esta plática; si pregunta, dile que "
+                "está esperando esa autorización.")
+        elif pendiente:
             lineas.append(
                 f"SERVICIO COTIZADO ESPERANDO EL SÍ: id {pendiente.id} «{pendiente.name}», ${pendiente.amount:,.2f} más IVA. "
                 f"Si el último mensaje del cliente es SÍ (o equivalente), llama ejecutar_servicio con servicio_id={pendiente.id} "
                 "y NO vuelvas a cotizar. Solo cotiza de nuevo si el cliente cambió lo que pidió.")
+        if (self.xb_sa_pause_reason == "handoff" and not self.xb_sa_paused_until and self.xb_sa_hold_dt
+                and self.xb_sa_hold_dt > fields.Datetime.now() - timedelta(hours=48)):
+            lineas.append(
+                "YA SE AVISÓ a una persona del equipo sobre esta plática y ella contestará lo pendiente. NO te quedes callado: "
+                "sigue contestando con normalidad todo lo demás que pregunte (qué es XUBAX, dudas generales, etc.). No vuelvas a "
+                "usar pasar_a_humano por el mismo tema ni repitas «ya le avisé»; solo si pide algo NUEVO que tampoco puedas resolver. "
+                "No prometas fechas ni hagas lo que quedó en manos de la persona.")
         equipo = self._xb_sa_team_user()
         if equipo:
             lineas.append(
@@ -831,8 +854,8 @@ class DiscussChannel(models.Model):
                 body=cuerpo, message_type="whatsapp_message", author_id=self.env.ref("base.partner_root").id,
                 subtype_xmlid="mail.mt_comment", attachment_ids=adjunto.ids)
 
-    def _xb_sa_notify(self, record, users, resumen, urgente=False):
-        """Actividad para cada responsable; si es urgente, además aviso en su bandeja."""
+    def _xb_sa_notify(self, record, users, resumen, urgente=False, bandeja=False):
+        """Actividad para cada responsable; si es urgente (o se pide ``bandeja``), además aviso en su bandeja."""
         if not users:
             return
         for user in users:
@@ -842,9 +865,9 @@ class DiscussChannel(models.Model):
                 note=Markup(tools.plaintext2html(resumen)),
                 user_id=user.id,
             )
-        if urgente:
+        if urgente or bandeja:
             record.sudo().message_post(
-                body=Markup(tools.plaintext2html(f"🚨 Urgente: {resumen}")),
+                body=Markup(tools.plaintext2html(f"{'🚨 Urgente: ' if urgente else '🔔 '}{resumen}")),
                 partner_ids=users.partner_id.ids,
                 subtype_xmlid="mail.mt_comment",
             )
@@ -1029,7 +1052,15 @@ class DiscussChannel(models.Model):
         p = proyecto.sudo()
         if not (contacto and p.database_name):
             return {"ok": False, "motivo": "No hay un sistema autorizado seleccionado."}
-        if not (contacto.role == "owner" and contacto.can_billing):
+        aprobador = self.env["xb.support.contact"]
+        if contacto.guest:
+            # Invitado: puede pedirlo, pero el SÍ lo da el titular que lo invitó (desde su número).
+            aprobador = self.env["xb.support.contact"].sudo().search([
+                ("project_id", "=", p.id), ("guest", "=", False), ("active", "=", True), ("role", "=", "owner"),
+                ("can_billing", "=", True), ("remote_user_id", "=", contacto.remote_user_id)], limit=1)
+            if not aprobador:
+                return {"ok": False, "motivo": "El titular que lo invitó ya no puede autorizar: pasa a una persona del equipo."}
+        elif not (contacto.role == "owner" and contacto.can_billing):
             return {"ok": False, "motivo": "Solo quien autoriza servicios en su sistema puede pedirlos (tienen costo). "
                                            "Dile que se lo pida a esa persona, o explícale cómo hacerlo (eso es gratis)."}
         Servicio = self.env["xb.support.service"].sudo()
@@ -1058,9 +1089,25 @@ class DiscussChannel(models.Model):
         servicio = Servicio.create({
             "name": entrada.get("descripcion") or "Servicio en el sistema",
             "executor": ejecutor, "channel_id": self.id, "project_id": p.id, "contact_id": contacto.id,
-            "whatsapp_number": self.whatsapp_number, "minutes": minutos,
+            "approver_id": aprobador.id or False, "whatsapp_number": self.whatsapp_number, "minutes": minutos,
             "operations": json.dumps(plan, ensure_ascii=False) if plan else False, "preview": vista,
         })
+        if aprobador:
+            avisado = servicio._xb_ask_approver()
+            if not avisado:
+                self._xb_sa_notify(servicio, self.wa_account_id.sudo().xb_sa_support_user_ids,
+                                   f"{contacto.name} (invitado de {aprobador.name}) pide un servicio en {p.name}: "
+                                   f"{servicio.name}. No se pudo pedir el SÍ por WhatsApp a {aprobador.name} "
+                                   f"({aprobador.phone}): contáctalo.", bandeja=True)
+            return {"ok": True, "servicio_id": servicio.id, "minutos": minutos,
+                    "precio": f"${servicio.amount:,.2f} más IVA", "vista_previa": vista,
+                    "lo_hace": "la IA, en cuanto el titular autorice" if ejecutor == "ai"
+                    else "una persona del equipo, en horario de oficina",
+                    "siguiente": f"Dile qué se va a hacer y el precio MÁS IVA, y que lo autoriza {aprobador.name} (quien le dio "
+                                 "acceso): " + ("ya se le pidió por WhatsApp su SÍ. " if avisado else
+                                 "no se le pudo escribir ahora; el equipo lo contactará. ") +
+                                 "Tú NO puedes autorizarlo ni llamar ejecutar_servicio en esta plática; dile que le avisas "
+                                 "cuando quede."}
         return {"ok": True, "servicio_id": servicio.id, "minutos": minutos,
                 "precio": f"${servicio.amount:,.2f} más IVA",
                 "lo_hace": "la IA, en cuanto autorice" if ejecutor == "ai"
@@ -1071,16 +1118,26 @@ class DiscussChannel(models.Model):
 
     def _xb_sa_tool_ejecutar_servicio(self, job, entrada):
         Servicio = self.env["xb.support.service"].sudo()
+        mios = self._xb_sa_contacts()
+        propios = [("channel_id", "=", self.id), ("state", "=", "quoted"), ("approver_id", "=", False)]
+        de_invitados = [("approver_id", "in", mios.ids), ("state", "=", "quoted"),
+                        ("quote_dt", ">", fields.Datetime.now() - timedelta(hours=24))]
         servicio = Servicio.browse(int(entrada.get("servicio_id") or 0)).exists()
-        if not servicio or servicio.channel_id != self or servicio.state != "quoted":
-            servicio = Servicio.search([("channel_id", "=", self.id), ("state", "=", "quoted")], order="id desc", limit=1)
+        if not servicio or servicio.state != "quoted" or not (
+                (servicio.channel_id == self and not servicio.approver_id) or servicio.approver_id in mios):
+            servicio = Servicio.search(propios, order="id desc", limit=1) or Servicio.search(
+                de_invitados, order="id desc", limit=1)
         if not servicio:
-            return {"ok": False, "motivo": "No hay un servicio cotizado con ese número en esta plática."}
-        si = servicio._xb_authorization()
+            return {"ok": False, "motivo": "No hay un servicio cotizado con ese número en esta plática "
+                                           "(si lo pidió un invitado, solo lo autoriza el titular desde su número)."}
+        si = servicio._xb_authorization(self)
         if not si:
             return {"ok": False, "motivo": "El cliente todavía no respondió SÍ después de la cotización (o pasaron "
                                            "más de 24 h). Pídele que lo confirme."}
         servicio.write({"authorized_dt": fields.Datetime.now(), "authorization_message_id": si.id})
+        self._xb_sa_tell_guest(servicio, f"{servicio.approver_id.name} autorizó tu solicitud: «{servicio.name}». "
+                                         + ("Ya lo estoy haciendo." if servicio.executor == "ai"
+                                            else "Una persona del equipo lo hará en horario de oficina y te confirma."))
         acc = self.wa_account_id.sudo()
         usados = servicio._xb_month_minutes(servicio.project_id)
         if usados + servicio.minutes > servicio._xb_cap_minutes() and servicio.executor == "ai":
@@ -1113,7 +1170,18 @@ class DiscussChannel(models.Model):
         servicio.write({"state": "done", "done_dt": fields.Datetime.now(),
                         "result": servicio._xb_preview_text(hechos)})
         servicio._xb_notify_authorizers()
+        self._xb_sa_tell_guest(servicio, f"Listo: «{servicio.name}» ya quedó hecho.")
         return {"ok": True, "hecho": hechos, "cobro": f"${servicio.amount:,.2f} más IVA, se suma a su factura del mes"}
+
+    def _xb_sa_tell_guest(self, servicio, texto):
+        """Si lo pidió un invitado, se le avisa en SU plática (el titular autoriza desde la suya)."""
+        canal = servicio.channel_id
+        if not (servicio.approver_id and canal and canal != self):
+            return
+        try:
+            canal._xb_sa_send(texto)
+        except Exception:  # noqa: BLE001 - fuera de la ventana de 24 h no se puede; el equipo ya lo sabe
+            _logger.warning("xb_support_agent: no se pudo avisar al invitado del servicio %s", servicio.id)
 
     def _xb_sa_tool_errores_del_servidor(self, job, entrada):
         _contactos, contacto, proyecto = self._xb_sa_current()
@@ -1149,28 +1217,43 @@ class DiscussChannel(models.Model):
         return {"ok": True, "propuesta": prop.id, "nota": "Queda pendiente de que el equipo la apruebe."}
 
     def _xb_sa_tool_proponer_alta_numero(self, job, entrada):
+        from . import support_contact
         _contactos, contacto, proyecto = self._xb_sa_current()
-        return {"ok": False, "motivo": "Los números ya no se autorizan aquí: cada persona se reconoce por el "
-                                       "teléfono de SU usuario en su sistema. Dile al cliente que capture el celular en "
-                                       "la ficha del usuario (Ajustes › Usuarios) y que esa persona escriba de nuevo."}
-        if not (contacto and contacto.role == "owner"):
-            return {"ok": False, "motivo": "Solo quien autoriza servicios puede pedir autorizar otros números."}
-        if not xb_phone_key(entrada.get("celular")):
+        if not (contacto and contacto.role == "owner" and contacto.can_billing and not contacto.guest):
+            return {"ok": False, "motivo": "Solo quien autoriza servicios en el sistema puede dar acceso a otra persona."}
+        clave = xb_phone_key(entrada.get("celular"))
+        if not clave:
             return {"ok": False, "motivo": "El celular debe tener 10 dígitos."}
+        Contacto = self.env["xb.support.contact"].sudo().with_context(active_test=False)
+        previo = Contacto.search([("phone_key", "=", clave), ("project_id", "=", proyecto.id)], limit=1)
         acc = self.wa_account_id.sudo()
-        prop = self.env["xb.support.proposal"].sudo().with_company(acc._xb_sa_company()).create({
-            "name": f"Autorizar a {entrada.get('nombre')} en {proyecto.name}",
-            "kind": "add_number",
-            "channel_id": self.id,
-            "project_id": proyecto.id,
-            "contact_id": contacto.id,
-            "whatsapp_number": self.whatsapp_number,
-            "new_name": entrada.get("nombre"),
-            "new_phone": entrada.get("celular"),
-            "new_role": entrada.get("tipo") or "employee",
-        })
-        self._xb_sa_notify(prop, acc.xb_sa_support_user_ids, prop.name)
-        return {"ok": True, "nota": "Queda pendiente de aprobación; se le avisará al titular por aquí."}
+        if entrada.get("quitar"):
+            if not (previo and previo.guest):
+                return {"ok": False, "motivo": "Ese número no es un invitado de este sistema."}
+            previo.active = False
+            support_contact._XB_RESOLVE_CACHE.clear()
+            self._xb_sa_notify(proyecto, acc.xb_sa_support_user_ids,
+                               f"{contacto.name} quitó el acceso de invitado de {previo.name} en {proyecto.name}")
+            return {"ok": True, "nota": f"Listo: {previo.name} ya no puede consultar."}
+        if previo and not previo.guest and previo.active:
+            return {"ok": False, "motivo": "Esa persona ya tiene acceso como usuario del sistema."}
+        nombre = (entrada.get("nombre") or "").strip()
+        if not nombre:
+            return {"ok": False, "motivo": "Falta el nombre de la persona."}
+        vals = {"name": nombre, "phone": entrada.get("celular"), "project_id": proyecto.id, "guest": True,
+                "guest_by": contacto.name, "auto": False, "active": True, "role": "employee", "can_billing": False,
+                "remote_user_id": contacto.remote_user_id, "remote_login": f"invitado de {contacto.name}",
+                "note": f"Invitado por {contacto.name} desde WhatsApp ({fields.Date.today()})."}
+        if previo:
+            previo.write(vals)
+        else:
+            Contacto.create(vals)
+        support_contact._XB_RESOLVE_CACHE.clear()
+        self._xb_sa_notify(proyecto, acc.xb_sa_support_user_ids,
+                           f"{contacto.name} dio acceso de consulta a {nombre} ({entrada.get('celular')}) en {proyecto.name}")
+        return {"ok": True, "nota": f"Listo: {nombre} ya puede escribir a este número y consultar {proyecto.name} "
+                                    "(consulta sin dinero, capturas; si pide un cambio con costo, lo autorizas tú con un SÍ). Avísale tú que ya puede "
+                                    "escribir; si quieres quitarle el acceso, dímelo."}
 
     def _xb_sa_tool_pasar_a_humano(self, job, entrada):
         acc = self.wa_account_id.sudo()
@@ -1195,14 +1278,13 @@ class DiscussChannel(models.Model):
                 "partner_id": contacto.partner_id.id or False,
                 "priority": "3" if urgente else "1",
             })
-        self._xb_sa_notify(registro, users, f"{titulo}\n{cuerpo}", urgente)
-        # La caída grave se sigue atendiendo; lo demás queda en manos de la persona.
+        if not _contactos:
+            # Prospecto o miembro de BNI: también le toca a ventas (Josette), no solo a soporte.
+            users = users | acc.xb_sa_sales_user_ids | lead.user_id
+        self._xb_sa_notify(registro, users, f"{titulo}\n{cuerpo}", urgente, bandeja=True)
+        # El agente NO se calla: sigue contestando lo demás. Solo se recuerda que ya se avisó.
         if entrada.get("motivo") != "caida_grave":
-            self.sudo().write({
-                "xb_sa_paused_until": fields.Datetime.now() + timedelta(hours=max(acc.xb_sa_pause_hours, 0)),
-                "xb_sa_pause_reason": "handoff",
-                "xb_sa_hold_dt": fields.Datetime.now(),
-            })
+            self.sudo().write({"xb_sa_pause_reason": "handoff", "xb_sa_hold_dt": fields.Datetime.now()})
         return {"ok": True, "nota": "El equipo ya fue avisado. Díselo al cliente con amabilidad."}
 
     def _xb_sa_lead_vals(self, acc):

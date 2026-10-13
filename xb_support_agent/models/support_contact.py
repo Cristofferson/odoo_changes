@@ -53,11 +53,17 @@ class XbSupportContact(models.Model):
                                        help="El usuario que la persona confirmó ser por WhatsApp.")
     challenge_dt = fields.Datetime("Se le pidió confirmar", readonly=True)
     confirmed = fields.Boolean("Identidad confirmada", compute="_compute_confirmed")
+    guest = fields.Boolean(
+        "Invitado del titular", readonly=True,
+        help="Persona sin usuario en su sistema a la que el titular dio acceso por WhatsApp. Consulta sin "
+             "dinero, recibe capturas (sin pantallas de dinero) y puede pedir cambios con costo, que autoriza el titular "
+             "con un SÍ desde su número; ve lo mismo que el titular que la invitó. Si luego tiene usuario propio con ese teléfono, se reconoce como usuario.")
+    guest_by = fields.Char("Autorizado por", readonly=True)
 
-    @api.depends("remote_user_id", "confirmed_user_id")
+    @api.depends("remote_user_id", "confirmed_user_id", "guest")
     def _compute_confirmed(self):
         for rec in self:
-            rec.confirmed = bool(rec.remote_user_id and rec.remote_user_id == rec.confirmed_user_id)
+            rec.confirmed = bool(rec.guest or (rec.remote_user_id and rec.remote_user_id == rec.confirmed_user_id))
 
     _phone_project_unique = models.Constraint(
         "UNIQUE(phone_key, project_id)",
@@ -110,6 +116,9 @@ class XbSupportContact(models.Model):
                 continue
             previo = Contacto.search([("phone_key", "=", key), ("project_id", "=", p.id)], limit=1)
             if len(usuarios) != 1:
+                if previo.guest and not usuarios:
+                    resultado |= previo if previo.active else previo.browse()
+                    continue
                 if previo.active:
                     previo.active = False
                 if len(usuarios) > 1:
@@ -118,6 +127,7 @@ class XbSupportContact(models.Model):
                 continue
             u = usuarios[0]
             vals = {"name": u["name"], "phone": number, "auto": True, "active": True,
+                    "guest": False, "guest_by": False,
                     "remote_user_id": u["id"], "remote_login": u["login"],
                     "role": "owner" if u["autoriza"] else "employee", "can_billing": u["autoriza"]}
             if previo:

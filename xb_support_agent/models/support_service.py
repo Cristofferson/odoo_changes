@@ -43,7 +43,10 @@ class XbSupportService(models.Model):
     channel_id = fields.Many2one("discuss.channel", string="Conversación", ondelete="set null")
     project_id = fields.Many2one("project.project", string="Sistema", required=True)
     partner_id = fields.Many2one("res.partner", related="project_id.partner_id", store=True, string="Se le cobra a")
-    contact_id = fields.Many2one("xb.support.contact", string="Lo autorizó")
+    contact_id = fields.Many2one("xb.support.contact", string="Lo pidió")
+    approver_id = fields.Many2one(
+        "xb.support.contact", string="Debe autorizarlo",
+        help="Si lo pidió un invitado, el titular que lo invitó es quien tiene que responder SÍ (desde su número).")
     whatsapp_number = fields.Char("Número")
     operations = fields.Text("Operaciones (JSON)")
     preview = fields.Text("Lo que se le enseñó al cliente")
@@ -85,9 +88,31 @@ class XbSupportService(models.Model):
                 return m
         return False
 
-    def _xb_authorization(self):
+    def _xb_authorization(self, channel=None):
+        """El SÍ debe venir de quien autoriza: en la plática del invitado no cuenta, en la del titular sí."""
         self.ensure_one()
-        return self._xb_inbound_yes(self.channel_id, self.quote_dt)
+        return self._xb_inbound_yes(channel or self.channel_id, self.quote_dt)
+
+    def _xb_ask_approver(self):
+        """Le pide el SÍ al titular por su WhatsApp (si escribió hace menos de 23 h). Devuelve si pudo avisarle."""
+        self.ensure_one()
+        from .support_contact import xb_phone_key
+        ap = self.approver_id
+        canal = self.env["discuss.channel"].sudo().search([
+            ("channel_type", "=", "whatsapp"), ("wa_account_id", "=", self.channel_id.wa_account_id.id),
+            ("whatsapp_number", "like", "%" + xb_phone_key(ap.phone))], limit=1)
+        if not canal:
+            return False
+        ultimos = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", canal.id), ("message_type", "=", "whatsapp_message"),
+            ("date", ">", fields.Datetime.now() - timedelta(hours=23))], order="id desc", limit=10)
+        if not any(m.wa_message_ids.filtered(lambda w: w.message_type == "inbound") for m in ultimos):
+            return False
+        canal._xb_sa_send(
+            f"Hola, {self.contact_id.name} pide en {self.project_id.name}: {self.name}. "
+            f"Cuesta ${self.amount:,.2f} más IVA ({self.minutes} min de servicio). "
+            f"Si lo autorizas, responde SÍ; si no, ignora este mensaje.")
+        return True
 
     @api.model
     def _xb_cap_minutes(self):
@@ -116,7 +141,7 @@ class XbSupportService(models.Model):
             "<p>Se autorizó un servicio de XUBAX en <b>%s</b>.</p><ul><li>Autorizó: <b>%s</b> (por WhatsApp)</li>"
             "<li>Servicio: %s</li><li>Tiempo: %s min · $%s más IVA</li></ul>"
             "<p>Se suma a la factura del mes. Si no lo reconoces, responde a este correo.</p>") % (
-            self.project_id.name, self.contact_id.name or self.whatsapp_number, self.name, self.minutes,
+            self.project_id.name, (self.approver_id or self.contact_id).name or self.whatsapp_number, self.name, self.minutes,
             f"{self.amount:,.2f}")
         self.env["mail.mail"].sudo().create({
             "subject": "Servicio autorizado por WhatsApp · %s" % self.project_id.name,

@@ -6,7 +6,7 @@ registro y un texto a resaltar). Aquí se valida que ese menú abra una VISTA
 (``ir.actions.act_window``; nunca acciones de servidor ni pantallas que hagan
 algo al abrirse, como la caja) y luego un navegador sin pantalla entra con el
 magic-link de ``despacho_autologin`` de ESA base, toma la foto y cierra sesión.
-Solo para quien autoriza servicios; la captura se toma con la sesión de esa persona.
+Para quien autoriza servicios y para sus invitados (sin pantallas de dinero); la captura se toma con la sesión del titular.
 """
 import base64
 import hashlib
@@ -48,7 +48,7 @@ def _sin_tope_de_memoria():
     resource.setrlimit(resource.RLIMIT_AS, (duro, duro))
 
 
-def _resolver(env, menu, registro_id):
+def _resolver(env, menu, registro_id, sin_dinero=False):
     """(url, título) de la vista pedida, o error. Solo vistas (act_window)."""
     Menus = env["ir.ui.menu"]
     partes = [p.strip() for p in (menu or "").replace(">", "/").split("/") if p.strip()]
@@ -69,6 +69,8 @@ def _resolver(env, menu, registro_id):
             for x in pila:
                 accion = x.action
                 if accion and accion._name == "ir.actions.act_window":
+                    if sin_dinero and accion.res_model.startswith(client_query.XB_MONEY_MODELS):
+                        raise ValueError("Esa pantalla es de dinero (contabilidad, nómina); no se le manda a un invitado.")
                     url = f"/odoo/action-{accion.id}"
                     if registro_id:
                         registro = env[accion.res_model].browse(int(registro_id)).exists()
@@ -82,10 +84,10 @@ def _resolver(env, menu, registro_id):
 
 def tomar_captura(dbname, contacto, menu, registro_id, resaltar):
     """Devuelve (jpeg_bytes, título, resaltado)."""
-    if client_query._rol(contacto) != "owner":
-        raise ValueError("Las capturas solo se mandan al titular del sistema.")
+    if client_query._rol(contacto) != "owner" and not contacto.guest:
+        raise ValueError("Las capturas solo se mandan al titular del sistema o a sus invitados.")
     with client_query.client_env(dbname, contacto) as (env, _rol):
-        url, titulo = _resolver(env, menu, registro_id)
+        url, titulo = _resolver(env, menu, registro_id, sin_dinero=client_query._rol(contacto) != "owner")
         env.cr.execute("SELECT value FROM ir_config_parameter WHERE key = 'despacho_autologin.secret'")
         fila = env.cr.fetchone()
     if not fila or not fila[0]:

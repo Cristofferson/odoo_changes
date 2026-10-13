@@ -208,6 +208,23 @@ XB_TOOLS = [
 ]
 
 
+# Solo para el EQUIPO de XUBAX reconocido por su teléfono (ver _xb_sa_team_user).
+XB_TEAM_TOOLS = [
+    _tool("ver_citas_bni",
+          "EQUIPO: lista los 1 a 1 de BNI próximos (id, miembro, fecha y hora).",
+          {}),
+    _tool("mover_cita_bni",
+          "EQUIPO: cambia la fecha y hora de un 1 a 1 de BNI. Avisa al miembro por WhatsApp si escribió hace menos de 24 h.",
+          {"cita_id": {"type": "integer", "description": "Id de la cita, de ver_citas_bni."},
+           "inicio": {"type": "string", "description": "Nueva fecha y hora de Ciudad de México, AAAA-MM-DD HH:MM (puede ser cualquier minuto, p. ej. 09:10)."}}),
+    _tool("cancelar_cita_bni",
+          "EQUIPO: cancela un 1 a 1 de BNI. Úsala SOLO después de que la persona del equipo confirme que la quiere cancelar.",
+          {"cita_id": {"type": "integer", "description": "Id de la cita, de ver_citas_bni."}}),
+]
+for _t in XB_TEAM_TOOLS:
+    _t.pop("strict", None)
+
+
 # La API acepta como máximo 20 herramientas «strict»: las de BNI van sin ese modo
 # (los manejadores leen la entrada con .get, así que toleran campos faltantes).
 XB_NON_STRICT = {"marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
@@ -440,6 +457,14 @@ class DiscussChannel(models.Model):
                 f"SERVICIO COTIZADO ESPERANDO EL SÍ: id {pendiente.id} «{pendiente.name}», ${pendiente.amount:,.2f} más IVA. "
                 f"Si el último mensaje del cliente es SÍ (o equivalente), llama ejecutar_servicio con servicio_id={pendiente.id} "
                 "y NO vuelvas a cotizar. Solo cotiza de nuevo si el cliente cambió lo que pidió.")
+        equipo = self._xb_sa_team_user()
+        if equipo:
+            lineas.append(
+                f"Esta persona es del EQUIPO de XUBAX: {equipo.name} (usuario interno, reconocida por su teléfono). No es prospecto ni "
+                "miembro: no le vendas ni le des el trato de BNI. Si pide ver, mover o cancelar un 1 a 1 de BNI, usa ver_citas_bni y "
+                "luego mover_cita_bni o cancelar_cita_bni (la hora puede ser cualquier minuto, p. ej. 9:10). Mover: hazlo directo y dile qué "
+                "quedó y si el miembro fue avisado. Cancelar: confirma primero con ella. Si la persona del equipo pide mover algo que NO es "
+                "un 1 a 1 de BNI, dile que eso lo haga ella desde Odoo. Si pregunta otra cosa, contesta con naturalidad y trátala de tú.")
         if self._xb_sa_is_bni():
             lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
@@ -625,7 +650,8 @@ class DiscussChannel(models.Model):
         mensajes = historial + [{"role": "system",
                                  "content": self._xb_sa_context_text(contactos, contacto, proyecto)}]
         texto = ""
-        herramientas = XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
+        herramientas = (XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
+                        + (XB_TEAM_TOOLS if self._xb_sa_team_user() else []))
         for _ronda in range(XB_MAX_TOOL_ROUNDS):
             kwargs = dict(
                 model=acc.xb_sa_model,
@@ -1247,6 +1273,90 @@ class DiscussChannel(models.Model):
             self.sudo().message_post(
                 body=cuerpo, message_type="whatsapp_message", author_id=self.env.ref("base.partner_root").id,
                 subtype_xmlid="mail.mt_comment", attachment_ids=adjunto.ids)
+
+    def _xb_sa_team_user(self):
+        """Usuario interno de XUBAX dueño de este teléfono, si está en la lista del equipo (parámetro
+        xb_support_agent.team_user_ids = ids separados por coma). Vacío si no."""
+        self.ensure_one()
+        llave = xb_phone_key(self.whatsapp_number)
+        ids = [int(x) for x in re.findall(r"\d+", self.env["ir.config_parameter"].sudo().get_param(
+            "xb_support_agent.team_user_ids") or "")]
+        if not (llave and ids):
+            return self.env["res.users"]
+        return self.env["res.users"].sudo().browse(ids).filtered(
+            lambda u: u.active and not u.share and xb_phone_key(u.partner_id.phone) == llave)[:1]
+
+    def _xb_sa_team_events(self, cita_id=None):
+        tipo = self.wa_account_id.sudo().xb_sa_bni_appointment_type_id
+        dom = [("appointment_type_id", "=", tipo.id), ("start", ">", fields.Datetime.now())]
+        if cita_id:
+            dom.append(("id", "=", int(cita_id)))
+        return self.env["calendar.event"].sudo().search(dom, order="start", limit=30)
+
+    def _xb_sa_local(self, dt):
+        return pytz.utc.localize(dt).astimezone(pytz.timezone(XB_TZ))
+
+    def _xb_sa_tool_ver_citas_bni(self, job, entrada):
+        if not self._xb_sa_team_user():
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        return {"ok": True, "citas": [
+            {"cita_id": e.id, "miembro": ", ".join((e.partner_ids - e.user_id.partner_id).mapped("name")),
+             "cuando": f"{XB_DIAS[self._xb_sa_local(e.start).weekday()]} {self._xb_sa_local(e.start):%d/%m/%Y %H:%M}"}
+            for e in self._xb_sa_team_events()]}
+
+    def _xb_sa_tell_member(self, evento, texto):
+        """Avisa al miembro en su plática si escribió hace menos de 24 h (ventana libre de WhatsApp). Devuelve si lo avisó."""
+        socio = (evento.partner_ids - evento.user_id.partner_id)[:1]
+        canal = self.env["discuss.channel"].sudo().search([
+            ("whatsapp_partner_id", "=", socio.id), ("wa_account_id", "=", self.wa_account_id.id)], limit=1)
+        if not canal:
+            return False
+        ultimo = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", canal.id), ("message_type", "=", "whatsapp_message"),
+            ("date", ">", fields.Datetime.now() - timedelta(hours=23))], order="id desc", limit=10)
+        if not any(m.wa_message_ids.filtered(lambda w: w.message_type == "inbound") for m in ultimo):
+            return False
+        canal._xb_sa_send(texto)
+        return True
+
+    def _xb_sa_tool_mover_cita_bni(self, job, entrada):
+        if not self._xb_sa_team_user():
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        evento = self._xb_sa_team_events(entrada.get("cita_id"))[:1]
+        if not evento:
+            return {"ok": False, "motivo": "No encuentro ese 1 a 1 de BNI próximo; usa ver_citas_bni."}
+        try:
+            local = pytz.timezone(XB_TZ).localize(datetime.strptime((entrada.get("inicio") or "").strip(), "%Y-%m-%d %H:%M"))
+        except ValueError:
+            return {"ok": False, "motivo": "La fecha debe ir como AAAA-MM-DD HH:MM."}
+        inicio = local.astimezone(pytz.utc).replace(tzinfo=None)
+        if inicio <= fields.Datetime.now():
+            return {"ok": False, "motivo": "Esa hora ya pasó."}
+        fin = inicio + (evento.stop - evento.start)
+        choque = self.env["calendar.event"].sudo().search([
+            ("user_id", "=", evento.user_id.id), ("id", "!=", evento.id), ("start", "<", fin), ("stop", ">", inicio)], limit=1)
+        if choque:
+            return {"ok": False, "motivo": f"A esa hora Josette ya tiene «{choque.name}»; escoge otra o pídele que la libere."}
+        evento.write({"start": inicio, "stop": fin})
+        miembro = ", ".join((evento.partner_ids - evento.user_id.partner_id).mapped("name"))
+        cuando = f"{XB_DIAS[local.weekday()]} {local:%d/%m/%Y a las %H:%M}"
+        avisado = self._xb_sa_tell_member(evento, f"Hola, te aviso que tu 1 a 1 con Josette cambió: ahora es el {cuando}. "
+                                                  "Si no te acomoda, dime y lo vemos.")
+        return {"ok": True, "miembro": miembro, "nuevo_horario": cuando, "miembro_avisado_por_whatsapp": avisado,
+                "nota": "" if avisado else "No se le pudo avisar por WhatsApp (no ha escrito en 24 h): dile a la persona del equipo que le avise."}
+
+    def _xb_sa_tool_cancelar_cita_bni(self, job, entrada):
+        if not self._xb_sa_team_user():
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        evento = self._xb_sa_team_events(entrada.get("cita_id"))[:1]
+        if not evento:
+            return {"ok": False, "motivo": "No encuentro ese 1 a 1 de BNI próximo; usa ver_citas_bni."}
+        miembro = ", ".join((evento.partner_ids - evento.user_id.partner_id).mapped("name"))
+        cuando = f"{XB_DIAS[self._xb_sa_local(evento.start).weekday()]} {self._xb_sa_local(evento.start):%d/%m/%Y %H:%M}"
+        avisado = self._xb_sa_tell_member(evento, f"Hola, te aviso que se canceló tu 1 a 1 con Josette del {cuando}. "
+                                                  "Si quieres, te busco otro horario.")
+        evento.unlink()
+        return {"ok": True, "miembro": miembro, "cancelada": cuando, "miembro_avisado_por_whatsapp": avisado}
 
     def _xb_sa_fix_event(self, evento, tipo, nombre):
         """La cita del 1 a 1 de BNI sale con su nombre (no el del tipo de cita copiado)."""

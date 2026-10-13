@@ -1248,6 +1248,13 @@ class DiscussChannel(models.Model):
                 body=cuerpo, message_type="whatsapp_message", author_id=self.env.ref("base.partner_root").id,
                 subtype_xmlid="mail.mt_comment", attachment_ids=adjunto.ids)
 
+    def _xb_sa_fix_event(self, evento, tipo, nombre):
+        """La cita del 1 a 1 de BNI sale con su nombre (no el del tipo de cita copiado)."""
+        evento = evento.sudo().with_context(dont_notify=True)
+        if tipo == self.wa_account_id.sudo().xb_sa_bni_appointment_type_id:
+            evento.name = f"1a1 con Josette - {nombre}"
+        return evento
+
     def _xb_sa_bni_event(self):
         """La próxima cita de 1 a 1 de este miembro."""
         partner = self.whatsapp_partner_id.sudo()
@@ -1523,6 +1530,7 @@ class DiscussChannel(models.Model):
         ).sudo().create(vals)
         if not self.xb_sa_lead_id and evento.opportunity_id:
             self.sudo().xb_sa_lead_id = evento.opportunity_id
+        self._xb_sa_fix_event(evento, tipo, nombre)
         if not evento.opportunity_id:  # con oportunidad, la app Citas ya le deja la actividad a quien da la demo
             self._xb_sa_notify(job, usuario, f"Demo agendada por WhatsApp: {pedido} con {nombre}")
         return {"ok": True, "cuando": pedido, "con": usuario.name, "duracion_minutos": round(tipo.appointment_duration * 60),

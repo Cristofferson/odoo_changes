@@ -86,7 +86,7 @@ class XbSupportContact(models.Model):
         * Si el número pasa a otro usuario, se pide confirmar de nuevo y se avisa al equipo.
         Devuelve los contactos (confirmados o pendientes de confirmar).
         """
-        from . import client_query
+        from . import client_query, remote
         key = xb_phone_key(number)
         if not key:
             return self.browse()
@@ -98,10 +98,13 @@ class XbSupportContact(models.Model):
         proyectos = self.env["project.project"].sudo().search([
             ("xb_support_active", "=", True), ("database_name", "!=", False)])
         for p in proyectos:
-            if not (p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER):
+            local = p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER
+            if not local and not remote.configurado(self.env, p.despacho_server):
                 continue
             try:
-                usuarios = client_query.usuarios_por_telefono(p.database_name, key)
+                usuarios = (client_query.usuarios_por_telefono(p.database_name, key) if local
+                            else remote.llamar(self.env, p.despacho_server, "usuarios_por_telefono",
+                                               db=p.database_name, key=key))
             except Exception:  # noqa: BLE001 - un sistema caído no tumba a los demás
                 _logger.exception("xb_support_agent: no se pudo buscar el teléfono en %s", p.database_name)
                 continue

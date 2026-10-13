@@ -27,7 +27,7 @@ from odoo.tools import html2plaintext
 from .support_contact import xb_phone_key
 import mimetypes
 
-from . import bni_card, client_query, client_write, screenshots, support_service
+from . import bni_card, client_query, client_write, remote, screenshots, support_service
 
 _logger = logging.getLogger(__name__)
 
@@ -972,11 +972,19 @@ class DiscussChannel(models.Model):
         if not (contacto and proyecto):
             return {"ok": False, "motivo": "No hay un sistema autorizado seleccionado para este número."}
         p = proyecto.sudo()
-        if not (p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER and p.database_name):
+        local = p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER
+        if not p.database_name or not (local or remote.configurado(self.env, p.despacho_server)):
             return {"ok": False, "motivo": "Este sistema vive en otro servidor: solo se puede revisar con revisar_sistema."}
         try:
+            if not local:
+                c = contacto.sudo()
+                return remote.llamar(self.env, p.despacho_server, "consulta", db=p.database_name, fn=fn.__name__,
+                                     args=list(args), contacto={"role": c.role, "can_billing": c.can_billing,
+                                                                "remote_user_id": c.remote_user_id})
             with client_query.client_env(p.database_name, contacto.sudo()) as (env, rol):
                 return fn(env, rol, *args)
+        except remote.XbRemoteError as e:
+            return {"ok": False, "motivo": f"No pude consultar ese sistema ahora ({e}). Pasa a una persona si hace falta."}
         except client_query.XbNoAgentUser:
             return {"ok": False, "motivo": "Este sistema todavía no tiene dado de alta el usuario de consulta del "
                                            "agente; no se pueden ver sus datos. Pásalo a una persona si hace falta."}
@@ -1110,8 +1118,15 @@ class DiscussChannel(models.Model):
     def _xb_sa_tool_errores_del_servidor(self, job, entrada):
         _contactos, contacto, proyecto = self._xb_sa_current()
         p = proyecto.sudo()
-        if not (contacto and p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER and p.database_name):
+        local = p.despacho_db_local and p.despacho_server == XB_LOCAL_SERVER
+        if not (contacto and p.database_name and (local or remote.configurado(self.env, p.despacho_server))):
             return {"ok": False, "motivo": "No disponible para este sistema."}
+        if not local:
+            try:
+                return remote.llamar(self.env, p.despacho_server, "errores_recientes", db=p.database_name,
+                                     horas=entrada.get("horas"))
+            except remote.XbRemoteError as e:
+                return {"ok": False, "motivo": f"No pude revisar ese servidor ahora ({e})."}
         return client_query.errores_recientes(p.database_name, entrada.get("horas"))
 
     def _xb_sa_tool_proponer_arreglo(self, job, entrada):

@@ -45,6 +45,21 @@ XB_MONEY_FIELDS = re.compile(
     r"(price|amount|cost|total|margin|balance|debit|credit|salary|wage|tax|discount|residual|cash|payment|paid)", re.I)
 
 
+def xb_phone_key(number):
+    """Últimos 10 dígitos de un teléfono (igual que support_contact.xb_phone_key; aquí para que este
+    archivo también corra solo en el módulo xb_support_reader de los otros servidores)."""
+    digitos = re.sub(r"\D", "", number or "")
+    return digitos[-10:] if len(digitos) >= 10 else ""
+
+
+def _telefonos(partner):
+    """Teléfonos de un contacto: «phone» y, en versiones que lo tienen, «mobile»."""
+    salida = [partner.phone]
+    if "mobile" in partner._fields:
+        salida.append(partner.mobile)
+    return salida
+
+
 class XbNoAgentUser(Exception):
     """El usuario ligado al número ya no existe, está archivado o no es interno."""
 
@@ -56,7 +71,6 @@ def _rol(contacto):
 def usuarios_por_telefono(dbname, key):
     """Usuarios internos y activos del sistema cuyo teléfono termina en ``key``
     (10 dígitos). Solo lectura. ``autoriza`` = está en el grupo «Autoriza servicios XUBAX»."""
-    from .support_contact import xb_phone_key
     with Registry(dbname).cursor() as cr:
         cr.execute("SET TRANSACTION READ ONLY")
         cr.execute("SET LOCAL statement_timeout = %s", (XB_TIMEOUT_MS,))
@@ -64,7 +78,7 @@ def usuarios_por_telefono(dbname, key):
         grupo = env["res.groups"].search([("name", "=", XB_AUTH_GROUP)], limit=1)
         salida = []
         for u in env["res.users"].search([("share", "=", False), ("active", "=", True)]):
-            if xb_phone_key(u.partner_id.phone) == key:
+            if key in {xb_phone_key(t) for t in _telefonos(u.partner_id)}:
                 salida.append({"id": u.id, "login": u.login, "name": u.name,
                                "autoriza": bool(grupo and grupo in u.group_ids)})
         cr.rollback()
@@ -81,6 +95,17 @@ def autorizadores(dbname):
                  if u.active and not u.share]
         cr.rollback()
         return gente
+
+
+def autorizadores_de(env, proyecto):
+    """Como autorizadores(), para un proyecto que puede vivir en este servidor o en otro."""
+    from . import remote
+    if proyecto.despacho_db_local and proyecto.despacho_server == "odoo19":
+        return autorizadores(proyecto.database_name)
+    try:
+        return [tuple(x) for x in remote.llamar(env, proyecto.despacho_server, "autorizadores", db=proyecto.database_name)]
+    except Exception:  # noqa: BLE001 - sin llave o servidor caído: nadie a quien avisar
+        return []
 
 
 def usuario_vigente(cr, uid):
@@ -255,9 +280,23 @@ def resumir_registros(env, rol, modelo, dominio, agrupar_por, totales, orden, li
     model = _check_model(env, rol, modelo)
     agrupar_por = [g for g in (agrupar_por or []) if _allowed_field(model, g.split(":")[0], rol)]
     totales = [t for t in (totales or []) if _allowed_field(model, t.split(":")[0], rol)]
-    grupos = model.formatted_read_group(
-        _domain(dominio), groupby=agrupar_por, aggregates=["__count", *totales],
-        order=orden or None, limit=max(1, min(int(limite or 30), 100)))
+    limite = max(1, min(int(limite or 30), 100))
+    if hasattr(model, "formatted_read_group"):
+        grupos = model.formatted_read_group(
+            _domain(dominio), groupby=agrupar_por, aggregates=["__count", *totales],
+            order=orden or None, limit=limite)
+    else:  # Odoo 18: read_group con los nombres de columna de formatted_read_group
+        crudo = model.read_group(_domain(dominio), fields=list(totales), groupby=agrupar_por,
+                                 orderby=orden or False, limit=limite, lazy=False)
+        grupos = []
+        for g in crudo:
+            fila = {"__count": g.get("__count", g.get("%s_count" % (agrupar_por[0].split(":")[0] if agrupar_por else ""), 0))}
+            for gb in agrupar_por:
+                fila[gb] = g.get(gb)
+            for t in totales:
+                campo = t.split(":")[0]
+                fila[t] = g.get(campo)
+            grupos.append(fila)
     salida = []
     for g in grupos:
         fila = {}

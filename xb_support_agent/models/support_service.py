@@ -106,7 +106,7 @@ class XbSupportService(models.Model):
         from . import client_query
         self.ensure_one()
         try:
-            gente = client_query.autorizadores(self.project_id.database_name)
+            gente = client_query.autorizadores_de(self.env, self.project_id)
         except Exception:  # noqa: BLE001 - el aviso no debe tumbar el servicio
             return
         correos = [mail for _n, mail in gente if mail and "@" in mail]
@@ -180,7 +180,7 @@ class XbSupportService(models.Model):
         if not correos:
             for proyecto in self.mapped("project_id"):
                 try:
-                    correos += [m for _n, m in client_query.autorizadores(proyecto.database_name) if m and "@" in m]
+                    correos += [m for _n, m in client_query.autorizadores_de(self.env, proyecto) if m and "@" in m]
                 except Exception:  # noqa: BLE001
                     continue
         correos = sorted(set(correos))

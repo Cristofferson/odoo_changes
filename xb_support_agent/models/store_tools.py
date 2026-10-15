@@ -4,6 +4,7 @@
 Catálogo público, cotizaciones con su ticket, pedidos y estado de pedidos. El equipo
 (personas de la cuenta reconocidas por su teléfono) además puede generar pedidos.
 """
+import base64
 import io
 import re
 import unicodedata
@@ -58,6 +59,11 @@ XB_STORE_TOOLS = [
               "required": ["producto_id", "cantidad", "opciones", "nota"]}},
            "cliente_nombre": {"type": "string", "description": "Solo equipo: nombre de a quién se cotiza; vacío = quien escribe."},
            "cliente_celular": {"type": "string", "description": "Solo equipo: celular de 10 dígitos; vacío = quien escribe."}}),
+    _tool("enviar_foto_producto",
+          "Manda por WhatsApp la FOTO de una joya del catálogo (va antes de tu texto). Úsala al recomendar piezas: máximo "
+          "3 fotos por respuesta, las que más le interesen.",
+          {"producto_id": {"type": "integer"},
+           "pie": {"type": "string", "description": "Una línea con el nombre y el precio «desde»; vacío = solo el nombre."}}),
     _tool("ver_pedidos",
           "Pedidos y cotizaciones. A un cliente le muestra los SUYOS (estado, total, saldo pendiente, fecha de entrega, "
           "si ya está listo). El equipo puede buscar por número (S00123), nombre o celular de cualquiera.",
@@ -348,6 +354,21 @@ class DiscussChannel(models.Model):
                 "lineas": [f"{l.product_uom_qty:g} × {l.product_id.display_name}: ${l.price_total:,.2f}"
                            for l in orden.order_line],
                 "nota": "Es una cotización (borrador). Mándale el ticket con enviar_ticket y dile que el precio incluye IVA."}
+
+    def _xb_sa_tool_enviar_foto_producto(self, job, entrada):
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        t = self.env["product.template"].sudo().with_company(company).search(
+            self._xb_sa_store_product_domain() + [("id", "=", int(entrada.get("producto_id") or 0))], limit=1)
+        if not t:
+            return {"ok": False, "motivo": "Ese producto no está en el catálogo publicado."}
+        if not t.image_1920:
+            return {"ok": False, "motivo": "Esa pieza todavía no tiene foto en el sitio."}
+        imagen = Image.open(io.BytesIO(base64.b64decode(t.image_1920))).convert("RGB")
+        imagen.thumbnail((1280, 1280))
+        salida = io.BytesIO()
+        imagen.save(salida, "JPEG", quality=88)
+        self._xb_sa_post_image(salida.getvalue(), f"{t.id}.jpg", (entrada.get("pie") or t.name).strip())
+        return {"ok": True, "nota": f"Foto de «{t.name}» enviada."}
 
     def _xb_sa_tool_ver_pedidos(self, job, entrada):
         acc = self.wa_account_id.sudo()

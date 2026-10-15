@@ -548,9 +548,16 @@ class DiscussChannel(models.Model):
                 .attachment_ids.filtered(lambda a: a.mimetype == "application/pdf" and a.file_size <= XB_PDF_MAX)
             pdf_vistos = set(pdfs.sorted("id", reverse=True)[:1].ids)
         turnos = []
+        # Avisos automáticos del módulo de respuestas (bienvenida / fuera de horario): no son parte de la plática.
+        acc = self.wa_account_id.sudo()
+        automaticos = {html2plaintext(str(getattr(acc, campo, "") or "")).strip()
+                       for campo in ("xb_offhours_body", "xb_welcome_body")} - {""}
         for msg in mensajes:
             ensayo = msg.message_type == "comment"
             if ensayo and msg.author_id != bot:
+                continue
+            if (automaticos and not ensayo and not msg.wa_message_ids.filtered(lambda w: w.message_type == "inbound")
+                    and any(html2plaintext(str(msg.body or "")).strip().startswith(a[:60]) for a in automaticos)):
                 continue
             # En modo ensayo las respuestas son notas: sin ellas el agente no
             # recordaría lo que ya dijo y repetiría el saludo cada vez.

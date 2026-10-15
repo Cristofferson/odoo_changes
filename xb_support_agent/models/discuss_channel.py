@@ -423,8 +423,13 @@ class DiscussChannel(models.Model):
     # ------------------------------------------------------------------
     def _xb_sa_contacts(self):
         self.ensure_one()
-        return self.env["xb.support.contact"]._xb_find(self.whatsapp_number).filtered(
-            lambda c: c.project_id.active)
+        return self._xb_sa_by_profile(self.env["xb.support.contact"]._xb_find(self.whatsapp_number).filtered(
+            lambda c: c.project_id.active))
+
+    def _xb_sa_by_profile(self, contactos):
+        """El agente de tienda solo ve el sistema de la tienda; el de soporte de XUBAX, todos menos ese."""
+        tienda = self.wa_account_id.sudo().xb_sa_profile == "tienda"
+        return contactos.filtered(lambda c: bool(c.project_id.xb_sa_store) == tienda)
 
     def _xb_sa_current(self):
         """(contacto, sistema) vigentes. Si solo hay un sistema, es ese."""
@@ -667,6 +672,10 @@ class DiscussChannel(models.Model):
 
         if self._xb_sa_identity_gate(job, acc):
             return
+        if acc.xb_sa_profile == "tienda" and not self.xb_sa_project_id:
+            tienda_p = self._xb_sa_contacts().project_id.filtered("xb_sa_store")[:1]
+            if tienda_p:
+                self.sudo().xb_sa_project_id = tienda_p
         contactos, contacto, proyecto = self._xb_sa_current()
         job.write({
             "contact_id": contacto.id,
@@ -750,7 +759,7 @@ class DiscussChannel(models.Model):
         """Primera vez que un número se liga a un usuario: se confirma por WhatsApp
         (en código, sin modelo). Devuelve True si ya se contestó aquí."""
         self.ensure_one()
-        pendientes = self.env["xb.support.contact"]._xb_resolve(self.whatsapp_number).filtered(
+        pendientes = self._xb_sa_by_profile(self.env["xb.support.contact"]._xb_resolve(self.whatsapp_number)).filtered(
             lambda c: not c.confirmed)
         if not pendientes:
             return False
@@ -1120,6 +1129,12 @@ class DiscussChannel(models.Model):
                                  "no se le pudo escribir ahora; el equipo lo contactará. ") +
                                  "Tú NO puedes autorizarlo ni llamar ejecutar_servicio en esta plática; dile que le avisas "
                                  "cuando quede."}
+        if p.xb_sa_store:
+            return {"ok": True, "servicio_id": servicio.id, "precio": "SIN COSTO (es el sistema de la tienda)",
+                    "lo_hace": "la IA, en cuanto autorices" if ejecutor == "ai" else "una persona del equipo",
+                    "vista_previa": vista,
+                    "siguiente": "Dile qué se va a cambiar, SIN hablar de precio (no cuesta), y pide que responda SÍ para hacerlo. "
+                                 "NO llames ejecutar_servicio hasta que responda SÍ."}
         return {"ok": True, "servicio_id": servicio.id, "minutos": minutos,
                 "precio": f"${servicio.amount:,.2f} más IVA",
                 "lo_hace": "la IA, en cuanto autorice" if ejecutor == "ai"
@@ -1183,6 +1198,8 @@ class DiscussChannel(models.Model):
                         "result": servicio._xb_preview_text(hechos)})
         servicio._xb_notify_authorizers()
         self._xb_sa_tell_guest(servicio, f"Listo: «{servicio.name}» ya quedó hecho.")
+        if servicio.project_id.xb_sa_store:
+            return {"ok": True, "hecho": hechos, "cobro": "sin cobro: es el sistema de la tienda"}
         return {"ok": True, "hecho": hechos, "cobro": f"${servicio.amount:,.2f} más IVA, se suma a su factura del mes"}
 
     def _xb_sa_tell_guest(self, servicio, texto):

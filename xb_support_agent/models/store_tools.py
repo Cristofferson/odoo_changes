@@ -28,9 +28,10 @@ XB_STORE_STATES = {
 
 # Herramientas de XB_TOOLS que sí sirven en la tienda (el resto es de soporte de XUBAX).
 XB_STORE_KEEP = {"pasar_a_humano", "registrar_prospecto", "ver_horarios_demo", "agendar_demo"}
-# Solo si quien escribe es del equipo y tiene un sistema ligado (consulta de Odoo de solo lectura).
-XB_STORE_TEAM_KEEP = {"seleccionar_sistema", "buscar_modelos", "describir_modelo", "consultar_registros",
-                      "resumir_registros", "historial_de_cambios", "enviar_captura"}
+# Solo si quien escribe es del equipo y está ligada a un usuario del Odoo de la tienda: consulta, capturas y cambios
+# (sin costo) por el mismo camino y con los mismos límites que el agente de soporte.
+XB_STORE_TEAM_KEEP = {"buscar_modelos", "describir_modelo", "consultar_registros", "resumir_registros",
+                      "historial_de_cambios", "enviar_captura", "cotizar_servicio", "ejecutar_servicio"}
 
 XB_STORE_TOOLS = [
     _tool("buscar_productos",
@@ -133,7 +134,9 @@ class DiscussChannel(models.Model):
                 f"Quien escribe es del EQUIPO de la tienda: {equipo.name} (reconocida por su teléfono). Trátala de tú, directo. "
                 "Puede pedirte buscar piezas, crear cotizaciones a nombre de un cliente (con su celular), mandar el ticket, "
                 "ver pedidos de cualquiera y generar pedidos (generar_pedido, solo cuando lo pida de forma explícita). "
-                "Si pide datos de Odoo (ventas, existencias, clientes), usa las herramientas de consulta.")
+                "Si pide datos de Odoo (ventas, existencias, clientes), usa las herramientas de consulta; si no encuentra dónde picar o pide "
+                "una imagen, usa enviar_captura (la captura REAL de su pantalla, con el botón marcado en rojo). Si pide que corrijas o cambies algo "
+                "en Odoo, usa cotizar_servicio (para la tienda NO tiene costo: no menciones precio) y, cuando responda SÍ, ejecutar_servicio.")
             if contactos:
                 for c in contactos:
                     lineas.append(f"- Sistema {c.project_id.name} (base {c.database_name}), "
@@ -199,6 +202,11 @@ class DiscussChannel(models.Model):
         website = self._xb_sa_store_website()
         base = (website.domain or "").rstrip("/")
         return f"{base}{tmpl.website_url}" if tmpl.website_url else base
+
+    def _xb_sa_store_share_url(self, orden):
+        website = self._xb_sa_store_website()
+        base = (website.domain or orden.get_base_url()).rstrip("/")
+        return base + orden._get_share_url(redirect=True)
 
     def _xb_sa_store_find_partner(self, celular, nombre, crear):
         Partner = self.env["res.partner"].sudo()
@@ -350,6 +358,8 @@ class DiscussChannel(models.Model):
         lineas = entrada.get("lineas") or []
         if not lineas:
             return {"ok": False, "motivo": "Faltan las joyas a cotizar."}
+        if not partner.lang or partner.lang.startswith("en"):
+            partner.lang = "es_MX"
         website = self._xb_sa_store_website()
         pricelist = website.pricelist_id if website and "pricelist_id" in website._fields else self.env["product.pricelist"]
         pricelist = pricelist or self.env["product.pricelist"].sudo().search([("website_id", "=", website.id)], limit=1) or \
@@ -372,7 +382,7 @@ class DiscussChannel(models.Model):
             if nota:
                 vals["name"] = f"{variante.display_name}\n{nota}"
             valores_lineas.append((0, 0, vals))
-        orden = self.env["sale.order"].sudo().with_company(company).create({
+        orden = self.env["sale.order"].sudo().with_company(company).with_context(lang=partner.lang).create({
             "partner_id": partner.id, "company_id": company.id,
             "pricelist_id": pricelist.id or False,
             "user_id": (equipo or acc.xb_sa_sales_user_ids[:1]).id or False,
@@ -385,6 +395,7 @@ class DiscussChannel(models.Model):
                                f"Cotización {orden.name} creada por el agente para {partner.name}: ${orden.amount_total:,.2f}")
         job.mode = "sales"
         return {"ok": True, "pedido": orden.name, "total_con_iva": round(orden.amount_total, 2),
+                "liga_cotizacion": self._xb_sa_store_share_url(orden),
                 "lineas": [f"{l.product_uom_qty:g} × {l.product_id.display_name}: ${l.price_total:,.2f}"
                            for l in orden.order_line],
                 "nota": "Es una cotización (borrador). Mándale el ticket con enviar_ticket y dile que el precio incluye IVA."}
@@ -449,13 +460,14 @@ class DiscussChannel(models.Model):
         orden = self._xb_sa_store_order(entrada.get("pedido"), equipo)
         if not orden:
             return {"ok": False, "motivo": "No encuentro ese pedido entre los de esta persona."}
-        png = orden._xb_quotation_image()
+        png = orden.with_context(lang=orden.partner_id.lang or "es_MX")._xb_quotation_image()
         imagen = Image.open(io.BytesIO(png)).convert("RGB")
         salida = io.BytesIO()
         imagen.save(salida, "JPEG", quality=90)
         self._xb_sa_post_image(salida.getvalue(), f"{orden.name}.jpg",
                                f"{'Pedido' if orden.state == 'sale' else 'Cotización'} {orden.name}")
-        return {"ok": True, "nota": f"Ticket de {orden.name} enviado (total ${orden.amount_total:,.2f} con IVA)."}
+        return {"ok": True, "liga_cotizacion": self._xb_sa_store_share_url(orden),
+                "nota": f"Ticket de {orden.name} enviado (total ${orden.amount_total:,.2f} con IVA). La liga abre la cotización en línea."}
 
     def _xb_sa_tool_generar_pedido(self, job, entrada):
         acc = self.wa_account_id.sudo()

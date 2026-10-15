@@ -60,11 +60,11 @@ class XbSupportService(models.Model):
     done_dt = fields.Datetime("Hecho")
     sale_order_id = fields.Many2one("sale.order", string="Orden de venta", copy=False, tracking=True)
 
-    @api.depends("minutes")
+    @api.depends("minutes", "project_id.xb_sa_store")
     def _compute_amount(self):
         precio = self.env["product.product"].sudo().browse(XB_SERVICE_PRODUCT).lst_price or 680.0
         for rec in self:
-            rec.amount = rec.minutes / 60.0 * precio
+            rec.amount = 0.0 if rec.project_id.xb_sa_store else rec.minutes / 60.0 * precio
 
     @api.model
     def _xb_round_minutes(self, minutos, maximo=None):
@@ -130,6 +130,8 @@ class XbSupportService(models.Model):
         """Correo a quienes autorizan servicios en su sistema: quién autorizó, qué y cuánto."""
         from . import client_query
         self.ensure_one()
+        if self.project_id.xb_sa_store:
+            return
         try:
             gente = client_query.autorizadores_de(self.env, self.project_id)
         except Exception:  # noqa: BLE001 - el aviso no debe tumbar el servicio
@@ -166,7 +168,7 @@ class XbSupportService(models.Model):
 
     def action_create_sale_orders(self):
         """Junta los servicios hechos y sin cobrar de cada cliente en una orden de venta."""
-        pendientes = self.filtered(lambda r: r.state == "done" and not r.sale_order_id)
+        pendientes = self.filtered(lambda r: r.state == "done" and not r.sale_order_id and not r.project_id.xb_sa_store)
         if not pendientes:
             raise UserError(_("No hay servicios hechos pendientes de cobrar en lo seleccionado."))
         sin_cliente = pendientes.filtered(lambda r: not r.partner_id).project_id
@@ -225,7 +227,7 @@ class XbSupportService(models.Model):
         y la manda por correo. Avisa al equipo de lo que hizo (y de lo que no pudo)."""
         inicio = fields.Datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         pendientes = self.sudo().search([("state", "=", "done"), ("sale_order_id", "=", False),
-                                         ("done_dt", "<", inicio)])
+                                         ("done_dt", "<", inicio), ("project_id.xb_sa_store", "=", False)])
         cuentas = self.env["whatsapp.account"].sudo().search([("xb_sa_enabled", "=", True)])
         equipo = cuentas.xb_sa_support_user_ids
         resumen, ordenes = [], self.env["sale.order"]

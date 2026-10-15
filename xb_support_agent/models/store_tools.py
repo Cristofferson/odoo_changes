@@ -34,11 +34,16 @@ XB_STORE_TEAM_KEEP = {"seleccionar_sistema", "buscar_modelos", "describir_modelo
 
 XB_STORE_TOOLS = [
     _tool("buscar_productos",
-          "Busca joyas en el catálogo PÚBLICO de la tienda (las publicadas en el sitio). Devuelve nombre, categoría, "
+          "Busca joyas en el catálogo PÚBLICO de la tienda (las publicadas en el sitio) por palabras del nombre, categoría y ETIQUETAS "
+          "(estilo: Promesa, Solitario, Vintage, Pavé, Halo, Eternity, Catedral, Tensión…; forma de piedra; una o varias piedras). "
+          "Si el cliente pide un estilo, busca por su etiqueta antes de decir que no hay. Devuelve nombre, categoría, "
           "precio «desde» de referencia y la liga a su ficha. Los anillos se fabrican a la medida: el precio final "
           "depende del metal, ancho y medida y se confirma en la cotización.",
           {"texto": {"type": "string", "description": "Palabras del nombre o referencia, p. ej. «solitario», «argolla mate»; vacío = no filtrar por nombre."},
            "categoria": {"type": "string", "description": "Palabra de la categoría (anillo, arete, dije, pulsera, argolla…); vacío = todas."},
+           "etiquetas": {"type": "array", "items": {"type": "string"},
+                         "description": "Etiquetas del catálogo (estilo, forma de piedra, piedras), p. ej. [\"Promesa\"], [\"Solitario\",\"Redondo\"]; "
+                                        "deben cumplirse todas. Lista vacía = sin filtrar. Las disponibles vienen en cada respuesta."},
            "precio_max": {"type": "number", "description": "Precio máximo CON IVA de referencia; 0 = sin tope."},
            "limite": {"type": "integer", "description": "Cuántos mostrar (máx. 8)."}}),
     _tool("ver_producto",
@@ -224,13 +229,32 @@ class DiscussChannel(models.Model):
     # ------------------------------------------------------------------
     # Herramientas
     # ------------------------------------------------------------------
+    _XB_STOP = {"de", "del", "la", "el", "los", "las", "para", "con", "y", "en", "un", "una", "que", "algo", "algunos", "diseno", "disenos"}
+
+    def _xb_sa_store_tags(self):
+        """{grupo: [etiquetas]} de las que están en piezas publicadas."""
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        piezas = self.env["product.template"].sudo().with_company(company).search(self._xb_sa_store_product_domain())
+        grupos = {}
+        for tag in piezas.product_tag_ids.sorted(lambda t: (t.filter_group_id.sequence, t.sequence, t.name)):
+            grupos.setdefault(tag.filter_group_id.name or "Otras", []).append(tag.name)
+        return grupos
+
     def _xb_sa_tool_buscar_productos(self, job, entrada):
         company = self.wa_account_id.sudo()._xb_sa_company()
         dominio = self._xb_sa_store_product_domain()
         for palabra in (entrada.get("texto") or "").split():
-            dominio += ["|", ("name", "ilike", palabra), ("default_code", "ilike", palabra)]
+            plano = _plano(palabra)
+            if plano in self._XB_STOP or len(plano) < 3:
+                continue
+            raiz = plano[:-1] if len(plano) > 4 and plano.endswith("s") else plano  # anillos → anillo
+            dominio += ["|", "|", "|", ("name", "ilike", raiz), ("default_code", "ilike", raiz),
+                        ("product_tag_ids.name", "ilike", raiz), ("categ_id.complete_name", "ilike", raiz)]
         if (entrada.get("categoria") or "").strip():
             dominio.append(("categ_id.complete_name", "ilike", entrada["categoria"].strip()))
+        for etiqueta in entrada.get("etiquetas") or []:
+            if (etiqueta or "").strip():
+                dominio.append(("product_tag_ids.name", "ilike", etiqueta.strip()))
         productos = self.env["product.template"].sudo().with_company(company).search(dominio, limit=60, order="name")
         tope = float(entrada.get("precio_max") or 0)
         salida = []
@@ -239,13 +263,18 @@ class DiscussChannel(models.Model):
             if tope and con > tope:
                 continue
             salida.append({"id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
+                           "etiquetas": t.product_tag_ids.mapped("name"),
+                           "metales": [v.name for l in t.attribute_line_ids if l.attribute_id.name == "Metal"
+                                       for v in l.product_template_value_ids.filtered(lambda x: x.ptav_active)][:8],
                            "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t)})
             if len(salida) >= min(int(entrada.get("limite") or 6), 8):
                 break
+        res = {"ok": True, "resultados": salida, "etiquetas_disponibles": self._xb_sa_store_tags(),
+               "nota": "Precios de referencia con IVA; el definitivo depende del metal, ancho y medida y va en la cotización."}
         if not salida:
-            return {"ok": True, "resultados": [], "nota": "Sin coincidencias en el catálogo publicado."}
-        return {"ok": True, "resultados": salida,
-                "nota": "Precios de referencia con IVA; el definitivo depende del metal, ancho y medida y va en la cotización."}
+            res["nota"] = ("Sin coincidencias. Prueba con otra etiqueta de etiquetas_disponibles (p. ej. Promesa, Solitario) o con "
+                           "menos palabras antes de decir que no hay.")
+        return res
 
     def _xb_sa_tool_ver_producto(self, job, entrada):
         company = self.wa_account_id.sudo()._xb_sa_company()
@@ -260,7 +289,7 @@ class DiscussChannel(models.Model):
         sin, con = self._xb_sa_store_price_ref(t, company)
         return {"ok": True, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
-                "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
+                "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
                 "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente."}
 
     def _xb_sa_store_variant(self, tmpl, opciones):

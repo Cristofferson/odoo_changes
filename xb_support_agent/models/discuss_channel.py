@@ -117,7 +117,7 @@ XB_TOOLS = [
           "Errores técnicos recientes del servidor en el sistema del cliente (cuando dice que «algo marca error»).",
           {"horas": {"type": "integer", "description": "Cuántas horas hacia atrás (máx. 168)."}}),
     _tool("enviar_captura",
-          "Le manda al cliente (titular o su invitado) una captura REAL de una pantalla de su sistema, con un texto resaltado "
+          "Le manda al cliente (titular, empleado o invitado) una captura REAL de una pantalla de su sistema, con un texto resaltado "
           "en rojo, para enseñarle dónde picar. Úsala cuando no encuentre algo o pida «capturas». Va antes de tu texto.",
           {"menu": {"type": "string", "description": "Ruta del menú como se ve en Odoo, p. ej. «Punto de venta» o "
                                                       "«Punto de venta / Pedidos / Sesiones»."},
@@ -1747,6 +1747,11 @@ class DiscussChannel(models.Model):
         if not elegido:
             return {"ok": False, "motivo": "Ese horario ya no está libre; vuelve a consultar ver_horarios_demo."}
         inicio, usuario = elegido[0]
+        ocupado = self.env["calendar.event"].sudo().search([
+            ("user_id", "=", usuario.id), ("start", "<", inicio.replace(tzinfo=None) + timedelta(hours=tipo.appointment_duration)),
+            ("stop", ">", inicio.replace(tzinfo=None))], limit=1)
+        if ocupado:
+            return {"ok": False, "motivo": "Ese horario ya no está libre; vuelve a consultar ver_horarios_demo."}
         nombre = entrada.get("nombre") or self.whatsapp_number
         cliente = self.whatsapp_partner_id.sudo()
         if not cliente:
@@ -1754,8 +1759,9 @@ class DiscussChannel(models.Model):
         if entrada.get("correo") and not cliente.email:
             cliente.email = entrada["correo"]
         fin = inicio + timedelta(hours=tipo.appointment_duration)
+        # La reserva debe llevar su línea de capacidad: sin ella, la app Citas no ve el horario como ocupado y lo vuelve a ofrecer.
         vals = tipo._prepare_calendar_event_values(
-            1, [], Markup(tools.plaintext2html(f"Agendada por el agente de WhatsApp.\nWhatsApp: {self.whatsapp_number}"
+            1, [{"capacity_reserved": 1, "capacity_used": 1}], Markup(tools.plaintext2html(f"Agendada por el agente de WhatsApp.\nWhatsApp: {self.whatsapp_number}"
             + (f"\n\n{self.xb_sa_bni_notes}" if self.xb_sa_bni_notes else ""))),
             tipo.appointment_duration, False, self.env["appointment.invite"], None, nombre, cliente, usuario,
             inicio.replace(tzinfo=None), fin.replace(tzinfo=None))

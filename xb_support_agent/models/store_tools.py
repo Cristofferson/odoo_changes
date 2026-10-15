@@ -36,7 +36,9 @@ XB_STORE_TOOLS = [
     _tool("buscar_productos",
           "Busca joyas en el catálogo PÚBLICO de la tienda (las publicadas en el sitio) por palabras del nombre, categoría y ETIQUETAS "
           "(estilo: Promesa, Solitario, Vintage, Pavé, Halo, Eternity, Catedral, Tensión…; forma de piedra; una o varias piedras). "
-          "Si el cliente pide un estilo, busca por su etiqueta antes de decir que no hay. Devuelve nombre, categoría, "
+          "Si el cliente pide un estilo, busca por su etiqueta antes de decir que no hay. OJO: las «Argolla» son argollas de MATRIMONIO "
+          "(bandas lisas): NO son anillos de compromiso ni de promesa; solo ofrécelas si piden argollas o alianzas de boda. "
+          "Los anillos de compromiso y promesa son las «Montadura» con etiqueta de estilo. Devuelve nombre, categoría, "
           "precio «desde» de referencia y la liga a su ficha. Los anillos se fabrican a la medida: el precio final "
           "depende del metal, ancho y medida y se confirma en la cotización.",
           {"texto": {"type": "string", "description": "Palabras del nombre o referencia, p. ej. «solitario», «argolla mate»; vacío = no filtrar por nombre."},
@@ -263,6 +265,9 @@ class DiscussChannel(models.Model):
             if tope and con > tope:
                 continue
             salida.append({"id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
+                           "tipo": ("ARGOLLA DE MATRIMONIO (no es de compromiso ni de promesa)"
+                                    if "argolla" in (t.categ_id.complete_name or "").lower() else
+                                    "montadura / anillo con piedra" if "montadura" in (t.categ_id.complete_name or "").lower() else ""),
                            "etiquetas": t.product_tag_ids.mapped("name"),
                            "metales": [v.name for l in t.attribute_line_ids if l.attribute_id.name == "Metal"
                                        for v in l.product_template_value_ids.filtered(lambda x: x.ptav_active)][:8],

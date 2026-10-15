@@ -6,7 +6,7 @@ registro y un texto a resaltar). Aquí se valida que ese menú abra una VISTA
 (``ir.actions.act_window``; nunca acciones de servidor ni pantallas que hagan
 algo al abrirse, como la caja) y luego un navegador sin pantalla entra con el
 magic-link de ``despacho_autologin`` de ESA base, toma la foto y cierra sesión.
-Para cualquier persona autorizada y confirmada del sistema (el titular ve todo; empleados e invitados, sin pantallas de dinero); la captura se toma con la sesión del titular.
+Para cualquier persona autorizada y confirmada del sistema (titular y empleados ven lo que sus permisos permiten en su propio Odoo; el invitado, sin pantallas de dinero); la captura se toma con la sesión del titular.
 """
 import base64
 import hashlib
@@ -85,7 +85,7 @@ def _resolver(env, menu, registro_id, sin_dinero=False):
 def tomar_captura(dbname, contacto, menu, registro_id, resaltar):
     """Devuelve (jpeg_bytes, título, resaltado)."""
     with client_query.client_env(dbname, contacto) as (env, _rol):
-        url, titulo = _resolver(env, menu, registro_id, sin_dinero=client_query._rol(contacto) != "owner")
+        url, titulo = _resolver(env, menu, registro_id, sin_dinero=bool(contacto.guest))
         env.cr.execute("SELECT value FROM ir_config_parameter WHERE key = 'despacho_autologin.secret'")
         fila = env.cr.fetchone()
     if not fila or not fila[0]:

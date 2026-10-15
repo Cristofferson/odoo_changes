@@ -670,11 +670,16 @@ class DiscussChannel(models.Model):
         client = anthropic.Anthropic(api_key=acc.xb_sa_api_key, timeout=120, max_retries=2)
         system = [{"type": "text", "text": acc._xb_sa_system_prompt(),
                    "cache_control": {"type": "ephemeral"}}]
+        tienda = acc.xb_sa_profile == "tienda"
         mensajes = historial + [{"role": "system",
-                                 "content": self._xb_sa_context_text(contactos, contacto, proyecto)}]
+                                 "content": (self._xb_sa_store_context(contactos, contacto, proyecto) if tienda
+                                             else self._xb_sa_context_text(contactos, contacto, proyecto))}]
         texto = ""
-        herramientas = (XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
-                        + (XB_TEAM_TOOLS if self._xb_sa_team_user() else []))
+        if tienda:
+            herramientas = self._xb_sa_store_tools(contactos)
+        else:
+            herramientas = (XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
+                            + (XB_TEAM_TOOLS if self._xb_sa_team_user() else []))
         for _ronda in range(XB_MAX_TOOL_ROUNDS):
             kwargs = dict(
                 model=acc.xb_sa_model,
@@ -756,7 +761,7 @@ class DiscussChannel(models.Model):
                      "Responde SÍ para continuar.")
         else:
             c.sudo().challenge_dt = ahora
-            texto = (f"Hola, soy el asistente de XUBAX. Tu número está ligado al usuario de {c.name} en "
+            texto = (f"Hola, soy el asistente de {acc.xb_sa_company_name or 'XUBAX'}. Tu número está ligado al usuario de {c.name} en "
                      f"{c.project_id.name}. ¿Eres tú? Responde SÍ para confirmarlo y poder ayudarte con tu sistema.")
         job.reply = texto
         if acc.xb_sa_shadow:

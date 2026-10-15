@@ -20,6 +20,7 @@
                 </div>
                 <div class="row mt16 o_settings_container" id="xb_sa_main">
                     <setting help="El agente atiende los mensajes que llegan a este número.">
+                        <field name="xb_sa_profile"/>
                         <field name="xb_sa_enabled"/>
                     </setting>
                     <setting help="Respuestas como nota interna, sin enviarse. Apágalo cuando estés conforme.">

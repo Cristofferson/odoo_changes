@@ -46,6 +46,12 @@ Estilo (es WhatsApp):
 class WhatsappAccount(models.Model):
     _inherit = "whatsapp.account"
 
+    xb_sa_profile = fields.Selection([
+        ("soporte", "Soporte y ventas de sistemas (XUBAX)"),
+        ("tienda", "Tienda (joyería): catálogo, cotizaciones y pedidos"),
+    ], string="Perfil del agente", default="soporte", required=True,
+        help="Soporte: atiende clientes con sistemas y prospectos de XUBAX. "
+             "Tienda: atiende clientes de una tienda (catálogo, cotizaciones con ticket, pedidos y su estado).")
     xb_sa_enabled = fields.Boolean(
         "Agente de IA encendido", copy=False,
         help="El agente atiende los mensajes que llegan a este número.")

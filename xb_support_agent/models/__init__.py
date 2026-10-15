@@ -6,5 +6,6 @@ from . import support_job
 from . import whatsapp_account
 from . import project_project
 from . import discuss_channel
+from . import store_tools
 from . import crm_lead
 from . import support_service

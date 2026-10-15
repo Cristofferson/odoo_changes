@@ -598,7 +598,11 @@ class DiscussChannel(models.Model):
             else:
                 rol = "assistant"
                 if msg.author_id != bot:
-                    texto = f"[Contestó {msg.author_id.name}, del equipo]: {texto}"
+                    # Al cliente de la tienda nunca se le nombra a una persona del equipo.
+                    anonimo = acc.xb_sa_profile == "tienda" and not self._xb_sa_store_team()
+                    quien = "una persona de la tienda (sin nombre; NO la nombres ni digas que otra persona contestó)" if anonimo \
+                        else f"{msg.author_id.name}, del equipo"
+                    texto = f"[Contestó {quien}]: {texto}"
             if texto:
                 bloques.append({"type": "text", "text": texto})
             if turnos and turnos[-1]["role"] == rol:

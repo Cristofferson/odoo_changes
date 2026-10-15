@@ -170,7 +170,7 @@ class DiscussChannel(models.Model):
             if citas:
                 lineas.append("Citas agendadas vigentes: " + "; ".join(
                     f"{XB_DIAS[pytz.utc.localize(c.start).astimezone(tz).weekday()]} "
-                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M} con {c.user_id.name}" for c in citas) + ".")
+                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M}" + (f" con {c.user_id.name}" if equipo else "") for c in citas) + ".")
             else:
                 lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda).")
         return "\n".join(lineas)

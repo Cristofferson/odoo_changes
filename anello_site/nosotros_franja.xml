@@ -1,0 +1,12 @@
+<section class="pg-sec cream" id="por-que-anello">
+  <div class="anbn-w">
+    <div class="pg-head"><div class="anbn-eb">Por qué Anello</div><h2>Lo que nos distingue</h2></div>
+    <div class="pg-grid">
+      <div><i class="fa fa-star"/><h3>Casi 200 reseñas de 5 estrellas</h3><p>Las mejores calificaciones en Google, hechas por quienes ya compraron con nosotros.</p></div>
+      <div><i class="fa fa-diamond"/><h3>Gemólogo graduado por la GIA</h3><p>Muy pocas joyerías en México cuentan con uno.</p></div>
+      <div><i class="fa fa-wrench"/><h3>Taller propio desde 1999</h3><p>Fabricamos, personalizamos y reparamos nuestras piezas.</p></div>
+      <div><i class="fa fa-search"/><h3>Láser personalizado en la piedra</h3><p>Somos los únicos en México con grabado láser personalizado en la piedra.</p></div>
+    </div>
+  </div>
+</section>
+

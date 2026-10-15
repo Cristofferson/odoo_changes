@@ -1,0 +1,35 @@
+<t t-name="anbn.page_garantia">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Garantía y compra segura</t>
+    <div id="wrap" class="oe_structure anbn anbn-page">
+
+<section class="pg-sec" style="padding-top:clamp(48px,7vw,96px)">
+  <div class="anbn-w">
+    <div class="pg-head" style="max-width:820px;margin-left:auto;margin-right:auto;text-align:center">
+      <div class="anbn-eb">Garantía y compra segura</div>
+      <h1>Compra con tranquilidad</h1>
+      <p>Hecho a mano en Morelia, con respaldo de por vida.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pg-sec cream">
+  <div class="anbn-w">
+    <div class="pg-grid">
+      <div><i class="fa fa-shield"/><h3>Garantía de por vida</h3><p>Si el metal o la piedra que compraste tienen un defecto, lo resolvemos. Cubre el metal y la gema que se vendieron. No cubre el desgaste normal ni los daños por golpes. Cada caso lo revisa una persona de nuestro equipo.</p></div>
+      <div><i class="fa fa-circle-o"/><h3>Tu primer ajuste de medida, gratis</h3><p>Durante un año después de recibir tu anillo, el primer ajuste de medida no te cuesta. Si dudas de tu medida, usa nuestra <a href="/guias/medida-de-anillo">guía</a> o ven al estudio.</p></div>
+      <div><i class="fa fa-credit-card"/><h3>Meses sin intereses</h3><p>Paga en 3 a 12 meses sin intereses, según el monto de tu compra. Pregúntanos por WhatsApp y te decimos qué plan aplica a tu pieza.</p></div>
+      <div><i class="fa fa-wrench"/><h3>Somos fabricantes</h3><p>Somos taller propio desde 1999. Por eso podemos personalizar tu pieza, repararla o hacer trabajos urgentes. Cuéntanos qué necesitas y te decimos si se puede y en cuánto tiempo.</p></div>
+      <div><i class="fa fa-exchange"/><h3>Cambios y devoluciones</h3><p>7 días naturales desde que recibes tu pieza, en piezas de línea. <a href="/envios-y-devoluciones">Ver las condiciones</a>.</p></div>
+      <div><i class="fa fa-certificate"/><h3>Certificado ICERT</h3><p>Todos nuestros anillos incluyen su certificado y el número grabado con láser en la piedra. <a href="/icert">Conoce ICERT</a>.</p></div>
+    </div>
+    <div class="bn-btns" style="margin-top:36px">
+      <a class="anbn-btn solid" href="/appointment">Agenda tu cita</a>
+      <a class="anbn-btn" href="https://wa.me/524433244511">Escríbenos por WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </t>
+</t>

@@ -57,7 +57,8 @@ XB_STORE_TOOLS = [
           "Crea una COTIZACIÓN (borrador, no es un pedido) con una o más joyas y su ticket queda listo para enviarse con "
           "enviar_ticket. Cada línea lleva el id del producto, la cantidad y las opciones elegidas con el nombre EXACTO "
           "que devolvió ver_producto (metal, ancho, medida…). Si falta alguna opción, no la inventes: pregúntasela al cliente. "
-          "Para clientes: se cotiza a su propio nombre. El equipo puede cotizar a nombre de otra persona con su celular.",
+          "Para clientes: se cotiza a su propio nombre y es OBLIGATORIO pasar nombre_completo (nombre y apellido que él te dio; "
+          "si en WhatsApp solo tiene un apodo o usuario, pregúntaselo antes de cotizar). El equipo puede cotizar a nombre de otra persona con su celular.",
           {"lineas": {"type": "array", "items": {"type": "object", "properties": {
               "producto_id": {"type": "integer"},
               "cantidad": {"type": "number"},
@@ -65,6 +66,7 @@ XB_STORE_TOOLS = [
                            "description": "Nombres exactos de las opciones elegidas, p. ej. [\"Oro amarillo 14kt\",\"4mm\",\"7.5\"]."},
               "nota": {"type": "string", "description": "Grabado, mensaje o indicación especial; vacío si no hay."}},
               "required": ["producto_id", "cantidad", "opciones", "nota"]}},
+           "nombre_completo": {"type": "string", "description": "Clientes: nombre y apellido reales de quien escribe, tal como te los dijo; vacío solo si es del equipo."},
            "cliente_nombre": {"type": "string", "description": "Solo equipo: nombre de a quién se cotiza; vacío = quien escribe."},
            "cliente_celular": {"type": "string", "description": "Solo equipo: celular de 10 dígitos; vacío = quien escribe."}}),
     _tool("enviar_foto_producto",
@@ -355,6 +357,13 @@ class DiscussChannel(models.Model):
             partner = self.whatsapp_partner_id.sudo()
             if not partner:
                 return {"ok": False, "motivo": "No tengo a quien cotizar: pídele su nombre y vuelve a intentar."}
+            if not equipo:
+                nombre = " ".join((entrada.get("nombre_completo") or "").split())
+                if len(nombre.split()) < 2:
+                    return {"ok": False, "motivo": "Falta su nombre completo (nombre y apellido). Pídeselo con naturalidad, "
+                                                   "dile que es para poner la cotización a su nombre, y vuelve a intentar."}
+                if nombre.lower() != (partner.name or "").strip().lower():
+                    partner.name = nombre
         lineas = entrada.get("lineas") or []
         if not lineas:
             return {"ok": False, "motivo": "Faltan las joyas a cotizar."}
@@ -380,7 +389,7 @@ class DiscussChannel(models.Model):
                     "tax_ids": [(6, 0, impuesto.ids)] if impuesto else [(5,)]}
             nota = (ln.get("nota") or "").strip()
             if nota:
-                vals["name"] = f"{variante.display_name}\n{nota}"
+                vals["name"] = f"{variante.with_context(lang=partner.lang).display_name}\n{nota}"
             valores_lineas.append((0, 0, vals))
         orden = self.env["sale.order"].sudo().with_company(company).with_context(lang=partner.lang).create({
             "partner_id": partner.id, "company_id": company.id,

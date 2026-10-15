@@ -85,14 +85,6 @@
   /* burbuja de saludo, una sola vez por visitante */
   var b = document.querySelector('.anbn-wa-bubble'), k = 'anbn_wa_bubble';
   var seen = false; try { seen = localStorage.getItem(k); } catch (e) {}
-  /* horario de WhatsApp: 8:00 a 21:00 todos los días, hora del centro de México */
-  try {
-    var hr = +new Intl.DateTimeFormat('es-MX', { hour: 'numeric', hour12: false, timeZone: 'America/Mexico_City' }).format(new Date()) % 24;
-    if ((hr < 8 || hr >= 21) && b) {
-      b.querySelector('b').textContent = 'Déjanos tu mensaje';
-      b.querySelector('.anbn-wa-txt').textContent = 'Ahora estamos fuera de horario. Escríbenos y te contestamos a partir de las 8:00.';
-    }
-  } catch (e) {}
   if (b && !seen) setTimeout(function () { b.hidden = false; }, 8000);
   function done() { if (b) b.hidden = true; try { localStorage.setItem(k, '1'); } catch (e) {} }
   if (b) { b.querySelector('button').addEventListener('click', done); b.addEventListener('click', function (e) { if (e.target.tagName !== 'BUTTON') { done(); a.click(); } }); }

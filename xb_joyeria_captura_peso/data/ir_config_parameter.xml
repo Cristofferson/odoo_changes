@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Costo de hechura con el que nace la lista de materiales de una joya al capturar su peso -->
+    <record id="param_hechura" model="ir.config_parameter">
+        <field name="key">xb_joyeria_captura_peso.hechura</field>
+        <field name="value">600</field>
+    </record>
+</odoo>

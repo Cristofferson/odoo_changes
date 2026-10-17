@@ -204,7 +204,7 @@ XB_TOOLS = [
           "y la liga donde el cliente puede escoger otro horario él mismo.",
           {"desde": {"type": "string", "description": "AAAA-MM-DD si el cliente quiere a partir de cierta fecha; cadena vacía = lo más pronto."}}),
     _tool("agendar_demo",
-          "Aparta la cita/demo en uno de los horarios devueltos por ver_horarios_demo.",
+          "Aparta la cita/demo en uno de los horarios devueltos por ver_horarios_demo. ANTES de usarla, la persona ya tiene que haber dicho si la quiere por videollamada o presencial: si no lo ha dicho, pregúntaselo primero y aparta hasta que conteste. Solo entonces manda la liga (videollamada) o la dirección (presencial).",
           {"inicio": {"type": "string", "description": "Fecha y hora exactamente como la dio ver_horarios_demo (AAAA-MM-DD HH:MM)."},
            "nombre": {"type": "string"},
            "correo": {"type": "string", "description": "Cadena vacía si no lo dio."}}),
@@ -496,7 +496,7 @@ class DiscussChannel(models.Model):
         if self._xb_sa_is_bni():
             lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
-                          "videollamada o presencial. Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema. "
+                          "videollamada o presencial: pregúntalo ANTES de apartar la cita (no la apartes ni mandes la liga hasta saberlo). Conoce su negocio y su referido ideal. No tiene acceso a ningún sistema. "
                           "En esta plática de BNI NO uses ni menciones datos del sistema de un cliente ni pendientes de soporte o servicios, "
                           "aunque la persona también sea cliente; solo información pública o lo que ella diga, salvo que ella pida soporte. "
                           "En BNI Josette está registrada como IMPLEMENTADORA DE ERP (Odoo): si preguntan a qué se dedican, dilo así; "

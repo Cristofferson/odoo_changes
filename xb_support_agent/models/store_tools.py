@@ -304,8 +304,8 @@ class DiscussChannel(models.Model):
         sin, con = self._xb_sa_store_price_ref(t, company)
         return {"ok": True, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
-                "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
-                "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente."}
+                "etiquetas": t.product_tag_ids.mapped("name"), "dias_de_fabricacion": int(t.sale_delay or 0) or None, "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
+                "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. «dias_de_fabricacion» es el tiempo aproximado que toma hacerla desde que se confirma el pedido; dilo como estimado, la fecha exacta la pone la tienda en el pedido."}
 
     def _xb_sa_store_variant(self, tmpl, opciones):
         """Variante de la plantilla con las opciones dadas. (variante, error)."""
@@ -445,7 +445,13 @@ class DiscussChannel(models.Model):
             partner = self.whatsapp_partner_id.sudo()
             if not partner:
                 return {"ok": True, "pedidos": [], "nota": "No encuentro pedidos ligados a este número."}
-            dominio.append(("partner_id", "child_of", partner.commercial_partner_id.id))
+            socios = partner.commercial_partner_id
+            llave = xb_phone_key(self.whatsapp_number)
+            if llave:  # el mismo celular capturado en otro contacto (p. ej. con espacios) también cuenta
+                otros = self.env["res.partner"].sudo().search([("phone", "like", llave[-4:])]).filtered(
+                    lambda r: xb_phone_key(r.phone) == llave)
+                socios |= otros.mapped("commercial_partner_id")
+            dominio.append(("partner_id", "child_of", socios.ids))
         pedidos = self.env["sale.order"].sudo().search(dominio, order="id desc", limit=8)
         tz = pytz.timezone(XB_TZ)
         salida = []
@@ -459,6 +465,8 @@ class DiscussChannel(models.Model):
                 "total": round(p.amount_total, 2),
                 "saldo_pendiente": round(getattr(p, "amount_unpaid", 0.0) or 0.0, 2) if p.state == "sale" else None,
                 "entrega_prometida": entrega,
+                "dias_de_fabricacion_estimados": max([int(l.product_id.product_tmpl_id.sale_delay or 0) for l in p.order_line
+                                                      if not l.display_type] or [0]) or None,
                 "listo_para_recoger": bool(p.xb_ready_notified_date) if "xb_ready_notified_date" in p._fields else None,
                 "piezas": [f"{l.product_uom_qty:g} × {l.product_id.display_name or l.name}" for l in p.order_line
                            if not l.display_type][:6]})

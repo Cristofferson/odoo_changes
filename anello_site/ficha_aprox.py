@@ -23,6 +23,7 @@ ficha = '''<data>
     <li t-attf-class="mb-1 {{'' if combination_info.get('xb_diamantes') else 'd-none'}}"><strong>Diamantes:</strong>
       <ul id="xb_diamantes" class="mb-0 ps-3"><li t-foreach="combination_info.get('xb_diamantes') or []" t-as="d" t-out="d"/></ul>
     </li>
+    <li t-if="product.sale_delay" class="mb-1"><strong>Fabricación:</strong> aproximadamente <t t-out="int(product.sale_delay)"/> días desde que se confirma el pedido</li>
   </xpath>
   <xpath expr="//div[hasclass('form-text')]" position="replace"/>
   <xpath expr="//li[span[@id='dmn_stones']]" position="replace"/>

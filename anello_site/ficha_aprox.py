@@ -24,6 +24,7 @@ ficha = '''<data>
       <ul id="xb_diamantes" class="mb-0 ps-3"><li t-foreach="combination_info.get('xb_diamantes') or []" t-as="d" t-out="d"/></ul>
     </li>
     <li t-if="product.sale_delay" class="mb-1"><strong>Fabricación:</strong> aproximadamente <t t-out="int(product.sale_delay)"/> días desde que se confirma el pedido</li>
+    <li t-if="product.product_tag_ids.filtered('visible_to_customers')" class="mb-1"><strong>Estilo:</strong> <span t-out="', '.join(product.product_tag_ids.filtered('visible_to_customers').mapped('name'))"/></li>
   </xpath>
   <xpath expr="//div[hasclass('form-text')]" position="replace"/>
   <xpath expr="//li[span[@id='dmn_stones']]" position="replace"/>
@@ -55,3 +56,8 @@ a.write({'datas': datas, 'mimetype': 'text/css'})
 link = V.with_context(active_test=False).search([('key', '=', 'anbn.css_link'), ('website_id', '=', 1)], limit=1)
 link.write({'arch': '<data><xpath expr="//head" position="inside"><link rel="stylesheet" href="/web/content/%d/anello-bn.css?unique=%s"/></xpath></data>' % (a.id, a.checksum[:8])})
 env.cr.commit(); print('CSS', a.id, a.checksum[:8])
+
+# Las etiquetas ya no se pintan arriba del precio (website 1): van como «Estilo» en la Ficha de la pieza.
+vista('anbn.tags_en_ficha', 'Anello: etiquetas dentro de la Ficha de la pieza', env.ref('website_sale.product_tags'),
+      "<data><xpath expr=\"//div[@t-attf-class]\" position=\"replace\"/></data>", prio=30, website=1)
+env.cr.commit()

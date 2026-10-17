@@ -519,7 +519,7 @@ class DiscussChannel(models.Model):
         if self.whatsapp_partner_id:
             tz = pytz.timezone(XB_TZ)
             citas = self.env["calendar.event"].sudo().search([
-                ("appointment_type_id", "!=", False), ("start", ">", fields.Datetime.now()),
+                ("appointment_type_id", "!=", False), ("stop", ">", fields.Datetime.now()),
                 ("partner_ids", "in", self.whatsapp_partner_id.ids)], order="start", limit=3)
             if citas:
                 lineas.append("Citas agendadas vigentes: " + "; ".join(

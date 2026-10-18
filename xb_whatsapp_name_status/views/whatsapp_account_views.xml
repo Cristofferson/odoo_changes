@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="whatsapp_account_form_xb_name_status" model="ir.ui.view">
+        <field name="name">whatsapp.account.form.xb_name_status</field>
+        <field name="model">whatsapp.account</field>
+        <field name="inherit_id" ref="whatsapp.whatsapp_account_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Nombre visible en Meta">
+                    <group>
+                        <field name="xb_name_requested"/>
+                        <field name="xb_name_status" widget="badge"
+                               decoration-success="xb_name_status == 'approved'"
+                               decoration-warning="xb_name_status in ('pending', 'deferred')"
+                               decoration-danger="xb_name_status == 'rejected'"/>
+                        <field name="xb_name_reason" invisible="not xb_name_reason"/>
+                    </group>
+                    <group>
+                        <field name="xb_name_checked"/>
+                        <button name="action_xb_name_check" type="object" string="Consultar nombre en Meta"
+                                class="btn-secondary" icon="fa-refresh"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

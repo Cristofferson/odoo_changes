@@ -51,6 +51,7 @@
                 <div class="row mt16 o_settings_container" id="xb_sa_people">
                     <setting help="Reciben propuestas de arreglo y lo que el agente pasa a humano.">
                         <field name="xb_sa_support_user_ids" widget="many2many_tags"/>
+                        <field name="xb_sa_approver_phone" placeholder="10 dígitos"/>
                     </setting>
                     <setting help="Opcional: además de avisar, se crea un ticket en este equipo.">
                         <field name="xb_sa_helpdesk_team_id"/>

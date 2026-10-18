@@ -11,6 +11,7 @@
                 <field name="project_id"/>
                 <field name="contact_id"/>
                 <field name="urgency"/>
+                <field name="billable" optional="show"/>
                 <field name="state" widget="badge" decoration-warning="state == 'pending'" decoration-info="state == 'approved'" decoration-success="state == 'done'"/>
             </list>
         </field>
@@ -30,7 +31,8 @@
                 </header>
                 <sheet>
                     <div class="alert alert-info" role="alert" invisible="kind != 'fix' or state != 'approved'">
-                        Por ahora el arreglo se hace a mano. Cuando quede, usa «Hecho y avisar al cliente».
+                        El arreglo se hace a mano. Cuando quede, usa «Hecho y avisar al cliente»
+                        (si se cobra, entra al cobro del mes).
                     </div>
                     <h1><field name="name"/></h1>
                     <group>
@@ -45,6 +47,13 @@
                             <field name="channel_id"/>
                             <field name="decided_by_id" invisible="not decided_by_id"/>
                             <field name="decided_date" invisible="not decided_date"/>
+                            <field name="owner_notified_dt" invisible="not owner_notified_dt"/>
+                            <field name="reject_reason" invisible="state != 'rejected'"/>
+                        </group>
+                        <group invisible="kind != 'fix'">
+                            <field name="billable" readonly="state != 'pending'"/>
+                            <field name="minutes" invisible="not billable" readonly="state != 'pending'"/>
+                            <field name="service_id" invisible="not service_id"/>
                         </group>
                     </group>
                     <group string="Número a autorizar" invisible="kind != 'add_number'">

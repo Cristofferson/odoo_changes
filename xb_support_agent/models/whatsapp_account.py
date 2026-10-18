@@ -81,6 +81,10 @@ class WhatsappAccount(models.Model):
         "res.users", "xb_sa_support_users_rel", "account_id", "user_id",
         string="Quién atiende soporte", domain=[("share", "=", False)],
         help="Reciben las propuestas de arreglo y lo que el agente pasa a humano.")
+    xb_sa_approver_phone = fields.Char(
+        "Celular que aprueba las propuestas",
+        help="A este WhatsApp le llegan las propuestas del agente; se aprueban o rechazan contestando "
+             "«SÍ 12» / «NO 12» (o «ver solicitudes»). Vacío = solo se aprueban desde Odoo.")
     xb_sa_sales_user_ids = fields.Many2many(
         "res.users", "xb_sa_sales_users_rel", "account_id", "user_id",
         string="Quién atiende ventas", domain=[("share", "=", False)],

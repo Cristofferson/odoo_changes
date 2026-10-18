@@ -19,4 +19,14 @@
         <field name="nextcall">2026-11-01 14:00:00</field>
         <field name="active" eval="True"/>
     </record>
+    <record id="ir_cron_xb_support_proposal_digest" model="ir.cron">
+        <field name="name">Agente de WhatsApp: resumen diario de propuestas al dueño</field>
+        <field name="model_id" ref="model_xb_support_proposal"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_owner_digest()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall">2026-10-19 15:00:00</field>
+        <field name="active" eval="True"/>
+    </record>
 </odoo>

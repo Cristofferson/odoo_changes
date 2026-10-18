@@ -140,10 +140,15 @@ XB_TOOLS = [
           "verifica ese SÍ por su cuenta.",
           {"servicio_id": {"type": "integer"}}),
     _tool("proponer_arreglo",
-          "Deja una propuesta de arreglo para que el equipo la apruebe. No arregla nada por sí misma.",
+          "Deja una propuesta de arreglo para que el dueño de XUBAX la apruebe desde su WhatsApp. No arregla nada "
+          "por sí misma: si se aprueba, lo hace una persona del equipo y al cliente se le avisa por aquí.",
           {"resumen": {"type": "string", "description": "Una línea: qué hay que hacer."},
            "problema": {"type": "string", "description": "Qué encontraste, con datos."},
-           "propuesta": {"type": "string", "description": "Qué sugieres hacer, paso a paso."},
+           "propuesta": {"type": "string", "description": "Qué sugieres hacer, paso a paso, con los registros exactos."},
+           "cobrable": {"type": "boolean", "description":
+               "true SOLO si el cliente pidió el cambio (se cobra como servicio). false si lo encontraste tú o es "
+               "un error del sistema o nuestro."},
+           "minutos": {"type": "integer", "description": "Tiempo de servicio si es cobrable (mínimo 15, múltiplos de 15)."},
            "urgente": {"type": "boolean"}}),
     _tool("proponer_alta_numero",
           "Solo para el titular (quien autoriza servicios): da acceso de CONSULTA a otra persona que no tiene usuario en el "
@@ -398,6 +403,9 @@ class DiscussChannel(models.Model):
             try:
                 if kwargs.get("whatsapp_inbound_msg_uid"):
                     if hasattr(channel, "_xb_is_campaign_reply") and channel._xb_is_campaign_reply(message):
+                        continue
+                    # «SÍ 12» / «NO 12» / «Ver solicitudes» del dueño: no van al agente.
+                    if self.env["xb.support.proposal"]._xb_owner_command(channel, html2plaintext(message.body or "")):
                         continue
                     self.env["xb.support.job"]._xb_enqueue(channel, message)
                 elif channel._xb_sa_is_human_reply(message):
@@ -1234,6 +1242,7 @@ class DiscussChannel(models.Model):
         _contactos, contacto, proyecto = self._xb_sa_current()
         acc = self.wa_account_id.sudo()
         urgente = bool(entrada.get("urgente"))
+        cobrable = bool(entrada.get("cobrable")) and not proyecto.sudo().xb_sa_store
         prop = self.env["xb.support.proposal"].sudo().with_company(acc._xb_sa_company()).create({
             "name": entrada.get("resumen") or "Arreglo propuesto",
             "kind": "fix",
@@ -1244,10 +1253,15 @@ class DiscussChannel(models.Model):
             "whatsapp_number": self.whatsapp_number,
             "problem": entrada.get("problema"),
             "suggestion": entrada.get("propuesta"),
+            "billable": cobrable,
+            "minutes": self.env["xb.support.service"]._xb_round_minutes(entrada.get("minutos")) if cobrable else 15,
         })
         self._xb_sa_notify(prop, acc.xb_sa_support_user_ids,
                            f"Propuesta de arreglo en {proyecto.name or 'sistema sin elegir'}: {prop.name}", urgente)
-        return {"ok": True, "propuesta": prop.id, "nota": "Queda pendiente de que el equipo la apruebe."}
+        return {"ok": True, "propuesta": prop.id, "lo_hace": "una persona del equipo, si se aprueba",
+                "nota": "Ya se le pidió la aprobación al dueño de XUBAX por WhatsApp. Dile al cliente que queda "
+                        "pendiente de aprobación y que le avisas por aquí cuando quede" +
+                        (" (y que se cobra como servicio)." if cobrable else ".")}
 
     def _xb_sa_tool_proponer_alta_numero(self, job, entrada):
         from . import support_contact

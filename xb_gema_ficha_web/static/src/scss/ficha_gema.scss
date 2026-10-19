@@ -1,4 +1,5 @@
-// Ficha de gema, diseño «tarjeta de certificado» (propuesta C, 19-oct-2026).
+// Ficha de gema, diseño E (19-oct-2026): las 4C como escalas (propuesta D)
+// y el resto en tablas limpias (propuesta A); «Brillo y simetría» en dos columnas.
 // Colores y letras de anello.mx. $headings-font-family del tema es Roboto:
 // la serifa de los títulos la pone el tema sobre h1..h6, no esa variable.
 $xb-serif: 'Cormorant Garamond', Georgia, serif;
@@ -13,47 +14,44 @@ $xb-linea: #E6E1D9;
     color: $xb-tinta;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 
-    .xb-gema-marco { background: $xb-crema; border: 1px solid $xb-oro-l; padding: 6px; }
-    .xb-gema-tarjeta {
-        border: 1px solid $xb-oro-l;
-        padding: 28px 24px 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 22px;
-    }
-    .xb-gema-sup { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: $xb-oro-d; }
-    .xb-gema-titulo { font-family: $xb-serif; font-size: 34px; margin: 6px 0 4px; line-height: 1.05; }
+    .xb-gema-cab { display: flex; flex-direction: column; gap: 6px; }
+    .xb-gema-sup { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: $xb-gris; }
+    .xb-gema-titulo { font-family: $xb-serif; font-weight: 500; font-size: 34px; line-height: 1.1; margin: 0; }
     .xb-gema-sub { font-size: 14px; color: $xb-gris; }
 
-    // 4C: tantas columnas como datos haya (--xb-4c).
-    .xb-gema-4c {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(var(--xb-4c, 4), minmax(0, 1fr));
-        border-top: 1px solid $xb-oro-l;
-        border-bottom: 1px solid $xb-oro-l;
+    // Escalas de las 4C
+    .xb-gema-escala { position: relative; display: flex; flex-direction: column; gap: 10px; }
+    .xb-gema-escala-cab { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .xb-gema-escala-cab .xb-gema-h {
+        margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+        display: inline-flex; align-items: center; gap: 2px; font-family: inherit;
     }
-    @media (max-width: 575.98px) {
-        .xb-gema-4c { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .xb-gema-c:nth-child(n+3) { border-top: 1px solid $xb-linea; }
-        .xb-gema-c:nth-child(3) { border-left: 0; }
-        .xb-gema-sup { letter-spacing: .14em; }
+    .xb-gema-escala-val { font-size: 15px; text-align: right; span { color: $xb-gris; } }
+    .xb-gema-pasos { display: flex; gap: 3px; }
+    .xb-gema-paso {
+        flex: 1 1 0; min-width: 0; min-height: 36px; padding: 2px; display: flex; align-items: center; justify-content: center;
+        text-align: center; line-height: 1.1; font-size: 12px; background: $xb-crema; color: $xb-gris;
+        font-variant-numeric: tabular-nums;
+        &.xb-banda { background: $xb-linea; }
+        &.xb-activo { background: $xb-tinta; color: #FAF8F4; font-weight: 600; }
     }
-    .xb-gema-c {
-        padding: 14px 4px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        & + .xb-gema-c { border-left: 1px solid $xb-linea; }
-    }
-    .xb-gema-num { font-family: $xb-serif; font-size: 30px; font-weight: 600; line-height: 1.2; font-variant-numeric: lining-nums; }
-    .xb-gema-c-etq { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: $xb-gris; display: inline-flex; align-items: center; gap: 2px; }
+    .xb-gema-extremos { display: flex; justify-content: space-between; font-size: 12px; color: $xb-gris; }
 
-    .xb-gema-detalles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
-    @media (max-width: 575.98px) { .xb-gema-detalles { grid-template-columns: minmax(0, 1fr); } }
+    // Tablas
+    .xb-gema-tabla { display: flex; flex-direction: column; }
+    .xb-gema-tabla .xb-gema-h {
+        margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $xb-oro-d;
+        display: inline-flex; align-items: center; gap: 2px; font-family: inherit;
+    }
+    .xb-gema-filas { position: relative; border-top: 1px solid $xb-linea; display: flex; flex-direction: column; }
+    .xb-gema-dos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+    @media (max-width: 575.98px) {
+        .xb-gema-dos { grid-template-columns: minmax(0, 1fr); }
+        .xb-gema-paso { font-size: 10px; min-height: 32px; }
+        .xb-gema-sup { letter-spacing: .12em; }
+    }
 
     .xb-gema-fila {
         position: relative;
@@ -61,14 +59,15 @@ $xb-linea: #E6E1D9;
         justify-content: space-between;
         align-items: center;
         gap: 12px;
-        padding: 9px 0;
-        border-bottom: 1px dotted $xb-oro-l;
-        font-size: 14px;
+        padding: 10px 0;
+        border-bottom: 1px solid $xb-linea;
+        font-size: 15px;
     }
+    .xb-gema-dos .xb-gema-fila { font-size: 14px; }
     .xb-gema-etq { color: $xb-gris; display: inline-flex; align-items: center; gap: 2px; }
     .xb-gema-val { font-weight: 500; text-align: right; }
 
-    // Botón «ⓘ» + globo. El globo se ancla a la fila (o a la tira de 4C).
+    // Botón «ⓘ» + globo. El globo se ancla a la fila o a la escala.
     .xb-gema-ayuda {
         display: inline-block;
         summary {
@@ -104,39 +103,21 @@ $xb-linea: #E6E1D9;
         color: $xb-tinta;
         font-weight: 400;
     }
-
-    .xb-gema-cert {
-        position: relative;
-        border: 1px solid $xb-linea;
-        padding: 22px 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+    .xb-gema-escala .xb-gema-ayuda-texto { top: 34px; }
+    .xb-gema-ayuda-imgs {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+        &:first-child { margin-top: 0; }
+        img { flex: 1 1 140px; min-width: 0; max-width: 100%; max-height: 260px; object-fit: contain; background: #FAF8F4; }
     }
-    .xb-gema-cert-cab { position: relative; display: flex; align-items: center; gap: 12px; }
-    .xb-gema-lab {
-        min-width: 48px;
-        height: 48px;
-        padding: 0 10px;
-        border-radius: 24px;
-        background: $xb-tinta;
-        color: #FAF8F4;
+
+    .xb-gema-cert-img { max-height: 200px; align-self: center; margin: 10px 0; }
+    .xb-gema-cert-botones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .xb-gema-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: .06em;
-    }
-    .xb-gema-cert-num { font-size: 18px; font-weight: 500; }
-    .xb-gema-cert-fecha { font-size: 13px; color: $xb-gris; text-align: right; }
-    .xb-gema-cert-img { max-height: 200px; align-self: center; }
-    .xb-gema-cert-botones { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 4px; }
-    .xb-gema-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
         min-height: 44px;
+        padding: 0 20px;
         border: 1px solid $xb-tinta;
         color: $xb-tinta;
         font-size: 13px;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Categoría de tienda «Diamantes» de anello.mx (sitio 1). Se la ponen
+         solas las gemas de tipo Diamante (product.template._xb_sync_categoria_diamantes). -->
+    <data noupdate="1">
+        <record id="categ_diamantes" model="product.public.category">
+            <field name="name">Diamantes</field>
+            <field name="website_id" ref="website.default_website"/>
+            <field name="sequence">5</field>
+        </record>
+    </data>
+</odoo>

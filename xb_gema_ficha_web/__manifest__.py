@@ -16,11 +16,18 @@ uninstall):
   fields. Before, it always read the DIAMANE fields.
 * "Hearts and Arrows" reads its own field (it was reading "Fire").
 * Rows without data are hidden.
+* Shop category and menu "Diamantes" (anello.mx): gems of type Diamante
+  get it automatically; "/shop" without category or search no longer
+  lists them.
 * The gem video ("Video", ``x_studio_video``) is always saved without
   sound: on every upload the audio track is removed with ffmpeg (video
   copied as is, no re-encoding). Needs ``ffmpeg``/``ffprobe`` on the
   server; if they fail the video is saved unchanged and a warning logged.
-* Layout of a printed certificate card (proposal C). Every field has an
+* Layout E: the 4Cs as visual scales (a value outside its scale, e.g. cut
+  "N/A", shows as a plain row) and the rest in clean tables, "Brillo y
+  simetría" in two columns. The lab images (ASET, IdealScope, hearts and
+  arrows, clarity plot, fluorescence...) show inside the "i" balloon of
+  their field. Every field has an
   "i" button with what it means; the texts are edited in Website >
   Configuration > "Ficha de gema: explicaciones" (empty text = no button).
 
@@ -36,13 +43,14 @@ users only).
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Website/eCommerce",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.4.1",
     "license": "LGPL-3",
     "depends": ["website_sale"],
     "data": [
         "security/ir.model.access.csv",
         "data/xb_gema_ayuda_data.xml",
         "views/xb_gema_ayuda_views.xml",
+        "data/product_public_category_data.xml",
         "views/ficha_gema_templates.xml",
     ],
     "assets": {

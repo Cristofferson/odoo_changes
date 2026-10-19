@@ -31,6 +31,18 @@ GEMA_GALERIA = [
     ("x_studio_imagen_origen2_c", "Comprobación de origen"),
 ]
 GEMA_VIDEO = "x_studio_video"
+# Imágenes de comprobación que se ven al abrir el «ⓘ» de cada casilla.
+GEMA_IMAGENES_AYUDA = {
+    "aset": [("x_studio_imagen_aset2_c", "Imagen ASET")],
+    "idealscope": [("x_studio_imagen_idealscope2_c", "Imagen IdealScope")],
+    "ha": [("x_studio_imagen_corazones_c", "Corazones"), ("x_studio_imagen_flechas_c", "Flechas")],
+    "pureza": [("x_studio_ploteo_pureza", "Ploteo de pureza")],
+    "fluorescencia": [("x_studio_imagen_fluorescencia_c", "Comprobación de fluorescencia")],
+    "color": [("x_studio_imagen_color_c", "Comprobación de color"),
+              ("x_studio_comprobacin_color_fancy", "Comprobación de color fancy")],
+    "quilataje": [("x_studio_imagen_ct_c", "Comprobación de quilataje")],
+    "origen": [("x_studio_imagen_origen2_c", "Comprobación de origen")],
+}
 
 # Nombre del laboratorio en «Certificado(s)» -> sus campos. Studio los nombró
 # distinto en cada tanda, por eso no se pueden armar con un patrón.
@@ -86,6 +98,14 @@ class ProductTemplate(models.Model):
             or ("x_studio_id_gema" in self._fields and self.x_studio_id_gema)
             or ("x_studio_quilataje_c" in self._fields and self.x_studio_quilataje_c))
 
+    def _xb_gema_imagenes(self):
+        """{clave: [(campo, texto alterno)]} con las imágenes de laboratorio
+        que esta gema SÍ tiene; van dentro del globo «ⓘ» de su casilla."""
+        self.ensure_one()
+        b = self.with_context(bin_size=True)
+        return {clave: [(c, alt) for c, alt in campos if c in self._fields and b[c]]
+                for clave, campos in GEMA_IMAGENES_AYUDA.items()}
+
     def _xb_gema_ayudas(self):
         """{clave: {"nombre", "texto"}} del botón «ⓘ» (modelo xb.gema.ayuda)."""
         return {a.clave: {"nombre": a.name, "texto": a.explicacion or ""}
@@ -109,6 +129,65 @@ class ProductTemplate(models.Model):
             else:
                 texto = str(valor)
         return {"Si": "Sí", "SI": "Sí"}.get(texto, texto)
+
+    def _xb_gema_escalas(self):
+        """Las 4C para las barras de la ficha: [{clave, nombre, valor, texto,
+        pasos: [{etiqueta, activo, banda}], izq, der}]. Una C cuyo valor no
+        cae en su escala (corte «N/A», color fancy…) va con pasos=[] y la
+        plantilla la pinta como fila normal. Vacía si no hay dato."""
+        self.ensure_one()
+
+        def escala(clave, nombre, valor, texto, pasos, activo, banda, izq, der):
+            if not valor:
+                return None
+            return {"clave": clave, "nombre": nombre, "valor": valor, "texto": texto, "izq": izq, "der": der,
+                    "pasos": [{"etiqueta": e, "activo": e == activo, "banda": i in banda}
+                              for i, e in enumerate(pasos)] if activo else []}
+
+        res = []
+        ct = "x_studio_quilataje_c" in self._fields and self.x_studio_quilataje_c
+        if ct:
+            cortes = [0, 0.30, 0.50, 0.70, 0.90, 1.00, 1.50, 2.00, 3.00]
+            etiquetas = ["<0.30", "0.30", "0.50", "0.70", "0.90", "1.00", "1.50", "2.00", "3.00+"]
+            i = max(k for k, c in enumerate(cortes) if ct >= c - 0.005)
+            res.append(escala("quilataje", "Quilates", "%.2f ct" % ct, "", etiquetas, etiquetas[i], set(),
+                              "Más pequeño", "Más grande"))
+
+        color = self._xb_gema_txt("x_studio_color_real").strip().upper()
+        pasos = list("DEFGHIJKLM") + ["N–R", "S–Z"]
+        activo = color if color in "DEFGHIJKLM" and len(color) == 1 else (
+            "N–R" if color in list("NOPQR") else "S–Z" if color in list("STUVWXYZ") else None)
+        grupos = {"D": "Incoloro", "E": "Incoloro", "F": "Incoloro", "G": "Casi incoloro", "H": "Casi incoloro",
+                  "I": "Casi incoloro", "J": "Casi incoloro", "K": "Tono tenue", "L": "Tono tenue", "M": "Tono tenue",
+                  "N–R": "Tono muy ligero", "S–Z": "Tono ligero"}
+        res.append(escala("color", "Color", color, grupos.get(activo, ""), pasos, activo, {0, 1, 2},
+                          "Incoloro", "Tono visible"))
+
+        pureza = self._xb_gema_txt("x_studio_pureza_real").strip().upper()
+        pasos = ["FL", "IF", "VVS1", "VVS2", "VS1", "VS2", "SI1", "SI2", "I1", "I2", "I3"]
+        textos = {"FL": "Sin inclusiones", "IF": "Sin inclusiones internas", "VVS1": "Inclusiones muy, muy ligeras",
+                  "VVS2": "Inclusiones muy, muy ligeras", "VS1": "Inclusiones muy ligeras", "VS2": "Inclusiones muy ligeras",
+                  "SI1": "Inclusiones ligeras", "SI2": "Inclusiones ligeras", "I1": "Inclusiones visibles",
+                  "I2": "Inclusiones visibles", "I3": "Inclusiones visibles"}
+        res.append(escala("pureza", "Pureza", pureza, textos.get(pureza, ""), pasos,
+                          pureza if pureza in pasos else None, {0, 1, 2, 3}, "Sin inclusiones", "Inclusiones visibles"))
+
+        corte = self._xb_gema_txt("x_studio_corte").strip().upper()
+        palabras = {"P": "Pobre", "F": "Regular", "G": "Bueno", "VG": "Muy bueno", "EX": "Excelente"}
+        if corte != "N/A":
+            res.append(escala("corte", "Corte", corte, palabras.get(corte, ""), list(palabras.values()),
+                              palabras.get(corte), set(), "Pobre", "Excelente"))
+        return [r for r in res if r]
+
+    def _xb_gema_fluorescencia(self):
+        """«Fuerte, azul»; sin el color cuando no hay fluorescencia (antes
+        salía «Ninguna, ninguna»)."""
+        self.ensure_one()
+        intensidad = self._xb_gema_txt("x_studio_fluorescencia_intensidad", "x_studio_explicacin_de_la_fluorescencia")
+        color = self._xb_gema_txt("x_studio_fluorescencia_color_c", "x_studio_fluorescencia_color_explicac_c").lower()
+        if not intensidad or intensidad.strip().lower() in ("ninguna", "none", "n/a", "nula") or color in ("ninguna", "none", "n/a"):
+            return intensidad
+        return ", ".join(x for x in (intensidad, color) if x)
 
     def _xb_gema_certificados(self):
         """Un dict por laboratorio de «Certificado(s)» con sus datos; el campo
@@ -219,6 +298,20 @@ class ProductTemplate(models.Model):
             vals = dict(vals, **{GEMA_VIDEO: self._xb_video_sin_audio(vals[GEMA_VIDEO])})
         return vals
 
+    def _xb_sync_categoria_diamantes(self):
+        """Pone (o quita) la categoría de tienda «Diamantes» según la gema sea
+        de tipo Diamante. Las demás categorías de tienda no se tocan."""
+        categ = self.env.ref("xb_gema_ficha_web.categ_diamantes", raise_if_not_found=False)
+        if not categ or "x_studio_tipo_gema_c" not in self._fields:
+            return
+        for t in self:
+            es = t.categ_id.id == GEM_CATEGORY_ID and (t.x_studio_tipo_gema_c.display_name or "").strip().lower() == "diamante"
+            tiene = categ in t.public_categ_ids
+            if es and not tiene:
+                t.sudo().public_categ_ids = [(4, categ.id)]
+            elif tiene and not es:
+                t.sudo().public_categ_ids = [(3, categ.id)]
+
     _XB_CAMPOS_SYNC = {c for c, _e in GEMA_GALERIA} | {
         GEMA_VIDEO, "image_1920", "categ_id", "x_studio_id_gema", "x_studio_tipo_gema_c",
         "x_studio_quilataje_c"}
@@ -227,6 +320,7 @@ class ProductTemplate(models.Model):
     def create(self, vals_list):
         vals_list = [self._xb_vals_sin_audio(vals) for vals in vals_list]
         templates = super().create(vals_list)
+        templates._xb_sync_categoria_diamantes()
         if any(self._XB_CAMPOS_SYNC.intersection(vals) for vals in vals_list):
             templates._xb_sync_gema_galeria()
         return templates
@@ -234,6 +328,8 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         vals = self._xb_vals_sin_audio(vals)
         res = super().write(vals)
+        if {"categ_id", "x_studio_tipo_gema_c"}.intersection(vals):
+            self._xb_sync_categoria_diamantes()
         if self._XB_CAMPOS_SYNC.intersection(vals):
             self._xb_sync_gema_galeria()
         return res

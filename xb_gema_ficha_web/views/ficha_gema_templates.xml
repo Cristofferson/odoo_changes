@@ -2,111 +2,154 @@
 <odoo>
     <!-- Botón «ⓘ»: espera `ayuda` = {"nombre", "texto"}. Sin JS: <details>,
          el texto se abre como globo sobre la fila (position: absolute). -->
+    <!-- `imgs` (opcional) = [(campo, alt)] de imágenes de esta gema para el globo. -->
     <template id="boton_ayuda" name="Gems: help button">
-        <details t-if="ayuda.get('texto')" class="xb-gema-ayuda">
+        <t t-set="imgs" t-value="imgs or []"/>
+        <details t-if="ayuda.get('texto') or imgs" class="xb-gema-ayuda">
             <summary t-att-aria-label="'Qué significa %s' % (ayuda.get('nombre') or '')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>
             </summary>
-            <div class="xb-gema-ayuda-texto" t-out="ayuda['texto']"/>
+            <div class="xb-gema-ayuda-texto">
+                <t t-if="ayuda.get('texto')" t-out="ayuda['texto']"/>
+                <div t-if="imgs" class="xb-gema-ayuda-imgs">
+                    <t t-foreach="imgs" t-as="im">
+                        <img t-attf-src="/web/image/product.template/#{product.id}/#{im[0]}/600x600" t-att-alt="im[1]" loading="lazy"/>
+                    </t>
+                </div>
+            </div>
         </details>
     </template>
 
     <!-- Fila etiqueta/valor; el valor llega como cuerpo del t-call. -->
     <template id="fila" name="Gems: data row">
         <t t-set="ayuda" t-value="ayudas.get(clave) or {}"/>
+        <t t-set="imgs" t-value="imagenes.get(clave) or []"/>
         <div class="xb-gema-fila">
             <span class="xb-gema-etq"><t t-out="ayuda.get('nombre') or etiqueta"/><t t-call="xb_gema_ficha_web.boton_ayuda"/></span>
             <span class="xb-gema-val"><t t-out="0"/></span>
         </div>
     </template>
 
-    <!-- Tablas de la gema en la ficha de producto. Reemplaza a la vista vieja
-         xb_gemas.ficha_gema_producto (la archiva el post_init_hook). -->
+    <!-- Ficha de gema (diseño E, 19-oct-2026): las 4C como escalas y el resto
+         en tablas. Reemplaza a la vista vieja xb_gemas.ficha_gema_producto
+         (la archiva el post_init_hook). -->
     <template id="ficha_gema" inherit_id="website_sale.cta_wrapper" priority="5" name="Gems: data tables">
         <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="before">
             <div t-if="product._xb_es_gema()" class="xb-gema mb-4">
                 <t t-set="ayudas" t-value="product._xb_gema_ayudas()"/>
+                <t t-set="imagenes" t-value="product._xb_gema_imagenes()"/>
                 <t t-set="T" t-value="product._xb_gema_txt"/>
-                <div class="xb-gema-marco">
-                    <div class="xb-gema-tarjeta">
-                        <div class="text-center">
-                            <div class="xb-gema-sup">Reporte de la gema<t t-if="'x_studio_id_gema' in product._fields and product.x_studio_id_gema"> · ID <t t-out="product.x_studio_id_gema"/></t></div>
-                            <h2 class="xb-gema-titulo"><t t-out="T('x_studio_tipo_gema_c') or 'Gema'"/></h2>
-                            <t t-set="forma" t-value="T('x_studio_talla_o_forma', 'x_studio_nombre_de_la_forma')"/>
-                            <t t-set="medidas" t-value="T('x_studio_medidas_totales')"/>
-                            <div t-if="forma or medidas" class="xb-gema-sub">
-                                <t t-out="forma"/><t t-if="forma and medidas"> · </t><t t-if="medidas"><t t-out="medidas"/> mm</t>
-                            </div>
-                        </div>
+                <t t-set="certificados" t-value="product._xb_gema_certificados()"/>
 
-                        <t t-set="cuatro_c" t-value="[c for c in [
-                            ('quilataje', 'Quilates', ('%.2f' % product.x_studio_quilataje_c) if 'x_studio_quilataje_c' in product._fields and product.x_studio_quilataje_c else ''),
-                            ('color', 'Color', T('x_studio_color_real')),
-                            ('pureza', 'Pureza', T('x_studio_pureza_real')),
-                            ('corte', 'Corte', T('x_studio_corte')),
-                        ] if c[2]]"/>
-                        <div t-if="cuatro_c" class="xb-gema-4c" t-attf-style="--xb-4c: #{len(cuatro_c)}">
-                            <t t-foreach="cuatro_c" t-as="c">
-                                <t t-set="ayuda" t-value="ayudas.get(c[0]) or {}"/>
-                                <div class="xb-gema-c">
-                                    <span class="xb-gema-num" t-out="c[2]"/>
-                                    <span class="xb-gema-c-etq"><t t-out="ayuda.get('nombre') or c[1]"/><t t-call="xb_gema_ficha_web.boton_ayuda"/></span>
-                                </div>
-                            </t>
-                        </div>
-
-                        <t t-set="detalles" t-value="[d for d in [
-                            ('origen', 'Origen', T('x_studio_origen_c')),
-                            ('brillo', 'Brillo', T('x_studio_brillo_c', 'x_studio_explicacion_brillo')),
-                            ('pulido', 'Pulido', T('x_studio_pulido', 'x_studio_explicacin_del_pulido')),
-                            ('fuego', 'Fuego', T('x_studio_fuego_c', 'x_studio_explicacion_fuego')),
-                            ('simetria', 'Simetría', T('x_studio_simetria_calificacion_c', 'x_studio_simetria_explicacion_c')),
-                            ('aset', 'ASET', T('x_studio_aset_c', 'x_studio_explicacion_aset')),
-                            ('idealscope', 'IdealScope', T('x_studio_idealscope_c', 'x_studio_explicacion_idealscope_c')),
-                            ('ha', 'Corazones y flechas', T('x_studio_ha_c')),
-                            ('triple_ex', 'Triple excelente', T('x_studio_triple_excelente_c')),
-                            ('patron', 'Patrón', T('x_studio_patron_c', 'x_studio_explicacion_patron')),
-                            ('fluorescencia', 'Fluorescencia', ', '.join(x for x in [T('x_studio_fluorescencia_intensidad', 'x_studio_explicacin_de_la_fluorescencia'), T('x_studio_fluorescencia_color_c', 'x_studio_fluorescencia_color_explicac_c').lower()] if x)),
-                        ] if d[2]]"/>
-                        <div t-if="detalles" class="xb-gema-detalles">
-                            <t t-foreach="detalles" t-as="d">
-                                <t t-call="xb_gema_ficha_web.fila">
-                                    <t t-set="clave" t-value="d[0]"/>
-                                    <t t-set="etiqueta" t-value="d[1]"/>
-                                    <t t-out="d[2]"/>
-                                </t>
-                            </t>
-                        </div>
+                <div class="xb-gema-cab">
+                    <div class="xb-gema-sup">
+                        <t t-out="' · '.join(x for x in [
+                            ' '.join(y for y in [T('x_studio_tipo_gema_c'), (T('x_studio_origen_c').split(' (')[0].lower() if T('x_studio_origen_c') else '')] if y),
+                            ('ID ' + product.x_studio_id_gema) if 'x_studio_id_gema' in product._fields and product.x_studio_id_gema else '',
+                            ('Certificado ' + ', '.join(c['laboratorio'] for c in certificados)) if certificados else '',
+                        ] if x)"/>
+                    </div>
+                    <h2 class="xb-gema-titulo">Reporte de la gema</h2>
+                    <t t-set="forma" t-value="T('x_studio_talla_o_forma', 'x_studio_nombre_de_la_forma')"/>
+                    <t t-set="medidas" t-value="T('x_studio_medidas_totales')"/>
+                    <!-- «- x» sin números = medidas sin capturar -->
+                    <t t-set="medidas" t-value="medidas if [c for c in (medidas or '') if c.isdigit()] else ''"/>
+                    <div t-if="forma or medidas" class="xb-gema-sub">
+                        <t t-out="forma"/><t t-if="forma and medidas"> · </t><t t-if="medidas"><t t-out="medidas"/> mm</t>
                     </div>
                 </div>
 
-                <t t-foreach="product._xb_gema_certificados()" t-as="cert">
-                    <t t-set="ayuda" t-value="ayudas.get(cert['clave']) or {}"/>
-                    <div class="xb-gema-cert">
-                        <div class="xb-gema-cert-cab">
-                            <span class="xb-gema-lab" t-out="cert['laboratorio']"/>
-                            <div class="flex-grow-1">
-                                <div class="xb-gema-sup text-start">Certificado <t t-out="cert['laboratorio']"/><t t-call="xb_gema_ficha_web.boton_ayuda"/></div>
-                                <div t-if="cert['numero']" class="xb-gema-cert-num">N.º <t t-out="cert['numero']"/></div>
-                            </div>
-                            <div t-if="cert['fecha']" class="xb-gema-cert-fecha">Emitido<br/><t t-out="cert['fecha'].strftime('%d/%m/%Y')"/></div>
+                <!-- Las 4C: escala si el valor cae en ella; si no, fila normal. -->
+                <t t-set="escalas" t-value="product._xb_gema_escalas()"/>
+                <t t-foreach="[e for e in escalas if e['pasos']]" t-as="esc">
+                    <t t-set="ayuda" t-value="ayudas.get(esc['clave']) or {}"/>
+                    <t t-set="imgs" t-value="imagenes.get(esc['clave']) or []"/>
+                    <section class="xb-gema-escala">
+                        <div class="xb-gema-escala-cab">
+                            <div class="xb-gema-h"><t t-out="ayuda.get('nombre') or esc['nombre']"/><t t-call="xb_gema_ficha_web.boton_ayuda"/></div>
+                            <div class="xb-gema-escala-val"><b t-out="esc['valor']"/><t t-if="esc['texto']"> <span>· <t t-out="esc['texto']"/></span></t></div>
                         </div>
-                        <t t-if="cert['laser']" t-call="xb_gema_ficha_web.fila">
-                            <t t-set="clave" t-value="'cert_laser'"/>
-                            <t t-set="etiqueta" t-value="'Inscripción láser'"/>
-                            <t t-out="cert['laser']"/>
+                        <div class="xb-gema-pasos">
+                            <t t-foreach="esc['pasos']" t-as="p">
+                                <span t-attf-class="xb-gema-paso #{'xb-activo' if p['activo'] else ('xb-banda' if p['banda'] else '')}" t-out="p['etiqueta']"/>
+                            </t>
+                        </div>
+                        <div class="xb-gema-extremos"><span t-out="esc['izq']"/><span t-out="esc['der']"/></div>
+                    </section>
+                </t>
+                <t t-set="sin_escala" t-value="[e for e in escalas if not e['pasos']]"/>
+                <section t-if="sin_escala" class="xb-gema-tabla">
+                    <div class="xb-gema-h">Las 4C</div>
+                    <div class="xb-gema-filas">
+                        <t t-foreach="sin_escala" t-as="e">
+                            <t t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="e['clave']"/>
+                                <t t-set="etiqueta" t-value="e['nombre']"/>
+                                <t t-out="e['valor']"/>
+                            </t>
                         </t>
-                        <img t-if="cert['imagen']" t-attf-src="/web/image/product.template/#{product.id}/#{cert['imagen']}" class="img-fluid xb-gema-cert-img" loading="lazy" alt="Inscripción láser"/>
-                        <t t-if="cert['comentarios']" t-call="xb_gema_ficha_web.fila">
-                            <t t-set="clave" t-value="'cert_comentarios'"/>
-                            <t t-set="etiqueta" t-value="'Comentarios'"/>
-                            <t t-out="cert['comentarios']"/>
+                    </div>
+                </section>
+
+                <t t-set="detalles" t-value="[d for d in [
+                    ('origen', 'Origen', T('x_studio_origen_c')),
+                    ('brillo', 'Brillo', T('x_studio_brillo_c', 'x_studio_explicacion_brillo')),
+                    ('pulido', 'Pulido', T('x_studio_pulido', 'x_studio_explicacin_del_pulido')),
+                    ('fuego', 'Fuego', T('x_studio_fuego_c', 'x_studio_explicacion_fuego')),
+                    ('simetria', 'Simetría', T('x_studio_simetria_calificacion_c', 'x_studio_simetria_explicacion_c')),
+                    ('aset', 'ASET', T('x_studio_aset_c', 'x_studio_explicacion_aset')),
+                    ('idealscope', 'IdealScope', T('x_studio_idealscope_c', 'x_studio_explicacion_idealscope_c')),
+                    ('ha', 'Corazones y flechas', T('x_studio_ha_c')),
+                    ('triple_ex', 'Triple excelente', T('x_studio_triple_excelente_c')),
+                    ('patron', 'Patrón', T('x_studio_patron_c', 'x_studio_explicacion_patron')),
+                    ('fluorescencia', 'Fluorescencia', product._xb_gema_fluorescencia()),
+                ] if d[2] or imagenes.get(d[0])]"/>
+                <section t-if="detalles" class="xb-gema-tabla">
+                    <div class="xb-gema-h">Brillo y simetría</div>
+                    <div class="xb-gema-filas xb-gema-dos">
+                        <t t-foreach="detalles" t-as="d">
+                            <t t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="d[0]"/>
+                                <t t-set="etiqueta" t-value="d[1]"/>
+                                <t t-out="d[2] or 'Ver imagen'"/>
+                            </t>
                         </t>
+                    </div>
+                </section>
+
+                <t t-foreach="certificados" t-as="cert">
+                    <t t-set="ayuda" t-value="ayudas.get(cert['clave']) or {}"/>
+                    <t t-set="imgs" t-value="[]"/>
+                    <section class="xb-gema-tabla">
+                        <div class="xb-gema-h">Certificado <t t-out="cert['laboratorio']"/><t t-call="xb_gema_ficha_web.boton_ayuda"/></div>
+                        <div class="xb-gema-filas">
+                            <t t-if="cert['numero']" t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="'cert_numero'"/>
+                                <t t-set="etiqueta" t-value="'Número'"/>
+                                <t t-out="cert['numero']"/>
+                            </t>
+                            <t t-if="cert['fecha']" t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="'cert_fecha'"/>
+                                <t t-set="etiqueta" t-value="'Fecha'"/>
+                                <t t-out="cert['fecha'].strftime('%d/%m/%Y')"/>
+                            </t>
+                            <t t-if="cert['laser']" t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="'cert_laser'"/>
+                                <t t-set="etiqueta" t-value="'Inscripción láser'"/>
+                                <t t-out="cert['laser']"/>
+                            </t>
+                            <img t-if="cert['imagen']" t-attf-src="/web/image/product.template/#{product.id}/#{cert['imagen']}" class="img-fluid xb-gema-cert-img" loading="lazy" alt="Inscripción láser"/>
+                            <t t-if="cert['comentarios']" t-call="xb_gema_ficha_web.fila">
+                                <t t-set="clave" t-value="'cert_comentarios'"/>
+                                <t t-set="etiqueta" t-value="'Comentarios'"/>
+                                <t t-out="cert['comentarios']"/>
+                            </t>
+                        </div>
                         <div t-if="cert['pdf'] or cert['verificar']" class="xb-gema-cert-botones">
-                            <a t-if="cert['pdf']" t-att-href="cert['pdf']" target="_blank" rel="noopener" class="xb-gema-btn xb-gema-btn-lleno">Ver PDF</a>
+                            <a t-if="cert['pdf']" t-att-href="cert['pdf']" target="_blank" rel="noopener" class="xb-gema-btn xb-gema-btn-lleno">Ver certificado PDF</a>
                             <a t-if="cert['verificar']" t-att-href="cert['verificar']" target="_blank" rel="noopener" class="xb-gema-btn">Verificar en <t t-out="cert['laboratorio']"/></a>
                         </div>
-                    </div>
+                    </section>
                 </t>
             </div>
         </xpath>

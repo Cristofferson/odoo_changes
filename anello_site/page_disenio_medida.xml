@@ -1,0 +1,60 @@
+<t t-name="anbn.page_disenio_medida">
+  <t t-call="website.layout">
+    <t t-set="additional_title">Diseño a la medida</t>
+    <div id="wrap" class="oe_structure dm">
+<style>
+.dm{background:#FAF8F4;color:#14110E}
+.dm-w{max-width:1120px;margin:0 auto;padding:72px 24px 64px;display:flex;flex-direction:column;gap:44px}
+.dm-intro{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.dm-eb{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:#8C6A38}
+.dm h1{margin:0;font-weight:500;font-size:clamp(36px,5vw,60px);line-height:1.05;max-width:820px;text-wrap:balance}
+.dm-lead{margin:0;font-size:18px;line-height:1.6;color:#5E574E;max-width:680px}
+.dm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.dm-card{background:#fff;border:1px solid #E6E1D9;display:flex;flex-direction:column}
+.dm-card img{width:100%;height:300px;object-fit:cover;display:block}
+.dm-body{padding:28px 32px 32px;display:flex;flex-direction:column;gap:12px;flex-grow:1}
+.dm-body h2{margin:0;font-weight:600;font-size:32px}
+.dm-body p{margin:0;font-size:15px;line-height:1.6;color:#5E574E}
+.dm-hor{font-size:14px}
+.dm-btn{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;min-height:48px;padding:0 28px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid #14110E}
+.dm-btn-l{background:#14110E;color:#FAF8F4!important}
+.dm-btn-l:hover{background:#8C6A38;border-color:#8C6A38}
+.dm-btn-o{color:#14110E!important}
+.dm-btn-o:hover{background:#14110E;color:#FAF8F4!important}
+.dm-pie{text-align:center;font-size:14px;color:#5E574E}
+.dm-pie b{color:#14110E;font-weight:500}
+@media (max-width:767.98px){.dm-grid{grid-template-columns:minmax(0,1fr)}.dm-card img{height:220px}.dm-w{padding:48px 16px}.dm-body{padding:24px}}
+</style>
+<div class="dm-w">
+  <div class="dm-intro">
+    <div class="dm-eb">Diseño a la medida</div>
+    <h1>Tu anillo, diseñado contigo</h1>
+    <p class="dm-lead">Platica con un asesor Anello: elige metal, piedra y medida, y nuestros orfebres lo hacen a mano. Te atendemos en persona en nuestro Estudio de Morelia o por videollamada, estés donde estés.</p>
+  </div>
+  <div class="dm-grid">
+    <div class="dm-card">
+      <img src="{{bn2-asesoria.jpg}}" alt="Asesora mostrando anillos a una pareja en el Estudio Anello" loading="lazy"/>
+      <div class="dm-body">
+        <div class="dm-eb">Presencial</div>
+        <h2>En el Estudio Anello</h2>
+        <p>Prueba los anillos con calma. Plaza Fiesta Camelinas, piso G · Av. Ventura Puente 1843 E16, Col. Electricistas, Morelia.</p>
+        <div class="dm-hor">Todos los días · 11:00 a 19:00</div>
+        <a href="/appointment/5" class="dm-btn dm-btn-l">Agendar en el Estudio</a>
+      </div>
+    </div>
+    <div class="dm-card">
+      <img src="{{bn4-icert.jpg}}" alt="Mano con celular junto a una tarjeta de certificado" loading="lazy"/>
+      <div class="dm-body">
+        <div class="dm-eb">Virtual</div>
+        <h2>Por videollamada</h2>
+        <p>¿No estás en Morelia? Tu asesor te muestra los anillos en vivo desde tu casa y resuelve tus dudas. Te mandamos la liga por correo.</p>
+        <div class="dm-hor">Todos los días · 11:00 a 18:00</div>
+        <a href="/appointment/6" class="dm-btn dm-btn-o">Agendar videollamada</a>
+      </div>
+    </div>
+  </div>
+  <div class="dm-pie">Citas de 45 minutos. ¿Dudas? Escríbenos por WhatsApp al <b>443 324 4511</b></div>
+</div>
+    </div>
+  </t>
+</t>

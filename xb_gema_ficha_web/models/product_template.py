@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
+import base64
+import logging
+import os
 import re
+import subprocess
+import tempfile
 
 from odoo import api, models
+
+_logger = logging.getLogger(__name__)
 
 GEM_CATEGORY_ID = 71
 
@@ -170,18 +177,62 @@ class ProductTemplate(models.Model):
             if existentes:
                 Image.browse([i.id for i in existentes.values()]).unlink()
 
+    @api.model
+    def _xb_video_sin_audio(self, valor):
+        """Quita la pista de audio a un video en base64 (lo que llega en
+        vals). Copia el video tal cual, sin recomprimir (`-c copy`). Si no
+        trae audio, o ffmpeg falla, devuelve el valor original: nunca se
+        pierde un video por esto."""
+        if not valor:
+            return valor
+        try:
+            datos = base64.b64decode(valor)
+        except Exception:
+            return valor
+        with tempfile.TemporaryDirectory(prefix="xb_gema_video_") as tmp:
+            entrada = os.path.join(tmp, "entrada")
+            salida = os.path.join(tmp, "salida.mp4")
+            with open(entrada, "wb") as f:
+                f.write(datos)
+            try:
+                audio = subprocess.run(
+                    ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries",
+                     "stream=index", "-of", "csv=p=0", entrada],
+                    capture_output=True, text=True, timeout=60).stdout.strip()
+                if not audio:
+                    return valor
+                subprocess.run(
+                    ["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", entrada, "-map", "0:v",
+                     "-c", "copy", "-movflags", "+faststart", "-f", "mp4", salida],
+                    check=True, capture_output=True, timeout=300)
+                with open(salida, "rb") as f:
+                    nuevo = f.read()
+            except Exception as e:  # ffmpeg ausente, formato raro, tiempo agotado…
+                _logger.warning("No se pudo quitar el audio al video de la gema: %s", e)
+                return valor
+        if not nuevo:
+            return valor
+        return base64.b64encode(nuevo)
+
+    def _xb_vals_sin_audio(self, vals):
+        if vals.get(GEMA_VIDEO) and not self.env.context.get("bin_size"):
+            vals = dict(vals, **{GEMA_VIDEO: self._xb_video_sin_audio(vals[GEMA_VIDEO])})
+        return vals
+
     _XB_CAMPOS_SYNC = {c for c, _e in GEMA_GALERIA} | {
         GEMA_VIDEO, "image_1920", "categ_id", "x_studio_id_gema", "x_studio_tipo_gema_c",
         "x_studio_quilataje_c"}
 
     @api.model_create_multi
     def create(self, vals_list):
+        vals_list = [self._xb_vals_sin_audio(vals) for vals in vals_list]
         templates = super().create(vals_list)
         if any(self._XB_CAMPOS_SYNC.intersection(vals) for vals in vals_list):
             templates._xb_sync_gema_galeria()
         return templates
 
     def write(self, vals):
+        vals = self._xb_vals_sin_audio(vals)
         res = super().write(vals)
         if self._XB_CAMPOS_SYNC.intersection(vals):
             self._xb_sync_gema_galeria()

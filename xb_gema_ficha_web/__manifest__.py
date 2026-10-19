@@ -16,6 +16,10 @@ uninstall):
   fields. Before, it always read the DIAMANE fields.
 * "Hearts and Arrows" reads its own field (it was reading "Fire").
 * Rows without data are hidden.
+* The gem video ("Video", ``x_studio_video``) is always saved without
+  sound: on every upload the audio track is removed with ffmpeg (video
+  copied as is, no re-encoding). Needs ``ffmpeg``/``ffprobe`` on the
+  server; if they fail the video is saved unchanged and a warning logged.
 * Layout of a printed certificate card (proposal C). Every field has an
   "i" button with what it means; the texts are edited in Website >
   Configuration > "Ficha de gema: explicaciones" (empty text = no button).
@@ -32,7 +36,7 @@ users only).
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Website/eCommerce",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "license": "LGPL-3",
     "depends": ["website_sale"],
     "data": [

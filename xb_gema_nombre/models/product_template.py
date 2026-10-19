@@ -4,6 +4,7 @@ from decimal import ROUND_FLOOR, Decimal
 from odoo import api, fields, models
 
 CATEG_GEMA = 71
+TIPO_DIAMANTE = "Diamante"
 # Palabras que no aportan al nombre.
 VACIOS = {"", "n/a", "na", "otro", "ninguno", "none"}
 # Si cambia alguno, el nombre se vuelve a armar.
@@ -37,9 +38,15 @@ class ProductTemplate(models.Model):
         help="Si está marcada, el nombre de la gema no se calcula a partir de sus datos.")
 
     def _xb_nombre_aplica(self):
+        # Piezas únicas (con serie) y, desde el 19-oct, también los diamantes de
+        # acento (sin serie): «Diamante LAB PR 0.05 VVS2 E VG». La lista de
+        # materiales de las joyas los lee por ese nombre (xb_joyeria_peso_precio).
         self.ensure_one()
-        return (self.categ_id.id == CATEG_GEMA and self.tracking == "serial" and not self.xb_nombre_fijo
-                and "x_studio_tipo_gema_c" in self._fields)
+        if (self.categ_id.id != CATEG_GEMA or self.xb_nombre_fijo
+                or "x_studio_tipo_gema_c" not in self._fields):
+            return False
+        return (self.tracking == "serial"
+                or self.with_context(lang="en_US").x_studio_tipo_gema_c.x_name == TIPO_DIAMANTE)
 
     def _xb_nombre_automatico(self):
         self.ensure_one()

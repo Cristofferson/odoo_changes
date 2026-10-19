@@ -8,6 +8,17 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 KT = re.compile(r'(\d+)\s*k', re.I)
+# Margen propio de los diamantes de laboratorio (los marcados «Costo LAB por quilate», de
+# xb_gema_precio_rapaport): dentro de la joya se cobran a su costo × este factor, no con el margen de
+# la regla de la joya. 0 o vacío = sin margen propio.
+PARAM_FACTOR_LAB = 'xb_gema_precio_rapaport.factor_lab'
+# Diamante por su nombre: «Diamante LAB PR 0.05 VVS2 E VG» (nomenclatura de gemas, 19-oct; el natural no
+# lleva «NAT») o el formato viejo «Diamante LAB 0.02Qts SI1 G VG Princesa».
+# Grupos: origen, forma, quilates, pureza, color, corte.
+DIAMANTE = re.compile(r'Diamante\s+(?:(LAB|NAT)\s+)?(?:([A-Z]{2,4})\s+)?(\d+(?:\.\d+)?)\s*(?:Qts?)?\s+(\S+)\s+(\S+)\s+(\S+)', re.I)
+FORMA_VIEJA = re.compile(r'\b(Baguette|Princesa|Marquesa)\s*$', re.I)
+FORMAS = {'BR': 'redondos', 'PR': 'princesa', 'BG': 'baguette', 'MQ': 'marquesa', 'PS': 'pera', 'OV': 'ovalados',
+          'EM': 'esmeralda', 'HS': 'corazón', 'AC': 'asscher', 'CU': 'cojín', 'RA': 'radiante', 'TBAG': 'baguette'}
 
 
 class ProductTemplate(models.Model):
@@ -107,8 +118,8 @@ class ProductTemplate(models.Model):
         mc = re.search(r'([\d.]+)\s*ct', central.name or '', re.I)
         if mc:
             for prod in list(acentos):
-                mq = re.search(r'([\d.]+)\s*Qts?', prod.name or '', re.I)
-                if mq and abs(float(mq.group(1)) - float(mc.group(1))) < 1e-6:
+                mq = DIAMANTE.search(prod.name or '')
+                if mq and abs(float(mq.group(3)) - float(mc.group(1))) < 1e-6:
                     centro = prod
                     acentos.pop(prod)
                     break
@@ -130,27 +141,27 @@ class ProductTemplate(models.Model):
             texto = ''
         renglones = []
         cn = (central.name or '').lower()
-        mcen = centro and re.search(r'Diamante\s+(LAB|NAT)\s+([\d.]+)\s*Qts?\s+(\S+)\s+(\S+)\s+(\S+)', centro.name or '', re.I)
+        mcen = centro and DIAMANTE.search(centro.name or '')
         if mcen:
-            tipo, qt, pureza, color, corte = mcen.groups()
+            tipo, _forma, qt, pureza, color, corte = mcen.groups()
             renglones.append('Diamante central %s de %s ct · corte %s · color %s · pureza %s · certificado ICERT' % (
-                'de laboratorio' if tipo.upper() == 'LAB' else 'natural', qt,
+                'de laboratorio' if (tipo or '').upper() == 'LAB' else 'natural', qt,
                 self._XB_CORTE.get(corte.upper(), corte), color, pureza))
         elif 'diamante' in cn:
             origen = 'de laboratorio' if 'laboratorio' in cn else 'natural'
             renglones.append('Diamante central %s: quilataje, color y pureza a tu elección con tu asesor · '
                              'certificado ICERT' % origen)
         for prod, qty in acentos.items():
-            m = re.search(r'Diamante\s+(LAB|NAT)\s+([\d.]+)\s*Qts?\s+(\S+)\s+(\S+)\s+(\S+)', prod.name or '', re.I)
+            m = DIAMANTE.search(prod.name or '')
             if not m:
                 continue
-            tipo, qt, pureza, color, corte = m.groups()
+            tipo, abrev, qt, pureza, color, corte = m.groups()
             q = int(qty)
-            mf = re.search(r'\b(Baguette|Princesa|Marquesa)\s*$', prod.name or '', re.I)
-            forma = (' ' + mf.group(1).lower()) if mf else ' redondos'
+            mf = FORMA_VIEJA.search(prod.name or '')
+            forma = ' ' + (mf.group(1).lower() if mf else FORMAS.get((abrev or 'BR').upper(), (abrev or '').upper()))
             renglones.append('%d diamantes de acento%s %s de %s qt (%.2f qt en total) · corte %s · pureza %s · '
                              'color %s · certificado ICERT de la pieza' % (
-                                 q, forma, 'de laboratorio' if tipo.upper() == 'LAB' else 'naturales', qt,
+                                 q, forma, 'de laboratorio' if (tipo or '').upper() == 'LAB' else 'naturales', qt,
                                  q * float(qt), self._XB_CORTE.get(corte.upper(), corte), pureza, color))
         return texto, renglones
 
@@ -168,12 +179,36 @@ class ProductTemplate(models.Model):
         aleacion = metal.xb_aleacion_id if metal and 'xb_aleacion_id' in metal._fields else False
         return (aleacion, peso) if aleacion and peso else (False, 0.0)
 
+    def _xb_factor_lab(self):
+        return float(self.env['ir.config_parameter'].sudo().get_param(PARAM_FACTOR_LAB) or 0)
+
+    def _xb_costo_lab(self, ptavs, cia):
+        """Costo de los diamantes de laboratorio de esta combinación, según la lista de materiales."""
+        self.ensure_one()
+        if 'mrp.bom' not in self.env or 'xb_costo_lab_quilate' not in self._fields:
+            return 0.0
+        bom = self.env['mrp.bom'].sudo().search(
+            [('product_tmpl_id', '=', self.id), ('product_id', '=', False)], order='sequence, id', limit=1)
+        if not bom:
+            return 0.0
+        total = 0.0
+        for linea in bom.bom_line_ids:
+            if not linea.product_id.product_tmpl_id.xb_costo_lab_quilate \
+                    or not self._xb_linea_aplica(linea.bom_product_template_attribute_value_ids, ptavs):
+                continue
+            comp = linea.product_id.with_company(cia)
+            total += comp.uom_id._compute_price(comp.standard_price, linea.product_uom_id) * linea.product_qty
+        return total / (bom.product_qty or 1.0)
+
     def _xb_costo_combinacion(self, ptavs):
         """Costo que ve la regla de la joya: SOLO hechura y piedras cuando el metal tiene aleación
-        (el metal se suma aparte, a su precio de venta)."""
+        (el metal se suma aparte, a su precio de venta). Con ``xb_sin_lab`` en el contexto, tampoco
+        los diamantes de laboratorio: esos llevan su propio margen."""
         costo = super()._xb_costo_combinacion(ptavs)
         if costo is None:
             return costo
+        if self.env.context.get('xb_sin_lab'):
+            costo -= self._xb_costo_lab(ptavs, self.company_id or self.env.company)
         aleacion, _g = self._xb_metal_aleacion(ptavs)
         if not aleacion:
             return costo
@@ -193,6 +228,25 @@ class ProductTemplate(models.Model):
         return precio_g * gramos
 
     _XB_SIN_CENTRAL = ('Anillo / Argolla', 'Anillo / Churumbela')
+
+    # Grueso con el que el taller hace una argolla maciza según su ancho: 1.5 mm a 4 mm y 1.8 mm a
+    # 6 mm (lo dio el dueño); los anchos intermedios o fuera de ese par, en la misma recta.
+    _XB_GRUESO_4MM = 1.5
+    _XB_GRUESO_POR_MM = 0.15
+
+    def _xb_grueso(self, mm):
+        return self._XB_GRUESO_4MM + self._XB_GRUESO_POR_MM * (mm - 4.0)
+
+    def _xb_factor_ancho(self, mm, mm_ref):
+        """En una argolla, más ancha es también más gruesa: el metal crece con ancho × grueso."""
+        if not self._xb_es_argolla():
+            return super()._xb_factor_ancho(mm, mm_ref)
+        return (mm * self._xb_grueso(mm)) / (mm_ref * self._xb_grueso(mm_ref))
+
+    def _xb_es_argolla(self):
+        self.ensure_one()
+        nombre = self.categ_id.complete_name or ''
+        return nombre == 'Anillo / Argolla' or nombre.startswith('Anillo / Argolla /')
 
     def _xb_sin_central(self):
         """Las argollas y churumbelas (y sus subcategorías) no llevan piedra central."""
@@ -309,6 +363,14 @@ class ProductPricelistItem(models.Model):
         if not ptavs:
             return price
         moneda = currency or self.currency_id or self.env.company.currency_id
+        # Diamantes de laboratorio: su costo × su propio margen; la regla de la joya, sobre el resto.
+        factor = tmpl._xb_factor_lab()
+        cia = self.pricelist_id.company_id or tmpl.company_id or self.env.company
+        lab = factor and tmpl.with_company(cia)._xb_costo_lab(ptavs, cia)
+        if lab and not self.env.context.get('xb_sin_lab'):
+            price = super()._compute_price(product.with_context(xb_sin_lab=True), quantity, uom, date,
+                                           currency=currency, **kwargs)
+            price += tmpl.cost_currency_id._convert(lab * factor, moneda, cia, date or fields.Date.context_today(self))
         metal = tmpl._xb_metal_venta(ptavs, self.pricelist_id, date=date, currency=moneda)
         if metal and product.uom_id != uom:
             metal = product.uom_id._compute_price(metal, uom)

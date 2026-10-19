@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="param_lab_usd_quilate" model="ir.config_parameter">
+        <field name="key">xb_gema_precio_rapaport.lab_usd_quilate</field>
+        <field name="value">180</field>
+    </record>
+    <record id="param_factor_lab" model="ir.config_parameter">
+        <field name="key">xb_gema_precio_rapaport.factor_lab</field>
+        <field name="value">3.88</field>
+    </record>
+</odoo>

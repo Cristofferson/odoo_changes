@@ -82,6 +82,11 @@ XB_STORE_TOOLS = [
           "Manda por WhatsApp el TICKET (imagen) de una cotización o pedido, con su QR para revisarlo o pagarlo en línea. "
           "Va antes de tu texto. Un cliente solo puede pedir los suyos.",
           {"pedido": {"type": "string", "description": "Número, p. ej. S00369."}}),
+    _tool("revisar_certificado",
+          "Revisa si el certificado ICERT (la tarjeta que se acerca al celular) de una pieza ya está dado de alta y activo. "
+          "Pide el número de la tarjeta: viene impreso en la tarjeta y aparece en la pantalla que sale al acercarla "
+          "(si manda captura, léelo de ahí). Sin número revisa las piezas que estén a nombre de quien escribe.",
+          {"numero": {"type": "string", "description": "Número de la tarjeta o de la pieza; cadena vacía si no lo tiene."}}),
     _tool("generar_pedido",
           "Confirma una cotización y la vuelve PEDIDO. Solo el equipo de la tienda puede hacerlo, y solo después de que la "
           "persona del equipo lo pida de forma explícita. Si lo pide un cliente, avisa a la tienda para que lo confirme "
@@ -162,10 +167,13 @@ class DiscussChannel(models.Model):
                 and self.xb_sa_hold_dt > fields.Datetime.now() - timedelta(hours=48)):
             lineas.append("YA SE AVISÓ a una persona de la tienda sobre esta plática y ella contestará lo pendiente. NO te quedes "
                           "callado: sigue contestando todo lo demás. No repitas «ya le avisé» ni uses pasar_a_humano por el mismo tema.")
+        lineas += self._xb_sa_common_rules()
+        lineas.append("Si preguntan si su certificado ICERT (la tarjeta) ya está registrado o activo, usa revisar_certificado "
+                      "con el número de la tarjeta antes de contestar.")
         if self.whatsapp_partner_id:
             tz = pytz.timezone(XB_TZ)
             citas = self.env["calendar.event"].sudo().search([
-                ("appointment_type_id", "!=", False), ("start", ">", fields.Datetime.now()),
+                ("appointment_type_id", "!=", False), ("stop", ">", fields.Datetime.now()),
                 ("partner_ids", "in", self.whatsapp_partner_id.ids)], order="start", limit=3)
             if citas:
                 lineas.append("Citas agendadas vigentes: " + "; ".join(
@@ -458,6 +466,12 @@ class DiscussChannel(models.Model):
         for p in pedidos:
             entrega = (pytz.utc.localize(p.commitment_date).astimezone(tz).strftime("%d/%m/%Y")
                        if p.commitment_date else "sin fecha")
+            dias = max([int(l.product_id.product_tmpl_id.sale_delay or 0) for l in p.order_line
+                        if not l.display_type] or [0]) or None
+            # Sin fecha prometida: estimado = confirmación del pedido + días de fabricación de la pieza más tardada.
+            estimada = None
+            if not p.commitment_date and p.state == "sale" and dias and p.date_order:
+                estimada = (pytz.utc.localize(p.date_order).astimezone(tz) + timedelta(days=dias)).strftime("%d/%m/%Y")
             salida.append({
                 "pedido": p.name, "cliente": p.partner_id.name if equipo else "",
                 "estado": XB_STORE_STATES.get(p.state, p.state),
@@ -465,12 +479,16 @@ class DiscussChannel(models.Model):
                 "total": round(p.amount_total, 2),
                 "saldo_pendiente": round(getattr(p, "amount_unpaid", 0.0) or 0.0, 2) if p.state == "sale" else None,
                 "entrega_prometida": entrega,
-                "dias_de_fabricacion_estimados": max([int(l.product_id.product_tmpl_id.sale_delay or 0) for l in p.order_line
-                                                      if not l.display_type] or [0]) or None,
+                "dias_de_fabricacion_estimados": dias,
+                "entrega_estimada_aprox": estimada,
                 "listo_para_recoger": bool(p.xb_ready_notified_date) if "xb_ready_notified_date" in p._fields else None,
                 "piezas": [f"{l.product_uom_qty:g} × {l.product_id.display_name or l.name}" for l in p.order_line
                            if not l.display_type][:6]})
-        return {"ok": True, "pedidos": salida}
+        return {"ok": True, "pedidos": salida,
+                "nota": "Si «entrega_prometida» es «sin fecha», da la «entrega_estimada_aprox» como APROXIMADA («más o menos el …») "
+                        "y que la tienda la confirma. NUNCA digas «no tiene fecha asignada» ni «no está registrada en el sistema»: "
+                        "suena a que nadie lo está haciendo. Si «listo_para_recoger» es false, di que «todavía está en el taller», "
+                        "no que «no aparece»."}
 
     def _xb_sa_tool_enviar_ticket(self, job, entrada):
         equipo = self._xb_sa_store_team()
@@ -485,6 +503,37 @@ class DiscussChannel(models.Model):
                                f"{'Pedido' if orden.state == 'sale' else 'Cotización'} {orden.name}")
         return {"ok": True, "liga_cotizacion": self._xb_sa_store_share_url(orden),
                 "nota": f"Ticket de {orden.name} enviado (total ${orden.amount_total:,.2f} con IVA). La liga abre la cotización en línea."}
+
+    def _xb_sa_tool_revisar_certificado(self, job, entrada):
+        Lote = self.env["stock.lot"].sudo()
+        if "x_studio_url_stij" not in Lote._fields:
+            return {"ok": False, "motivo": "Este sistema no tiene certificados ICERT."}
+        numero = re.sub(r"\s", "", entrada.get("numero") or "")
+        if numero:
+            lotes = Lote.search(["|", ("x_studio_url_stij", "=", numero), ("name", "=", numero)], limit=3)
+            if not lotes:
+                return {"ok": True, "registrado": False,
+                        "nota": "Ese número todavía no está dado de alta: la tienda tiene que activarlo. No lo des por un "
+                                "error de la tarjeta; avisa con pasar_a_humano para que lo activen y dile que le avisamos."}
+        else:
+            partner = self.whatsapp_partner_id.sudo()
+            if not partner:
+                return {"ok": False, "motivo": "Pídele el número de la tarjeta."}
+            campos = [c for c in ("x_studio_beneficiario", "dmn_claim_partner_id") if c in Lote._fields]
+            dominio = ["|"] * (len(campos) - 1) + [(c, "child_of", partner.commercial_partner_id.id) for c in campos]
+            lotes = Lote.search(dominio, limit=5) if campos else Lote
+            if not lotes:
+                return {"ok": True, "registrado": None,
+                        "nota": "No hay piezas a su nombre con certificado; eso no significa que no exista. Pídele el número "
+                                "de la tarjeta (impreso o en la pantalla que sale al acercarla) y revisa con él."}
+        return {"ok": True, "piezas": [{
+            "registrado": True,
+            "activo": bool(l.x_studio_visor_activo) and (l.x_studio_estatus or "") == "Activo",
+            "estatus": l.x_studio_estatus or "",
+            "pieza": l.product_id.display_name,
+        } for l in lotes],
+            "nota": "Si «activo» es true, ya puede acercar la tarjeta a su celular y verá su pieza. Si es false, la tienda "
+                    "tiene que activarla: avisa con pasar_a_humano. No des datos del dueño de la pieza."}
 
     def _xb_sa_tool_generar_pedido(self, job, entrada):
         acc = self.wa_account_id.sudo()

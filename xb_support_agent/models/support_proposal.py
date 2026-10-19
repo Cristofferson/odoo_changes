@@ -4,6 +4,7 @@ import re
 from datetime import timedelta
 
 from odoo import _, api, fields, models
+from odoo.tools import html2plaintext as tools_html2plaintext
 from odoo.exceptions import UserError
 
 from .support_service import XB_SERVICE_PRODUCT
@@ -14,6 +15,10 @@ XB_OWNER_TEMPLATE = "solicitudes_agente_xubax"
 XB_OWNER_YES = re.compile(r"^\W*(s[ií]|aprobar|apruebo|autorizo|ok)\s*#?\s*(\d+)\W*$", re.I)
 XB_OWNER_NO = re.compile(r"^\W*(no|rechazar|rechazo)\s*#?\s*(\d+)\b[\s,.:;-]*(.*)$", re.I | re.S)
 XB_OWNER_LIST = re.compile(r"^\W*(ver solicitudes|solicitudes|pendientes)\W*$", re.I)
+# «Sí» / «No, ya lo hice» sin número: vale si CITA el mensaje de una solicitud (o si solo hay una pendiente).
+XB_OWNER_YES_BARE = re.compile(r"^\W*(s[ií]|aprobar|apruebo|autorizo|ok|va|dale)\W*$", re.I)
+XB_OWNER_NO_BARE = re.compile(r"^\W*(no|rechazar|rechazo)\b[\s,.:;-]*(.*)$", re.I | re.S)
+XB_OWNER_QUOTED_ID = re.compile(r"#(\d+)")
 
 
 class XbSupportProposal(models.Model):
@@ -238,18 +243,68 @@ class XbSupportProposal(models.Model):
         return True
 
     @api.model
-    def _xb_owner_command(self, canal, texto):
-        """Respuesta del dueño desde su WhatsApp. Devuelve True si era una orden (y no va al agente)."""
+    def _xb_is_owner_channel(self, canal):
+        """¿Es la plática del dueño (donde llegan las solicitudes)?"""
         acc = self._xb_owner_account()
         if not (acc and canal.wa_account_id == acc):
             return False
         numero = self._xb_owner_number(acc)[-10:]
-        if not numero or not (canal.whatsapp_number or "").endswith(numero):
+        return bool(numero) and (canal.whatsapp_number or "").endswith(numero)
+
+    @api.model
+    def _xb_quoted_id(self, message):
+        """Número de la solicitud del mensaje que el dueño citó al contestar («*#5* · …»)."""
+        citado = message.parent_id if message else False
+        if not citado:
+            return None
+        hallado = XB_OWNER_QUOTED_ID.search(tools_html2plaintext(citado.body or "")[:80])
+        return int(hallado.group(1)) if hallado else None
+
+    @api.model
+    def _xb_last_bot_was_request(self, canal):
+        """¿Lo último que le escribió el agente al dueño fue una solicitud (o el resumen de la mañana)?"""
+        ultimo = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", canal.id), ("message_type", "=", "whatsapp_message"),
+            ("author_id", "=", self.env.ref("base.partner_root").id)], order="id desc", limit=1)
+        cuerpo = ultimo.body or ""
+        return "#" in cuerpo and any(p in cuerpo for p in ("SÍ", "aprobada", "rechazada", "¿Cuál?", "ya estaba"))
+
+    @api.model
+    def _xb_owner_command(self, canal, texto, message=None):
+        """Respuesta del dueño (desde su WhatsApp o escrita en su plática en Odoo). Devuelve True si era
+        una orden (y no va al agente). «SÍ 5» siempre vale; un «Sí» a secas vale si cita el mensaje de la
+        solicitud o si solo hay una pendiente; si no, se le pregunta cuál."""
+        if not self._xb_is_owner_channel(canal):
             return False
+        numero = self._xb_owner_number(self._xb_owner_account())[-10:]
         texto = (texto or "").strip()
         si, no, lista = XB_OWNER_YES.match(texto), XB_OWNER_NO.match(texto), XB_OWNER_LIST.match(texto)
-        if not (si or no or lista):
-            return False
+        rec_id, motivo, aprobar = None, "", None
+        if si or no:
+            rec_id, aprobar = int((si or no).group(2)), bool(si)
+            motivo = no.group(3) if no else ""
+        elif not lista:
+            si_solo, no_solo = XB_OWNER_YES_BARE.match(texto), XB_OWNER_NO_BARE.match(texto)
+            citado = self._xb_quoted_id(message)
+            if not (si_solo or no_solo) or (no_solo and not citado):
+                return False  # «no …» sin citar una solicitud es plática normal
+            if not citado and not self._xb_last_bot_was_request(canal):
+                return False  # «sí» que contesta otra pregunta del agente
+            aprobar = bool(si_solo)
+            motivo = no_solo.group(2) if no_solo else ""
+            if citado:
+                rec_id = citado
+            else:
+                pendientes = self.sudo().search([("state", "=", "pending")])
+                if len(pendientes) != 1:
+                    if not pendientes:
+                        return False  # un «sí» suelto sin nada pendiente: es plática normal
+                    canal._xb_sa_send(_(
+                        "¿Cuál? Hay %(n)s solicitudes pendientes (%(ids)s). Contesta citando el mensaje de la "
+                        "solicitud, o escribe *SÍ 5* / *NO 5*.", n=len(pendientes),
+                        ids=", ".join(f"#{i}" for i in pendientes.sorted("id").ids)))
+                    return True
+                rec_id = pendientes.id
         dueno = self.env["res.users"].sudo().search([("partner_id.phone_sanitized", "like", "%" + numero)], limit=1)
         yo = self.with_user(dueno).sudo() if dueno else self.sudo()
         if lista:
@@ -259,18 +314,18 @@ class XbSupportProposal(models.Model):
             for rec in pendientes:
                 canal._xb_sa_send(rec._xb_owner_line())
             return True
-        rec = yo.browse(int((si or no).group(2))).exists()
+        rec = yo.browse(rec_id).exists()
         if not rec:
-            canal._xb_sa_send(_("No encontré la solicitud #%s.") % (si or no).group(2))
+            canal._xb_sa_send(_("No encontré la solicitud #%s.") % rec_id)
         elif rec.state != "pending":
             canal._xb_sa_send(_("La #%(id)s ya estaba %(state)s.", id=rec.id,
                                 state=dict(rec._fields["state"].selection)[rec.state].lower()))
-        elif si:
+        elif aprobar:
             rec.action_approve()
             canal._xb_sa_send(_("👍 #%(id)s aprobada.%(extra)s", id=rec.id,
                                 extra=_(" Quedó como tarea para el equipo.") if rec.state == "approved" else ""))
         else:
-            rec.reject_reason = no.group(3).strip()[:200] or False
+            rec.reject_reason = (motivo or "").strip()[:200] or False
             rec.action_reject()
             canal._xb_sa_send(_("👌 #%s rechazada.") % rec.id)
         return True

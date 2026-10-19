@@ -68,6 +68,7 @@
                     </setting>
                     <setting help="Cita de la app Citas: horarios, encargado y oportunidad en el CRM salen de ahí.">
                         <field name="xb_sa_appointment_type_id"/>
+                        <field name="xb_sa_video_appointment_type_id"/>
                     </setting>
                     <setting help="Miembros de BNI: la cita de 1 a 1 y quién los recibe.">
                         <field name="xb_sa_bni_appointment_type_id"/>

@@ -39,6 +39,8 @@ XB_HOLD_HOURS = 2
 XB_RESUME_WORDS = {"#agente", "#bot"}
 XB_DRAFT_MARK = "Ensayo (no se envió)"
 XB_DRAFT_HTML = f"<p><b>🤖 {XB_DRAFT_MARK}:</b></p>"
+# Nota que deja Odoo al mandar una plantilla de WhatsApp desde un pedido («Mensaje enviado al cliente: S00076 · …»).
+XB_TEMPLATE_MARK = "Mensaje enviado al cliente:"
 XB_MAX_TOOL_ROUNDS = 14
 # Imágenes que el agente puede ver: las más recientes que mandó el cliente.
 XB_VOZ_MARK = "[transcripción] "
@@ -58,6 +60,34 @@ XB_TZ = "America/Mexico_City"
 XB_LOCAL_SERVER = "odoo19"
 XB_BACKUP_STATUS = "/var/lib/xb_support_agent/backups.json"
 XB_DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+
+
+XB_URL_WRAPPED = re.compile(r"[*_~]+(https?://[^\s*_~]+?)[*_~]+(?=[\s.,;:!?)]|$)")
+XB_URL_TAIL = re.compile(r"(https?://[^\s*~]+)[*~]+(\S?)")
+
+
+def xb_wa_text(texto):
+    """Texto listo para WhatsApp: «**x**» (Markdown) → «*x*», y ninguna liga pegada a un * o _ (WhatsApp
+    los toma como parte de la dirección y la liga da error)."""
+    texto = re.sub(r"\*\*(.+?)\*\*", r"*\1*", texto or "", flags=re.S)
+    texto = XB_URL_WRAPPED.sub(r"\1", texto)
+    texto = re.sub(r"[*_~]+(?=https?://)", "", texto)
+    # Un * pegado al final de la liga se quita; si venía texto pegado detrás, se separa con un espacio.
+    return XB_URL_TAIL.sub(lambda m: m.group(1) + (" " + m.group(2) if m.group(2) else ""), texto)
+
+
+# Mensajes de pura despedida: si el agente no había preguntado nada, no hace falta contestar (y cuesta).
+XB_CLOSING = re.compile(
+    r"^(?:(?:muchas|mil|muchísimas|muchisimas)?\s*gracias(?:\s+(?:a\s+ti|igualmente|de\s+nuevo|por\s+todo))?|"
+    r"ok(?:ay|a)?|va|vale|sale|perfecto|excelente|genial|entendido|enterado|de\s+acuerdo|listo|igualmente|"
+    r"buenas\s+noches|bonito\s+d[ií]a|saludos|bendiciones|hasta\s+luego|nos\s+vemos|bye)"
+    r"(?:[\s,.!¡]+(?:gracias|igualmente|saludos|bendiciones|a\s+ti))*[\s.!¡]*$", re.I)
+
+
+def xb_is_closing(texto):
+    """¿Es solo un «gracias», «ok», «👍» o similar? (los emojis solos también cuentan)."""
+    limpio = re.sub(r"[^\w\s.,!¡¿?]", "", texto or "").strip()
+    return not limpio or bool(XB_CLOSING.match(limpio))
 
 
 def _tool(name, description, properties, required=None):
@@ -141,7 +171,10 @@ XB_TOOLS = [
           {"servicio_id": {"type": "integer"}}),
     _tool("proponer_arreglo",
           "Deja una propuesta de arreglo para que el dueño de XUBAX la apruebe desde su WhatsApp. No arregla nada "
-          "por sí misma: si se aprueba, lo hace una persona del equipo y al cliente se le avisa por aquí.",
+          "por sí misma: si se aprueba, lo hace una persona del equipo y al cliente se le avisa por aquí. Úsala SOLO para "
+          "un cambio CONCRETO que el cliente no puede hacer él mismo (qué registro, qué campo, de qué valor a qué valor). "
+          "NO la uses para «revisar», «investigar» o «confirmar con el cliente»: eso es pasar_a_humano. Si en el contexto ya "
+          "hay una propuesta pendiente del mismo tema, NO crees otra.",
           {"resumen": {"type": "string", "description": "Una línea: qué hay que hacer."},
            "problema": {"type": "string", "description": "Qué encontraste, con datos."},
            "propuesta": {"type": "string", "description": "Qué sugieres hacer, paso a paso, con los registros exactos."},
@@ -207,20 +240,37 @@ XB_TOOLS = [
     _tool("ver_horarios_demo",
           "Devuelve horarios libres para la cita/demo (hora de Ciudad de México), sacados de la app de Citas, "
           "y la liga donde el cliente puede escoger otro horario él mismo.",
-          {"desde": {"type": "string", "description": "AAAA-MM-DD si el cliente quiere a partir de cierta fecha; cadena vacía = lo más pronto."}}),
+          {"desde": {"type": "string", "description": "AAAA-MM-DD si el cliente quiere a partir de cierta fecha; cadena vacía = lo más pronto."},
+           "modalidad": {"type": "string", "enum": ["", "presencial", "videollamada"],
+                         "description": "Como la quiere la persona; cadena vacía si todavía no lo dice."}}),
     _tool("agendar_demo",
           "Aparta la cita/demo en uno de los horarios devueltos por ver_horarios_demo. ANTES de usarla, la persona ya tiene que haber dicho si la quiere por videollamada o presencial: si no lo ha dicho, pregúntaselo primero y aparta hasta que conteste. Solo entonces manda la liga (videollamada) o la dirección (presencial).",
           {"inicio": {"type": "string", "description": "Fecha y hora exactamente como la dio ver_horarios_demo (AAAA-MM-DD HH:MM)."},
            "nombre": {"type": "string"},
-           "correo": {"type": "string", "description": "Cadena vacía si no lo dio."}}),
+           "correo": {"type": "string", "description": "Cadena vacía si no lo dio."},
+           "modalidad": {"type": "string", "enum": ["presencial", "videollamada"],
+                         "description": "La que eligió la persona (la misma que usaste en ver_horarios_demo)."}}),
 ]
 
 
 # Solo para el EQUIPO de XUBAX reconocido por su teléfono (ver _xb_sa_team_user).
 XB_TEAM_TOOLS = [
     _tool("ver_citas_bni",
-          "EQUIPO: lista los 1 a 1 de BNI próximos (id, miembro, fecha y hora).",
+          "EQUIPO: la agenda próxima de Josette (15 días): los 1 a 1 de BNI y todo lo demás que tenga en su calendario, "
+          "también lo que ella capturó a mano (id, qué es, con quién, fecha y hora).",
           {}),
+    _tool("agendar_cita_bni",
+          "EQUIPO: aparta un 1 a 1 de BNI con Josette a la fecha y hora que pida la persona del equipo (cualquier minuto), "
+          "aunque el miembro no haya escrito. Si el miembro escribió en las últimas 24 h se le avisa por WhatsApp.",
+          {"miembro": {"type": "string", "description": "Nombre del miembro como lo dijo la persona del equipo."},
+           "celular": {"type": "string", "description": "10 dígitos si lo sabe; cadena vacía si no."},
+           "inicio": {"type": "string", "description": "Fecha y hora de Ciudad de México, AAAA-MM-DD HH:MM."},
+           "modalidad": {"type": "string", "enum": ["videollamada", "presencial"]}},
+          ["miembro", "celular", "inicio", "modalidad"]),
+    _tool("ver_platica",
+          "EQUIPO: lee los últimos mensajes de la plática de WhatsApp de otra persona en este mismo número "
+          "(para saber qué dijo o qué se le contestó). Solo lectura.",
+          {"buscar": {"type": "string", "description": "Celular (10 dígitos) o nombre de la persona."}}),
     _tool("mover_cita_bni",
           "EQUIPO: cambia la fecha y hora de un 1 a 1 de BNI. Avisa al miembro por WhatsApp si escribió hace menos de 24 h.",
           {"cita_id": {"type": "integer", "description": "Id de la cita, de ver_citas_bni."},
@@ -235,8 +285,10 @@ for _t in XB_TEAM_TOOLS:
 
 # La API acepta como máximo 20 herramientas «strict»: las de BNI van sin ese modo
 # (los manejadores leen la entrada con .get, así que toleran campos faltantes).
+# La API también limita la complejidad TOTAL de los esquemas strict («Schema is too complex»): las de citas
+# tampoco van strict desde que llevan «modalidad».
 XB_NON_STRICT = {"marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
-                 "registrar_referido_ideal", "enviar_tarjeta_bni"}
+                 "registrar_referido_ideal", "enviar_tarjeta_bni", "ver_horarios_demo", "agendar_demo"}
 for _herramienta in XB_TOOLS:
     if _herramienta["name"] in XB_NON_STRICT:
         _herramienta.pop("strict", None)
@@ -405,10 +457,17 @@ class DiscussChannel(models.Model):
                     if hasattr(channel, "_xb_is_campaign_reply") and channel._xb_is_campaign_reply(message):
                         continue
                     # «SÍ 12» / «NO 12» / «Ver solicitudes» del dueño: no van al agente.
-                    if self.env["xb.support.proposal"]._xb_owner_command(channel, html2plaintext(message.body or "")):
+                    if self.env["xb.support.proposal"]._xb_owner_command(
+                            channel, html2plaintext(message.body or ""), message):
                         continue
                     self.env["xb.support.job"]._xb_enqueue(channel, message)
                 elif channel._xb_sa_is_human_reply(message):
+                    Propuesta = self.env["xb.support.proposal"]
+                    if Propuesta._xb_is_owner_channel(channel):
+                        # El dueño escribe en SU plática desde Odoo: puede aprobar («Sí» citando la
+                        # solicitud), pero eso no es «una persona atendiendo»: el agente no se pausa.
+                        Propuesta._xb_owner_command(channel, html2plaintext(message.body or ""), message)
+                        continue
                     channel.sudo().write({
                         "xb_sa_paused_until": fields.Datetime.now() + timedelta(
                             hours=max(channel.wa_account_id.xb_sa_pause_hours, 0)),
@@ -486,6 +545,12 @@ class DiscussChannel(models.Model):
                 f"SERVICIO COTIZADO ESPERANDO EL SÍ: id {pendiente.id} «{pendiente.name}», ${pendiente.amount:,.2f} más IVA. "
                 f"Si el último mensaje del cliente es SÍ (o equivalente), llama ejecutar_servicio con servicio_id={pendiente.id} "
                 "y NO vuelvas a cotizar. Solo cotiza de nuevo si el cliente cambió lo que pidió.")
+        if proyecto:
+            propuestas = self.env["xb.support.proposal"].sudo().search(
+                [("project_id", "=", proyecto.id), ("state", "in", ("pending", "approved"))], order="id", limit=10)
+            if propuestas:
+                lineas.append("Propuestas de arreglo YA abiertas en este sistema (no dupliques): " + "; ".join(
+                    f"#{r.id} «{r.name}» ({dict(r._fields['state'].selection)[r.state].lower()})" for r in propuestas) + ".")
         if (self.xb_sa_pause_reason == "handoff" and not self.xb_sa_paused_until and self.xb_sa_hold_dt
                 and self.xb_sa_hold_dt > fields.Datetime.now() - timedelta(hours=48)):
             lineas.append(
@@ -499,8 +564,11 @@ class DiscussChannel(models.Model):
                 f"Esta persona es del EQUIPO de XUBAX: {equipo.name} (usuario interno, reconocida por su teléfono). No es prospecto ni "
                 "miembro: no le vendas ni le des el trato de BNI. Si pide ver, mover o cancelar un 1 a 1 de BNI, usa ver_citas_bni y "
                 "luego mover_cita_bni o cancelar_cita_bni (la hora puede ser cualquier minuto, p. ej. 9:10). Mover: hazlo directo y dile qué "
-                "quedó y si el miembro fue avisado. Cancelar: confirma primero con ella. Si la persona del equipo pide mover algo que NO es "
-                "un 1 a 1 de BNI, dile que eso lo haga ella desde Odoo. Si pregunta otra cosa, contesta con naturalidad y trátala de tú.")
+                "quedó y si el miembro fue avisado. Cancelar: confirma primero con ella. ver_citas_bni trae TODA la agenda de Josette "
+                "(también lo capturado a mano): úsala antes de decir que algo no está. Si pide AGENDAR un 1 a 1 con alguien, hazlo tú con "
+                "agendar_cita_bni (pregunta videollamada o presencial si no lo dijo); nunca le mandes la liga /appointment/7, esa es la demo "
+                "de ventas, no el 1 a 1. Si te dice que otra persona «ya te escribió» o pregunta qué dijo alguien, usa ver_platica. "
+                "Si pregunta otra cosa, contesta con naturalidad y trátala de tú.")
         if self._xb_sa_is_bni():
             lineas.append("Esta persona es MIEMBRO DE BNI: trátala como colega (cálida, breve, sin vender). Su 1 a 1 es con "
                           "Josette Salinas Gil, 1 hora: ofrece horarios con ver_horarios_demo y pregunta si prefiere "
@@ -523,6 +591,7 @@ class DiscussChannel(models.Model):
                           "Si es cliente y pide soporte, atiéndelo como a cualquier cliente.")
         if self.xb_sa_lead_id:
             lineas.append(f"Ya hay un registro en el CRM para esta plática: «{self.xb_sa_lead_id.name}».")
+        lineas += self._xb_sa_common_rules()
         # La agenda manda: si el equipo movió o canceló una cita, el historial ya no es cierto.
         if self.whatsapp_partner_id:
             tz = pytz.timezone(XB_TZ)
@@ -537,16 +606,33 @@ class DiscussChannel(models.Model):
                 lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda: no la menciones como apartada).")
         return "\n".join(lineas)
 
+    def _xb_sa_common_rules(self):
+        """Reglas que van en el contexto de todos los perfiles (no en las instrucciones editables)."""
+        reglas = [
+            "Contesta lo que la persona dice AHORA. Si su último mensaje responde a un mensaje automático o abre un tema "
+            "nuevo, no retomes pendientes de días anteriores (de otra pieza, de otro cliente, de otro asunto) salvo que ella "
+            "los mencione.",
+            "Las ligas van solas, sin asteriscos ni guiones bajos alrededor (WhatsApp los pega a la dirección y la rompe).",
+        ]
+        if self.wa_account_id.sudo().xb_sa_video_appointment_type_id:
+            reglas.append("Citas: hay dos modalidades, presencial y videollamada. Pregunta cuál quiere ANTES de ver horarios y pásala "
+                          "en «modalidad» a ver_horarios_demo y agendar_demo. Si es videollamada, manda la liga que devuelve "
+                          "agendar_demo en ese mismo mensaje; no prometas mandarla después.")
+        return reglas
+
     # ------------------------------------------------------------------
     # Historial → mensajes para Claude
     # ------------------------------------------------------------------
     def _xb_sa_history(self):
         self.ensure_one()
         desde = fields.Datetime.now() - timedelta(hours=XB_HISTORY_HOURS)
+        # También las plantillas que mandó Odoo (carrito, pedido listo, cotización…): el cliente suele contestarles a ellas.
+        mt_comment = self.env.ref("mail.mt_comment")
         mensajes = self.env["mail.message"].sudo().search([
             ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("date", ">=", desde),
             "|", ("message_type", "=", "whatsapp_message"),
-            "&", ("message_type", "=", "comment"), ("body", "ilike", XB_DRAFT_MARK),
+            "&", ("message_type", "=", "comment"),
+            "|", "|", ("body", "ilike", XB_DRAFT_MARK), ("body", "ilike", XB_TEMPLATE_MARK), ("subtype_id", "=", mt_comment.id),
         ], order="id desc", limit=XB_HISTORY_LIMIT).sorted("id")
         bot = self.env.ref("base.partner_root")
         # Solo las imágenes más recientes del cliente van como imagen (cuestan
@@ -554,19 +640,18 @@ class DiscussChannel(models.Model):
         imagenes = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")) \
             .attachment_ids.filtered(lambda a: (a.mimetype or "") in XB_VISION_TYPES)
         vistas = set(imagenes.sorted("id", reverse=True)[:XB_VISION_MAX].ids)
-        # Miembros de BNI: la HORLI en PDF más reciente se le da a Claude para que la lea.
-        pdf_vistos = set()
-        if self._xb_sa_is_bni():
-            pdfs = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")) \
-                .attachment_ids.filtered(lambda a: a.mimetype == "application/pdf" and a.file_size <= XB_PDF_MAX)
-            pdf_vistos = set(pdfs.sorted("id", reverse=True)[:1].ids)
+        # El PDF más reciente que mandó la persona (HORLI, constancia, factura…) se le da a Claude para que lo lea.
+        pdfs = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")) \
+            .attachment_ids.filtered(lambda a: a.mimetype == "application/pdf" and a.file_size <= XB_PDF_MAX)
+        pdf_vistos = set(pdfs.sorted("id", reverse=True)[:1].ids)
         turnos = []
         # Avisos automáticos del módulo de respuestas (bienvenida / fuera de horario): no son parte de la plática.
         acc = self.wa_account_id.sudo()
         automaticos = {html2plaintext(str(getattr(acc, campo, "") or "")).strip()
                        for campo in ("xb_offhours_body", "xb_welcome_body")} - {""}
         for msg in mensajes:
-            ensayo = msg.message_type == "comment"
+            ensayo = msg.message_type == "comment" and XB_DRAFT_MARK in str(msg.body or "")
+            plantilla = msg.message_type == "comment" and not ensayo
             if ensayo and msg.author_id != bot:
                 continue
             if (automaticos and not ensayo and not msg.wa_message_ids.filtered(lambda w: w.message_type == "inbound")
@@ -600,9 +685,12 @@ class DiscussChannel(models.Model):
                 texto = f"{texto}\n[Adjuntó: {tipos}]".strip()
             if not texto and not bloques:
                 continue
-            entrante = not ensayo and bool(msg.wa_message_ids.filtered(lambda w: w.message_type == "inbound"))
+            entrante = not msg.message_type == "comment" and bool(msg.wa_message_ids.filtered(lambda w: w.message_type == "inbound"))
             if entrante:
                 rol = "user"
+            elif plantilla:
+                rol = "assistant"
+                texto = "[Mensaje automático que se le envió]: " + texto.replace(XB_TEMPLATE_MARK, "", 1).strip()
             else:
                 rol = "assistant"
                 if msg.author_id != bot:
@@ -617,8 +705,14 @@ class DiscussChannel(models.Model):
                 turnos[-1]["content"] += bloques
             else:
                 turnos.append({"role": rol, "content": bloques})
+        # La plática debe empezar con la persona. Lo que se le mandó antes (p. ej. la plantilla a la que está
+        # contestando) no se tira: va como nota al inicio de su primer turno.
+        previos = []
         while turnos and turnos[0]["role"] != "user":
-            turnos.pop(0)
+            previos += [b["text"] for b in turnos.pop(0)["content"] if b.get("type") == "text"]
+        if turnos and previos:
+            turnos[0]["content"].insert(0, {"type": "text", "text": "[Antes de que escribiera, se le envió esto]:\n"
+                                                                    + "\n".join(previos)[-2000:]})
         return turnos
 
     def _xb_sa_transcribe(self, adjunto):
@@ -677,6 +771,9 @@ class DiscussChannel(models.Model):
         if not historial or historial[-1]["role"] != "user":
             job.write({"state": "skipped", "reason": "No hay nada nuevo que contestar"})
             return
+        if self._xb_sa_just_closing(historial):
+            job.write({"state": "skipped", "reason": "Solo se despidió o agradeció; no hace falta contestar"})
+            return
         if not acc.xb_sa_api_key:
             raise ValueError("Falta la llave de API de Anthropic en la cuenta de WhatsApp")
 
@@ -689,6 +786,10 @@ class DiscussChannel(models.Model):
             if tienda_p:
                 self.sudo().xb_sa_project_id = tienda_p
         contactos, contacto, proyecto = self._xb_sa_current()
+        if not self.xb_sa_lead_id and not contactos:
+            existente = self._xb_sa_existing_lead()
+            if existente:
+                self.sudo().xb_sa_lead_id = existente
         job.write({
             "contact_id": contacto.id,
             "project_id": proyecto.id,
@@ -767,6 +868,20 @@ class DiscussChannel(models.Model):
             self._xb_sa_send(texto)
             job.state = "done"
 
+    @api.model
+    def _xb_sa_just_closing(self, historial):
+        """El cliente solo agradece o se despide («gracias», «ok», 👍) y el agente no le había hecho una pregunta."""
+        ultimo = historial[-1]["content"]
+        if any(b.get("type") != "text" for b in ultimo):
+            return False
+        if not xb_is_closing(" ".join(b["text"] for b in ultimo)):
+            return False
+        if len(historial) < 2:
+            return False
+        previo = " ".join(b.get("text", "") for b in historial[-2]["content"] if b.get("type") == "text")
+        previo = re.sub(r"[^\w\s.,!¡¿?]", "", previo).strip()
+        return bool(previo) and "?" not in previo[-200:]
+
     def _xb_sa_identity_gate(self, job, acc):
         """Primera vez que un número se liga a un usuario: se confirma por WhatsApp
         (en código, sin modelo). Devuelve True si ya se contestó aquí."""
@@ -782,15 +897,19 @@ class DiscussChannel(models.Model):
         pendientes = pendientes.filtered(lambda c: not c.confirmed)
         if not pendientes:
             return False
-        c = pendientes[0]
+        # Una sola pregunta para todos sus sistemas: el mismo celular es la misma persona.
         ahora = fields.Datetime.now()
-        if c.challenge_dt and ahora - c.challenge_dt < timedelta(hours=24):
-            texto = (f"Antes de ayudarte necesito confirmar que eres {c.name} de {c.project_id.name}. "
+        nombres = " / ".join(dict.fromkeys(pendientes.mapped("name")))
+        sistemas = pendientes.mapped("project_id.name")
+        donde = sistemas[0] if len(sistemas) == 1 else ", ".join(sistemas[:-1]) + " y " + sistemas[-1]
+        if all(c.challenge_dt and ahora - c.challenge_dt < timedelta(hours=24) for c in pendientes):
+            texto = (f"Antes de ayudarte necesito confirmar que eres {nombres} ({donde}). "
                      "Responde SÍ para continuar.")
         else:
-            c.sudo().challenge_dt = ahora
-            texto = (f"Hola, soy el asistente de {acc.xb_sa_company_name or 'XUBAX'}. Tu número está ligado al usuario de {c.name} en "
-                     f"{c.project_id.name}. ¿Eres tú? Responde SÍ para confirmarlo y poder ayudarte con tu sistema.")
+            pendientes.sudo().write({"challenge_dt": ahora})
+            texto = (f"Hola, soy el asistente de {acc.xb_sa_company_name or 'XUBAX'}. Tu número está ligado al usuario de {nombres} en "
+                     f"{donde}. ¿Eres tú? Responde SÍ para confirmarlo y poder ayudarte con "
+                     f"{'tu sistema' if len(sistemas) == 1 else 'tus sistemas'}.")
         job.reply = texto
         if acc.xb_sa_shadow:
             self._xb_sa_post_draft(texto)
@@ -853,7 +972,7 @@ class DiscussChannel(models.Model):
         """Mensaje libre dentro de la ventana de 24 h (sin plantilla, sin costo)."""
         self.ensure_one()
         self.sudo().message_post(
-            body=Markup(tools.plaintext2html(texto or "")),
+            body=Markup(tools.plaintext2html(xb_wa_text(texto))),
             message_type="whatsapp_message",
             author_id=self.env.ref("base.partner_root").id,
             subtype_xmlid="mail.mt_comment",
@@ -863,7 +982,7 @@ class DiscussChannel(models.Model):
         """Modo ensayo: nota interna que el cliente NO recibe."""
         self.ensure_one()
         self.sudo().message_post(
-            body=Markup(XB_DRAFT_HTML) + Markup(tools.plaintext2html(texto)),
+            body=Markup(XB_DRAFT_HTML) + Markup(tools.plaintext2html(xb_wa_text(texto))),
             message_type="comment",
             author_id=self.env.ref("base.partner_root").id,
             subtype_xmlid="mail.mt_note",
@@ -1345,6 +1464,34 @@ class DiscussChannel(models.Model):
             "medium_id": self.env["utm.medium"].sudo().search([("name", "=", "WhatsApp")], limit=1).id or False,
         }
 
+    def _xb_sa_existing_lead(self):
+        """Oportunidad abierta que ya existe para esta persona: la del clic en el sitio o anuncio
+        (xb_whatsapp_web_leads) o una reciente con el mismo celular. Así no se duplica en el CRM."""
+        self.ensure_one()
+        acc = self.wa_account_id.sudo()
+        fuente = self.xb_wa_source_lead_id.sudo()
+        if fuente and fuente.active and fuente.probability < 100:
+            return fuente
+        ids = self._xb_sa_ids_by_phone("crm_lead", self.whatsapp_number)
+        if not ids:
+            return self.env["crm.lead"]
+        return self.env["crm.lead"].sudo().search([
+            ("id", "in", ids), ("company_id", "in", [False, acc._xb_sa_company().id]),
+            ("probability", "<", 100), ("create_date", ">", fields.Datetime.now() - timedelta(days=60))],
+            order="id desc", limit=1)
+
+    @api.model
+    def _xb_sa_ids_by_phone(self, tabla, numero):
+        """Ids de res_partner o crm_lead con ese celular, comparando solo dígitos (los teléfonos se capturan
+        con espacios y guiones, así que un «like» sobre el texto falla)."""
+        llave = xb_phone_key(numero)
+        if not llave or tabla not in ("res_partner", "crm_lead"):
+            return []
+        self.env.cr.execute(
+            f"SELECT id FROM {tabla} WHERE active AND right(regexp_replace(coalesce(phone, ''), '\\D', '', 'g'), 10) = %s "
+            "ORDER BY id DESC LIMIT 20", [llave])
+        return [r[0] for r in self.env.cr.fetchall()]
+
     def _xb_sa_tool_registrar_prospecto(self, job, entrada):
         acc = self.wa_account_id.sudo()
         descripcion = "\n".join(f"{k.capitalize()}: {v}" for k, v in entrada.items() if v)
@@ -1355,10 +1502,17 @@ class DiscussChannel(models.Model):
             "city": entrada.get("ciudad") or False,
             "description": Markup(tools.plaintext2html(descripcion + "\n\n(Registrado por el agente de WhatsApp)")),
         }
-        lead = self.xb_sa_lead_id.sudo()
+        lead = self.xb_sa_lead_id.sudo() or self._xb_sa_existing_lead()
         if lead:
-            lead.write({k: v for k, v in vals.items() if v})
-            return {"ok": True, "nota": "Prospecto actualizado."}
+            if not self.xb_sa_lead_id:
+                self.sudo().xb_sa_lead_id = lead
+            # La descripción se va sumando (no se pisa lo que ya escribió el sitio o el equipo).
+            previa = tools.html2plaintext(lead.description or "").strip()
+            nueva = tools.html2plaintext(vals["description"]).strip()
+            if nueva and nueva not in previa:
+                vals["description"] = Markup(tools.plaintext2html(f"{previa}\n\n{nueva}".strip()))
+            lead.write({k: v for k, v in vals.items() if v and (k == "description" or not lead[k])})
+            return {"ok": True, "nota": "Prospecto actualizado (ya existía en el CRM; no se creó otro)."}
         vals.update(self._xb_sa_lead_vals(acc))
         # Si el CRM no usa «Iniciativas», un registro tipo lead no se ve en el embudo.
         usa_iniciativas = self.env.ref("crm.group_use_lead").sudo().all_user_ids.filtered(lambda u: not u.share)
@@ -1431,11 +1585,18 @@ class DiscussChannel(models.Model):
             lambda u: u.active and not u.share and xb_phone_key(u.partner_id.phone) == llave)[:1]
 
     def _xb_sa_team_events(self, cita_id=None):
-        tipo = self.wa_account_id.sudo().xb_sa_bni_appointment_type_id
-        dom = [("appointment_type_id", "=", tipo.id), ("start", ">", fields.Datetime.now())]
+        """Agenda de Josette: los 1 a 1 de BNI y todo lo que tenga en su calendario (también lo capturado a mano)."""
+        acc = self.wa_account_id.sudo()
+        tipo, josette = acc.xb_sa_bni_appointment_type_id, acc.xb_sa_bni_user_id
+        dom = [("stop", ">", fields.Datetime.now()), ("start", "<", fields.Datetime.now() + timedelta(days=15))]
+        if josette:
+            dom += ["|", "|", ("appointment_type_id", "=", tipo.id), ("user_id", "=", josette.id),
+                    ("partner_ids", "in", josette.partner_id.ids)]
+        else:
+            dom.append(("appointment_type_id", "=", tipo.id))
         if cita_id:
             dom.append(("id", "=", int(cita_id)))
-        return self.env["calendar.event"].sudo().search(dom, order="start", limit=30)
+        return self.env["calendar.event"].sudo().search(dom, order="start", limit=40)
 
     def _xb_sa_local(self, dt):
         return pytz.utc.localize(dt).astimezone(pytz.timezone(XB_TZ))
@@ -1443,10 +1604,97 @@ class DiscussChannel(models.Model):
     def _xb_sa_tool_ver_citas_bni(self, job, entrada):
         if not self._xb_sa_team_user():
             return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        tipo = self.wa_account_id.sudo().xb_sa_bni_appointment_type_id
         return {"ok": True, "citas": [
-            {"cita_id": e.id, "miembro": ", ".join((e.partner_ids - e.user_id.partner_id).mapped("name")),
-             "cuando": f"{XB_DIAS[self._xb_sa_local(e.start).weekday()]} {self._xb_sa_local(e.start):%d/%m/%Y %H:%M}"}
-            for e in self._xb_sa_team_events()]}
+            {"cita_id": e.id, "que": e.name, "es_1a1_bni": e.appointment_type_id == tipo or "uno a uno" in (e.name or "").lower()
+             or "1a1" in (e.name or "").lower(),
+             "con": ", ".join((e.partner_ids - e.user_id.partner_id).mapped("name")),
+             "cuando": f"{XB_DIAS[self._xb_sa_local(e.start).weekday()]} {self._xb_sa_local(e.start):%d/%m/%Y %H:%M}"
+                       f"–{self._xb_sa_local(e.stop):%H:%M}"}
+            for e in self._xb_sa_team_events()],
+            "nota": "Es toda la agenda de Josette de los próximos 15 días, incluido lo que capturó a mano."}
+
+    def _xb_sa_tool_agendar_cita_bni(self, job, entrada):
+        if not self._xb_sa_team_user():
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        acc = self.wa_account_id.sudo()
+        tipo, josette = acc.xb_sa_bni_appointment_type_id, acc.xb_sa_bni_user_id
+        if not (tipo and josette):
+            return {"ok": False, "motivo": "Falta configurar la cita de 1 a 1 de BNI en la cuenta."}
+        try:
+            local = pytz.timezone(XB_TZ).localize(datetime.strptime((entrada.get("inicio") or "").strip()[:16], "%Y-%m-%d %H:%M"))
+        except ValueError:
+            return {"ok": False, "motivo": "La fecha debe ir como AAAA-MM-DD HH:MM."}
+        inicio = local.astimezone(pytz.utc).replace(tzinfo=None)
+        if inicio <= fields.Datetime.now():
+            return {"ok": False, "motivo": "Esa hora ya pasó."}
+        Partner = self.env["res.partner"].sudo()
+        socios = Partner.browse(self._xb_sa_ids_by_phone("res_partner", entrada.get("celular")))[:1]
+        nombre = (entrada.get("miembro") or "").strip()
+        if not socios and nombre:
+            # Por nombre: primero los de la etiqueta BNI; se compara sin acentos palabra por palabra.
+            dominio = [("name", "ilike", p) for p in nombre.split()[:3] if len(p) > 2]
+            socios = Partner.search(dominio + [("category_id.name", "=", "BNI")], limit=5) or Partner.search(dominio, limit=5)
+        if not socios:
+            return {"ok": False, "motivo": "No encuentro a esa persona en los contactos; pide su celular."}
+        if len(socios) > 1:
+            return {"ok": False, "motivo": "Hay varias personas con ese nombre; pide el celular o el nombre completo.",
+                    "opciones": [f"{r.name} ({r.phone or 'sin cel'})" for r in socios[:5]]}
+        socio = socios
+        fin = inicio + timedelta(hours=tipo.appointment_duration or 1)
+        choque = self.env["calendar.event"].sudo().search([
+            ("user_id", "=", josette.id), ("start", "<", fin), ("stop", ">", inicio)], limit=1)
+        if choque:
+            return {"ok": False, "motivo": f"A esa hora Josette ya tiene «{choque.name}»; escoge otra hora."}
+        modalidad = entrada.get("modalidad") or "presencial"
+        vals = tipo._prepare_calendar_event_values(
+            1, [{"capacity_reserved": 1, "capacity_used": 1}],
+            Markup(tools.plaintext2html(f"Agendada por el agente de WhatsApp a petición de {self._xb_sa_team_user().name}.\n"
+                                        f"Modalidad: {modalidad}")),
+            tipo.appointment_duration, False, self.env["appointment.invite"], None, socio.name, socio, josette, inicio, fin)
+        evento = self.env["calendar.event"].with_context(
+            mail_create_nolog=True, mail_create_nosubscribe=True, allowed_company_ids=josette.company_ids.ids,
+        ).sudo().create(vals)
+        self._xb_sa_fix_event(evento, tipo, socio.name)
+        self._xb_sa_ensure_videocall(evento, tipo)
+        cuando = f"{XB_DIAS[local.weekday()]} {local:%d/%m/%Y a las %H:%M}"
+        liga = evento.videocall_location if modalidad == "videollamada" else ""
+        avisado = self._xb_sa_tell_member(evento, f"Hola, {socio.name.split()[0]}. Josette te apartó tu 1 a 1 el {cuando} "
+                                                  + (f"por videollamada: {liga}" if liga else "en la oficina de XUBAX.")
+                                                  + " Si no te acomoda, dime y lo movemos.")
+        return {"ok": True, "cita_id": evento.id, "miembro": socio.name, "cuando": cuando, "modalidad": modalidad,
+                **({"liga_videollamada": liga} if liga else {}), "miembro_avisado_por_whatsapp": avisado,
+                "nota": "" if avisado else "El miembro no ha escrito en 24 h: no se le pudo avisar por WhatsApp; dile a la persona del equipo que le avise."}
+
+    def _xb_sa_tool_ver_platica(self, job, entrada):
+        if not self._xb_sa_team_user():
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        buscar = (entrada.get("buscar") or "").strip()
+        llave = xb_phone_key(buscar)
+        Canal = self.env["discuss.channel"].sudo()
+        dominio = [("channel_type", "=", "whatsapp"), ("wa_account_id", "=", self.wa_account_id.id), ("id", "!=", self.id)]
+        if llave:
+            canales = Canal.search(dominio + [("whatsapp_number", "like", llave)], order="id desc", limit=3)
+        else:
+            canales = Canal.search(dominio + ["|", ("whatsapp_partner_id.name", "ilike", buscar), ("name", "ilike", buscar)],
+                                   order="id desc", limit=3)
+        if not canales:
+            return {"ok": False, "motivo": "No encuentro una plática con ese nombre o celular en este número."}
+        if len(canales) > 1 and not llave:
+            return {"ok": False, "motivo": "Hay varias pláticas que coinciden; pide el celular.",
+                    "opciones": canales.mapped("name")}
+        canal = canales[0]
+        mensajes = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", canal.id), ("message_type", "=", "whatsapp_message")],
+            order="id desc", limit=15).sorted("id")
+        bot = self.env.ref("base.partner_root")
+        salida = []
+        for m in mensajes:
+            entrante = bool(m.wa_message_ids.filtered(lambda w: w.message_type == "inbound"))
+            quien = "la persona" if entrante else ("el agente" if m.author_id == bot else m.author_id.name)
+            texto = html2plaintext(m.body or "").strip() or ("[adjunto]" if m.attachment_ids else "")
+            salida.append(f"{self._xb_sa_local(m.date):%d/%m %H:%M} {quien}: {texto[:400]}")
+        return {"ok": True, "platica": canal.name, "mensajes": salida}
 
     def _xb_sa_tell_member(self, evento, texto):
         """Avisa al miembro en su plática si escribió hace menos de 24 h (ventana libre de WhatsApp). Devuelve si lo avisó."""
@@ -1649,10 +1897,12 @@ class DiscussChannel(models.Model):
             self.xb_sa_lead_id.sudo().tag_ids.mapped("name")
         return any((n or "").strip().upper() == "BNI" for n in etiquetas)
 
-    def _xb_sa_appt_type(self):
+    def _xb_sa_appt_type(self, modalidad=""):
         acc = self.wa_account_id.sudo()
         if self._xb_sa_is_bni() and acc.xb_sa_bni_appointment_type_id:
             return acc.xb_sa_bni_appointment_type_id
+        if modalidad == "videollamada" and acc.xb_sa_video_appointment_type_id:
+            return acc.xb_sa_video_appointment_type_id
         return acc.xb_sa_appointment_type_id
 
     def _xb_sa_tool_marcar_miembro_bni(self, job, entrada):
@@ -1689,12 +1939,12 @@ class DiscussChannel(models.Model):
                 (" y ya recibió el video de Josette." if self.xb_sa_bni_welcomed else ".") +
                 " Sigue: ofrécele su 1 a 1 con ver_horarios_demo."}
 
-    def _xb_sa_demo_slots(self, desde=None):
+    def _xb_sa_demo_slots(self, desde=None, modalidad=""):
         """Horarios libres de la cita nativa (app Citas): [(inicio UTC, usuario)].
 
         Pocos y repartidos: mañana, mediodía y tarde de cada día; 8 en total.
         """
-        tipo = self._xb_sa_appt_type()
+        tipo = self._xb_sa_appt_type(modalidad)
         if not tipo:
             return []
         tz = pytz.timezone(XB_TZ)
@@ -1718,13 +1968,14 @@ class DiscussChannel(models.Model):
             elegidos += [del_dia[i] for i in sorted({0, len(del_dia) // 2, len(del_dia) - 1})]
         return elegidos[:8]
 
-    def _xb_sa_appointment_url(self):
-        tipo = self._xb_sa_appt_type()
+    def _xb_sa_appointment_url(self, modalidad=""):
+        tipo = self._xb_sa_appt_type(modalidad)
         base = tipo.website_id.domain or tipo.get_base_url()
         return f"{base.rstrip('/')}/appointment/{tipo.id}"
 
     def _xb_sa_tool_ver_horarios_demo(self, job, entrada):
-        tipo = self._xb_sa_appt_type()
+        modalidad = entrada.get("modalidad") or ""
+        tipo = self._xb_sa_appt_type(modalidad)
         if not tipo:
             return {"ok": False, "motivo": "No hay una cita configurada para demos; registra el prospecto y pasa a humano."}
         desde = None
@@ -1735,16 +1986,17 @@ class DiscussChannel(models.Model):
             except ValueError:
                 return {"ok": False, "motivo": "La fecha debe ir como AAAA-MM-DD."}
         tz = pytz.timezone(XB_TZ)
-        libres = self._xb_sa_demo_slots(desde)
+        libres = self._xb_sa_demo_slots(desde, modalidad)
         return {"horarios": [f"{t.astimezone(tz):%Y-%m-%d %H:%M} ({XB_DIAS[t.astimezone(tz).weekday()]})" for t, _u in libres],
                 "duracion_minutos": round(tipo.appointment_duration * 60),
                 "se_puede_agendar_hasta_dias": tipo.max_schedule_days,
                 # La cita de BNI no es pública: sin liga, el agente agenda por aquí.
-                **({"liga_para_escoger_otro_horario": self._xb_sa_appointment_url()} if tipo.is_published else {})}
+                **({"liga_para_escoger_otro_horario": self._xb_sa_appointment_url(modalidad)} if tipo.is_published else {})}
 
     def _xb_sa_tool_agendar_demo(self, job, entrada):
         acc = self.wa_account_id.sudo()
-        tipo = self._xb_sa_appt_type()
+        modalidad = entrada.get("modalidad") or ""
+        tipo = self._xb_sa_appt_type(modalidad)
         if not tipo:
             return {"ok": False, "motivo": "No hay una cita configurada para demos."}
         tz = pytz.timezone(XB_TZ)
@@ -1753,7 +2005,7 @@ class DiscussChannel(models.Model):
             dia = tz.localize(datetime.strptime(pedido[:10], "%Y-%m-%d")).astimezone(pytz.utc).replace(tzinfo=None)
         except ValueError:
             return {"ok": False, "motivo": "El horario debe ir como AAAA-MM-DD HH:MM."}
-        libres = self._xb_sa_demo_slots(dia)
+        libres = self._xb_sa_demo_slots(dia, modalidad)
         if not any(t.astimezone(tz).strftime("%Y-%m-%d %H:%M") == pedido for t, _u in libres):
             # Los 8 mostrados son una muestra: busca en todo el día pedido.
             libres = [x for x in self._xb_sa_day_slots(tipo, dia) if x[0].astimezone(tz).strftime("%Y-%m-%d %H:%M") == pedido]
@@ -1791,10 +2043,34 @@ class DiscussChannel(models.Model):
         if not self.xb_sa_lead_id and evento.opportunity_id:
             self.sudo().xb_sa_lead_id = evento.opportunity_id
         self._xb_sa_fix_event(evento, tipo, nombre)
+        self._xb_sa_ensure_videocall(evento, tipo)
         if not evento.opportunity_id:  # con oportunidad, la app Citas ya le deja la actividad a quien da la demo
             self._xb_sa_notify(job, usuario, f"Demo agendada por WhatsApp: {pedido} con {nombre}")
-        return {"ok": True, "cuando": pedido, "con": usuario.name, "duracion_minutos": round(tipo.appointment_duration * 60),
-                "liga_videollamada": evento.videocall_location or "El equipo se la manda antes de la cita."}
+        res = {"ok": True, "cuando": pedido, "con": usuario.name, "duracion_minutos": round(tipo.appointment_duration * 60),
+               "modalidad": modalidad or "presencial"}
+        if evento.videocall_location:
+            res["liga_videollamada"] = evento.videocall_location
+            res["nota"] = "Mándale la liga en tu respuesta, tal cual (sin asteriscos): con ella entra a la videollamada a la hora de la cita."
+        elif modalidad == "videollamada":
+            res["nota"] = ("Esta cita NO tiene liga de videollamada: no prometas una. Dile que una persona del equipo le "
+                           "escribe por aquí antes de la cita para conectarse, y avisa con pasar_a_humano.")
+        elif tipo.location_id:
+            res["direccion"] = tipo.location or tipo.location_id.contact_address.replace("\n", ", ").strip(", ")
+        return res
+
+    def _xb_sa_ensure_videocall(self, evento, tipo):
+        """Liga de videollamada de Odoo para citas de un tipo «Odoo Discuss» (al crear por código Odoo no
+        siempre la arma). En la tienda, con el dominio de su sitio en vez del de Odoo."""
+        evento = evento.sudo()
+        if tipo.event_videocall_source != "discuss":
+            return
+        if not evento.videocall_location:
+            evento._set_discuss_videocall_location()
+        if self.wa_account_id.sudo().xb_sa_profile == "tienda":
+            dominio = (self._xb_sa_store_website().domain or "").rstrip("/")
+            base = evento.get_base_url().rstrip("/")
+            if dominio and evento.videocall_location.startswith(base) and base != dominio:
+                evento.videocall_location = dominio + evento.videocall_location[len(base):]
 
     def _xb_sa_day_slots(self, tipo, dia):
         """Todos los huecos libres del día pedido (sin recortar a 8)."""

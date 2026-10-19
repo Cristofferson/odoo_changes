@@ -124,6 +124,10 @@ class WhatsappAccount(models.Model):
     xb_sa_appointment_type_id = fields.Many2one(
         "appointment.type", string="Cita para demos",
         help="Cita de la app Citas: de ahí salen los horarios, el encargado y la oportunidad en el CRM.")
+    xb_sa_video_appointment_type_id = fields.Many2one(
+        "appointment.type", string="Cita por videollamada",
+        help="Opcional: si el cliente la quiere por videollamada se aparta en esta cita (lleva su liga). "
+             "Vacío = la misma cita para todo.")
     xb_sa_demo_calendar_id = fields.Many2one(
         "resource.calendar", string="Horario para demos",
         help="Días y horas en que se pueden agendar. Vacío = horario de la empresa.")

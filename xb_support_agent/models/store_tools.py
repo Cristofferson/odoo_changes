@@ -466,12 +466,6 @@ class DiscussChannel(models.Model):
         for p in pedidos:
             entrega = (pytz.utc.localize(p.commitment_date).astimezone(tz).strftime("%d/%m/%Y")
                        if p.commitment_date else "sin fecha")
-            dias = max([int(l.product_id.product_tmpl_id.sale_delay or 0) for l in p.order_line
-                        if not l.display_type] or [0]) or None
-            # Sin fecha prometida: estimado = confirmación del pedido + días de fabricación de la pieza más tardada.
-            estimada = None
-            if not p.commitment_date and p.state == "sale" and dias and p.date_order:
-                estimada = (pytz.utc.localize(p.date_order).astimezone(tz) + timedelta(days=dias)).strftime("%d/%m/%Y")
             salida.append({
                 "pedido": p.name, "cliente": p.partner_id.name if equipo else "",
                 "estado": XB_STORE_STATES.get(p.state, p.state),
@@ -479,16 +473,15 @@ class DiscussChannel(models.Model):
                 "total": round(p.amount_total, 2),
                 "saldo_pendiente": round(getattr(p, "amount_unpaid", 0.0) or 0.0, 2) if p.state == "sale" else None,
                 "entrega_prometida": entrega,
-                "dias_de_fabricacion_estimados": dias,
-                "entrega_estimada_aprox": estimada,
                 "listo_para_recoger": bool(p.xb_ready_notified_date) if "xb_ready_notified_date" in p._fields else None,
                 "piezas": [f"{l.product_uom_qty:g} × {l.product_id.display_name or l.name}" for l in p.order_line
                            if not l.display_type][:6]})
         return {"ok": True, "pedidos": salida,
-                "nota": "Si «entrega_prometida» es «sin fecha», da la «entrega_estimada_aprox» como APROXIMADA («más o menos el …») "
-                        "y que la tienda la confirma. NUNCA digas «no tiene fecha asignada» ni «no está registrada en el sistema»: "
-                        "suena a que nadie lo está haciendo. Si «listo_para_recoger» es false, di que «todavía está en el taller», "
-                        "no que «no aparece»."}
+                "nota": "FECHAS: la única fecha de entrega que puedes decir es «entrega_prometida». Si dice «sin fecha», NO "
+                        "calcules, estimes ni sugieras fechas o plazos (ni «aprox.», ni «unos días», ni «la próxima semana»): di que "
+                        "su pieza está en el taller y que la tienda le confirma la fecha por aquí, y avisa con pasar_a_humano. "
+                        "Tampoco digas «no tiene fecha asignada» ni «no está registrada en el sistema» (suena a que nadie lo está "
+                        "haciendo). Si «listo_para_recoger» es false, di que «todavía está en el taller», no que «no aparece»."}
 
     def _xb_sa_tool_enviar_ticket(self, job, entrada):
         equipo = self._xb_sa_store_team()

@@ -523,6 +523,7 @@ class DiscussChannel(models.Model):
                 lineas.append(f"- {c.name} ({'INVITADO sin usuario propio: consulta sin dinero, capturas y puede pedir cambios que autoriza el titular' if c.guest else 'usuario ' + (c.remote_login or '')}) · {rol} · sistema «{c.project_id.name}» (base {c.database_name}) · ve temas de dinero y autoriza servicios: {dinero}")
             if proyecto:
                 lineas.append(f"Sistema de esta plática: «{proyecto.name}» (base {proyecto.database_name}).")
+                lineas += self._xb_sa_contracted(proyecto, contacto)
             else:
                 lineas.append("Todavía no se sabe de cuál sistema habla: pregúntale y usa seleccionar_sistema.")
         pendiente = self.env["xb.support.service"].sudo().search(
@@ -606,6 +607,30 @@ class DiscussChannel(models.Model):
                 lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda: no la menciones como apartada).")
         return "\n".join(lineas)
 
+    def _xb_sa_contracted(self, proyecto, contacto):
+        """Lo que el cliente tiene contratado con nosotros (la suscripción ligada a su sistema en Despacho)."""
+        sus = proyecto.sudo().despacho_subscription_id if "despacho_subscription_id" in proyecto._fields else False
+        if not sus:
+            return []
+        partes = [l for l in sus.order_line if not l.display_type and l.product_id]
+        if not partes:
+            return []
+        dinero = contacto and contacto.can_billing
+        detalle = "; ".join(
+            l.product_id.with_context(lang="es_MX").name + (f" (${l.price_total:,.2f} con IVA)" if dinero else "")
+            for l in partes)
+        texto = (f"LO QUE ESTE CLIENTE YA TIENE CONTRATADO con nosotros (suscripción {sus.name}): {detalle}. "
+                 "Eso ya está incluido: NO se lo vuelvas a ofrecer ni a cotizar ni registres interés de compra por ello. Si pregunta "
+                 "qué incluye lo que pagó, contéstale con esto")
+        texto += (" (a esta persona sí puedes darle montos)." if dinero else " (sin montos: esta persona no ve temas de dinero).")
+        if dinero:
+            facturas = sus.invoice_ids.filtered(lambda f: f.state == "posted").sorted("invoice_date", reverse=True)[:2]
+            if facturas:
+                texto += " Últimas facturas: " + "; ".join(
+                    f"{f.name} {f.invoice_date:%d/%m/%Y} ${f.amount_total:,.2f} "
+                    f"({'pagada' if f.payment_state in ('paid', 'in_payment') else 'pendiente de pago'})" for f in facturas) + "."
+        return [texto]
+
     def _xb_sa_common_rules(self):
         """Reglas que van en el contexto de todos los perfiles (no en las instrucciones editables)."""
         reglas = [
@@ -613,6 +638,12 @@ class DiscussChannel(models.Model):
             "nuevo, no retomes pendientes de días anteriores (de otra pieza, de otro cliente, de otro asunto) salvo que ella "
             "los mencione.",
             "Las ligas van solas, sin asteriscos ni guiones bajos alrededor (WhatsApp los pega a la dirección y la rompe).",
+            "ATIENDE TÚ HASTA EL FINAL: la idea es que la persona quede resuelta sin esperar a nadie. Si te pregunta cómo hacer "
+            "algo, guíala paso a paso (un paso por mensaje si es largo; si manda captura, dile exactamente qué picar ahí) y sigue "
+            "con ella hasta que quede. NO ofrezcas «¿quieres que te contacte el equipo?» ni pases la plática solo porque el "
+            "trámite es largo o es en otra plataforma (Meta, Google, el banco). pasar_a_humano es solo para lo que de verdad no "
+            "puedes: cobros y aclaraciones de pagos, algo que exige nuestras credenciales o el servidor, o que la persona lo pida. "
+            "Aun entonces, avanza con ella todo lo que sí pueda hacer mientras tanto.",
         ]
         if self.wa_account_id.sudo().xb_sa_video_appointment_type_id:
             reglas.append("Citas: hay dos modalidades, presencial y videollamada. Pregunta cuál quiere ANTES de ver horarios y pásala "
@@ -1121,6 +1152,9 @@ class DiscussChannel(models.Model):
                 SELECT name, start_at FROM pos_session
                  WHERE state = 'opened' AND start_at < now() - interval '1 day'
                  ORDER BY start_at LIMIT 5""",
+            "modulos_de_xubax_instalados": """
+                SELECT name, coalesce(shortdesc->>'es_MX', shortdesc->>'en_US') FROM ir_module_module
+                 WHERE state = 'installed' AND (name LIKE 'xb\\_%%' OR author ILIKE '%%xubax%%') ORDER BY 1""",
             "usuarios_activos_e_ultimo_acceso": """
                 SELECT (SELECT count(*) FROM res_users WHERE active AND NOT share),
                        (SELECT max(create_date) FROM res_users_log)""",

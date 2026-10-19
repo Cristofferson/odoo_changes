@@ -17,7 +17,7 @@ uninstall):
 * "Hearts and Arrows" reads its own field (it was reading "Fire").
 * Rows without data are hidden.
 * Shop category and menu "Diamantes" (anello.mx): gems of type Diamante
-  get it automatically; "/shop" without category or search no longer
+  tracked by serial number get it automatically (accent stones do not); "/shop" without category or search no longer
   lists them.
 * The gem video ("Video", ``x_studio_video``) is always saved without
   sound: on every upload the audio track is removed with ffmpeg (video
@@ -43,7 +43,7 @@ users only).
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Website/eCommerce",
-    "version": "19.0.1.4.1",
+    "version": "19.0.1.4.2",
     "license": "LGPL-3",
     "depends": ["website_sale"],
     "data": [

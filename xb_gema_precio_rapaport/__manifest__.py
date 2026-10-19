@@ -16,7 +16,9 @@ so the shop, which adds the 16 % VAT, shows the public price in pesos.
 
 It runs whenever a gem is quoted or one of the fields of its public price
 changes, and every week (after the Rapaport jobs) to follow the dollar.
-Gems without a public price are not touched. The dollar rate is taken
+Gems without a public price, and gems without serial number tracking
+(accent stones, priced by hand and used by the rings' price), are not
+touched. The dollar rate is taken
 from the company that keeps USD rates.
 """,
     "author": "XUBAX",
@@ -24,7 +26,7 @@ from the company that keeps USD rates.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Sales/Sales",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "license": "LGPL-3",
     "depends": ["rapaport_pricing"],
     "data": [

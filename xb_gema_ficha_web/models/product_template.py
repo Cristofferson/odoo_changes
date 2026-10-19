@@ -305,7 +305,9 @@ class ProductTemplate(models.Model):
         if not categ or "x_studio_tipo_gema_c" not in self._fields:
             return
         for t in self:
-            es = t.categ_id.id == GEM_CATEGORY_ID and (t.x_studio_tipo_gema_c.display_name or "").strip().lower() == "diamante"
+            # solo piezas únicas (con número de serie); los acentos no se venden sueltos
+            es = (t.categ_id.id == GEM_CATEGORY_ID and t.tracking == "serial"
+                  and (t.x_studio_tipo_gema_c.display_name or "").strip().lower() == "diamante")
             tiene = categ in t.public_categ_ids
             if es and not tiene:
                 t.sudo().public_categ_ids = [(4, categ.id)]
@@ -328,7 +330,7 @@ class ProductTemplate(models.Model):
     def write(self, vals):
         vals = self._xb_vals_sin_audio(vals)
         res = super().write(vals)
-        if {"categ_id", "x_studio_tipo_gema_c"}.intersection(vals):
+        if {"categ_id", "x_studio_tipo_gema_c", "tracking"}.intersection(vals):
             self._xb_sync_categoria_diamantes()
         if self._XB_CAMPOS_SYNC.intersection(vals):
             self._xb_sync_gema_galeria()

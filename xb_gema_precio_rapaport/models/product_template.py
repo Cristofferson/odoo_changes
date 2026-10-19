@@ -13,7 +13,7 @@ IVA = 0.16
 # Campos de los que depende x_studio_precio_publico (compute de Studio) y
 # la cotización de rapaport_pricing, que escribe x_studio_precio_rapnet_qt.
 CAMPOS_PRECIO = {
-    "categ_id", "x_studio_precio_rapnet_qt", "x_studio_quilataje_c", "x_studio_corte",
+    "categ_id", "tracking", "x_studio_precio_rapnet_qt", "x_studio_quilataje_c", "x_studio_corte",
     "x_studio_triple_excelente_c", "x_studio_ha_c", "x_studio_certificados",
     "x_studio_origen_c",
 }
@@ -33,7 +33,11 @@ class ProductTemplate(models.Model):
         return usd._convert(1.0, mxn, compania, fields.Date.context_today(self), round=False)
 
     def _xb_aplicar_precio_rapaport(self, tasa=None):
+        # Solo piezas únicas (con número de serie): los diamantes de acento no
+        # llevan serie, tienen precio a mano y los anillos calculan su precio
+        # con ellos.
         gemas = self.filtered(lambda t: t.categ_id.id == CATEG_GEMA
+                              and t.tracking == "serial"
                               and "x_studio_precio_publico" in t._fields
                               and t.x_studio_precio_publico > 0)
         if not gemas:
@@ -50,7 +54,7 @@ class ProductTemplate(models.Model):
     @api.model
     def _cron_xb_precio_rapaport(self):
         gemas = self.with_context(active_test=False).search(
-            [("categ_id", "=", CATEG_GEMA), ("x_studio_precio_publico", ">", 0)])
+            [("categ_id", "=", CATEG_GEMA), ("tracking", "=", "serial"), ("x_studio_precio_publico", ">", 0)])
         cambiadas = gemas._xb_aplicar_precio_rapaport()
         _logger.info("Precio de venta Rapaport: %s de %s gemas actualizadas", cambiadas, len(gemas))
         return cambiadas

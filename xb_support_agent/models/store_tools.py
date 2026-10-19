@@ -312,8 +312,8 @@ class DiscussChannel(models.Model):
         sin, con = self._xb_sa_store_price_ref(t, company)
         return {"ok": True, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
-                "etiquetas": t.product_tag_ids.mapped("name"), "dias_de_fabricacion": int(t.sale_delay or 0) or None, "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
-                "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. «dias_de_fabricacion» es el tiempo aproximado que toma hacerla desde que se confirma el pedido; dilo como estimado, la fecha exacta la pone la tienda en el pedido."}
+                "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
+                "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. No des tiempos de fabricación ni de entrega (ni aproximados): si preguntan, di que la tienda confirma la fecha de entrega al levantar el pedido."}
 
     def _xb_sa_store_variant(self, tmpl, opciones):
         """Variante de la plantilla con las opciones dadas. (variante, error)."""

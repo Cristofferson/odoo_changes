@@ -1,0 +1,149 @@
+// Ficha de gema, diseño «tarjeta de certificado» (propuesta C, 19-oct-2026).
+// Colores y letras de anello.mx. $headings-font-family del tema es Roboto:
+// la serifa de los títulos la pone el tema sobre h1..h6, no esa variable.
+$xb-serif: 'Cormorant Garamond', Georgia, serif;
+$xb-tinta: #14110E;
+$xb-gris: #6E665C;
+$xb-crema: #F4EFE7;
+$xb-oro-l: #C9AE7E;
+$xb-oro-d: #8C6A38;
+$xb-linea: #E6E1D9;
+
+.xb-gema {
+    color: $xb-tinta;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .xb-gema-marco { background: $xb-crema; border: 1px solid $xb-oro-l; padding: 6px; }
+    .xb-gema-tarjeta {
+        border: 1px solid $xb-oro-l;
+        padding: 28px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+    .xb-gema-sup { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: $xb-oro-d; }
+    .xb-gema-titulo { font-family: $xb-serif; font-size: 34px; margin: 6px 0 4px; line-height: 1.05; }
+    .xb-gema-sub { font-size: 14px; color: $xb-gris; }
+
+    // 4C: tantas columnas como datos haya (--xb-4c).
+    .xb-gema-4c {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(var(--xb-4c, 4), minmax(0, 1fr));
+        border-top: 1px solid $xb-oro-l;
+        border-bottom: 1px solid $xb-oro-l;
+    }
+    @media (max-width: 575.98px) {
+        .xb-gema-4c { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .xb-gema-c:nth-child(n+3) { border-top: 1px solid $xb-linea; }
+        .xb-gema-c:nth-child(3) { border-left: 0; }
+        .xb-gema-sup { letter-spacing: .14em; }
+    }
+    .xb-gema-c {
+        padding: 14px 4px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        & + .xb-gema-c { border-left: 1px solid $xb-linea; }
+    }
+    .xb-gema-num { font-family: $xb-serif; font-size: 30px; font-weight: 600; line-height: 1.2; font-variant-numeric: lining-nums; }
+    .xb-gema-c-etq { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: $xb-gris; display: inline-flex; align-items: center; gap: 2px; }
+
+    .xb-gema-detalles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+    @media (max-width: 575.98px) { .xb-gema-detalles { grid-template-columns: minmax(0, 1fr); } }
+
+    .xb-gema-fila {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px dotted $xb-oro-l;
+        font-size: 14px;
+    }
+    .xb-gema-etq { color: $xb-gris; display: inline-flex; align-items: center; gap: 2px; }
+    .xb-gema-val { font-weight: 500; text-align: right; }
+
+    // Botón «ⓘ» + globo. El globo se ancla a la fila (o a la tira de 4C).
+    .xb-gema-ayuda {
+        display: inline-block;
+        summary {
+            list-style: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            color: $xb-oro-d;
+            &::-webkit-details-marker { display: none; }
+            &:hover, &:focus-visible { color: $xb-tinta; }
+        }
+        &[open] summary { color: $xb-tinta; }
+    }
+    .xb-gema-ayuda-texto {
+        position: absolute;
+        z-index: 5;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 4px;
+        padding: 12px 14px;
+        background: #FFFFFF;
+        border: 1px solid $xb-oro-l;
+        box-shadow: 0 6px 18px rgba(20, 17, 14, .12);
+        font-size: 13px;
+        line-height: 1.5;
+        letter-spacing: normal;
+        text-transform: none;
+        text-align: left;
+        color: $xb-tinta;
+        font-weight: 400;
+    }
+
+    .xb-gema-cert {
+        position: relative;
+        border: 1px solid $xb-linea;
+        padding: 22px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .xb-gema-cert-cab { position: relative; display: flex; align-items: center; gap: 12px; }
+    .xb-gema-lab {
+        min-width: 48px;
+        height: 48px;
+        padding: 0 10px;
+        border-radius: 24px;
+        background: $xb-tinta;
+        color: #FAF8F4;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .06em;
+    }
+    .xb-gema-cert-num { font-size: 18px; font-weight: 500; }
+    .xb-gema-cert-fecha { font-size: 13px; color: $xb-gris; text-align: right; }
+    .xb-gema-cert-img { max-height: 200px; align-self: center; }
+    .xb-gema-cert-botones { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 4px; }
+    .xb-gema-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border: 1px solid $xb-tinta;
+        color: $xb-tinta;
+        font-size: 13px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        text-decoration: none;
+        &:hover { background: $xb-tinta; color: #FAF8F4; }
+    }
+    .xb-gema-btn-lleno { background: $xb-tinta; color: #FAF8F4; &:hover { background: $xb-oro-d; border-color: $xb-oro-d; } }
+}

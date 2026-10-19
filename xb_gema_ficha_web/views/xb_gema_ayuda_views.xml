@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="xb_gema_ayuda_view_list" model="ir.ui.view">
+        <field name="name">xb.gema.ayuda.list</field>
+        <field name="model">xb.gema.ayuda</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="false" delete="false">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="explicacion"/>
+                <field name="clave" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="xb_gema_ayuda_action" model="ir.actions.act_window">
+        <field name="name">Ficha de gema: qué significa cada casilla</field>
+        <field name="res_model">xb.gema.ayuda</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p>Lo que lee el cliente al tocar «ⓘ» junto a cada casilla de la ficha de una gema.</p>
+        </field>
+    </record>
+
+    <menuitem id="xb_gema_ayuda_menu" action="xb_gema_ayuda_action"
+              parent="website.menu_website_global_configuration" sequence="60"
+              name="Ficha de gema: explicaciones"/>
+</odoo>

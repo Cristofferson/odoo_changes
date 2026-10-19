@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate: lo que el usuario escriba no se pisa al actualizar. -->
+    <data noupdate="1">
+        <record id="ayuda_gema" model="xb.gema.ayuda">
+            <field name="clave">gema</field>
+            <field name="name">Gema</field>
+            <field name="explicacion">Tipo de piedra preciosa.</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="ayuda_origen" model="xb.gema.ayuda">
+            <field name="clave">origen</field>
+            <field name="name">Origen</field>
+            <field name="explicacion">Indica si la gema se extrajo de una mina (natural) o se creó en un laboratorio.</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="ayuda_id_gema" model="xb.gema.ayuda">
+            <field name="clave">id_gema</field>
+            <field name="name">ID de la gema</field>
+            <field name="explicacion">Número con el que identificamos esta pieza en nuestro inventario y en su certificado.</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="ayuda_forma" model="xb.gema.ayuda">
+            <field name="clave">forma</field>
+            <field name="name">Forma</field>
+            <field name="explicacion">Silueta de la gema vista desde arriba y estilo de su facetado.</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="ayuda_medidas" model="xb.gema.ayuda">
+            <field name="clave">medidas</field>
+            <field name="name">Medidas</field>
+            <field name="explicacion">Diámetro mínimo – diámetro máximo × altura, en milímetros.</field>
+            <field name="sequence">50</field>
+        </record>
+        <record id="ayuda_quilataje" model="xb.gema.ayuda">
+            <field name="clave">quilataje</field>
+            <field name="name">Quilates</field>
+            <field name="explicacion">Peso de la gema. Un quilate equivale a 0.20 gramos.</field>
+            <field name="sequence">60</field>
+        </record>
+        <record id="ayuda_color" model="xb.gema.ayuda">
+            <field name="clave">color</field>
+            <field name="name">Color</field>
+            <field name="explicacion">Escala de la D (incoloro) a la Z (tono amarillo o café visible). Mientras más cerca de la D, más escaso es el diamante.</field>
+            <field name="sequence">70</field>
+        </record>
+        <record id="ayuda_pureza" model="xb.gema.ayuda">
+            <field name="clave">pureza</field>
+            <field name="name">Pureza</field>
+            <field name="explicacion">Cantidad y tamaño de las inclusiones internas y marcas externas. Va de FL (sin inclusiones) a I3 (inclusiones visibles a simple vista).</field>
+            <field name="sequence">80</field>
+        </record>
+        <record id="ayuda_corte" model="xb.gema.ayuda">
+            <field name="clave">corte</field>
+            <field name="name">Corte</field>
+            <field name="explicacion">Qué tan bien están hechas las proporciones y facetas. Es lo que más influye en cuánta luz regresa a tus ojos.</field>
+            <field name="sequence">90</field>
+        </record>
+        <record id="ayuda_brillo" model="xb.gema.ayuda">
+            <field name="clave">brillo</field>
+            <field name="name">Brillo</field>
+            <field name="explicacion">Cantidad de luz blanca que la gema refleja hacia quien la mira.</field>
+            <field name="sequence">100</field>
+        </record>
+        <record id="ayuda_fuego" model="xb.gema.ayuda">
+            <field name="clave">fuego</field>
+            <field name="name">Fuego</field>
+            <field name="explicacion">Destellos de colores que aparecen cuando la luz se descompone dentro de la gema.</field>
+            <field name="sequence">110</field>
+        </record>
+        <record id="ayuda_ha" model="xb.gema.ayuda">
+            <field name="clave">ha</field>
+            <field name="name">Corazones y flechas</field>
+            <field name="explicacion">Patrón simétrico de 8 corazones y 8 flechas que se ve con un visor especial. Indica un facetado muy preciso.</field>
+            <field name="sequence">120</field>
+        </record>
+        <record id="ayuda_patron" model="xb.gema.ayuda">
+            <field name="clave">patron</field>
+            <field name="name">Patrón</field>
+            <field name="explicacion">Distribución de las zonas claras y oscuras que se ven al mover la gema.</field>
+            <field name="sequence">130</field>
+        </record>
+        <record id="ayuda_aset" model="xb.gema.ayuda">
+            <field name="clave">aset</field>
+            <field name="name">ASET</field>
+            <field name="explicacion">Evaluación con el visor ASET (Angular Spectrum Evaluation Tool), que muestra cómo la gema capta y refleja la luz.</field>
+            <field name="sequence">140</field>
+        </record>
+        <record id="ayuda_triple_ex" model="xb.gema.ayuda">
+            <field name="clave">triple_ex</field>
+            <field name="name">Triple excelente</field>
+            <field name="explicacion">La gema obtuvo la calificación Excelente en corte, pulido y simetría.</field>
+            <field name="sequence">150</field>
+        </record>
+        <record id="ayuda_idealscope" model="xb.gema.ayuda">
+            <field name="clave">idealscope</field>
+            <field name="name">IdealScope</field>
+            <field name="explicacion">Visor que muestra en qué zonas la gema pierde luz; califica su rendimiento de luz.</field>
+            <field name="sequence">160</field>
+        </record>
+        <record id="ayuda_pulido" model="xb.gema.ayuda">
+            <field name="clave">pulido</field>
+            <field name="name">Pulido</field>
+            <field name="explicacion">Calidad del acabado de la superficie de las facetas.</field>
+            <field name="sequence">170</field>
+        </record>
+        <record id="ayuda_simetria" model="xb.gema.ayuda">
+            <field name="clave">simetria</field>
+            <field name="name">Simetría</field>
+            <field name="explicacion">Qué tan alineadas y parejas están las facetas entre sí.</field>
+            <field name="sequence">180</field>
+        </record>
+        <record id="ayuda_fluorescencia" model="xb.gema.ayuda">
+            <field name="clave">fluorescencia</field>
+            <field name="name">Fluorescencia</field>
+            <field name="explicacion">Brillo que emite la gema bajo luz ultravioleta (ninguna, débil, media o fuerte). Con luz normal no se nota.</field>
+            <field name="sequence">190</field>
+        </record>
+        <record id="ayuda_cert_numero" model="xb.gema.ayuda">
+            <field name="clave">cert_numero</field>
+            <field name="name">Número de certificado</field>
+            <field name="explicacion">Folio del reporte que emitió el laboratorio. Con él puedes verificar el certificado en su sitio.</field>
+            <field name="sequence">200</field>
+        </record>
+        <record id="ayuda_cert_fecha" model="xb.gema.ayuda">
+            <field name="clave">cert_fecha</field>
+            <field name="name">Fecha de emisión</field>
+            <field name="explicacion">Fecha en que el laboratorio emitió el reporte.</field>
+            <field name="sequence">210</field>
+        </record>
+        <record id="ayuda_cert_laser" model="xb.gema.ayuda">
+            <field name="clave">cert_laser</field>
+            <field name="name">Inscripción láser</field>
+            <field name="explicacion">Número grabado con láser en el filo (cintillo) de la gema. Coincide con el del certificado.</field>
+            <field name="sequence">220</field>
+        </record>
+        <record id="ayuda_cert_comentarios" model="xb.gema.ayuda">
+            <field name="clave">cert_comentarios</field>
+            <field name="name">Comentarios</field>
+            <field name="explicacion">Observaciones que el laboratorio anotó en el reporte.</field>
+            <field name="sequence">230</field>
+        </record>
+        <record id="ayuda_lab_diamane" model="xb.gema.ayuda">
+            <field name="clave">lab_DIAMANE</field>
+            <field name="name">DIAMANE</field>
+            <field name="explicacion">Certificado emitido por el laboratorio de DIAMANE.</field>
+            <field name="sequence">240</field>
+        </record>
+        <record id="ayuda_lab_gia" model="xb.gema.ayuda">
+            <field name="clave">lab_GIA</field>
+            <field name="name">GIA</field>
+            <field name="explicacion">Gemological Institute of America: laboratorio gemológico independiente de Estados Unidos.</field>
+            <field name="sequence">250</field>
+        </record>
+        <record id="ayuda_lab_igi" model="xb.gema.ayuda">
+            <field name="clave">lab_IGI</field>
+            <field name="name">IGI</field>
+            <field name="explicacion">International Gemological Institute: laboratorio gemológico internacional.</field>
+            <field name="sequence">260</field>
+        </record>
+        <record id="ayuda_lab_hrd" model="xb.gema.ayuda">
+            <field name="clave">lab_HRD</field>
+            <field name="name">HRD</field>
+            <field name="explicacion">HRD Antwerp: laboratorio gemológico de Amberes, Bélgica.</field>
+            <field name="sequence">270</field>
+        </record>
+        <record id="ayuda_lab_ags" model="xb.gema.ayuda">
+            <field name="clave">lab_AGS</field>
+            <field name="name">AGS</field>
+            <field name="explicacion">American Gem Society Laboratories.</field>
+            <field name="sequence">280</field>
+        </record>
+        <record id="ayuda_lab_egl" model="xb.gema.ayuda">
+            <field name="clave">lab_EGL</field>
+            <field name="name">EGL</field>
+            <field name="explicacion">European Gemological Laboratory.</field>
+            <field name="sequence">290</field>
+        </record>
+        <record id="ayuda_lab_gsi" model="xb.gema.ayuda">
+            <field name="clave">lab_GSI</field>
+            <field name="name">GSI</field>
+            <field name="explicacion">Gemological Science International.</field>
+            <field name="sequence">300</field>
+        </record>
+        <record id="ayuda_lab_gcal" model="xb.gema.ayuda">
+            <field name="clave">lab_GCAL</field>
+            <field name="name">GCAL</field>
+            <field name="sequence">310</field>
+        </record>
+        <record id="ayuda_lab_gra" model="xb.gema.ayuda">
+            <field name="clave">lab_GRA</field>
+            <field name="name">GRA</field>
+            <field name="sequence">320</field>
+        </record>
+    </data>
+</odoo>

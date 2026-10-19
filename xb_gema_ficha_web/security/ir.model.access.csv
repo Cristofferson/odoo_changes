@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_xb_gema_ayuda_user,xb.gema.ayuda user,model_xb_gema_ayuda,base.group_user,1,0,0,0
+access_xb_gema_ayuda_editor,xb.gema.ayuda editor,model_xb_gema_ayuda,website.group_website_restricted_editor,1,1,0,0

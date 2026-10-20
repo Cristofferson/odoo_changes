@@ -22,7 +22,7 @@ KB = [
  ("policy","Garantía de por vida",
   "Garantía de por vida contra defectos del metal y de la piedra que se compró (la gema y el metal que se vendieron). No cubre desgaste normal ni daños por golpes. Una persona de la tienda valida cada caso; no prometas reparaciones ni cambios por tu cuenta."),
  ("policy","Meses sin intereses",
-  "Meses sin intereses con tarjeta de crédito según el total con IVA: de $2,000 a $9,999 → 3 MSI; de $10,000 a $19,999 → 6 MSI; de $20,000 a $29,999 → 9 MSI; de $30,000 en adelante → hasta 12 MSI. Con menos de $2,000 no aplica. Dilo con el total de su cotización. Qué tarjetas participan lo confirma una persona de la tienda."),
+  "Meses sin intereses con tarjeta de crédito según el total con IVA: de $2,000 a $9,999 → 3 MSI; de $10,000 a $19,999 → 6 MSI; de $20,000 a $29,999 → 9 MSI; de $30,000 en adelante → hasta 12 MSI. Con menos de $2,000 no aplica. Dilo con el total de su cotización. Aplica con cualquier tarjeta de crédito, de cualquier banco."),
  ("service","Por qué Anello",
   "Taller fabricante con historia desde 1999 (La Esfinge). Mejores calificaciones en Google: casi 200 reseñas de 5 estrellas. Únicos a nivel nacional con grabado láser personalizado del certificado en la piedra. Gemólogo graduado por la GIA (pocas joyerías en México lo tienen). Garantía de por vida contra defectos de metal y piedra. El primer ajuste de medida es gratis durante un año después de la entrega. Al ser fabricantes se ofrecen personalizaciones, reparaciones y trabajos urgentes (el plazo lo confirma una persona). No hay descuentos; sí hay programas de lealtad (el detalle lo da una persona)."),
  ("service","Ventajas de ICERT",

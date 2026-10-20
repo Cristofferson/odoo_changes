@@ -636,7 +636,14 @@ class DiscussChannel(models.Model):
         reglas = [
             "Contesta lo que la persona dice AHORA. Si su último mensaje responde a un mensaje automático o abre un tema "
             "nuevo, no retomes pendientes de días anteriores (de otra pieza, de otro cliente, de otro asunto) salvo que ella "
-            "los mencione.",
+            "los mencione. PERO si su mensaje es ambiguo y encaja con algo que quedó pendiente con ella («la cadena», «mi "
+            "pedido», «lo que me iban a mandar»), es de eso de lo que habla: lígalo a ese pendiente y no le ofrezcas otra cosa.",
+            "Todo lo que escribes (fuera de las herramientas) le llega TAL CUAL a la persona. Nunca escribas notas para ti, "
+            "razonamientos ni frases sobre ella en tercera persona («Ulises sabrá…», «no le confirmo…»): solo el mensaje para ella.",
+            "No prometas cuándo va a contestar o confirmar el equipo («hoy mismo», «mañana a primera hora», «en una hora»): di "
+            "«en cuanto el equipo lo confirme te aviso por aquí». Pide cada dato UNA sola vez; si no lo da, no se lo vuelvas a pedir.",
+            "Con fotos: describe solo lo que se ve. No afirmes medidas (largo, tamaño en cm), kilataje, material ni si la "
+            "piedra es diamante a partir de una foto; si hace falta el dato, pregúntalo o explica cómo medirlo.",
             "Las ligas van solas, sin asteriscos ni guiones bajos alrededor (WhatsApp los pega a la dirección y la rompe).",
             "ATIENDE TÚ HASTA EL FINAL: la idea es que la persona quede resuelta sin esperar a nadie. Si te pregunta cómo hacer "
             "algo, guíala paso a paso (un paso por mensaje si es largo; si manda captura, dile exactamente qué picar ahí) y sigue "
@@ -883,7 +890,10 @@ class DiscussChannel(models.Model):
             bloques = list(resp.content)
             ultimo = max((i for i, b in enumerate(bloques)
                           if b.type in ("server_tool_use", "web_search_tool_result")), default=-1)
-            texto = "\n\n".join(b.text for b in bloques[ultimo + 1:] if b.type == "text").strip()
+            textos = [b.text for b in bloques[ultimo + 1:] if b.type == "text" and b.text.strip()]
+            if len(textos) > 1:  # lo de antes suele ser una nota del modelo para sí mismo: al cliente solo la respuesta
+                job._xb_log("Se descartó texto previo a la respuesta: " + " | ".join(textos[:-1])[:500])
+            texto = (textos[-1] if textos else "").strip()
             break
         else:
             job._xb_log("Se alcanzó el máximo de rondas de herramientas.")
@@ -933,14 +943,16 @@ class DiscussChannel(models.Model):
         nombres = " / ".join(dict.fromkeys(pendientes.mapped("name")))
         sistemas = pendientes.mapped("project_id.name")
         donde = sistemas[0] if len(sistemas) == 1 else ", ".join(sistemas[:-1]) + " y " + sistemas[-1]
+        if acc.xb_sa_profile == "tienda":  # en la tienda no se enseña el nombre técnico del sistema
+            donde = f"el equipo de {acc.xb_sa_company_name or acc._xb_sa_company().name}"
         if all(c.challenge_dt and ahora - c.challenge_dt < timedelta(hours=24) for c in pendientes):
             texto = (f"Antes de ayudarte necesito confirmar que eres {nombres} ({donde}). "
                      "Responde SÍ para continuar.")
         else:
             pendientes.sudo().write({"challenge_dt": ahora})
             texto = (f"Hola, soy el asistente de {acc.xb_sa_company_name or 'XUBAX'}. Tu número está ligado al usuario de {nombres} en "
-                     f"{donde}. ¿Eres tú? Responde SÍ para confirmarlo y poder ayudarte con "
-                     f"{'tu sistema' if len(sistemas) == 1 else 'tus sistemas'}.")
+                     f"{donde}. ¿Eres tú? Responde SÍ para confirmarlo y poder ayudarte"
+                     f"{'' if acc.xb_sa_profile == 'tienda' else ' con tu sistema' if len(sistemas) == 1 else ' con tus sistemas'}.")
         job.reply = texto
         if acc.xb_sa_shadow:
             self._xb_sa_post_draft(texto)

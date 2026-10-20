@@ -51,8 +51,11 @@ XB_STORE_TOOLS = [
            "limite": {"type": "integer", "description": "Cuántos mostrar (máx. 8)."}}),
     _tool("ver_producto",
           "Ficha de una joya: descripción, opciones disponibles (metal, ancho, medida, piedra…) con sus nombres exactos, "
-          "precio «desde» y liga. Úsala antes de cotizar para conocer las opciones.",
-          {"producto_id": {"type": "integer"}}),
+          "precio «desde» y liga. Úsala antes de cotizar para conocer las opciones. Si ya sabes la combinación (metal, "
+          "medida…), pásala en «opciones» y te da su precio exacto con IVA, sin necesidad de cotizar ni de pedir el nombre.",
+          {"producto_id": {"type": "integer"},
+           "opciones": {"type": "array", "items": {"type": "string"},
+                        "description": "Opcional: valores elegidos con su nombre exacto (p. ej. «Oro amarillo 10kt», «6.5»)."}}),
     _tool("crear_cotizacion",
           "Crea una COTIZACIÓN (borrador, no es un pedido) con una o más joyas y su ticket queda listo para enviarse con "
           "enviar_ticket. Cada línea lleva el id del producto, la cantidad y las opciones elegidas con el nombre EXACTO "
@@ -310,10 +313,21 @@ class DiscussChannel(models.Model):
             valores = linea.product_template_value_ids.filtered(lambda v: v.ptav_active)
             opciones[linea.attribute_id.name] = [v.name for v in valores]
         sin, con = self._xb_sa_store_price_ref(t, company)
-        return {"ok": True, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
+        combinacion = {}
+        if entrada.get("opciones"):
+            variante, error = self._xb_sa_store_variant(t, entrada.get("opciones"))
+            if error:
+                combinacion = {"precio_de_la_combinacion": None, "motivo": error}
+            else:
+                impuesto = self._xb_sa_store_tax(company)
+                unitario = self._xb_sa_store_line_price(variante, self._xb_sa_store_pricelist(company))
+                total = impuesto.compute_all(unitario, quantity=1.0)["total_included"] if impuesto else unitario
+                combinacion = {"combinacion": variante.display_name, "precio_de_la_combinacion_con_iva": round(total, 2)}
+        return {"ok": True, **combinacion, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
                 "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
-                "nota": "Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. No des tiempos de fabricación ni de entrega (ni aproximados): si preguntan, di que la tienda confirma la fecha de entrega al levantar el pedido."}
+                "nota": "Si trae «precio_de_la_combinacion_con_iva», dáselo de inmediato como el precio de esa pieza con IVA; el nombre "
+                        "completo solo hace falta para formalizar la cotización. Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. No des tiempos de fabricación ni de entrega (ni aproximados): si preguntan, di que la tienda confirma la fecha de entrega al levantar el pedido."}
 
     def _xb_sa_store_variant(self, tmpl, opciones):
         """Variante de la plantilla con las opciones dadas. (variante, error)."""
@@ -344,6 +358,13 @@ class DiscussChannel(models.Model):
         if not variante:
             return None, "No se pudo armar esa combinación de opciones."
         return variante, None
+
+    def _xb_sa_store_pricelist(self, company):
+        """La lista de precios del sitio de la tienda (la misma con la que se cotiza)."""
+        website = self._xb_sa_store_website()
+        pricelist = website.pricelist_id if website and "pricelist_id" in website._fields else self.env["product.pricelist"]
+        return pricelist or self.env["product.pricelist"].sudo().search([("website_id", "=", website.id)], limit=1) or \
+            self.env["product.pricelist"].sudo().search([("company_id", "=", company.id)], limit=1)
 
     def _xb_sa_store_line_price(self, variante, pricelist):
         """Precio unitario SIN IVA de la variante: lo que dé la lista de precios; si da 0 (variante nueva sin regla), su precio de lista."""
@@ -377,10 +398,7 @@ class DiscussChannel(models.Model):
             return {"ok": False, "motivo": "Faltan las joyas a cotizar."}
         if not partner.lang or partner.lang.startswith("en"):
             partner.lang = "es_MX"
-        website = self._xb_sa_store_website()
-        pricelist = website.pricelist_id if website and "pricelist_id" in website._fields else self.env["product.pricelist"]
-        pricelist = pricelist or self.env["product.pricelist"].sudo().search([("website_id", "=", website.id)], limit=1) or \
-            self.env["product.pricelist"].sudo().search([("company_id", "=", company.id)], limit=1)
+        pricelist = self._xb_sa_store_pricelist(company)
         impuesto = self._xb_sa_store_tax(company)
         valores_lineas = []
         for ln in lineas:
@@ -474,14 +492,26 @@ class DiscussChannel(models.Model):
                 "saldo_pendiente": round(getattr(p, "amount_unpaid", 0.0) or 0.0, 2) if p.state == "sale" else None,
                 "entrega_prometida": entrega,
                 "listo_para_recoger": bool(p.xb_ready_notified_date) if "xb_ready_notified_date" in p._fields else None,
-                "piezas": [f"{l.product_uom_qty:g} × {l.product_id.display_name or l.name}" for l in p.order_line
-                           if not l.display_type][:6]})
+                "renglones": self._xb_sa_store_order_lines(p)})
         return {"ok": True, "pedidos": salida,
-                "nota": "FECHAS: la única fecha de entrega que puedes decir es «entrega_prometida». Si dice «sin fecha», NO "
+                "nota": "PRECIOS: cada renglón ya trae su precio con IVA y «total» es la suma de todos. Si la cotización trae varias "
+                        "opciones (p. ej. zirconia y diamante), el total las suma juntas: di cuánto sale cada opción sumando sus "
+                        "renglones y aclara que se escoge solo una. FECHAS: la única fecha de entrega que puedes decir es «entrega_prometida». Si dice «sin fecha», NO "
                         "calcules, estimes ni sugieras fechas o plazos (ni «aprox.», ni «unos días», ni «la próxima semana»): di que "
                         "su pieza está en el taller y que la tienda le confirma la fecha por aquí, y avisa con pasar_a_humano. "
                         "Tampoco digas «no tiene fecha asignada» ni «no está registrada en el sistema» (suena a que nadie lo está "
                         "haciendo). Si «listo_para_recoger» es false, di que «todavía está en el taller», no que «no aparece»."}
+
+    def _xb_sa_store_order_lines(self, orden):
+        """Renglones con su precio CON IVA; las secciones (p. ej. «Opción 1») van como título."""
+        salida = []
+        for l in orden.order_line[:15]:
+            texto = (l.name or "").split("\n")[0].strip() or l.product_id.display_name
+            if l.display_type == "line_section":
+                salida.append(f"— {texto} —")
+            elif not l.display_type:
+                salida.append(f"{l.product_uom_qty:g} × {texto}: ${l.price_total:,.2f} con IVA")
+        return salida
 
     def _xb_sa_tool_enviar_ticket(self, job, entrada):
         equipo = self._xb_sa_store_team()

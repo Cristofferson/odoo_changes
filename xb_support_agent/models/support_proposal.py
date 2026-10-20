@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
+
+import pytz
 
 from odoo import _, api, fields, models
 from odoo.tools import html2plaintext as tools_html2plaintext
 from odoo.exceptions import UserError
+
 
 from .support_service import XB_SERVICE_PRODUCT
 
@@ -332,14 +335,29 @@ class XbSupportProposal(models.Model):
 
     @api.model
     def _cron_owner_digest(self):
-        """Cada mañana: lo que sigue esperando decisión."""
+        """Cada mañana, UNA vez al día: la lista corta de lo que sigue esperando decisión
+        (el detalle de cada una ya le llegó al crearse; «ver solicitudes» lo repite)."""
         pendientes = self.sudo().search([("state", "=", "pending")], order="id")
         if not pendientes:
             return
+        # Al actualizar el módulo el cron puede correr otra vez el mismo día: solo la primera vale.
+        Param = self.env["ir.config_parameter"].sudo()
+        hoy = datetime.now(pytz.timezone("America/Mexico_City")).date().isoformat()
+        if Param.get_param("xb_support_agent.digest_date") == hoy:
+            return
         canal = self._xb_owner_channel()
-        if canal and self._xb_window_open(canal):
-            canal._xb_sa_send(_("Buenos días. Hay %s solicitud(es) del agente esperando tu decisión:") % len(pendientes))
-        pendientes._xb_ask_owner()
+        if not canal:
+            return
+        if self._xb_window_open(canal):
+            lineas = [_("Buenos días. Siguen esperando tu decisión (%s):") % len(pendientes)]
+            lineas += [f"• *#{r.id}* · {r.project_id.name or _('sin sistema')} · {r.name}"
+                       f"{' 🚨' if r.urgency == 'high' else ''}" for r in pendientes]
+            lineas.append(_("Responde *SÍ n* o *NO n*. Para ver el detalle de todas, escribe *ver solicitudes*."))
+            canal._xb_sa_send("\n".join(lineas))
+            pendientes.write({"owner_notified_dt": fields.Datetime.now()})
+        elif not self._xb_owner_template_ping(canal, pendientes[0]):
+            return
+        Param.set_param("xb_support_agent.digest_date", hoy)
 
     @api.model_create_multi
     def create(self, vals_list):

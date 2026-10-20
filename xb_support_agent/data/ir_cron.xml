@@ -26,7 +26,6 @@
         <field name="code">model._cron_owner_digest()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
-        <field name="nextcall">2026-10-19 15:00:00</field>
         <field name="active" eval="True"/>
     </record>
 </odoo>

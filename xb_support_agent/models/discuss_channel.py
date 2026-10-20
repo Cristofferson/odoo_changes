@@ -271,6 +271,14 @@ XB_TEAM_TOOLS = [
           "EQUIPO: lee los últimos mensajes de la plática de WhatsApp de otra persona en este mismo número "
           "(para saber qué dijo o qué se le contestó). Solo lectura.",
           {"buscar": {"type": "string", "description": "Celular (10 dígitos) o nombre de la persona."}}),
+    _tool("escribir_a",
+          "EQUIPO: le manda un WhatsApp, como el agente, a otra persona que ya tiene plática en este número (p. ej. "
+          "ofrecerle un horario, darle seguimiento o avisarle algo que pidió el equipo). Redacta tú el mensaje completo, "
+          "cálido y listo para esa persona, con lo que te pidió el equipo; después, lo que conteste te llega a ti en su plática. "
+          "Solo se puede si esa persona escribió en las últimas 24 horas (regla de WhatsApp); si no, dile al equipo que "
+          "hay que esperar a que escriba o mandarle una plantilla desde Odoo.",
+          {"buscar": {"type": "string", "description": "Celular (10 dígitos) o nombre de la persona."},
+           "mensaje": {"type": "string", "description": "El mensaje tal como le va a llegar."}}),
     _tool("mover_cita_bni",
           "EQUIPO: cambia la fecha y hora de un 1 a 1 de BNI. Avisa al miembro por WhatsApp si escribió hace menos de 24 h.",
           {"cita_id": {"type": "integer", "description": "Id de la cita, de ver_citas_bni."},
@@ -1715,21 +1723,9 @@ class DiscussChannel(models.Model):
     def _xb_sa_tool_ver_platica(self, job, entrada):
         if not self._xb_sa_team_user():
             return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
-        buscar = (entrada.get("buscar") or "").strip()
-        llave = xb_phone_key(buscar)
-        Canal = self.env["discuss.channel"].sudo()
-        dominio = [("channel_type", "=", "whatsapp"), ("wa_account_id", "=", self.wa_account_id.id), ("id", "!=", self.id)]
-        if llave:
-            canales = Canal.search(dominio + [("whatsapp_number", "like", llave)], order="id desc", limit=3)
-        else:
-            canales = Canal.search(dominio + ["|", ("whatsapp_partner_id.name", "ilike", buscar), ("name", "ilike", buscar)],
-                                   order="id desc", limit=3)
-        if not canales:
-            return {"ok": False, "motivo": "No encuentro una plática con ese nombre o celular en este número."}
-        if len(canales) > 1 and not llave:
-            return {"ok": False, "motivo": "Hay varias pláticas que coinciden; pide el celular.",
-                    "opciones": canales.mapped("name")}
-        canal = canales[0]
+        canal, error = self._xb_sa_other_channel(entrada.get("buscar"))
+        if error:
+            return error
         mensajes = self.env["mail.message"].sudo().search([
             ("model", "=", "discuss.channel"), ("res_id", "=", canal.id), ("message_type", "=", "whatsapp_message")],
             order="id desc", limit=15).sorted("id")
@@ -1741,6 +1737,47 @@ class DiscussChannel(models.Model):
             texto = html2plaintext(m.body or "").strip() or ("[adjunto]" if m.attachment_ids else "")
             salida.append(f"{self._xb_sa_local(m.date):%d/%m %H:%M} {quien}: {texto[:400]}")
         return {"ok": True, "platica": canal.name, "mensajes": salida}
+
+    def _xb_sa_tool_escribir_a(self, job, entrada):
+        equipo = self._xb_sa_team_user()
+        if not equipo:
+            return {"ok": False, "motivo": "Solo el equipo de XUBAX puede usar esto."}
+        mensaje = (entrada.get("mensaje") or "").strip()
+        if not mensaje:
+            return {"ok": False, "motivo": "Falta el mensaje."}
+        canal, error = self._xb_sa_other_channel(entrada.get("buscar"))
+        if error:
+            return error
+        if not self.env["xb.support.proposal"]._xb_window_open(canal):
+            return {"ok": False, "motivo": f"{canal.name} no ha escrito en las últimas 24 horas: WhatsApp no deja mandarle "
+                                           "un mensaje libre. Hay que esperar a que escriba o mandarle una plantilla desde Odoo."}
+        if self.wa_account_id.sudo().xb_sa_shadow:
+            canal._xb_sa_post_draft(mensaje)
+        else:
+            canal._xb_sa_send(mensaje)
+        canal.sudo().message_post(
+            body=Markup("<p>%s</p>") % f"El agente mandó el mensaje anterior a petición de {equipo.name}.",
+            message_type="comment", subtype_xmlid="mail.mt_note", author_id=self.env.ref("base.partner_root").id)
+        return {"ok": True, "platica": canal.name,
+                "nota": "Ya le llegó. Dile a la persona del equipo que se lo mandaste y que lo que conteste lo atiendes tú."}
+
+    def _xb_sa_other_channel(self, buscar):
+        """(plática, error) de otra persona en este mismo número, por celular o nombre."""
+        buscar = (buscar or "").strip()
+        llave = xb_phone_key(buscar)
+        Canal = self.env["discuss.channel"].sudo()
+        dominio = [("channel_type", "=", "whatsapp"), ("wa_account_id", "=", self.wa_account_id.id), ("id", "!=", self.id)]
+        if llave:
+            canales = Canal.search(dominio + [("whatsapp_number", "like", llave)], order="id desc", limit=3)
+        else:
+            canales = Canal.search(dominio + ["|", ("whatsapp_partner_id.name", "ilike", buscar), ("name", "ilike", buscar)],
+                                   order="id desc", limit=3)
+        if not buscar or not canales:
+            return None, {"ok": False, "motivo": "No encuentro una plática con ese nombre o celular en este número."}
+        if len(canales) > 1 and not llave:
+            return None, {"ok": False, "motivo": "Hay varias pláticas que coinciden; pide el celular.",
+                          "opciones": canales.mapped("name")}
+        return canales[0], None
 
     def _xb_sa_tell_member(self, evento, texto):
         """Avisa al miembro en su plática si escribió hace menos de 24 h (ventana libre de WhatsApp). Devuelve si lo avisó."""

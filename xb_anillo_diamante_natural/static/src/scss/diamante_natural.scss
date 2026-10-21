@@ -1,0 +1,220 @@
+// Selector de diamante natural en la ficha del anillo (anello.mx).
+$xbdn-oro: #a6824c;
+$xbdn-linea: #e3ddd2;
+$xbdn-suave: #f8f4ec;
+$xbdn-texto: #1d1b18;
+$xbdn-tenue: #6c655b;
+
+.xbdn {
+    margin: 1.25rem 0 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid $xbdn-linea;
+    border-radius: 8px;
+    background: #fff;
+    scroll-margin-top: 90px;
+    transition: box-shadow .3s, border-color .3s;
+
+    &.xbdn-aviso {
+        border-color: $xbdn-oro;
+        box-shadow: 0 0 0 3px rgba($xbdn-oro, .25);
+    }
+}
+
+.xbdn-titulo {
+    margin: 0 0 .25rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: $xbdn-texto;
+}
+
+.xbdn-sub,
+.xbdn-cuenta {
+    margin: 0 0 .75rem;
+    font-size: .88rem;
+    color: $xbdn-tenue;
+}
+
+.xbdn-resumen {
+    margin: .5rem 0 1rem;
+    padding: .75rem 1rem;
+    border-radius: 6px;
+    background: $xbdn-suave;
+    font-variant-numeric: tabular-nums;
+
+    p { margin: 0; font-size: .9rem; }
+    &.xbdn-pendiente { color: $xbdn-tenue; }
+}
+
+.xbdn-fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .15rem 0;
+    font-size: .92rem;
+}
+
+.xbdn-total {
+    margin-top: .35rem;
+    padding-top: .45rem;
+    border-top: 1px solid $xbdn-linea;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.xbdn-ver {
+    display: inline-block;
+    margin-top: .4rem;
+    font-size: .85rem;
+    color: $xbdn-oro;
+}
+
+.xbdn-filtros {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    margin-bottom: .75rem;
+}
+
+.xbdn-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem .75rem;
+}
+
+.xbdn-etq {
+    min-width: 5.5rem;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: $xbdn-tenue;
+}
+
+.xbdn-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+}
+
+.xbdn-chip {
+    padding: .3rem .7rem;
+    border: 1px solid $xbdn-linea;
+    border-radius: 999px;
+    background: #fff;
+    font-size: .82rem;
+    color: $xbdn-texto;
+    cursor: pointer;
+
+    &[aria-pressed="true"] {
+        border-color: $xbdn-texto;
+        background: $xbdn-texto;
+        color: #fff;
+    }
+}
+
+.xbdn-orden {
+    padding: .3rem .5rem;
+    border: 1px solid $xbdn-linea;
+    border-radius: 4px;
+    background: #fff;
+    font-size: .85rem;
+}
+
+.xbdn-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: .6rem;
+}
+
+.xbdn-diamante {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    min-width: 0;
+    padding: .5rem;
+    border: 1px solid $xbdn-linea;
+    border-radius: 6px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover { border-color: rgba($xbdn-oro, .6); }
+    &:focus-visible { outline: 2px solid $xbdn-oro; outline-offset: 2px; }
+
+    &[aria-pressed="true"] {
+        border-color: $xbdn-oro;
+        box-shadow: 0 0 0 2px rgba($xbdn-oro, .35);
+        background: $xbdn-suave;
+    }
+}
+
+.xbdn-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    border-radius: 4px;
+    background: #f3f1ed;
+}
+
+.xbdn-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 0;
+}
+
+.xbdn-forma { font-weight: 600; font-size: .9rem; color: $xbdn-texto; }
+.xbdn-specs,
+.xbdn-cert { font-size: .76rem; line-height: 1.35; color: $xbdn-tenue; }
+.xbdn-precio { margin-top: .2rem; font-weight: 600; font-size: .92rem; font-variant-numeric: tabular-nums; color: $xbdn-texto; }
+
+.xbdn-sello {
+    position: absolute;
+    top: .45rem;
+    right: .45rem;
+    display: none;
+    padding: .1rem .5rem;
+    border-radius: 999px;
+    background: $xbdn-oro;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.xbdn-diamante[aria-pressed="true"] .xbdn-sello { display: block; }
+
+.xbdn-mas {
+    display: block;
+    width: 100%;
+    margin-top: .75rem;
+    padding: .55rem;
+    border: 1px solid $xbdn-texto;
+    border-radius: 4px;
+    background: #fff;
+    font-size: .85rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.xbdn-vacio { grid-column: 1 / -1; margin: 0; font-size: .9rem; color: $xbdn-tenue; }
+
+.xbdn-nota {
+    margin: -.25rem 0 .75rem;
+    font-size: .85rem;
+    color: $xbdn-tenue;
+    b { color: $xbdn-texto; }
+}
+
+// Kiosco: pantalla grande y táctil, tarjetas más anchas.
+.xbdn-kiosco {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+
+    .xbdn-rejilla { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .8rem; }
+    .xbdn-chip { padding: .5rem 1rem; font-size: .95rem; }
+    .xbdn-forma { font-size: 1rem; }
+    .xbdn-specs, .xbdn-cert { font-size: .85rem; }
+    .xbdn-precio { font-size: 1.05rem; }
+}

@@ -42,7 +42,7 @@
     var STONE_TXT = {
         "zirconia": "Brillo clásico. Es la opción incluida en el precio que ves.",
         "diamante de laboratorio": "Diamante real, creado en laboratorio. Elige su tamaño:",
-        "diamante natural": "Extraído de la tierra y certificado. Un asesor te cotiza la piedra.",
+        "diamante natural": "Extraído de la tierra y certificado. Elige tu diamante en la lista.",
     };
     var ZIRC = { blanco: "xbv-z-blanco", rojo: "xbv-z-rojo", multicolor: "xbv-z-multi" };
 
@@ -296,6 +296,11 @@
             var name = li.dataset.attributeName || "";
             var inputs = Array.prototype.slice.call(li.querySelectorAll("input.js_variant_change"));
             if (!inputs.length || li.dataset.attributeDisplayType !== "radio") return; // select/pills/color se quedan nativos
+            // Un solo valor de texto libre (p. ej. «Frase a grabar»): Odoo ya pinta el campo; solo se le da el estilo de etiqueta.
+            if (inputs.length === 1 && inputs[0].dataset.isCustom === "True") {
+                li.classList.add("xbv-custom");
+                return;
+            }
             if (li.classList.contains("d-none")) {
                 fixed.push([name, inputs[0].dataset.valueName]);
                 return;

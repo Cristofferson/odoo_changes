@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="xb_anillo_diamante_natural_self_order.ProductPage" t-inherit="pos_self_order.ProductPage" t-inherit-mode="extension">
+        <xpath expr="//AttributeSelection" position="after">
+            <section t-if="xbdnNatural" class="xbdn xbdn-kiosco" aria-label="Elige tu diamante natural">
+                <div class="xbdn-cab">
+                    <h3 class="xbdn-titulo">Elige tu diamante natural</h3>
+                    <p class="xbdn-sub">Todos son piezas únicas con certificado. El precio de tu anillo es la montadura más el diamante que elijas.</p>
+                </div>
+                <div t-if="!xbdn.elegido" class="xbdn-resumen xbdn-pendiente"><p>Elige un diamante para poder agregar el anillo.</p></div>
+                <div t-else="" class="xbdn-resumen">
+                    <div class="xbdn-fila xbdn-total">
+                        <span>Diamante <t t-esc="xbdnTexto(xbdn.elegido)"/></span>
+                        <span t-esc="selfOrder.formatMonetary(xbdn.elegido.precio)"/>
+                    </div>
+                </div>
+                <t t-if="xbdn.datos">
+                    <div class="xbdn-filtros">
+                        <div class="xbdn-grupo">
+                            <span class="xbdn-etq">Forma</span>
+                            <div class="xbdn-chips">
+                                <button type="button" class="xbdn-chip" t-att-aria-pressed="!xbdn.forma ? 'true' : 'false'" t-on-click="() => this.xbdnFiltrar('forma', '')">Todas</button>
+                                <t t-foreach="xbdn.datos.formas" t-as="f" t-key="f">
+                                    <button type="button" class="xbdn-chip" t-att-aria-pressed="xbdn.forma === f ? 'true' : 'false'" t-on-click="() => this.xbdnFiltrar('forma', f)" t-esc="f"/>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="xbdn-grupo">
+                            <span class="xbdn-etq">Quilates</span>
+                            <div class="xbdn-chips">
+                                <t t-foreach="xbdnRangos" t-as="r" t-key="r.id">
+                                    <button type="button" class="xbdn-chip" t-att-aria-pressed="xbdn.rango === r.id ? 'true' : 'false'" t-on-click="() => this.xbdnFiltrar('rango', r.id)" t-esc="r.nombre"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <t t-set="xbdnRes" t-value="xbdnLista"/>
+                    <p class="xbdn-cuenta"><t t-esc="xbdnRes.length"/> <t t-esc="xbdnRes.length === 1 ? 'diamante' : 'diamantes'"/></p>
+                    <div class="xbdn-rejilla">
+                        <p t-if="!xbdnRes.length" class="xbdn-vacio">No hay diamantes con estos filtros. Prueba con otra forma o con otros quilates.</p>
+                        <t t-foreach="xbdnRes.slice(0, xbdn.mostrar)" t-as="d" t-key="d.id">
+                            <button type="button" class="xbdn-diamante" t-att-aria-pressed="xbdn.elegido and xbdn.elegido.id === d.id ? 'true' : 'false'" t-on-click="() => this.xbdnElegir(d)">
+                                <img class="xbdn-img" t-att-src="d.imagen" t-att-alt="d.nombre" loading="lazy"/>
+                                <span class="xbdn-cuerpo">
+                                    <span class="xbdn-forma" t-esc="xbdnTexto(d)"/>
+                                    <span t-if="xbdnSpecs(d)" class="xbdn-specs" t-esc="xbdnSpecs(d)"/>
+                                    <span t-if="d.certificado" class="xbdn-cert">Certificado <t t-esc="d.certificado"/></span>
+                                    <span class="xbdn-precio" t-esc="selfOrder.formatMonetary(d.precio)"/>
+                                </span>
+                                <span class="xbdn-sello">Elegido</span>
+                            </button>
+                        </t>
+                    </div>
+                    <button t-if="xbdnRes.length > xbdn.mostrar" type="button" class="xbdn-mas" t-on-click="() => this.xbdn.mostrar += 12">Ver más diamantes</button>
+                </t>
+                <p t-elif="xbdn.error" class="xbdn-cuenta">No pudimos cargar los diamantes. Sal del anillo y vuelve a abrirlo.</p>
+                <p t-else="" class="xbdn-cuenta">Cargando diamantes…</p>
+            </section>
+        </xpath>
+    </t>
+</templates>

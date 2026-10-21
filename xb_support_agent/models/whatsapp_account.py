@@ -121,6 +121,10 @@ class WhatsappAccount(models.Model):
     xb_sa_bni_video_name = fields.Char(groups="base.group_system")
     xb_sa_bni_horli = fields.Binary("HORLI de XUBAX", attachment=True, copy=False, groups="base.group_system")
     xb_sa_bni_horli_name = fields.Char(groups="base.group_system")
+    xb_sa_store_pricelist_id = fields.Many2one(
+        "product.pricelist", string="Cotizar con esta lista de precios",
+        help="Perfil tienda. Si se llena, el agente ofrece y cotiza SOLO los productos con precio propio en esta lista "
+             "(aunque no estén publicados en el sitio) y con los precios de esta lista. Vacío = catálogo publicado en el sitio.")
     xb_sa_appointment_type_id = fields.Many2one(
         "appointment.type", string="Cita para demos",
         help="Cita de la app Citas: de ahí salen los horarios, el encargado y la oportunidad en el CRM.")

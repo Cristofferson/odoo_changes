@@ -96,7 +96,27 @@ XB_STORE_TOOLS = [
           "(queda en espera, no se confirma solo).",
           {"pedido": {"type": "string", "description": "Número de la cotización."}}),
 ]
-for _t in XB_STORE_TOOLS:
+# Catálogo por lista de precios (DIAMANE: diamantes sueltos para joyeros). Reemplazan a las de joyería.
+XB_STONE_TOOLS = {
+    "buscar_productos": _tool(
+        "buscar_productos",
+        "Busca DIAMANTES sueltos del inventario (los que tienen precio en la lista de la empresa). Filtra por palabras del "
+        "nombre (forma abreviada BR redondo, PR princesa, OV oval, EM esmeralda, PS pera, MQ marquesa, CU cojín, AC asscher, "
+        "RA radiant, HS corazón, BG baguette, TR trillón; color D–Z; pureza IF, VVS1, VS2, SI1…; laboratorio GIA, IGI…), "
+        "por rango de quilates, por origen y por precio. Devuelve los datos de cada piedra y su precio sin IVA y con IVA.",
+        {"texto": {"type": "string", "description": "Palabras del nombre, p. ej. «BR VS1», «OV G», «GIA»; vacío = no filtrar por nombre."},
+         "origen": {"type": "string", "enum": ["", "natural", "laboratorio"], "description": "Vacío = los dos."},
+         "quilates_min": {"type": "number", "description": "0 = sin mínimo."},
+         "quilates_max": {"type": "number", "description": "0 = sin máximo."},
+         "precio_max": {"type": "number", "description": "Precio máximo CON IVA; 0 = sin tope."},
+         "limite": {"type": "integer", "description": "Cuántos mostrar (máx. 8)."}}),
+    "ver_producto": _tool(
+        "ver_producto",
+        "Ficha completa de un diamante: forma, quilates, color, pureza, corte, pulido, simetría, fluorescencia, medidas, "
+        "origen, certificados y su precio sin IVA y con IVA.",
+        {"producto_id": {"type": "integer"}}),
+}
+for _t in XB_STORE_TOOLS + list(XB_STONE_TOOLS.values()):
     _t.pop("strict", None)
 
 
@@ -127,7 +147,10 @@ class DiscussChannel(models.Model):
             lambda u: u.active and not u.share and xb_phone_key(u.partner_id.phone) == llave)[:1]
 
     def _xb_sa_store_tools(self, contactos):
-        herramientas = [t for t in XB_TOOLS if t["name"] in XB_STORE_KEEP] + XB_STORE_TOOLS
+        tienda = XB_STORE_TOOLS
+        if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
+            tienda = [XB_STONE_TOOLS.get(t["name"], t) for t in XB_STORE_TOOLS]
+        herramientas = [t for t in XB_TOOLS if t["name"] in XB_STORE_KEEP] + tienda
         if contactos and self._xb_sa_store_team():
             herramientas += [t for t in XB_TOOLS if t["name"] in XB_STORE_TEAM_KEEP]
         return herramientas
@@ -197,7 +220,12 @@ class DiscussChannel(models.Model):
         return company.account_sale_tax_id
 
     def _xb_sa_store_product_domain(self):
-        company = self.wa_account_id.sudo()._xb_sa_company()
+        acc = self.wa_account_id.sudo()
+        company = acc._xb_sa_company()
+        if acc.xb_sa_store_pricelist_id:
+            # Catálogo = lo que tiene precio propio en la lista (p. ej. diamantes de DIAMANE), publicado o no.
+            items = acc.xb_sa_store_pricelist_id.item_ids.filtered(lambda i: i.applied_on == "1_product")
+            return [("id", "in", items.product_tmpl_id.ids), ("sale_ok", "=", True), ("company_id", "in", [False, company.id])]
         website = self._xb_sa_store_website()
         dominio = [("is_published", "=", True), ("sale_ok", "=", True), ("company_id", "in", [False, company.id])]
         if website:
@@ -205,14 +233,18 @@ class DiscussChannel(models.Model):
         return dominio
 
     def _xb_sa_store_price_ref(self, tmpl, company):
-        """(sin IVA, con IVA) de referencia: el precio de lista de la plantilla."""
-        sin = tmpl.list_price
+        """(sin IVA, con IVA) de referencia: el precio de lista de la plantilla, o el de la lista de la cuenta."""
+        lista = self.wa_account_id.sudo().xb_sa_store_pricelist_id
+        sin = lista._get_product_price(tmpl.product_variant_id, 1.0) if lista and tmpl.product_variant_id else tmpl.list_price
         impuesto = self._xb_sa_store_tax(company)
         con = impuesto.compute_all(sin, quantity=1.0)["total_included"] if impuesto else sin
         return sin, con
 
     def _xb_sa_store_url(self, tmpl):
         website = self._xb_sa_store_website()
+        if self.wa_account_id.sudo().xb_sa_store_pricelist_id and (
+                not tmpl.is_published or (tmpl.website_id and tmpl.website_id != website)):
+            return ""  # su ficha está en otro sitio (p. ej. la de Anello) o no está publicada
         base = (website.domain or "").rstrip("/")
         return f"{base}{tmpl.website_url}" if tmpl.website_url else base
 
@@ -263,7 +295,57 @@ class DiscussChannel(models.Model):
             grupos.setdefault(tag.filter_group_id.name or "Otras", []).append(tag.name)
         return grupos
 
+    _XB_GEMA = [("forma", "x_studio_talla_o_forma"), ("quilates", "x_studio_quilataje_c"), ("color", "x_studio_color_real"),
+                ("pureza", "x_studio_pureza_real"), ("corte", "x_studio_corte"), ("pulido", "x_studio_pulido"),
+                ("simetria", "x_studio_simetria_calificacion_c"), ("fluorescencia", "x_studio_fluorescencia_intensidad"),
+                ("medidas_mm", "x_studio_medidas_totales"), ("origen", "x_studio_origen_c"), ("certificados", "x_studio_certificados")]
+
+    def _xb_sa_store_gem(self, t):
+        """Datos de la piedra (campos de la ficha de gema) que tengan valor."""
+        datos = {}
+        for clave, campo in self._XB_GEMA:
+            if campo not in t._fields or not t[campo]:
+                continue
+            valor = t[campo]
+            if t._fields[campo].type in ("many2one", "many2many"):
+                valor = ", ".join(valor.mapped("display_name"))
+            elif t._fields[campo].type == "selection":
+                valor = dict(t._fields[campo]._description_selection(t.env)).get(valor, valor)
+            if isinstance(valor, str) and not re.search(r"\w", valor):
+                continue  # p. ej. medidas vacías « -  x »
+            datos[clave] = valor
+        return datos
+
+    def _xb_sa_store_stones(self, entrada):
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        dominio = self._xb_sa_store_product_domain()
+        for palabra in (entrada.get("texto") or "").split():
+            dominio.append(("name", "ilike", palabra))
+        origen = (entrada.get("origen") or "").strip().lower()
+        if origen and "x_studio_origen_c" in self.env["product.template"]._fields:
+            dominio.append(("x_studio_origen_c", "ilike", "laboratorio" if origen.startswith("lab") else "Natural"))
+        if float(entrada.get("quilates_min") or 0):
+            dominio.append(("x_studio_quilataje_c", ">=", float(entrada["quilates_min"])))
+        if float(entrada.get("quilates_max") or 0):
+            dominio.append(("x_studio_quilataje_c", "<=", float(entrada["quilates_max"])))
+        piedras = self.env["product.template"].sudo().with_company(company).search(dominio, order="x_studio_quilataje_c, id")
+        tope = float(entrada.get("precio_max") or 0)
+        salida = []
+        for t in piedras:
+            sin, con = self._xb_sa_store_price_ref(t, company)
+            if tope and con > tope:
+                continue
+            salida.append({"id": t.id, "nombre": t.name, **self._xb_sa_store_gem(t),
+                           "precio_sin_iva": round(sin, 2), "precio_con_iva": round(con, 2)})
+            if len(salida) >= min(int(entrada.get("limite") or 6), 8):
+                break
+        return {"ok": True, "resultados": salida, "total_que_coinciden": len(piedras),
+                "nota": "Precios para joyería (mayoreo), de esta lista. Si no hay lo que busca, ofrece lo más parecido "
+                        "(forma, quilates, color o pureza cercanos) o pasa la plática a una persona."}
+
     def _xb_sa_tool_buscar_productos(self, job, entrada):
+        if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
+            return self._xb_sa_store_stones(entrada)
         company = self.wa_account_id.sudo()._xb_sa_company()
         dominio = self._xb_sa_store_product_domain()
         for palabra in (entrada.get("texto") or "").split():
@@ -308,6 +390,13 @@ class DiscussChannel(models.Model):
             self._xb_sa_store_product_domain() + [("id", "=", int(entrada.get("producto_id") or 0))], limit=1)
         if not t:
             return {"ok": False, "motivo": "Ese producto no está en el catálogo publicado."}
+        if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
+            sin, con = self._xb_sa_store_price_ref(t, company)
+            return {"ok": True, "id": t.id, "nombre": t.name, **self._xb_sa_store_gem(t),
+                    "precio_sin_iva": round(sin, 2), "precio_con_iva": round(con, 2),
+                    "tiene_video": bool("x_studio_video" in t._fields and t.x_studio_video),
+                    "nota": "Pieza única del inventario: el precio es el de la lista para joyería. Para apartarla o comprarla, "
+                            "cotízala con crear_cotizacion (opciones vacías)."}
         opciones = {}
         for linea in t.attribute_line_ids:
             valores = linea.product_template_value_ids.filtered(lambda v: v.ptav_active)
@@ -365,6 +454,8 @@ class DiscussChannel(models.Model):
 
     def _xb_sa_store_pricelist(self, company):
         """La lista de precios del sitio de la tienda (la misma con la que se cotiza)."""
+        if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
+            return self.wa_account_id.sudo().xb_sa_store_pricelist_id
         website = self._xb_sa_store_website()
         pricelist = website.pricelist_id if website and "pricelist_id" in website._fields else self.env["product.pricelist"]
         return pricelist or self.env["product.pricelist"].sudo().search([("website_id", "=", website.id)], limit=1) or \

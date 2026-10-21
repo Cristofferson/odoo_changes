@@ -1,0 +1,16 @@
+KB = [
+ ("service", "Quiénes somos",
+  "DIAMANE es una casa de diamantes de Morelia, Michoacán: vende diamantes sueltos naturales y de laboratorio, con su certificado, a joyeros y talleres (mayoreo). Es parte del mismo grupo que Anello (joyería al público, https://www.anello.mx). Sitio: https://www.diamane.mx (la tienda en línea es solo para joyeros registrados). Correo hola@diamane.mx."),
+ ("policy", "Solo joyeros",
+  "DIAMANE vende únicamente a joyeros, talleres y negocios de joyería. A una persona que busca una joya o un diamante para ella o para regalar se le recomienda Anello (https://www.anello.mx, WhatsApp 443 324 4511), que vende al público."),
+ ("policy", "Precios",
+  "Los precios son de mayoreo para joyería y se dan MÁS IVA (16 %). Diamantes naturales: se basan en la lista Rapaport del mercado, con un descuento según el tamaño de la piedra, en pesos al tipo de cambio del día; por eso pueden moverse un poco cada semana. Diamantes de laboratorio y acentos tienen su propio precio. El precio vigente es el que dan las herramientas; nunca lo inventes ni ofrezcas descuentos."),
+ ("service", "Certificados",
+  "Las piedras traen certificado DIAMANE y muchas además de un laboratorio internacional (GIA, IGI u otros); el que tiene cada una sale en sus datos. Muchas piedras de DIAMANE tienen certificado ICERT: tarjeta con chip NFC que, al acercarla al celular, muestra el reporte de la piedra y permite verificar que es auténtica."),
+ ("faq", "Abreviaturas de forma",
+  "BR redondo brillante, PR princesa, OV oval, EM esmeralda, PS pera, MQ marquesa, CU cojín, AC asscher, RA radiant, HS corazón, BG baguette, TR trillón. En el nombre de cada piedra va la forma, los quilates, la pureza y el color, por ejemplo «Diamante BR 0.41 VS2 L»."),
+ ("policy", "Compras, pagos y envíos",
+  "Las piedras son únicas: la cotización no las aparta. Para comprar o apartar, los datos de pago, el envío, la factura, el crédito o la consignación, una persona de DIAMANE lo atiende directamente (usa pasar_a_humano)."),
+ ("policy", "Videollamada",
+  "Se puede agendar una videollamada con DIAMANE para ver las piedras en vivo y resolver dudas; se agenda con ver_horarios_demo / agendar_demo y la liga sale al agendar."),
+]

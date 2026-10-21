@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_marketplace" model="ir.ui.view">
+        <field name="name">res.partner.form.marketplace</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_nv_open_seller" type="object"
+                        class="oe_stat_button" icon="fa-diamond"
+                        invisible="nv_seller_count == 0"
+                        groups="xb_marketplace.group_marketplace_manager">
+                    <field name="nv_listing_count" widget="statinfo"
+                           string="Anuncios Novadiam"/>
+                </button>
+                <field name="nv_seller_count" invisible="1"/>
+            </div>
+        </field>
+    </record>
+
+</odoo>

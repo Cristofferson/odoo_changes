@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- La configuración que ya existía no trae el equipo del taller ni las condiciones del examen físico. -->
+    <function model="nv.avaluo.config" name="_nv_sembrar_equipo"/>
+</odoo>

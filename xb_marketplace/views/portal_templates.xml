@@ -24,9 +24,9 @@
                                 <div class="col-lg-6">
                                     <label class="form-label fw-semibold">Metal</label>
                                     <select class="form-select" name="metal">
-                                        <option>Oro blanco 14k</option><option>Oro blanco 18k</option>
-                                        <option>Oro amarillo 14k</option><option>Oro amarillo 18k</option>
-                                        <option>Oro rosa</option><option>Platino</option>
+                                        <t t-foreach="metales" t-as="m">
+                                            <option t-esc="m.name"/>
+                                        </t>
                                     </select>
                                 </div>
                                 <div class="col-lg-6">
@@ -36,7 +36,20 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <label class="form-label fw-semibold">Talla del anillo</label>
-                                    <input type="text" class="form-control" name="size" placeholder="Ej. 6"/>
+                                    <select class="form-select" name="size">
+                                        <option value="">No la sé</option>
+                                        <t t-foreach="medidas" t-as="md">
+                                            <option t-esc="md.name"/>
+                                        </t>
+                                    </select>
+                                    <div class="form-text">Si no la sabes, la medimos en el taller.</div>
+                                </div>
+                                <!-- El peso es la mitad del avalúo: sin él no se puede
+                                     saber cuánto oro trae la pieza. -->
+                                <div class="col-lg-6">
+                                    <label class="form-label fw-semibold">¿Cuánto pesa la pieza?</label>
+                                    <input type="text" class="form-control form-control-lg" name="peso" placeholder="Ej. 4.2 gramos"/>
+                                    <div class="form-text">Si no lo sabes, lo pesamos al recibirla. Con el peso podemos decirte de entrada cuánto vale su oro.</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <label class="form-label fw-semibold">Marca (si aplica)</label>
@@ -60,6 +73,91 @@
                                 <div class="col-lg-6">
                                     <label class="form-label fw-semibold">No. de certificado (si lo tienes)</label>
                                     <input type="text" class="form-control" name="cert_number"/>
+                                </div>
+                                <!-- Color, pureza y corte salen de los catálogos de
+                                     gemología que ya usa el taller, no de una lista
+                                     propia del marketplace: la escala completa, para
+                                     que el dato del vendedor y el del taller sean el
+                                     mismo dato. Opcionales: casi nadie los sabe. -->
+                                <div class="col-lg-4">
+                                    <label class="form-label fw-semibold">Color</label>
+                                    <select class="form-select" name="color">
+                                        <option value="">No lo sé</option>
+                                        <t t-foreach="colores or []" t-as="c">
+                                            <option t-esc="c.x_name"/>
+                                        </t>
+                                    </select>
+                                    <div class="form-text">Viene en el certificado, de la D a la Z.</div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-label fw-semibold">Pureza</label>
+                                    <select class="form-select" name="pureza">
+                                        <option value="">No la sé</option>
+                                        <t t-foreach="purezas or []" t-as="pz">
+                                            <option t-esc="pz.x_name"/>
+                                        </t>
+                                    </select>
+                                    <div class="form-text">De FL (perfecta) a I3.</div>
+                                </div>
+                                <!-- Piedras además de la central. Van por grupo porque una
+                                     joya puede llevar varios tamaños distintos. -->
+                                <div class="col-lg-12">
+                                    <label class="form-label fw-semibold">¿Lleva más piedras además de la central?</label>
+                                    <div class="row">
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_qty_1" type="number" min="0" placeholder="Cantidad"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_mm_1" placeholder="Tamaño mm"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <select class="form-select" name="accent_type_1">
+                                            <option value="zirconia">Zirconia</option>
+                                            <option value="diamante_lab">Diamante lab</option>
+                                            <option value="diamante_nat">Diamante natural</option>
+                                            <option value="otra">Otra</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_qty_2" type="number" min="0" placeholder="Cantidad"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_mm_2" placeholder="Tamaño mm"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <select class="form-select" name="accent_type_2">
+                                            <option value="zirconia">Zirconia</option>
+                                            <option value="diamante_lab">Diamante lab</option>
+                                            <option value="diamante_nat">Diamante natural</option>
+                                            <option value="otra">Otra</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_qty_3" type="number" min="0" placeholder="Cantidad"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <input class="form-control" name="accent_mm_3" placeholder="Tamaño mm"/>
+                                    </div>
+                                    <div class="col-4 mb-2">
+                                        <select class="form-select" name="accent_type_3">
+                                            <option value="zirconia">Zirconia</option>
+                                            <option value="diamante_lab">Diamante lab</option>
+                                            <option value="diamante_nat">Diamante natural</option>
+                                            <option value="otra">Otra</option>
+                                        </select>
+                                    </div>
+                                    </div>
+                                    <div class="form-text">Un renglón por tamaño. Si no las sabes contar, déjalo vacío y las revisamos en el taller.</div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-label fw-semibold">Corte</label>
+                                    <select class="form-select" name="corte">
+                                        <option value="">No lo sé</option>
+                                        <t t-foreach="cortes or []" t-as="ct">
+                                            <option t-esc="ct.x_name"/>
+                                        </t>
+                                    </select>
+                                    <div class="form-text">EX es excelente; P, pobre.</div>
                                 </div>
                                 <div class="col-lg-6">
                                     <label class="form-label fw-semibold">Precio que pides (MXN)</label>

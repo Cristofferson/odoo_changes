@@ -1,4 +1,6 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+
+TAG_VENDEDOR = 'xb_marketplace.partner_tag_vendedor_novadiam'
 
 
 class MarketplaceSeller(models.Model):
@@ -34,6 +36,23 @@ class MarketplaceSeller(models.Model):
     def _compute_listing_count(self):
         for rec in self:
             rec.listing_count = len(rec.listing_ids)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Al nacer la ficha, el contacto queda marcado como vendedor: etiqueta
+        para poder filtrarlo desde Contactos, y nota en su historial para que
+        quede asentado cuándo y por quién se dio de alta."""
+        sellers = super().create(vals_list)
+        etiqueta = self.env.ref(TAG_VENDEDOR, raise_if_not_found=False)
+        for seller in sellers:
+            partner = seller.partner_id.sudo()
+            if etiqueta and etiqueta not in partner.category_id:
+                partner.write({'category_id': [(4, etiqueta.id)]})
+            partner.message_post(body=_(
+                'Alta como <b>vendedor de NOVADIAM</b> (marketplace de piezas '
+                'seminuevas). Registrado por %(usuario)s.',
+                usuario=self.env.user.name))
+        return sellers
 
     def action_approve(self):
         self.write({'state': 'approved'})

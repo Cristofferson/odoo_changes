@@ -1,3 +1,17 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_marketplace_seller_manager,marketplace.seller manager,model_marketplace_seller,group_marketplace_manager,1,1,1,1
 access_marketplace_seller_user,marketplace.seller user,model_marketplace_seller,base.group_user,1,0,0,0
+access_nv_avaluo_config_manager,nv_avaluo_config manager,model_nv_avaluo_config,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_config_user,nv_avaluo_config user,model_nv_avaluo_config,base.group_user,1,0,0,0
+access_nv_avaluo_banda_manager,nv_avaluo_banda manager,model_nv_avaluo_banda,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_banda_user,nv_avaluo_banda user,model_nv_avaluo_banda,base.group_user,1,0,0,0
+access_nv_avaluo_regla_lab_manager,nv_avaluo_regla_lab manager,model_nv_avaluo_regla_lab,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_regla_lab_user,nv_avaluo_regla_lab user,model_nv_avaluo_regla_lab,base.group_user,1,0,0,0
+access_nv_avaluo_estilo_manager,nv_avaluo_estilo manager,model_nv_avaluo_estilo,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_estilo_user,nv_avaluo_estilo user,model_nv_avaluo_estilo,base.group_user,1,0,0,0
+access_nv_avaluo_marca_manager,nv_avaluo_marca manager,model_nv_avaluo_marca,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_marca_user,nv_avaluo_marca user,model_nv_avaluo_marca,base.group_user,1,0,0,0
+access_nv_avaluo_acompanante_manager,nv_avaluo_acompanante manager,model_nv_avaluo_acompanante,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_acompanante_user,nv_avaluo_acompanante user,model_nv_avaluo_acompanante,base.group_user,1,0,0,0
+access_nv_avaluo_equipo_manager,nv_avaluo_equipo manager,model_nv_avaluo_equipo,group_marketplace_manager,1,1,1,1
+access_nv_avaluo_equipo_user,nv_avaluo_equipo user,model_nv_avaluo_equipo,base.group_user,1,0,0,0

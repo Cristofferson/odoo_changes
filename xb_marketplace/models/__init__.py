@@ -3,3 +3,8 @@ from . import product_template
 from . import res_company
 from . import sale_order
 from . import website
+from . import res_partner
+from . import nv_avaluo_config
+from . import nv_avaluo
+from . import nv_avaluo_reporte
+from . import nv_icert

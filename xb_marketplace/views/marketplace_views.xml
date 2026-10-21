@@ -170,6 +170,13 @@
                             <field name="nv_size"/>
                             <field name="nv_carats"/>
                         </group>
+                        <group string="Avalúo">
+                            <field name="x_studio_peso_joya" string="Peso declarado"/>
+                            <field name="nv_avaluo" string="Valor intrínseco"/>
+                            <field name="nv_av_techo"/>
+                            <field name="nv_av_veredicto_texto"/>
+                            <field name="list_price" string="Lo que pide el vendedor"/>
+                        </group>
                         <group string="Certificación">
                             <field name="nv_cert_type"/>
                             <field name="nv_cert_number"/>

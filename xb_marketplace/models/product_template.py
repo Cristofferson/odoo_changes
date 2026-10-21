@@ -40,7 +40,8 @@ class ProductTemplate(models.Model):
         'marketplace.seller', string='Vendedor', index=True, ondelete='restrict',
         tracking=True)
     nv_state = fields.Selection(
-        LISTING_STATES, string='Etapa', default='draft', tracking=True, copy=False)
+        LISTING_STATES, string='Etapa', default='draft', tracking=True, copy=False,
+        group_expand='_read_group_nv_state')
     nv_brand = fields.Char('Marca', help='Marca de la pieza, si aplica (se coteja en taller).')
     nv_city = fields.Char('Ciudad', help='Ciudad de origen; único dato de ubicación que se publica.')
     nv_story = fields.Text(
@@ -87,6 +88,32 @@ class ProductTemplate(models.Model):
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Todo anuncio nace con folio propio (NV-00001) como referencia
+        interna, para poder manejarlo desde que el vendedor lo publica —con la
+        pieza todavía en su casa—.
+
+        NO se escribe en el ID Joya: ése lo asigna el alta del STIJ al
+        certificar, con su propia secuencia (J000001). Son momentos distintos,
+        y muchos anuncios nunca llegan a certificarse: los rechazados, los
+        cancelados y los que el vendedor retira. Mezclarlos dejaría huecos en
+        la numeración que el cliente ve en su certificado."""
+        for vals in vals_list:
+            if vals.get('nv_is_listing') and not vals.get('default_code'):
+                folio = self.env['ir.sequence'].sudo().next_by_code(
+                    'xb_marketplace.listing')
+                if folio:
+                    vals['default_code'] = folio
+        return super().create(vals_list)
+
+    @api.model
+    def _read_group_nv_state(self, states, domain):
+        """El tablero de anuncios debe mostrar SIEMPRE las 14 fases, aunque
+        alguna esté vacía. Si no, Odoo solo dibuja las columnas que tienen
+        tarjetas y no hay a dónde arrastrar."""
+        return [code for code, _etiqueta in LISTING_STATES]
+
     @api.model
     def _nv_param(self, key, default):
         raw = self.env['ir.config_parameter'].sudo().get_param(
@@ -192,12 +219,10 @@ class ProductTemplate(models.Model):
         self.write({'nv_state': 'verifying'})
 
     def action_certify(self):
-        for rec in self:
-            if not rec.nv_serial:
-                raise UserError(_(
-                    'Asigna primero el No. de serie Novadiam (inscripción '
-                    'láser) para poder certificar la pieza.'))
-            rec.write({'nv_state': 'certified'})
+        # Certificar es emitir su ICERT: la gema graduada en el taller, ligada a la
+        # joya por el plástico. Si ya se emitió al examinarla, solo avanza la etapa.
+        self.filtered(lambda r: not r.nv_gema_lot_id).action_nv_emitir_icert()
+        self.write({'nv_state': 'certified'})
 
     def action_personalize(self):
         self.write({'nv_state': 'personalizing'})
@@ -317,19 +342,23 @@ class ProductTemplate(models.Model):
                     'antes de liberar el pago.', rec.name))
             if rec.nv_release_move_id:
                 rec.write({'nv_state': 'released'})
+                rec._nv_traspasar_al_comprador()
                 continue
             rec._nv_check_order_paid()
             move = self.env['account.move'].sudo().create(
                 rec._nv_release_move_vals())
             move._post()
             rec.write({'nv_state': 'released', 'nv_release_move_id': move.id})
+            rec._nv_traspasar_al_comprador()
             rec.message_post(body=_(
                 'Pago liberado: payout %(payout).2f al vendedor, comisión '
                 '%(commission).2f. Asiento %(move)s.',
                 payout=rec.nv_payout_amount,
                 commission=rec.nv_commission_amount,
                 move=move.name))
-            rec.nv_seller_id.message_post(body=_(
+            # sudo: avisarle al vendedor no debe depender de que quien libera
+            # tenga permiso de escritura sobre su ficha.
+            rec.nv_seller_id.sudo().message_post(body=_(
                 'Pago por liberar de "%(listing)s": %(payout).2f a la CLABE '
                 'registrada (asiento %(move)s).',
                 listing=rec.name, payout=rec.nv_payout_amount,
@@ -365,15 +394,82 @@ class ProductTemplate(models.Model):
                         note=str(exc))
                     self.env.cr.commit()
 
+    def _nv_buyer_invoices(self):
+        """Facturas de venta publicadas del comprador para esta pieza."""
+        self.ensure_one()
+        order = self.nv_sale_order_id
+        if not order:
+            return self.env['account.move']
+        return order.invoice_ids.filtered(
+            lambda m: m.move_type == 'out_invoice' and m.state == 'posted')
+
+    def _nv_refund_buyer(self):
+        """Emite la nota de crédito que devuelve al comprador lo que pagó.
+
+        Se usa cuando la pieza no pasa verificación. La nota debita el escrow
+        que alimentó la factura original, de modo que el saldo por liberar
+        queda en cero y la devolución queda asentada en contabilidad —no a
+        memoria de nadie—. Si no hay factura publicada no hay nada que
+        reversar. Es idempotente: no emite dos notas por la misma factura.
+        """
+        self.ensure_one()
+        invoices = self._nv_buyer_invoices()
+        if not invoices:
+            return self.env['account.move']
+        previas = invoices.mapped('reversal_move_ids').filtered(
+            lambda m: m.state != 'cancel')
+        if previas:
+            return previas
+        notas = invoices._reverse_moves([{
+            'ref': _('Reembolso por verificación fallida · %s', self.name),
+            'invoice_date': fields.Date.context_today(self),
+        } for _inv in invoices], cancel=False)
+        # Al reversar, Odoo recalcula la cuenta del renglón y la manda a
+        # "devoluciones sobre ventas". Aquí eso sería falso: la pieza nunca
+        # fue ingreso de Novadiam, el dinero vive en el escrow. Copiamos la
+        # cuenta de la factura original para que la nota debite el escrow y
+        # el saldo por liberar de esa pieza quede en cero.
+        for nota in notas:
+            cuentas = {
+                linea.product_id.id: linea.account_id
+                for linea in nota.reversed_entry_id.invoice_line_ids
+                if linea.product_id
+            }
+            for linea in nota.invoice_line_ids:
+                cuenta = cuentas.get(linea.product_id.id)
+                if cuenta and linea.account_id != cuenta:
+                    linea.account_id = cuenta
+        notas.filtered(lambda m: m.state == 'draft')._post()
+        return notas
+
     def action_cancel_verification(self):
         """La pieza no corresponde a lo publicado: reembolso al comprador y
         devolución al vendedor."""
+        for rec in self:
+            if rec.nv_state == 'released':
+                raise UserError(_(
+                    'La pieza "%s" ya tiene el pago liberado al vendedor. A '
+                    'estas alturas no es una cancelación sino una devolución, '
+                    'y debe reversarse a mano con el contador.', rec.name))
+            notas = rec._nv_refund_buyer()
+            if notas:
+                rec.message_post(body=_(
+                    'Venta cancelada por verificación. Nota de crédito '
+                    '%(nc)s emitida al comprador de la orden %(orden)s: el '
+                    'escrow queda saldado. Falta devolver la pieza al '
+                    'vendedor y registrar el pago del reembolso.',
+                    nc=', '.join(notas.mapped('name')),
+                    orden=rec.nv_sale_order_id.name))
+            elif rec.nv_sale_order_id:
+                rec.message_post(body=_(
+                    'Venta cancelada por verificación en la orden %s. No hay '
+                    'factura publicada, así que no hubo nada que reembolsar; '
+                    'cancela la orden y devuelve la pieza al vendedor.',
+                    rec.nv_sale_order_id.name))
+            else:
+                rec.message_post(body=_(
+                    'Pieza cancelada por verificación (sin orden de venta).'))
         self.write({'nv_state': 'cancelled_verif', 'is_published': False})
-        for rec in self.filtered('nv_sale_order_id'):
-            rec.message_post(body=_(
-                'Venta cancelada por verificación: procede reembolso al '
-                'comprador de la orden %s y devolución de la pieza al '
-                'vendedor.', rec.nv_sale_order_id.name))
 
     def action_mark_returned(self):
         self.write({'nv_state': 'returned', 'is_published': False})

@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===================== Configuración del avalúo ===================== -->
+    <record id="view_nv_avaluo_config_form" model="ir.ui.view">
+        <field name="name">nv.avaluo.config.form</field>
+        <field name="model">nv.avaluo.config</field>
+        <field name="arch" type="xml">
+            <form string="Avalúo" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Avalúo del marketplace</h1>
+                        <p class="text-muted">
+                            El vendedor pide lo que quiera entre el <b>piso</b> (valor intrínseco de la pieza)
+                            y el <b>techo</b> (un porcentaje de lo que cuesta nueva). El <b>precio sugerido</b>
+                            sale del mercado de usados.
+                        </p>
+                    </div>
+                    <notebook>
+                        <page string="Piso, sugerido y techo" name="limites">
+                            <group>
+                                <group string="Piso · valor intrínseco">
+                                    <field name="rango_a"/>
+                                    <field name="rango_b"/>
+                                    <field name="rango_c"/>
+                                    <field name="piso_alerta"/>
+                                </group>
+                                <group string="Sugerido · mercado de usados">
+                                    <field name="descuento_pedido"/>
+                                </group>
+                                <group string="Techo · promesa al comprador">
+                                    <field name="techo_pct"/>
+                                    <field name="pricelist_id"/>
+                                    <field name="medida_ref"/>
+                                    <field name="lab_anello"/>
+                                    <field name="anello_max_natural"/>
+                                    <field name="anello_max_lab"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Diamantes" name="diamantes">
+                            <group>
+                                <group string="Natural · % de Rapaport que paga un comprador">
+                                    <field name="banda_natural_ids" nolabel="1" colspan="2">
+                                        <list editable="bottom">
+                                            <field name="tipo" column_invisible="1"/>
+                                            <field name="hasta"/>
+                                            <field name="valor" string="% de Rapaport"/>
+                                        </list>
+                                    </field>
+                                </group>
+                                <group string="Laboratorio · dólares por quilate">
+                                    <field name="banda_lab_ids" nolabel="1" colspan="2">
+                                        <list editable="bottom">
+                                            <field name="tipo" column_invisible="1"/>
+                                            <field name="hasta"/>
+                                            <field name="valor" string="USD por quilate"/>
+                                        </list>
+                                    </field>
+                                </group>
+                            </group>
+                            <group string="Certificado y laboratorio (estrellas de la app Gemas)">
+                                <field name="regla_lab_ids" nolabel="1" colspan="2">
+                                    <list editable="bottom" create="false" delete="false">
+                                        <field name="estrellas" readonly="1"/>
+                                        <field name="laboratorios"/>
+                                        <field name="confianza"/>
+                                        <field name="calidad"/>
+                                    </list>
+                                </field>
+                            </group>
+                            <group>
+                                <group string="Acentos y datos dudosos">
+                                    <field name="acento_natural_usd"/>
+                                    <field name="acento_lab_usd"/>
+                                    <field name="dudoso_ct"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Metal" name="metal">
+                            <group>
+                                <group>
+                                    <field name="montadura_pct"/>
+                                </group>
+                            </group>
+                            <field name="estilo_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="peso_14k"/>
+                                    <field name="montadura_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Marcas" name="marcas">
+                            <p class="text-muted">Cuánto sube el avalúo frente a la misma pieza sin marca. 1.40 = vale 40 % más.</p>
+                            <field name="marca_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="alias"/>
+                                    <field name="factor"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Estado y lo que acompaña" name="estado">
+                            <group>
+                                <group string="Desgaste">
+                                    <field name="desgaste_a"/>
+                                    <field name="desgaste_b"/>
+                                    <field name="desgaste_c"/>
+                                    <field name="desgaste_d"/>
+                                    <field name="desgaste_supuesto"/>
+                                </group>
+                                <group string="Lo que acompaña">
+                                    <field name="acompanante_tope"/>
+                                </group>
+                            </group>
+                            <field name="acompanante_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="grupo"/>
+                                    <field name="name"/>
+                                    <field name="pct"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Equipo del taller" name="equipo">
+                            <div class="text-muted mb-2">
+                                El equipo con que se hace el examen físico. Sale en el informe junto a cada resultado.
+                            </div>
+                            <field name="equipo_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="tipo"/>
+                                    <field name="name"/>
+                                    <field name="detalle"/>
+                                    <field name="calibracion"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Informe PDF" name="informe">
+                            <group>
+                                <group string="Valuador">
+                                    <field name="valuador_nombre" placeholder="Quien imprime el informe"/>
+                                    <field name="valuador_cargo"/>
+                                    <field name="valuador_firma" widget="image" class="oe_avatar"/>
+                                </group>
+                                <group string="Vigencia">
+                                    <field name="vigencia_dias"/>
+                                </group>
+                            </group>
+                            <group string="Textos del informe">
+                                <field name="reporte_proposito"/>
+                                <field name="reporte_tipo_valor"/>
+                                <field name="reporte_condiciones"/>
+                                <field name="reporte_condiciones_fisico"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_nv_avaluo_config" model="ir.actions.server">
+        <field name="name">Avalúo</field>
+        <field name="model_id" ref="model_nv_avaluo_config"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_abrir()</field>
+    </record>
+
+    <menuitem id="menu_marketplace_config" name="Configuración"
+              parent="menu_marketplace_root" sequence="90"/>
+    <menuitem id="menu_marketplace_config_avaluo" name="Avalúo"
+              parent="menu_marketplace_config" action="action_nv_avaluo_config" sequence="10"/>
+
+    <!-- ===================== Ficha del anuncio: pestaña Avalúo ===================== -->
+    <record id="view_product_template_form_nv_avaluo" model="ir.ui.view">
+        <field name="name">product.template.form.nv.avaluo</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="xb_marketplace.view_product_template_form_marketplace"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='marketplace']" position="after">
+                <page string="Avalúo" name="nv_avaluo" invisible="not nv_is_listing">
+                    <div class="alert alert-light border mb-3 d-flex flex-wrap gap-4 align-items-center" role="status">
+                        <div>
+                            <div class="text-muted small">Pide</div>
+                            <field name="list_price" widget="monetary" readonly="1" class="fs-4 fw-bold"/>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Piso · valor intrínseco</div>
+                            <div class="fs-5"><field name="nv_av_piso" widget="monetary"/> – <field name="nv_av_piso_max" widget="monetary"/></div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Sugerido · usados</div>
+                            <div class="fs-5"><field name="nv_av_sugerido_min" widget="monetary"/> – <field name="nv_av_sugerido_max" widget="monetary"/></div>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Techo · promesa al comprador</div>
+                            <field name="nv_av_techo" widget="monetary" class="fs-5 fw-bold"/>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Resultado</div>
+                            <field name="nv_av_veredicto" invisible="1"/>
+                            <field name="nv_av_veredicto_texto" widget="badge"
+                                   decoration-success="nv_av_veredicto in ('rapido', 'tardar', 'publica')"
+                                   decoration-warning="nv_av_veredicto in ('bajar', 'bajo_piso', 'sin_nuevo', 'techo_bajo', 'sin_ct')"
+                                   decoration-danger="nv_av_veredicto in ('bajo', 'dudoso', 'sin_precio')"/>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="fw-bold">Tipo de avalúo</span>
+                        <field name="nv_av_tipo" widget="radio" options="{'horizontal': true}"/>
+                    </div>
+                    <group>
+                        <group string="Desglose del valor intrínseco">
+                            <field name="nv_av_confianza"/>
+                            <field name="nv_av_oro"/>
+                            <field name="nv_av_hechura"/>
+                            <field name="nv_av_diamante"/>
+                            <field name="nv_av_acentos"/>
+                            <field name="nv_avaluo" string="Valor intrínseco"/>
+                            <field name="nv_av_nuevo_anello"/>
+                        </group>
+                        <group string="Datos para el avalúo">
+                            <field name="nv_peso_g" invisible="nv_av_tipo == 'fisico'"/>
+                            <field name="x_studio_peso_joya" string="Peso que escribió el vendedor" readonly="1"/>
+                            <field name="nv_desgaste" placeholder="Supuesto"/>
+                            <field name="nv_acompanante_ids" widget="many2many_tags"/>
+                            <field name="nv_metal_probado" invisible="nv_av_tipo == 'fisico'"/>
+                            <field name="nv_cert_verificado"/>
+                        </group>
+                    </group>
+                    <div invisible="nv_av_tipo != 'fisico'">
+                        <group>
+                            <group string="Recepción y resguardo">
+                                <field name="nv_plastico"/>
+                                <field name="nv_joya_lot_id" invisible="not nv_joya_lot_id"/>
+                                <div colspan="2" class="mb-2">
+                                    <button name="action_nv_recibir" type="object" icon="fa-tag"
+                                            string="Registrar recepción" class="btn-secondary"
+                                            invisible="nv_joya_lot_id"/>
+                                    <button name="action_nv_recibir" type="object" icon="fa-refresh"
+                                            string="Cambiar plástico" class="btn-link"
+                                            invisible="not nv_joya_lot_id"/>
+                                </div>
+                                <field name="nv_rec_folio"/>
+                                <field name="nv_rec_fecha"/>
+                                <field name="nv_rec_user_id"/>
+                                <field name="nv_rec_estado"/>
+                                <field name="nv_dev_fecha"/>
+                                <field name="nv_dev_persona"/>
+                            </group>
+                            <group string="Metal">
+                                <field name="nv_examen_fecha" string="Fecha del examen"/>
+                                <field name="nv_examen_user_id"/>
+                                <field name="nv_peso_g" string="Peso en báscula (g)"/>
+                                <field name="nv_fis_ley"/>
+                                <field name="nv_fis_quintado"/>
+                                <field name="nv_fis_observaciones"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Diamante">
+                                <field name="nv_fis_origen"/>
+                                <field name="nv_fis_color"/>
+                                <field name="nv_fis_pureza"/>
+                                <field name="nv_fis_fluorescencia"/>
+                                <field name="nv_fis_laser"/>
+                            </group>
+                            <group string="Medidas y laboratorio">
+                                <field name="nv_fis_medidas" placeholder="6.45 – 6.48 × 3.95"/>
+                                <field name="nv_fis_ct"/>
+                                <field name="nv_fis_desmontada"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Certificado ICERT">
+                                <field name="nv_reporte_diamane" string="Número ICERT"
+                                       readonly="nv_gema_lot_id"/>
+                                <field name="nv_gema_lot_id" invisible="not nv_gema_lot_id"/>
+                                <field name="nv_visor_url" widget="url" invisible="not nv_visor_url"/>
+                                <div colspan="2" invisible="nv_gema_lot_id">
+                                    <button name="action_nv_emitir_icert" type="object" icon="fa-certificate"
+                                            string="Emitir ICERT" class="btn-primary"/>
+                                    <div class="text-muted small mt-1">Crea la ficha de la gema con lo medido en el taller y la liga a la joya con el mismo plástico.</div>
+                                </div>
+                            </group>
+                        </group>
+                        <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small">Fotos del taller</div>
+                        <div class="d-flex flex-wrap gap-4 mb-4 nv_fotos_taller">
+                            <field name="nv_fis_foto_1" widget="image" options="{'size': [140, 140]}"/>
+                            <field name="nv_fis_foto_2" widget="image" options="{'size': [140, 140]}"/>
+                            <field name="nv_fis_foto_3" widget="image" options="{'size': [140, 140]}"/>
+                            <field name="nv_fis_foto_4" widget="image" options="{'size': [140, 140]}"/>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Mercado (lo llena la revisión)">
+                            <field name="nv_mercado_nuevo"/>
+                            <field name="nv_usado_min"/>
+                            <field name="nv_usado_max"/>
+                            <field name="nv_usado_tipo"/>
+                        </group>
+                        <group string="Fuentes">
+                            <field name="nv_mercado_notas" nolabel="1" colspan="2"
+                                   placeholder="Ligas y notas de dónde salieron los precios del mercado…"/>
+                        </group>
+                    </group>
+                    <div class="mb-3">
+                        <button name="%(xb_marketplace.action_report_nv_avaluo)d" type="action"
+                                string="Imprimir informe de avalúo" icon="fa-file-pdf-o" class="btn-secondary"/>
+                    </div>
+                    <group string="Cómo se calculó">
+                        <field name="nv_avaluo_detalle" nolabel="1" colspan="2" class="text-muted"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista de anuncios: el resultado a la vista -->
+    <record id="view_marketplace_listing_list_nv_avaluo" model="ir.ui.view">
+        <field name="name">product.template.listing.list.nv.avaluo</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="xb_marketplace.view_marketplace_listing_list"/>
+        <field name="arch" type="xml">
+            <field name="list_price" position="after">
+                <field name="nv_av_piso" optional="show"/>
+                <field name="nv_av_techo" optional="show"/>
+                <field name="nv_av_veredicto" column_invisible="1"/>
+                <field name="nv_av_veredicto_texto" string="Avalúo" widget="badge" optional="show"
+                       decoration-success="nv_av_veredicto in ('rapido', 'tardar', 'publica')"
+                       decoration-warning="nv_av_veredicto in ('bajar', 'bajo_piso', 'sin_nuevo', 'techo_bajo', 'sin_ct')"
+                       decoration-danger="nv_av_veredicto in ('bajo', 'dudoso', 'sin_precio')"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

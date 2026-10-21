@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="paperformat_nv_avaluo" model="report.paperformat">
+        <field name="name">Avalúo NOVADIAM (carta)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">24</field>
+        <field name="margin_bottom">18</field>
+        <field name="margin_left">14</field>
+        <field name="margin_right">14</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">18</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_nv_avaluo" model="ir.actions.report">
+        <field name="name">Informe de avalúo</field>
+        <field name="model">product.template</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_marketplace.report_nv_avaluo</field>
+        <field name="report_file">xb_marketplace.report_nv_avaluo</field>
+        <field name="print_report_name">'Avaluo - %s' % (object.default_code or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_nv_avaluo"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(4, ref('xb_marketplace.group_marketplace_manager'))]"/>
+    </record>
+
+    <template id="report_nv_avaluo_document">
+        <t t-set="r" t-value="o._nv_reporte()"/>
+        <!-- Encabezado y pie propios: el informe es de NOVADIAM, no de la razón social que lo factura. -->
+        <div class="header" style="font-family: Helvetica, Arial, sans-serif; font-size: 8pt; color: #5d6570;">
+            <table style="width:100%; border-bottom: 0.8pt solid #8a6a35;">
+                <tr>
+                    <td style="width:50%; padding-bottom:4pt; vertical-align:bottom;">
+                        <img t-if="r['logo']" t-att-src="image_data_uri(r['logo'])" style="max-height:30pt; max-width:160pt;"/>
+                        <span t-else="" style="font-family: Georgia, serif; font-size: 16pt; color:#1d2229; letter-spacing: 3pt;" t-esc="r['marca_web']"/>
+                    </td>
+                    <td style="width:50%; text-align:right; padding-bottom:4pt; vertical-align:bottom; letter-spacing: 1pt;">
+                        INFORME DE AVALÚO DE JOYERÍA<br/>
+                        <span style="color:#1d2229;">Folio <t t-esc="r['folio']"/></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="article">
+            <style>
+                .nv { font-family: Helvetica, Arial, sans-serif; color: #1d2229; font-size: 9.5pt; line-height: 1.35; }
+                .nv h1 { font-family: Georgia, "Times New Roman", serif; font-size: 19pt; font-weight: normal; margin: 0 0 3pt 0; }
+                .nv h2 { font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #8a6a35; margin: 11pt 0 3pt 0; border-bottom: 0.6pt solid #d9cdb7; padding-bottom: 2pt; font-weight: bold; }
+                .nv .tag { font-size: 7.5pt; letter-spacing: 1.4pt; text-transform: uppercase; color: #8a6a35; font-weight: bold; }
+                .nv .muted { color: #5d6570; }
+                .nv .small { font-size: 8.3pt; }
+                .nv table.kv { width: 100%; border-collapse: collapse; }
+                .nv table.kv td { padding: 2.2pt 4pt; border-bottom: 0.4pt solid #e6e3da; vertical-align: top; }
+                .nv table.kv td.k { color: #5d6570; width: 40%; }
+                .nv table.kv td.v { text-align: right; white-space: nowrap; }
+                .nv .caja { border: 0.8pt solid #8a6a35; background: #f8f3ea; padding: 8pt 10pt; }
+                .nv .valor { font-family: Georgia, "Times New Roman", serif; font-size: 19pt; }
+                .nv .foto { height: 118pt; background-size: cover; background-position: center; border: 0.5pt solid #d9d6cc; }
+                .nv .aviso { border-left: 2pt solid #c58a2b; background: #fbf5e8; padding: 5pt 8pt; }
+                .nv .condiciones { font-size: 7.8pt; color: #3a4048; }
+                .nv .condiciones ol { padding-left: 12pt; margin: 0; }
+                .nv .condiciones li { margin-bottom: 2.5pt; }
+                .nv ul.lista { margin: 0; padding-left: 12pt; }
+                .nv ul.lista li { margin-bottom: 1.5pt; }
+                .nv .linea { border-top: 0.6pt solid #1d2229; padding-top: 3pt; }
+                .nv .nobreak { page-break-inside: avoid; }
+            </style>
+            <div class="page nv">
+                <!-- Identificación -->
+                <table style="width:100%;">
+                    <tr>
+                        <td style="vertical-align:bottom;">
+                            <div class="tag" t-esc="r['titulo']"/>
+                            <h1 t-esc="o.name"/>
+                            <div class="small muted">Referencia <t t-esc="o.default_code or o.id"/> · Solicitante: <t t-esc="r['solicitante']"/></div>
+                        </td>
+                        <td style="width:36%; vertical-align:bottom;" class="small">
+                            <table class="kv">
+                                <tr><td class="k">Fecha efectiva del valor</td><td class="v" t-esc="r['fecha']"/></tr>
+                                <tr><td class="k">Fecha del informe</td><td class="v" t-esc="r['fecha']"/></tr>
+                                <tr><td class="k">Examen físico</td><td class="v" t-esc="r['examen']"/></tr>
+                                <tr><td class="k">Vigente hasta</td><td class="v" t-esc="r['vigencia']"/></tr>
+                                <tr t-if="r['icert']"><td class="k">Certificado ICERT</td><td class="v" t-esc="r['icert']"/></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Conclusión -->
+                <div class="caja nobreak" style="margin-top:8pt;">
+                    <table style="width:100%;">
+                        <tr>
+                            <td style="vertical-align:top;">
+                                <div class="tag">Valor de reventa estimado</div>
+                                <div class="valor"><t t-esc="r['conclusion']"/> <span class="small">MXN</span></div>
+                                <div class="small muted">Pesos mexicanos con IVA incluido, a la fecha efectiva, en el mercado secundario de joyería usada en México.</div>
+                            </td>
+                            <td style="width:34%; vertical-align:top;" class="small">
+                                <table class="kv">
+                                    <tr><td class="k">Precio máximo de publicación (<t t-esc="r['techo_pct']"/> % de nueva)</td><td class="v" t-esc="r['techo']"/></tr>
+                                    <tr><td class="k">Confianza de los datos</td><td class="v" t-esc="r['confianza']"/></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div t-if="not r['examen_fisico']" class="aviso small" style="margin-top:6pt;">
+                    <b>Avalúo documental, sin examen físico.</b> Se basa en fotografías, documentos y declaraciones del vendedor.
+                    La pieza se examina en el taller de NOVADIAM cuando se vende, antes de liberar el pago.
+                </div>
+
+                <!-- Fotografías -->
+                <t t-if="r['fotos']">
+                    <h2>Fotografías</h2>
+                    <table style="width:100%; border-collapse: separate; border-spacing: 3pt 0;">
+                        <tr>
+                            <t t-foreach="r['fotos'][:4]" t-as="f">
+                                <td style="width:25%;"><div class="foto" t-attf-style="background-image: url('{{ image_data_uri(f) }}');"/></td>
+                            </t>
+                            <t t-foreach="range(4 - len(r['fotos'][:4]))" t-as="_v"><td style="width:25%;"/></t>
+                        </tr>
+                    </table>
+                    <div t-if="r['fotos_taller']" class="small muted" style="margin-top:2pt;">Fotografías tomadas en el taller de NOVADIAM durante el examen. No sustituyen la descripción escrita.</div>
+                    <div t-else="" class="small muted" style="margin-top:2pt;">Fotografías del vendedor, sin escala. Pueden no mostrar con fidelidad el color, el tamaño ni los defectos.</div>
+                </t>
+
+                <!-- Descripción -->
+                <table style="width:100%;" class="nobreak">
+                    <tr>
+                        <td style="width:48%; vertical-align:top; padding-right:8pt;">
+                            <h2>Descripción de la pieza</h2>
+                            <table class="kv">
+                                <tr t-foreach="r['pieza']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                            </table>
+                            <t t-if="r['acentos']">
+                                <h2>Piedras de acento</h2>
+                                <table class="kv">
+                                    <tr t-foreach="r['acentos']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                                </table>
+                            </t>
+                        </td>
+                        <td style="width:52%; vertical-align:top; padding-left:8pt;">
+                            <h2>Diamante central</h2>
+                            <table class="kv" t-if="r['diamante']">
+                                <tr t-foreach="r['diamante']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                            </table>
+                            <div t-else="" class="muted">El vendedor no declaró los quilates de la piedra central: no se valúa.</div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Examen físico -->
+                <div class="nobreak" t-if="r['pruebas']">
+                    <h2>Pruebas realizadas</h2>
+                    <table class="kv">
+                        <tr>
+                            <td class="k small" style="width:24%;"><b>Prueba</b></td>
+                            <td class="k small" style="width:40%;"><b>Equipo</b></td>
+                            <td class="k small"><b>Resultado</b></td>
+                        </tr>
+                        <tr t-foreach="r['pruebas']" t-as="x">
+                            <td class="k" t-esc="x[0]"/><td class="small" t-esc="x[1]"/><td t-esc="x[2]"/>
+                        </tr>
+                    </table>
+                    <div class="small muted" style="margin-top:2pt;">No se hizo análisis del metal por rayos X.</div>
+                </div>
+                <div class="nobreak" t-if="r['recepcion']">
+                    <h2>Recepción y resguardo</h2>
+                    <table class="kv">
+                        <tr t-foreach="r['recepcion']" t-as="x"><td class="k" style="width:24%;" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                    </table>
+                </div>
+
+                <!-- Encargo -->
+                <div class="nobreak">
+                    <h2>Encargo</h2>
+                    <table class="kv">
+                        <tr><td class="k" style="width:24%;">Propósito y uso previsto</td><td t-esc="r['proposito']"/></tr>
+                        <tr><td class="k">Usuarios previstos</td><td t-esc="r['usuarios']"/></tr>
+                        <tr><td class="k">Tipo de valor</td><td t-esc="r['tipo_valor']"/></tr>
+                        <tr><td class="k">Derecho que se valúa</td><td t-esc="r['derecho']"/></tr>
+                        <tr><td class="k">Alcance del trabajo</td><td t-esc="r['alcance']"/></tr>
+                    </table>
+                </div>
+
+                <div class="nobreak" t-if="r['supuestos']">
+                    <h2>Supuestos extraordinarios</h2>
+                    <div class="small" style="margin-bottom:2pt;">Se dieron por ciertos sin comprobarlos. Si alguno resulta falso, el valor puede cambiar.</div>
+                    <ul class="lista small">
+                        <li t-foreach="r['supuestos']" t-as="s" t-esc="s"/>
+                    </ul>
+                </div>
+
+                <!-- Metodología y resultados -->
+                <div class="nobreak">
+                    <h2>Metodología</h2>
+                    <table class="kv">
+                        <tr t-foreach="r['metodo']" t-as="x"><td class="k" style="width:24%;" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                    </table>
+                </div>
+
+                <table style="width:100%;" class="nobreak">
+                    <tr>
+                        <td style="width:52%; vertical-align:top; padding-right:8pt;">
+                            <h2>Referencias de valor (MXN)</h2>
+                            <table class="kv">
+                                <tr t-foreach="r['resultados']" t-as="x"><td class="k" style="width:52%;" t-esc="x[0]"/><td class="v" t-esc="x[1]"/></tr>
+                            </table>
+                        </td>
+                        <td style="width:48%; vertical-align:top; padding-left:8pt;">
+                            <h2>Composición del valor intrínseco (MXN)</h2>
+                            <table class="kv">
+                                <tr t-foreach="r['desglose']" t-as="x"><td class="k" t-esc="x[0]"/><td class="v" t-esc="x[1]"/></tr>
+                                <tr><td class="k"><b>Valor intrínseco</b></td><td class="v"><b t-esc="r['intrinseco']"/></td></tr>
+                            </table>
+                            <div class="small muted" style="margin-top:2pt;" t-esc="r['factores']"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="nobreak">
+                    <h2>Cálculo paso a paso</h2>
+                    <ul class="lista small muted">
+                        <li t-foreach="r['pasos']" t-as="p" t-esc="p"/>
+                    </ul>
+                </div>
+
+                <div class="nobreak">
+                    <h2>Condiciones limitantes y descargo de responsabilidad</h2>
+                    <div class="condiciones" t-out="r['condiciones']"/>
+                </div>
+
+                <div class="nobreak">
+                    <h2>Certificación</h2>
+                    <div class="small">
+                        Declaro que, a mi leal saber y entender: los hechos de este informe son ciertos; los análisis y las
+                        conclusiones son imparciales y solo están limitados por los supuestos y condiciones que aquí se señalan;
+                        el resultado no se fijó de antemano;
+                        <b t-if="r['examen_fisico']">la pieza se examinó físicamente en el taller de NOVADIAM, con el equipo y los resultados descritos en «Pruebas realizadas»;</b>
+                        <b t-else="">la pieza no se examinó físicamente;</b>
+                        el cálculo se hizo con el sistema de avalúo de NOVADIAM, con las tablas vigentes a la fecha efectiva; y
+                        <b>NOVADIAM cobra una comisión sobre el precio de venta de esta pieza</b>, por lo que tiene interés económico
+                        en la operación y este informe no es independiente.
+                    </div>
+                    <table style="width:100%; margin-top:16pt;">
+                        <tr>
+                            <td style="width:50%; vertical-align:bottom;">
+                                <img t-if="r['firma']" t-att-src="image_data_uri(r['firma'])" style="max-height:44pt;"/>
+                                <div class="linea small">
+                                    <b t-esc="r['valuador']"/><br/>
+                                    <span class="muted" t-esc="r['valuador_cargo']"/>
+                                </div>
+                            </td>
+                            <td style="width:50%; text-align:right; vertical-align:bottom;" class="small muted">
+                                <t t-if="r['visor_url']">
+                                    <img t-att-src="'/report/barcode/?barcode_type=QR&amp;width=180&amp;height=180&amp;value=%s' % quote_plus(r['visor_url'])"
+                                         style="width:62pt; height:62pt;"/><br/>
+                                    Escanee el código o el plástico <t t-esc="r['plastico']"/> para ver el certificado<br/>
+                                </t>
+                                Folio <t t-esc="r['folio']"/><br/>
+                                Emitido el <t t-esc="r['fecha']"/> · vigente hasta el <t t-esc="r['vigencia']"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer" style="font-family: Helvetica, Arial, sans-serif; font-size: 7pt; color: #5d6570;">
+            <table style="width:100%; border-top: 0.5pt solid #d9cdb7;">
+                <tr>
+                    <td style="padding-top:3pt;">
+                        <t t-esc="r['marca_web']"/> · Folio <t t-esc="r['folio']"/> · <t t-if="r['examen_fisico']">Avalúo con examen físico, de uso comercial</t><t t-else="">Estimación de uso comercial</t>; no es dictamen pericial ni avalúo para seguro.
+                        Su validez depende de que se conserve completo.
+                    </td>
+                    <td style="padding-top:3pt; text-align:right; white-space:nowrap;">
+                        Página <span class="page"/> de <span class="topage"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="report_nv_avaluo">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="xb_marketplace.report_nv_avaluo_document"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

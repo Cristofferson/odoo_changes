@@ -125,6 +125,17 @@ class WhatsappAccount(models.Model):
         "product.pricelist", string="Cotizar con esta lista de precios",
         help="Perfil tienda. Si se llena, el agente ofrece y cotiza SOLO los productos con precio propio en esta lista "
              "(aunque no estén publicados en el sitio) y con los precios de esta lista. Vacío = catálogo publicado en el sitio.")
+    xb_sa_store_autonomous = fields.Boolean(
+        "Vende solo",
+        help="Perfil tienda. El agente cierra la venta sin pasar la plática: la cotización se puede pagar en línea y, cuando "
+             "el cliente manda su comprobante, confirma el pedido y avisa al equipo para que verifique el depósito.")
+    xb_sa_store_prepayment = fields.Float(
+        "Anticipo para apartar", default=1.0,
+        help="Fracción del total (0.10 = 10 %) con la que se aparta. Se usa cuando el agente vende solo.")
+    xb_sa_store_b2b_category_id = fields.Many2one(
+        "res.partner.category", string="Solo clientes verificados (etiqueta)",
+        help="Perfil tienda solo para negocios. Si se llena, a un cliente sin esta etiqueta el agente no le da precios ni le "
+             "vende: le pide su constancia de situación fiscal y pide aprobación por WhatsApp. Al aprobar, se le pone la etiqueta.")
     xb_sa_appointment_type_id = fields.Many2one(
         "appointment.type", string="Cita para demos",
         help="Cita de la app Citas: de ahí salen los horarios, el encargado y la oportunidad en el CRM.")

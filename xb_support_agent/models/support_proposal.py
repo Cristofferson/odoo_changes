@@ -40,6 +40,7 @@ class XbSupportProposal(models.Model):
     kind = fields.Selection([
         ("fix", "Arreglo en el sistema"),
         ("add_number", "Autorizar un número"),
+        ("b2b", "Verificar cliente (solo negocios)"),
     ], string="Tipo", required=True, default="fix")
     state = fields.Selection([
         ("pending", "Por aprobar"),
@@ -69,6 +70,7 @@ class XbSupportProposal(models.Model):
     service_id = fields.Many2one("xb.support.service", string="Servicio cobrado", readonly=True, copy=False)
     owner_notified_dt = fields.Datetime("Se le pidió al dueño", readonly=True, copy=False)
     reject_reason = fields.Char("Motivo del rechazo")
+    partner_id = fields.Many2one("res.partner", string="Cliente a verificar")
 
     @api.model
     def _get_whatsapp_safe_fields(self):
@@ -100,6 +102,16 @@ class XbSupportProposal(models.Model):
                 rec._xb_decide("done")
                 rec._xb_tell_client(_("Listo, ya quedó autorizado el número de %(name)s para %(system)s.",
                                       name=rec.new_name, system=rec.project_id.name))
+            elif rec.kind == "b2b":
+                categoria = rec.channel_id.wa_account_id.sudo().xb_sa_store_b2b_category_id
+                if not (categoria and rec.partner_id):
+                    raise UserError(_("Falta el cliente o la etiqueta de verificación de la cuenta de WhatsApp."))
+                clientes = rec.partner_id | rec.partner_id.commercial_partner_id
+                clientes.sudo().write({"category_id": [(4, categoria.id)]})
+                rec._xb_decide("done")
+                rec._xb_tell_client(_("¡Listo, %(name)s! Ya quedó verificado tu negocio con %(company)s. Dime qué piedra "
+                                      "buscas y te paso opciones con precio. 💎", name=rec.partner_id.name.split()[0],
+                                      company=rec._xb_where()))
             else:
                 rec._xb_decide("approved")
                 rec._xb_bill()
@@ -140,7 +152,11 @@ class XbSupportProposal(models.Model):
             rec._xb_decide("rejected")
             if rec.service_id.state == "team":
                 rec.service_id.action_cancel()
-            if rec.billable:
+            if rec.kind == "b2b":
+                rec._xb_tell_client(_("Gracias por mandarnos tus datos. Por ahora no pudimos verificar tu negocio como "
+                                      "joyería.%(reason)s Si crees que es un error, cuéntanos por aquí.",
+                                      reason=f" {rec.reject_reason}." if rec.reject_reason else ""))
+            elif rec.billable:
                 rec._xb_tell_client(_("Sobre «%(name)s»: por ahora no lo vamos a hacer.%(reason)s Si quieres, "
                                       "lo platicamos por aquí.", name=rec.name,
                                       reason=f" {rec.reject_reason}." if rec.reject_reason else ""))
@@ -199,12 +215,22 @@ class XbSupportProposal(models.Model):
     def _xb_hour_price(self):
         return self.env["product.product"].sudo().browse(XB_SERVICE_PRODUCT).lst_price or 680.0
 
+    def _xb_where(self):
+        """Dónde aplica: el sistema del cliente o, al verificar un cliente, la empresa de la cuenta de WhatsApp."""
+        self.ensure_one()
+        if self.kind == "b2b":
+            return self.channel_id.wa_account_id.sudo().xb_sa_company_name or self.channel_id.wa_account_id.name
+        return self.project_id.name or _("sin sistema")
+
     def _xb_owner_line(self):
         self.ensure_one()
-        partes = [f"*#{self.id}* · {self.project_id.name or _('sin sistema')}"
+        partes = [f"*#{self.id}* · {self._xb_where()}"
                   f"{' · 🚨 urgente' if self.urgency == 'high' else ''}", self.name]
         if self.kind == "add_number":
             partes.append(_("Dar acceso a %(name)s (%(phone)s).", name=self.new_name, phone=self.new_phone))
+        elif self.kind == "b2b":
+            partes.append(self.problem or "")
+            partes.append(_("Su constancia quedó en su contacto. Si apruebas, ya puede ver precios y comprar."))
         else:
             if self.problem:
                 partes.append(_("Qué pasa: %s") % self.problem[:400])
@@ -350,7 +376,7 @@ class XbSupportProposal(models.Model):
             return
         if self._xb_window_open(canal):
             lineas = [_("Buenos días. Siguen esperando tu decisión (%s):") % len(pendientes)]
-            lineas += [f"• *#{r.id}* · {r.project_id.name or _('sin sistema')} · {r.name}"
+            lineas += [f"• *#{r.id}* · {r._xb_where()} · {r.name}"
                        f"{' 🚨' if r.urgency == 'high' else ''}" for r in pendientes]
             lineas.append(_("Responde *SÍ n* o *NO n*. Para ver el detalle de todas, escribe *ver solicitudes*."))
             canal._xb_sa_send("\n".join(lineas))

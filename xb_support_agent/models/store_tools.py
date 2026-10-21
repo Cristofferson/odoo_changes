@@ -116,7 +116,45 @@ XB_STONE_TOOLS = {
         "origen, certificados y su precio sin IVA y con IVA.",
         {"producto_id": {"type": "integer"}}),
 }
-for _t in XB_STORE_TOOLS + list(XB_STONE_TOOLS.values()):
+# Tienda que vende sola (DIAMANE): el cliente cierra con su comprobante y el equipo solo verifica.
+XB_SALE_TOOLS = {
+    "generar_pedido": _tool(
+        "generar_pedido",
+        "Confirma una cotización y la vuelve PEDIDO (con eso queda apartada la piedra). Con un CLIENTE úsala solo cuando ya te "
+        "mandó en esta plática el COMPROBANTE de su transferencia o depósito: léelo y pasa el monto que se ve en él; el comprobante "
+        "se guarda en el pedido y el equipo verifica el depósito. Si pagó en línea con la liga, el pedido se confirma solo (no la "
+        "uses). Con el EQUIPO, solo cuando lo pida de forma explícita (monto 0).",
+        {"pedido": {"type": "string", "description": "Número de la cotización."},
+         "monto_comprobante": {"type": "number", "description": "Monto pagado que se ve en el comprobante, en pesos; 0 si es el equipo."}}),
+}
+XB_SALE_EXTRA = [
+    _tool("avisar_a_la_tienda",
+          "Avisa al equipo de algo que tiene que hacer, SIN pasarle la plática: tú sigues atendiendo. Para el costo de un envío, "
+          "los datos para una factura, una visita para pagar en efectivo o recoger, o una entrega en persona.",
+          {"asunto": {"type": "string", "enum": ["envio", "factura", "pago_en_oficina", "entrega", "otro"]},
+           "pedido": {"type": "string", "description": "Número del pedido o cotización; vacío si no hay."},
+           "detalle": {"type": "string", "description": "Todo lo que el equipo necesita: dirección y CP, datos fiscales, día y hora, etc."}}),
+]
+# Tienda solo para negocios: antes de ver precios, el cliente manda su constancia y el dueño lo aprueba.
+XB_B2B_TOOLS = [
+    _tool("verificar_joyero",
+          "Pide la aprobación del dueño para que este cliente pueda ver precios y comprar. Úsala cuando ya te mandó en esta "
+          "plática su CONSTANCIA DE SITUACIÓN FISCAL (foto o PDF): léela y pasa sus datos tal cual aparecen. Marca "
+          "«actividad_de_joyeria» solo si alguna de sus actividades económicas es de joyería, orfebrería, relojería, "
+          "piedras preciosas o metales preciosos.",
+          {"razon_social": {"type": "string", "description": "Nombre o razón social como viene en la constancia."},
+           "rfc": {"type": "string"},
+           "actividades": {"type": "string", "description": "Sus actividades económicas como vienen en la constancia."},
+           "codigo_postal": {"type": "string"},
+           "joyeria": {"type": "string", "description": "Nombre comercial de su joyería o taller, como te lo dijo."},
+           "ciudad": {"type": "string"},
+           "actividad_de_joyeria": {"type": "boolean"},
+           "observaciones": {"type": "string", "description": "Algo que no cuadre (constancia vieja, nombre distinto, ilegible…); vacío si nada."}}),
+]
+XB_B2B_PRICE_KEYS = {"precio_sin_iva", "precio_con_iva", "desde_con_iva", "precio_de_la_combinacion_con_iva"}
+XB_B2B_NOTE = ("Todavía NO está verificado como negocio: no le des precios ni cotices. Pídele su Constancia de Situación "
+               "Fiscal (foto o PDF) para verificar su joyería y, cuando la mande, usa verificar_joyero.")
+for _t in XB_STORE_TOOLS + list(XB_STONE_TOOLS.values()) + list(XB_SALE_TOOLS.values()) + XB_SALE_EXTRA + XB_B2B_TOOLS:
     _t.pop("strict", None)
 
 
@@ -150,6 +188,10 @@ class DiscussChannel(models.Model):
         tienda = XB_STORE_TOOLS
         if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
             tienda = [XB_STONE_TOOLS.get(t["name"], t) for t in XB_STORE_TOOLS]
+        if self.wa_account_id.sudo().xb_sa_store_autonomous:
+            tienda = [XB_SALE_TOOLS.get(t["name"], t) for t in tienda] + XB_SALE_EXTRA
+        if self.wa_account_id.sudo().xb_sa_store_b2b_category_id:
+            tienda = tienda + XB_B2B_TOOLS
         herramientas = [t for t in XB_TOOLS if t["name"] in XB_STORE_KEEP] + tienda
         if contactos and self._xb_sa_store_team():
             herramientas += [t for t in XB_TOOLS if t["name"] in XB_STORE_TEAM_KEEP]
@@ -189,6 +231,12 @@ class DiscussChannel(models.Model):
                     f"{p.name} ({XB_STORE_STATES.get(p.state, p.state)}, ${p.amount_total:,.2f})" for p in pedidos) + ".")
         if self.xb_sa_lead_id:
             lineas.append(f"Ya hay un registro en el CRM para esta plática: «{self.xb_sa_lead_id.name}».")
+        if acc.xb_sa_store_b2b_category_id and not equipo:
+            pendiente = self.env["xb.support.proposal"].sudo().search_count([
+                ("kind", "=", "b2b"), ("channel_id", "=", self.id), ("state", "=", "pending")])
+            lineas.append("Este cliente YA ESTÁ VERIFICADO como negocio: puede ver precios y comprar." if not self._xb_sa_store_b2b_pending()
+                          else "Su verificación ya se mandó a aprobar: espera la respuesta; no le des precios todavía." if pendiente
+                          else XB_B2B_NOTE)
         if (self.xb_sa_pause_reason == "handoff" and not self.xb_sa_paused_until and self.xb_sa_hold_dt
                 and self.xb_sa_hold_dt > fields.Datetime.now() - timedelta(hours=48)):
             lineas.append("YA SE AVISÓ a una persona de la tienda sobre esta plática y ella contestará lo pendiente. NO te quedes "
@@ -345,6 +393,8 @@ class DiscussChannel(models.Model):
 
     def _xb_sa_tool_buscar_productos(self, job, entrada):
         if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
+            if self._xb_sa_store_b2b_pending():
+                return dict(self._xb_sa_store_hide_prices(self._xb_sa_store_stones(entrada)), nota=XB_B2B_NOTE)
             return self._xb_sa_store_stones(entrada)
         company = self.wa_account_id.sudo()._xb_sa_company()
         dominio = self._xb_sa_store_product_domain()
@@ -392,6 +442,8 @@ class DiscussChannel(models.Model):
             return {"ok": False, "motivo": "Ese producto no está en el catálogo publicado."}
         if self.wa_account_id.sudo().xb_sa_store_pricelist_id:
             sin, con = self._xb_sa_store_price_ref(t, company)
+            if self._xb_sa_store_b2b_pending():
+                return {"ok": True, "id": t.id, "nombre": t.name, **self._xb_sa_store_gem(t), "nota": XB_B2B_NOTE}
             return {"ok": True, "id": t.id, "nombre": t.name, **self._xb_sa_store_gem(t),
                     "precio_sin_iva": round(sin, 2), "precio_con_iva": round(con, 2),
                     "tiene_video": bool("x_studio_video" in t._fields and t.x_studio_video),
@@ -470,6 +522,8 @@ class DiscussChannel(models.Model):
         return precio or variante.lst_price
 
     def _xb_sa_tool_crear_cotizacion(self, job, entrada):
+        if self._xb_sa_store_b2b_pending():
+            return {"ok": False, "motivo": XB_B2B_NOTE}
         acc = self.wa_account_id.sudo()
         company = acc._xb_sa_company()
         equipo = self._xb_sa_store_team()
@@ -524,11 +578,89 @@ class DiscussChannel(models.Model):
             self._xb_sa_notify(orden, acc.xb_sa_sales_user_ids,
                                f"Cotización {orden.name} creada por el agente para {partner.name}: ${orden.amount_total:,.2f}")
         job.mode = "sales"
-        return {"ok": True, "pedido": orden.name, "total_con_iva": round(orden.amount_total, 2),
-                "liga_cotizacion": self._xb_sa_store_share_url(orden),
-                "lineas": [f"{l.product_uom_qty:g} × {l.product_id.display_name}: ${l.price_total:,.2f}"
-                           for l in orden.order_line],
-                "nota": "Es una cotización (borrador). Mándale el ticket con enviar_ticket y dile que el precio incluye IVA."}
+        res = {"ok": True, "pedido": orden.name, "total_con_iva": round(orden.amount_total, 2),
+               "liga_cotizacion": self._xb_sa_store_share_url(orden),
+               "lineas": [f"{l.product_uom_qty:g} × {l.product_id.display_name}: ${l.price_total:,.2f}"
+                          for l in orden.order_line],
+               "nota": "Es una cotización (borrador). Mándale el ticket con enviar_ticket y dile que el precio incluye IVA."}
+        if acc.xb_sa_store_autonomous:
+            # Se paga en línea con la liga (todo o el anticipo); al pagar, Odoo confirma el pedido solo.
+            orden.write({"require_payment": True, "prepayment_percent": acc.xb_sa_store_prepayment or 1.0})
+            tasa = self._xb_sa_store_usd_rate(company)
+            res.update({"anticipo_para_apartar": round(orden.amount_total * (acc.xb_sa_store_prepayment or 1.0), 2),
+                        "total_en_dolares": round(orden.amount_total / tasa, 2) if tasa else None,
+                        "tipo_de_cambio_hoy": round(tasa, 4) if tasa else None,
+                        "nota": "Es una cotización (borrador): todavía no aparta la piedra. Mándale el ticket con enviar_ticket. "
+                                "Con la liga (o el QR del ticket) puede pagar en línea con tarjeta el total o el anticipo, y con eso "
+                                "su pedido se confirma solo."})
+        return res
+
+    def _xb_sa_store_b2b_pending(self):
+        """Cliente sin verificar de una tienda solo para negocios: no ve precios ni compra."""
+        categoria = self.wa_account_id.sudo().xb_sa_store_b2b_category_id
+        if not categoria or self._xb_sa_store_team():
+            return False
+        partner = self.whatsapp_partner_id.sudo()
+        return not (partner and categoria & (partner.category_id | partner.commercial_partner_id.category_id))
+
+    def _xb_sa_store_hide_prices(self, res):
+        """Quita los precios de una respuesta (cliente sin verificar)."""
+        if isinstance(res, dict):
+            return {k: self._xb_sa_store_hide_prices(v) for k, v in res.items() if k not in XB_B2B_PRICE_KEYS}
+        if isinstance(res, list):
+            return [self._xb_sa_store_hide_prices(v) for v in res]
+        return res
+
+    def _xb_sa_last_inbound_file(self, dias=2):
+        """La última imagen o PDF que mandó el cliente en esta plática."""
+        return self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("message_type", "=", "whatsapp_message"),
+            ("create_date", ">=", fields.Datetime.now() - timedelta(days=dias)), ("attachment_ids", "!=", False),
+        ], order="id desc", limit=10).filtered(
+            lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")).attachment_ids.filtered(
+            lambda a: (a.mimetype or "").startswith("image/") or a.mimetype == "application/pdf")[:1]
+
+    def _xb_sa_tool_verificar_joyero(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        if not self._xb_sa_store_b2b_pending():
+            return {"ok": True, "nota": "Ya está verificado: puedes darle precios."}
+        Propuesta = self.env["xb.support.proposal"].sudo()
+        if Propuesta.search_count([("kind", "=", "b2b"), ("channel_id", "=", self.id), ("state", "=", "pending")]):
+            return {"ok": True, "nota": "Su verificación ya está en espera de aprobación; dile que en cuanto quede le avisas."}
+        constancia = self._xb_sa_last_inbound_file(dias=7)
+        if not constancia:
+            return {"ok": False, "motivo": "No veo su constancia en la plática: pídele que la mande en foto o PDF."}
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No tengo su contacto: pídele su nombre y vuelve a intentar."}
+        copia = constancia.copy({"res_model": "res.partner", "res_id": partner.id,
+                                 "name": f"Constancia fiscal {entrada.get('rfc') or ''} {constancia.name or ''}".strip()})
+        resumen = "\n".join(filter(None, [
+            f"{partner.name} ({self.whatsapp_number})",
+            f"Joyería: {entrada.get('joyeria') or '—'} · {entrada.get('ciudad') or '—'}",
+            f"Constancia: {entrada.get('razon_social') or '—'} · RFC {entrada.get('rfc') or '—'} · CP {entrada.get('codigo_postal') or '—'}",
+            f"Actividades: {entrada.get('actividades') or '—'}",
+            "✅ Actividad de joyería" if entrada.get("actividad_de_joyeria") else "⚠️ La actividad NO parece de joyería",
+            f"Ojo: {entrada['observaciones']}" if (entrada.get("observaciones") or "").strip() else ""]))
+        partner.message_post(body=Markup(tools.plaintext2html("Constancia de situación fiscal recibida por WhatsApp.\n" + resumen)),
+                             attachment_ids=copia.ids, message_type="comment", subtype_xmlid="mail.mt_note")
+        Propuesta.create({
+            "name": f"Verificar joyería {entrada.get('joyeria') or partner.name}"[:120],
+            "kind": "b2b", "channel_id": self.id, "partner_id": partner.id,
+            "whatsapp_number": self.whatsapp_number, "problem": resumen,
+        })
+        job.mode = "sales"
+        return {"ok": True, "nota": "Se mandó a aprobar. Dile que ya recibimos su constancia, que estamos verificando su negocio "
+                                    "y que en cuanto quede le avisamos por aquí para pasarle precios. Mientras, puedes seguir "
+                                    "platicando qué busca, sin precios."}
+
+    def _xb_sa_store_usd_rate(self, company):
+        """Pesos por dólar de hoy (de la compañía que lleva las tasas de USD)."""
+        usd, mxn = self.env.ref("base.USD"), self.env.ref("base.MXN")
+        tasa = self.env["res.currency.rate"].sudo().search([("currency_id", "=", usd.id)], order="name desc", limit=1)
+        if not tasa:
+            return 0.0
+        return usd._convert(1.0, mxn, tasa.company_id or company, fields.Date.context_today(self), round=False)
 
     def _xb_sa_tool_enviar_foto_producto(self, job, entrada):
         company = self.wa_account_id.sudo()._xb_sa_company()
@@ -611,6 +743,8 @@ class DiscussChannel(models.Model):
         return salida
 
     def _xb_sa_tool_enviar_ticket(self, job, entrada):
+        if self._xb_sa_store_b2b_pending():
+            return {"ok": False, "motivo": XB_B2B_NOTE}
         equipo = self._xb_sa_store_team()
         orden = self._xb_sa_store_order(entrada.get("pedido"), equipo)
         if not orden:
@@ -656,6 +790,8 @@ class DiscussChannel(models.Model):
                     "tiene que activarla: avisa con pasar_a_humano. No des datos del dueño de la pieza."}
 
     def _xb_sa_tool_generar_pedido(self, job, entrada):
+        if self._xb_sa_store_b2b_pending():
+            return {"ok": False, "motivo": XB_B2B_NOTE}
         acc = self.wa_account_id.sudo()
         equipo = self._xb_sa_store_team()
         orden = self._xb_sa_store_order(entrada.get("pedido"), equipo)
@@ -665,6 +801,8 @@ class DiscussChannel(models.Model):
             return {"ok": True, "nota": f"{orden.name} ya es un pedido confirmado."}
         if orden.state == "cancel":
             return {"ok": False, "motivo": f"{orden.name} está cancelada."}
+        if not equipo and acc.xb_sa_store_autonomous:
+            return self._xb_sa_store_confirm_paid(job, orden, entrada.get("monto_comprobante"))
         if not equipo:
             self._xb_sa_notify(orden, acc.xb_sa_sales_user_ids | acc.xb_sa_support_user_ids,
                                f"El cliente pide confirmar el pedido {orden.name} (${orden.amount_total:,.2f}): revísalo y confírmalo.",
@@ -677,3 +815,41 @@ class DiscussChannel(models.Model):
         orden.message_post(body=Markup("Pedido confirmado por el agente de WhatsApp a petición de %s.") % equipo.name,
                            message_type="comment", subtype_xmlid="mail.mt_note")
         return {"ok": True, "confirmado": True, "nota": f"{orden.name} confirmado como pedido (${orden.amount_total:,.2f} con IVA)."}
+
+    def _xb_sa_store_confirm_paid(self, job, orden, monto):
+        """Cliente de una tienda que vende sola: con su comprobante se confirma el pedido y el equipo verifica el depósito."""
+        acc = self.wa_account_id.sudo()
+        monto = float(monto or 0)
+        minimo = round(orden.amount_total * (acc.xb_sa_store_prepayment or 1.0), 2)
+        comprobante = self._xb_sa_last_inbound_file()
+        if not comprobante or monto <= 0:
+            return {"ok": False, "motivo": "Para apartar necesito el comprobante de su pago (foto o PDF) aquí en la plática, "
+                                           "o que pague en línea con la liga de su cotización."}
+        if monto < minimo - 1:
+            return {"ok": False, "motivo": f"El comprobante es por ${monto:,.2f} y para apartar se necesitan al menos "
+                                           f"${minimo:,.2f}. Pregúntale si le falta algo por depositar."}
+        orden.action_confirm()
+        copia = comprobante.copy({"res_model": "sale.order", "res_id": orden.id})
+        orden.message_post(body=Markup("Pedido confirmado por el agente de WhatsApp con el comprobante del cliente por "
+                                       "<b>$%s</b>. Falta verificar el depósito.") % f"{monto:,.2f}",
+                           attachment_ids=copia.ids, message_type="comment", subtype_xmlid="mail.mt_note")
+        self._xb_sa_notify(orden, acc.xb_sa_sales_user_ids or acc.xb_sa_support_user_ids,
+                           f"Pedido {orden.name} de {orden.partner_id.name} confirmado con su comprobante por ${monto:,.2f} "
+                           f"(total ${orden.amount_total:,.2f}): verifica que el depósito sí llegó.", bandeja=True)
+        job.mode = "sales"
+        saldo = max(orden.amount_total - monto, 0)
+        return {"ok": True, "confirmado": True, "pedido": orden.name, "pagado_segun_comprobante": monto,
+                "saldo_por_liquidar": round(saldo, 2),
+                "nota": "Ya es pedido y la piedra quedó apartada. Dile que el equipo verifica el depósito y, si algo no cuadra, "
+                        "le escribimos. " + ("Si falta saldo, se liquida antes de la entrega." if saldo else "")}
+
+    def _xb_sa_tool_avisar_a_la_tienda(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        asuntos = {"envio": "Cotizar envío", "factura": "Factura", "pago_en_oficina": "Visita a la oficina",
+                   "entrega": "Entrega en persona", "otro": "Aviso"}
+        orden = self._xb_sa_store_order(entrada.get("pedido"), self._xb_sa_store_team()) if entrada.get("pedido") else None
+        partner = self.whatsapp_partner_id.sudo()
+        texto = (f"{asuntos.get(entrada.get('asunto'), 'Aviso')} · {partner.name or self.whatsapp_number} "
+                 f"({self.whatsapp_number}): {entrada.get('detalle') or ''}")
+        self._xb_sa_notify(orden or self.xb_sa_lead_id.sudo() or job, acc.xb_sa_sales_user_ids or acc.xb_sa_support_user_ids, texto, bandeja=True)
+        return {"ok": True, "nota": "Ya le llegó el aviso al equipo. Tú sigues atendiendo; no digas que pasaste la plática."}

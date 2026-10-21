@@ -78,8 +78,8 @@ XB_STORE_TOOLS = [
           {"producto_id": {"type": "integer"},
            "pie": {"type": "string", "description": "Una línea con el nombre y el precio «desde»; vacío = solo el nombre."}}),
     _tool("ver_pedidos",
-          "Pedidos y cotizaciones. A un cliente le muestra los SUYOS (estado, total, saldo pendiente, fecha de entrega, "
-          "si ya está listo). El equipo puede buscar por número (S00123), nombre o celular de cualquiera.",
+          "Pedidos y cotizaciones. A un cliente le muestra los SUYOS (estado, total, saldo pendiente, si ya está listo). "
+          "Al equipo además le da la fecha de entrega. El equipo puede buscar por número (S00123), nombre o celular de cualquiera.",
           {"buscar": {"type": "string", "description": "Solo equipo: número, nombre o celular; vacío = los de quien escribe."}}),
     _tool("enviar_ticket",
           "Manda por WhatsApp el TICKET (imagen) de una cotización o pedido, con su QR para revisarlo o pagarlo en línea. "
@@ -329,7 +329,7 @@ class DiscussChannel(models.Model):
                 "dias_de_fabricacion": int(t.sale_delay or 0),
                 "nota": "Si trae «precio_de_la_combinacion_con_iva», dáselo de inmediato como el precio de esa pieza con IVA; el nombre "
                         "completo solo hace falta para formalizar la cotización. Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. "
-                        "TIEMPO DE ENTREGA: si preguntan, usa «dias_de_fabricacion» de ESTE modelo: di que tarda unos N días en fabricarse "
+                        "TIEMPO DE ENTREGA (solo ANTES de comprar; con un pedido ya confirmado no des fechas ni plazos): si preguntan, usa «dias_de_fabricacion» de ESTE modelo: di que tarda unos N días en fabricarse "
                         "contados desde que confirma y paga su pedido, da la fecha probable (hoy + N días) y aclara que la tienda "
                         "confirma la fecha exacta al levantar el pedido. Si «dias_de_fabricacion» es 0, no des plazo: di que la tienda se la confirma."}
 
@@ -494,15 +494,17 @@ class DiscussChannel(models.Model):
                 "fecha": p.date_order.strftime("%d/%m/%Y") if p.date_order else "",
                 "total": round(p.amount_total, 2),
                 "saldo_pendiente": round(getattr(p, "amount_unpaid", 0.0) or 0.0, 2) if p.state == "sale" else None,
-                "entrega_prometida": entrega,
                 "listo_para_recoger": bool(p.xb_ready_notified_date) if "xb_ready_notified_date" in p._fields else None,
                 "renglones": self._xb_sa_store_order_lines(p)})
+            if equipo:
+                salida[-1]["entrega_prometida"] = entrega
         return {"ok": True, "pedidos": salida,
                 "nota": "PRECIOS: cada renglón ya trae su precio con IVA y «total» es la suma de todos. Si la cotización trae varias "
                         "opciones (p. ej. zirconia y diamante), el total las suma juntas: di cuánto sale cada opción sumando sus "
-                        "renglones y aclara que se escoge solo una. FECHAS: la única fecha de entrega que puedes decir es «entrega_prometida». Si dice «sin fecha», NO "
-                        "calcules, estimes ni sugieras fechas o plazos (ni «aprox.», ni «unos días», ni «la próxima semana»): di que "
-                        "su pieza está en el taller y que la tienda le confirma la fecha por aquí, y avisa con pasar_a_humano. "
+                        "renglones y aclara que se escoge solo una. FECHAS: a un cliente con pedido confirmado NUNCA le des fecha de entrega ni "
+                        "plazos (ni «aprox.», ni «unos días», ni «la próxima semana», ni contando los días de fabricación del modelo): "
+                        "di que su pieza está en el taller y que la tienda le avisa por aquí en cuanto esté lista. Si pide una fecha o "
+                        "la necesita para un día en especial, avisa con pasar_a_humano para que la tienda se la confirme. "
                         "Tampoco digas «no tiene fecha asignada» ni «no está registrada en el sistema» (suena a que nadie lo está "
                         "haciendo). Si «listo_para_recoger» es false, di que «todavía está en el taller», no que «no aparece»."}
 

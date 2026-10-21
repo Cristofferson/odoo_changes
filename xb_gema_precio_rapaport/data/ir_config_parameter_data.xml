@@ -8,4 +8,16 @@
         <field name="key">xb_gema_precio_rapaport.factor_lab</field>
         <field name="value">3.88</field>
     </record>
+    <record id="param_diamane_pricelist" model="ir.config_parameter">
+        <field name="key">xb_gema_precio_rapaport.diamane_pricelist_id</field>
+        <field name="value">3</field>
+    </record>
+    <record id="param_diamane_factor_lab" model="ir.config_parameter">
+        <field name="key">xb_gema_precio_rapaport.diamane_factor_lab</field>
+        <field name="value">1.48</field>
+    </record>
+    <record id="param_diamane_escalones" model="ir.config_parameter">
+        <field name="key">xb_gema_precio_rapaport.diamane_escalones</field>
+        <field name="value">0.099:20,0.50:18,1.00:15,1.50:13,1.999:10,999:5</field>
+    </record>
 </odoo>

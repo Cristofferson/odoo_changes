@@ -47,7 +47,7 @@ D.write({
     "xb_sa_appointment_type_id": cita.id, "xb_sa_video_appointment_type_id": False,
     "xb_sa_store_pricelist_id": lista.id, "xb_sa_store_autonomous": True, "xb_sa_store_prepayment": 0.10, "xb_sa_pause_hours": 3,
     "xb_sa_hold_message": "Gracias por escribir a DIAMANE 💎. Ya le avisé a una persona del equipo y te contestará lo antes posible.",
-    "xb_sa_only_numbers": False, "xb_sa_shadow": True, "xb_sa_enabled": True,
+    "xb_sa_only_numbers": False, "xb_sa_shadow": False, "xb_sa_enabled": True,
 })
 print("OK agente DIAMANE:", D.xb_sa_profile, "| encendido:", D.xb_sa_enabled, "| ensayo:", D.xb_sa_shadow,
       "| llave:", "sí" if D.xb_sa_api_key else "NO", "| cita:", cita.id, cita.name,

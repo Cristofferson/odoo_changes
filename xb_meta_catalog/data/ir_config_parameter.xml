@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="param_xb_meta_catalog_website" model="ir.config_parameter">
+            <field name="key">xb_meta_catalog.website_id</field>
+            <field name="value">1</field>
+        </record>
+        <record id="param_xb_meta_catalog_min_price" model="ir.config_parameter">
+            <field name="key">xb_meta_catalog.min_price</field>
+            <field name="value">1</field>
+        </record>
+        <record id="param_xb_meta_catalog_brand" model="ir.config_parameter">
+            <field name="key">xb_meta_catalog.brand</field>
+            <field name="value">Anello</field>
+        </record>
+    </data>
+</odoo>

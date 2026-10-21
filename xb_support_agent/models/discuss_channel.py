@@ -856,6 +856,7 @@ class DiscussChannel(models.Model):
             herramientas = (XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
                             + (XB_TEAM_TOOLS if self._xb_sa_team_user() else []))
         for _ronda in range(XB_MAX_TOOL_ROUNDS):
+            self._xb_sa_typing()
             kwargs = dict(
                 model=acc.xb_sa_model,
                 max_tokens=16000,
@@ -1019,6 +1020,33 @@ class DiscussChannel(models.Model):
     # ------------------------------------------------------------------
     # Salida
     # ------------------------------------------------------------------
+    def _xb_sa_typing(self):
+        """Muestra «escribiendo…» al cliente mientras el agente piensa.
+
+        WhatsApp lo quita al llegar la respuesta o a los 25 s, así que se repite en
+        cada ronda. También marca su último mensaje como leído (palomitas azules).
+        Si falla, no pasa nada: es solo cortesía.
+        """
+        self.ensure_one()
+        acc = self.wa_account_id.sudo()
+        if acc.xb_sa_shadow:
+            return
+        ultimo = self.env["whatsapp.message"].sudo().search([
+            ("mail_message_id.model", "=", "discuss.channel"), ("mail_message_id.res_id", "=", self.id),
+            ("message_type", "=", "inbound"), ("msg_uid", "!=", False)], order="id desc", limit=1)
+        if not ultimo:
+            return
+        try:
+            from odoo.addons.whatsapp.tools.whatsapp_api import WhatsAppApi
+            api = WhatsAppApi(acc)
+            api._WhatsAppApi__api_requests(
+                "POST", f"/{api.phone_uid}/messages", auth_type="bearer",
+                headers={"Content-Type": "application/json"},
+                data=json.dumps({"messaging_product": "whatsapp", "status": "read",
+                                 "message_id": ultimo.msg_uid, "typing_indicator": {"type": "text"}}))
+        except Exception as e:  # noqa: BLE001
+            _logger.info("No se pudo mostrar «escribiendo…» en el canal %s: %s", self.id, e)
+
     def _xb_sa_send(self, texto):
         """Mensaje libre dentro de la ventana de 24 h (sin plantilla, sin costo)."""
         self.ensure_one()

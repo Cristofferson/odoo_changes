@@ -326,8 +326,12 @@ class DiscussChannel(models.Model):
         return {"ok": True, **combinacion, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
                 "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
+                "dias_de_fabricacion": int(t.sale_delay or 0),
                 "nota": "Si trae «precio_de_la_combinacion_con_iva», dáselo de inmediato como el precio de esa pieza con IVA; el nombre "
-                        "completo solo hace falta para formalizar la cotización. Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. No des tiempos de fabricación ni de entrega (ni aproximados): si preguntan, di que la tienda confirma la fecha de entrega al levantar el pedido."}
+                        "completo solo hace falta para formalizar la cotización. Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. "
+                        "TIEMPO DE ENTREGA: si preguntan, usa «dias_de_fabricacion» de ESTE modelo: di que tarda unos N días en fabricarse "
+                        "contados desde que confirma y paga su pedido, da la fecha probable (hoy + N días) y aclara que la tienda "
+                        "confirma la fecha exacta al levantar el pedido. Si «dias_de_fabricacion» es 0, no des plazo: di que la tienda se la confirma."}
 
     def _xb_sa_store_variant(self, tmpl, opciones):
         """Variante de la plantilla con las opciones dadas. (variante, error)."""
@@ -575,7 +579,7 @@ class DiscussChannel(models.Model):
             job.mode = "sales"
             return {"ok": True, "confirmado": False,
                     "nota": "El pedido lo confirma la tienda. Ya se le avisó a una persona del equipo; dile al cliente que "
-                            "le confirmarán su pedido y los detalles del anticipo. No digas que ya quedó confirmado."}
+                            "le confirmarán su pedido y los datos para pagarlo. No digas que ya quedó confirmado."}
         orden.sudo().action_confirm()
         orden.message_post(body=Markup("Pedido confirmado por el agente de WhatsApp a petición de %s.") % equipo.name,
                            message_type="comment", subtype_xmlid="mail.mt_note")

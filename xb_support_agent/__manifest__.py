@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Agente IA de soporte y ventas por WhatsApp",
-    "version": "19.0.1.18.0",
+    "version": "19.0.1.19.0",
     "summary": "Un agente de IA (Claude) atiende el WhatsApp: soporte revisando el sistema del cliente, ventas y prospectos",
     "description": """
 Agente de IA para un número de WhatsApp de Odoo:

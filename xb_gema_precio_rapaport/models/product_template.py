@@ -34,9 +34,10 @@ PARAM_DIAMANE_ESCALONES = "xb_gema_precio_rapaport.diamane_escalones"
 # «hasta N quilates: X % menos que Rapaport»; lo que pase del último tope lleva el último %.
 ESCALONES_DIAMANE = "0.099:20,0.50:18,1.00:15,1.50:13,1.999:10,999:5"
 ORIGEN_LAB = "Sintético (laboratorio)"
-# Acentos naturales (sin serie): su costo capturado sale arriba de Rapaport −20 %, así que no
-# se ponen en la lista hasta revisar ese costo (21-oct-2026). "1" los incluye.
+# Acentos naturales (sin serie): su costo × este factor (21-oct-2026: costo + 20 %). Su costo
+# capturado sale arriba de Rapaport, así que no se cotizan con Rapaport.
 PARAM_DIAMANE_ACENTOS_NAT = "xb_gema_precio_rapaport.diamane_acentos_nat"
+PARAM_DIAMANE_FACTOR_ACENTO_NAT = "xb_gema_precio_rapaport.diamane_factor_acento_nat"
 QUILATES_NOMBRE = re.compile(r"(\d+(?:\.\d+)?)\s*(?:Qts?|ct)\b", re.I)
 
 
@@ -166,8 +167,15 @@ class ProductTemplate(models.Model):
         if self._xb_es_lab():
             costo = float(icp.get_param(PARAM_USD_QUILATE, "180")) * quilates * tasa
             return round(costo * float(icp.get_param(PARAM_DIAMANE_FACTOR_LAB, "1.48")), 2)
-        if self.tracking != "serial" and icp.get_param(PARAM_DIAMANE_ACENTOS_NAT, "0") != "1":
-            return None
+        if self.tracking != "serial":
+            if icp.get_param(PARAM_DIAMANE_ACENTOS_NAT, "0") != "1":
+                return None
+            # El costo vive en la compañía de la pieza o en la de la tienda (Anello).
+            compania = self.company_id or self.env.ref("website.default_website").company_id
+            costo = self.with_company(compania).standard_price
+            if not costo:
+                return None
+            return round(costo * float(icp.get_param(PARAM_DIAMANE_FACTOR_ACENTO_NAT, "1.20")), 2)
         rapaport = self.x_studio_precio_rapnet_st if "x_studio_precio_rapnet_st" in self._fields else 0
         if not rapaport or rapaport <= 0:
             return None

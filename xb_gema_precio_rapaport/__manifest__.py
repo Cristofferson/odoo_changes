@@ -37,7 +37,7 @@ of sale and in Sales: they are kept unpublished and out of the kiosk.
     "website": "https://www.xubax.com",
     "support": "soporte@xubax.com",
     "category": "Sales/Sales",
-    "version": "19.0.1.3.0",
+    "version": "19.0.1.3.1",
     "license": "LGPL-3",
     "depends": ["rapaport_pricing", "website_sale", "pos_self_order"],
     "data": [

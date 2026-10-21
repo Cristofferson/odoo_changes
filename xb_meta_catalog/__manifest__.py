@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Anello — Catálogo para Meta / WhatsApp",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.1.0",
     "summary": "Feed de productos a nivel MODELO para el catálogo de "
                "WhatsApp / Commerce Manager.",
     "description": """

@@ -20,10 +20,16 @@ class ProductTemplate(models.Model):
     def _xb_meta_catalog_domain(self):
         website_id = int(self._xb_meta_param("website_id", 1) or 1)
         website = self.env["website"].sudo().browse(website_id)
-        return [
+        excluir = [c.strip() for c in (self._xb_meta_param(
+            "exclude_categories", "Reparación,Servicio") or "").split(",") if c.strip()]
+        dominio = [
             ("is_published", "=", True),
             ("website_id", "in", (False, website.id)),
         ]
+        for nombre in excluir:
+            # Reparaciones y servicios no son piezas que se puedan pedir desde el carrito.
+            dominio.append(("categ_id.complete_name", "not ilike", nombre))
+        return dominio
 
     def _xb_meta_image_ok(self, min_px):
         """True if the picture is big enough for Meta commerce.
@@ -100,12 +106,63 @@ class ProductTemplate(models.Model):
                 out["foto_chica"].append((p.id, p.name))
         return out
 
+    # Categoría interna → colección del catálogo de WhatsApp (la primera que coincida).
+    XB_META_COLLECTIONS = [
+        ("Anillo / Argolla", "Argollas de matrimonio"),
+        ("Anillo", "Anillos de compromiso"),
+        ("Arete", "Aretes"),
+        ("Gema", "Diamantes y gemas"),
+        ("Cadena", "Cadenas"),
+    ]
+
+    def _xb_meta_collection(self):
+        categoria = self.categ_id.complete_name or ""
+        for prefijo, coleccion in self.XB_META_COLLECTIONS:
+            if categoria.startswith(prefijo):
+                return coleccion
+        return (categoria.split(" / ")[0] or "Otros").strip()
+
+    def _xb_meta_options_text(self):
+        """«Metal: … · Medida: 3.0 a 8.0 · Piedra: …» con las opciones reales de la ficha.
+
+        Una entrada por modelo (no por combinación): el cliente elige en el chat.
+        """
+        partes = []
+        for linea in self.with_context(lang="es_MX").attribute_line_ids:
+            valores = [v.name for v in linea.value_ids]
+            if not valores:
+                continue
+            nombre = linea.attribute_id.name
+            if nombre == "Frase a grabar":
+                partes.append("Grabado de frase disponible")
+                continue
+            numeros = []
+            for v in valores:
+                try:
+                    numeros.append(float(v.replace(",", ".")))
+                except ValueError:
+                    pass
+            if len(numeros) >= 3:
+                texto = "%g a %g" % (min(numeros), max(numeros))
+                if len(numeros) < len(valores):
+                    texto += " (y otras)"
+            else:
+                texto = ", ".join(valores)
+            partes.append("%s: %s" % (nombre, texto))
+        return " · ".join(partes)
+
     def _xb_meta_item_vals(self, base_url, brand):
         """One GMC item per model."""
         self.ensure_one()
         raw_desc = self.description_sale or self.website_meta_description or ""
         desc = re.sub(r"<[^>]+>", " ", raw_desc)
         desc = re.sub(r"\s+", " ", desc).strip() or self.name
+        opciones = self._xb_meta_options_text()
+        if opciones:
+            desc = "%s\n\n%s" % (desc, opciones)
+            if any(len(l.value_ids) > 1 for l in self.attribute_line_ids):
+                desc += "\n\nPrecio desde. El precio final depende de las opciones que elijas; te lo cotizamos por WhatsApp."
+        coleccion = self._xb_meta_collection()
         url = self.website_url or "/shop"
         return {
             "id": str(self.id),
@@ -121,6 +178,9 @@ class ProductTemplate(models.Model):
             "price": "%.2f %s" % (
                 self.list_price, self.currency_id.name or "MXN"),
             "brand": brand,
+            # Para armar las colecciones (conjuntos) en Commerce Manager con un filtro.
+            "product_type": coleccion,
+            "custom_label_0": coleccion,
         }
 
     @api.model

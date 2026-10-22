@@ -167,7 +167,7 @@ class ProductTemplate(models.Model):
         if ancho and ancho_ref:
             mm, mm_ref = self._xb_numero(ancho.name), self._xb_numero(ancho_ref.name)
             if mm and mm_ref:
-                factor *= mm / mm_ref
+                factor *= self._xb_factor_ancho(mm, mm_ref)
 
         medida = self._xb_valor_de(ptavs, 'Medida')
         medida_ref = ref.get('Medida')
@@ -186,6 +186,11 @@ class ProductTemplate(models.Model):
 
         peso = peso_ref * factor
         return peso, peso * (metal.x_ley or 0), metal
+
+    def _xb_factor_ancho(self, mm, mm_ref):
+        """Cuánto metal más lleva el ancho `mm` que el de referencia. De entrada,
+        en proporción al ancho; un módulo puede sumar el grueso (ver argollas)."""
+        return mm / mm_ref
 
     def _xb_cotizacion(self, metal):
         """Pesos por gramo de metal puro, de la divisa que le corresponda."""

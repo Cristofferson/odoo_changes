@@ -28,7 +28,7 @@ venta y los reportes lo leen sin cambio alguno.
 Requiere que los valores del atributo Metal tengan capturadas su **ley** y su
 **densidad**, y que la plantilla tenga el peso de la pieza de referencia.
 """,
-    'version': '19.0.1.2.1',
+    'version': '19.0.1.3.0',
     'category': 'Sales/Sales',
     'author': 'XUBAX',
     'license': 'LGPL-3',

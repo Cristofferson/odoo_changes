@@ -13,7 +13,7 @@
     """,
     'author': 'XUBAX',
     'category': 'Point of Sale',
-    'depends': ['point_of_sale'],
+    'depends': ['point_of_sale', 'xb_sale_order_from_pos'],
     'data': [],
     'assets': {
         'point_of_sale._assets_pos': [

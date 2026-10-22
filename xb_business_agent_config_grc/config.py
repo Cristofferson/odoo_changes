@@ -19,13 +19,14 @@ vals = {
     "xb_ba_user_ids": [(6, 0, jorge.ids)], "xb_ba_team_id": env.ref("sales_team.team_sales_department").id,
     "xb_ba_model": "claude-sonnet-5-5", "xb_ba_effort": "medium", "xb_ba_pause_hours": 12,
     "xb_ba_hold_message": "Gracias por escribir a GR Consteladores Familiares. Ya le avisé a Gicela y Raúl y le responderán en cuanto puedan.",
-    "xb_ba_shadow": True, "xb_ba_enabled": True,
+    # Prueba: contesta de verdad solo al celular de Raúl; los demás clientes no reciben nada.
+    "xb_ba_shadow": False, "xb_ba_only_numbers": "+524432667677", "xb_ba_enabled": True,
 }
 if os.environ.get("XB_ANTHROPIC"):
     vals["xb_ba_api_key"] = os.environ["XB_ANTHROPIC"]
 if os.environ.get("XB_OPENAI"):
     vals["xb_ba_openai_key"] = os.environ["XB_OPENAI"]
 acc.write(vals)
-print("OK agente:", acc.id, acc.xb_ba_company_name, "| encendido:", acc.xb_ba_enabled, "| ensayo:", acc.xb_ba_shadow,
+print("OK agente:", acc.id, acc.xb_ba_company_name, "| encendido:", acc.xb_ba_enabled, "| ensayo:", acc.xb_ba_shadow, "| solo a:", acc.xb_ba_only_numbers,
       "| llave:", "sí" if acc.xb_ba_api_key else "NO", "| voz:", "sí" if acc.xb_ba_openai_key else "NO",
       "| conocimientos:", Kn.search_count([]), "| citas:", acc.xb_ba_appointment_type_ids.mapped("name"), "| atiende:", acc.xb_ba_user_ids.mapped("name"))

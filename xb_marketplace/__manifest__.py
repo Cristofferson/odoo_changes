@@ -17,7 +17,7 @@ Fases siguientes: escrow contable, checkout con personalizaciones,
 mensajería enmascarada y certificado digital público.
 """,
     'category': 'Website/eCommerce',
-    'version': '19.0.2.2.0',
+    'version': '19.0.2.3.0',
     'author': 'XUBAX',
     'license': 'OPL-1',
     'price': 299.00,

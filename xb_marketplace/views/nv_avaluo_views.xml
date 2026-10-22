@@ -233,6 +233,40 @@
                         </group>
                     </group>
                     <div invisible="nv_av_tipo != 'fisico'">
+                        <div class="o_horizontal_separator mt-2 mb-3 text-uppercase fw-bolder small">Fotos para leer</div>
+                        <div class="text-muted small mb-2">Arrastra aquí todas las fotos, en cualquier orden: certificado, factura, quintado, báscula, detector, inscripción láser, calibrador y fotos de la pieza. «Leer fotos» llena los campos; tú confirmas lo leído.</div>
+                        <field name="nv_ia_foto_ids" widget="many2many_binary" class="mb-2"/>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <button name="action_nv_leer_fotos" type="object" icon="fa-magic"
+                                    string="Leer fotos" class="btn-primary"
+                                    invisible="not nv_fotos_por_leer"/>
+                            <span class="text-muted small" invisible="not nv_fotos_por_leer">
+                                <field name="nv_fotos_por_leer" class="d-inline"/> foto(s) por leer
+                            </span>
+                        </div>
+                        <div invisible="not nv_lectura_ids">
+                            <div class="d-flex align-items-center gap-3 mb-1">
+                                <span class="fw-bold">Datos leídos de fotos</span>
+                                <span class="badge text-bg-warning" invisible="not nv_lecturas_pendientes">
+                                    <field name="nv_lecturas_pendientes" class="d-inline"/> por confirmar
+                                </span>
+                                <button name="action_nv_confirmar_lecturas" type="object" icon="fa-check"
+                                        string="Confirmar todo" class="btn-secondary btn-sm"
+                                        invisible="not nv_lecturas_pendientes"/>
+                            </div>
+                            <field name="nv_lectura_ids" nolabel="1" class="mb-4">
+                                <list create="0" delete="0" editable="bottom" decoration-warning="not confirmado"
+                                      decoration-muted="confirmado">
+                                    <field name="name" readonly="1"/>
+                                    <field name="valor" readonly="1"/>
+                                    <field name="nota" readonly="1"/>
+                                    <field name="foto_tipo" readonly="1"/>
+                                    <field name="foto_id" readonly="1" optional="hide"/>
+                                    <field name="clave" column_invisible="1"/>
+                                    <field name="confirmado" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </div>
                         <group>
                             <group string="Recepción y resguardo">
                                 <field name="nv_plastico"/>

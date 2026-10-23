@@ -15,7 +15,10 @@ for i, (kind, nombre, contenido) in enumerate(ns["KB"]):
     k.write(vals) if k else Kn.create(vals)
 vals = {
     "xb_ba_company_name": "GR Consteladores Familiares",
-    "xb_ba_instructions": XB_DEFAULT_INSTRUCTIONS_ES,
+    "xb_ba_instructions": XB_DEFAULT_INSTRUCTIONS_ES + (
+        "\nLARGO DE CADA MENSAJE (regla firme): máximo 300 caracteres, unos 4 renglones en el celular. Una sola idea y, si hace "
+        "falta, UNA pregunta al final. No repitas lo que ya dijiste (precios, dirección, fecha del taller), no agregues lo que no "
+        "pidió y no cierres con relleno. Si hay mucho que decir, da lo esencial y pregunta si quiere el detalle."),
     "xb_ba_user_ids": [(6, 0, jorge.ids)], "xb_ba_team_id": env.ref("sales_team.team_sales_department").id,
     "xb_ba_model": "claude-sonnet-5-5", "xb_ba_effort": "medium", "xb_ba_pause_hours": 12,
     "xb_ba_hold_message": "Gracias por escribir a GR Consteladores Familiares. Ya le avisé a Gicela y Raúl y le responderán en cuanto puedan.",

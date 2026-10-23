@@ -41,6 +41,7 @@ class XbSupportProposal(models.Model):
         ("fix", "Arreglo en el sistema"),
         ("add_number", "Autorizar un número"),
         ("b2b", "Verificar cliente (solo negocios)"),
+        ("quote", "Cotización a la medida"),
     ], string="Tipo", required=True, default="fix")
     state = fields.Selection([
         ("pending", "Por aprobar"),
@@ -71,6 +72,7 @@ class XbSupportProposal(models.Model):
     owner_notified_dt = fields.Datetime("Se le pidió al dueño", readonly=True, copy=False)
     reject_reason = fields.Char("Motivo del rechazo")
     partner_id = fields.Many2one("res.partner", string="Cliente a verificar")
+    sale_order_id = fields.Many2one("sale.order", string="Cotización", ondelete="set null")
 
     @api.model
     def _get_whatsapp_safe_fields(self):
@@ -102,6 +104,8 @@ class XbSupportProposal(models.Model):
                 rec._xb_decide("done")
                 rec._xb_tell_client(_("Listo, ya quedó autorizado el número de %(name)s para %(system)s.",
                                       name=rec.new_name, system=rec.project_id.name))
+            elif rec.kind == "quote":
+                rec._xb_send_quote()
             elif rec.kind == "b2b":
                 categoria = rec.channel_id.wa_account_id.sudo().xb_sa_store_b2b_category_id
                 if not (categoria and rec.partner_id):
@@ -120,6 +124,46 @@ class XbSupportProposal(models.Model):
                 if rec.billable:
                     rec._xb_tell_client(_("Ya quedó autorizado: «%s». Una persona del equipo lo hace en horario "
                                           "de oficina y te confirma por aquí.") % rec.name)
+        return True
+
+    def _xb_send_quote(self):
+        """Cotización a la medida autorizada: se le manda al cliente su ticket con la liga (o la plantilla, fuera de las 24 h)."""
+        self.ensure_one()
+        orden = self.sale_order_id.sudo()
+        if not orden or orden.state == "cancel":
+            raise UserError(_("La cotización de la solicitud #%s ya no existe o está cancelada.") % self.id)
+        if orden.amount_total <= 0:
+            raise UserError(_("La cotización %(order)s sigue sin precio: ponle los renglones con su precio en Odoo y vuelve a "
+                              "contestar *SÍ %(id)s*.", order=orden.name, id=self.id))
+        canal = self.channel_id.sudo()
+        nombre = (orden.partner_id.name or "").split()[0] if orden.partner_id.name else ""
+        liga = canal._xb_sa_store_share_url(orden) if canal else orden.get_base_url() + orden._get_share_url(redirect=True)
+        if canal and self._xb_window_open(canal):
+            canal._xb_sa_tool_enviar_ticket(None, {"pedido": orden.name})
+            canal._xb_sa_send(_(
+                "¡Listo, %(name)s! Ya está tu cotización *%(order)s*: %(what)s. Total: *$%(total)s* con IVA. Aquí la puedes "
+                "revisar y pagar en línea: %(url)s\nSi quieres cambiar algo o tienes dudas, aquí estoy 💍",
+                name=nombre, order=orden.name, what=self.name.split(": ", 1)[-1], total=f"{orden.amount_total:,.2f}", url=liga))
+        elif not self._xb_quote_template(orden, canal):
+            raise UserError(_("No se le pudo mandar al cliente (pasaron 24 h y no hay plantilla de cotización aprobada)."))
+        if orden.state == "draft" and hasattr(orden, "action_quotation_sent"):
+            orden.action_quotation_sent()
+        orden.message_post(body=_("Cotización autorizada por WhatsApp (solicitud #%s) y enviada al cliente.") % self.id,
+                           message_type="comment", subtype_xmlid="mail.mt_note")
+        self._xb_decide("done")
+
+    def _xb_quote_template(self, orden, canal):
+        """Fuera de las 24 h: la plantilla de cotización de la cuenta de la tienda (la misma que usa el equipo)."""
+        acc = canal.wa_account_id if canal else self.env["whatsapp.account"]
+        tmpl = self.env["whatsapp.template"].sudo().search([
+            ("model", "=", "sale.order"), ("wa_account_id", "=", acc.id), ("status", "=", "approved"),
+            ("template_name", "ilike", "cotizacion")], limit=1)
+        if not (tmpl and canal):
+            return False
+        composer = self.env["whatsapp.composer"].sudo().with_context(
+            active_model="sale.order", active_id=orden.id, default_wa_template_id=tmpl.id,
+        ).create({"phone": "+" + canal.whatsapp_number, "wa_template_id": tmpl.id, "res_model": "sale.order"})
+        composer._send_whatsapp_template()
         return True
 
     def _xb_bill(self):
@@ -152,6 +196,11 @@ class XbSupportProposal(models.Model):
             rec._xb_decide("rejected")
             if rec.service_id.state == "team":
                 rec.service_id.action_cancel()
+            if rec.kind == "quote" and rec.sale_order_id:
+                rec.sale_order_id.sudo().message_post(
+                    body=_("No se autorizó mandarla al cliente (solicitud #%(id)s).%(reason)s", id=rec.id,
+                           reason=f" Motivo: {rec.reject_reason}" if rec.reject_reason else ""),
+                    message_type="comment", subtype_xmlid="mail.mt_note")
             if rec.kind == "b2b":
                 rec._xb_tell_client(_("Gracias por mandarnos tus datos. Por ahora no pudimos verificar tu negocio como "
                                       "joyería.%(reason)s Si crees que es un error, cuéntanos por aquí.",
@@ -218,7 +267,7 @@ class XbSupportProposal(models.Model):
     def _xb_where(self):
         """Dónde aplica: el sistema del cliente o, al verificar un cliente, la empresa de la cuenta de WhatsApp."""
         self.ensure_one()
-        if self.kind == "b2b":
+        if self.kind in ("b2b", "quote"):
             return self.channel_id.wa_account_id.sudo().xb_sa_company_name or self.channel_id.wa_account_id.name
         return self.project_id.name or _("sin sistema")
 
@@ -231,6 +280,14 @@ class XbSupportProposal(models.Model):
         elif self.kind == "b2b":
             partes.append(self.problem or "")
             partes.append(_("Su constancia quedó en su contacto. Si apruebas, ya puede ver precios y comprar."))
+        elif self.kind == "quote":
+            orden = self.sale_order_id.sudo()
+            partes.append(self.problem or "")
+            if orden:
+                partes.append(_("Ponle los precios en %(order)s: %(url)s", order=orden.name,
+                                url=f"{orden.get_base_url()}/odoo/sales/{orden.id}"))
+            partes.append(_("Con *SÍ %(id)s* se la mando al cliente con su ticket y su liga para pagar.", id=self.id))
+            return "\n".join(partes)
         else:
             if self.problem:
                 partes.append(_("Qué pasa: %s") % self.problem[:400])
@@ -243,18 +300,39 @@ class XbSupportProposal(models.Model):
         return "\n".join(partes)
 
     def _xb_ask_owner(self):
-        """Le pide al dueño que decida: el detalle si la ventana de 24 h está abierta; si no, la plantilla."""
+        """Le pide a quien decide: el detalle si la ventana de 24 h está abierta; si no, la plantilla.
+        Las cotizaciones a la medida van a quienes las autorizan en la cuenta de la tienda (además del dueño)."""
         pendientes = self.filtered(lambda r: r.state == "pending")
-        canal = self._xb_owner_channel()
-        if not (pendientes and canal):
-            return False
-        if self._xb_window_open(canal):
-            for rec in pendientes:
-                canal._xb_sa_send(rec._xb_owner_line())
-        elif not self._xb_owner_template_ping(canal, pendientes[0]):
-            return False
-        pendientes.write({"owner_notified_dt": fields.Datetime.now()})
-        return True
+        avisado = False
+        for rec in pendientes:
+            for canal in rec._xb_decider_channels():
+                if self._xb_window_open(canal):
+                    canal._xb_sa_send(rec._xb_owner_line())
+                elif not self._xb_owner_template_ping(canal, rec):
+                    continue
+                avisado = True
+        if avisado:
+            pendientes.write({"owner_notified_dt": fields.Datetime.now()})
+        return avisado
+
+    def _xb_decider_channels(self):
+        """Pláticas (en el número del dueño) de quienes deciden esta solicitud."""
+        self.ensure_one()
+        canales = self._xb_owner_channel()
+        acc = self._xb_owner_account()
+        if self.kind == "quote" and acc:
+            for usuario in self.channel_id.wa_account_id.sudo().xb_sa_quote_approver_ids:
+                numero = re.sub(r"\D", "", usuario.partner_id.phone or "")[-10:]
+                if len(numero) == 10 and not any((c.whatsapp_number or "").endswith(numero) for c in canales):
+                    canales |= self.env["discuss.channel"].sudo()._get_whatsapp_channel(
+                        "52" + numero, acc, sender_name=usuario.name, create_if_not_found=True)
+        return canales
+
+    @api.model
+    def _xb_quote_approver_numbers(self):
+        """Celulares (10 dígitos) de quienes autorizan cotizaciones a la medida en alguna tienda."""
+        usuarios = self.env["whatsapp.account"].sudo().search([]).xb_sa_quote_approver_ids
+        return {re.sub(r"\D", "", u.partner_id.phone or "")[-10:] for u in usuarios} - {""}
 
     @api.model
     def _xb_owner_template_ping(self, canal, propuesta):
@@ -270,6 +348,18 @@ class XbSupportProposal(models.Model):
         ).create({"phone": "+" + canal.whatsapp_number, "wa_template_id": tmpl.id, "res_model": self._name})
         composer._send_whatsapp_template()
         return True
+
+    @api.model
+    def _xb_scope(self, canal):
+        """Qué solicitudes puede decidir quien escribe en esta plática: el dueño todas ([]); quien autoriza cotizaciones,
+        solo esas; nadie más (None)."""
+        if self._xb_is_owner_channel(canal):
+            return []
+        acc = self._xb_owner_account()
+        numero = (canal.whatsapp_number or "")[-10:]
+        if acc and canal.wa_account_id == acc and numero in self._xb_quote_approver_numbers():
+            return [("kind", "=", "quote")]
+        return None
 
     @api.model
     def _xb_is_owner_channel(self, canal):
@@ -303,9 +393,10 @@ class XbSupportProposal(models.Model):
         """Respuesta del dueño (desde su WhatsApp o escrita en su plática en Odoo). Devuelve True si era
         una orden (y no va al agente). «SÍ 5» siempre vale; un «Sí» a secas vale si cita el mensaje de la
         solicitud o si solo hay una pendiente; si no, se le pregunta cuál."""
-        if not self._xb_is_owner_channel(canal):
+        alcance = self._xb_scope(canal)
+        if alcance is None:
             return False
-        numero = self._xb_owner_number(self._xb_owner_account())[-10:]
+        numero = (canal.whatsapp_number or "")[-10:]
         texto = (texto or "").strip()
         si, no, lista = XB_OWNER_YES.match(texto), XB_OWNER_NO.match(texto), XB_OWNER_LIST.match(texto)
         rec_id, motivo, aprobar = None, "", None
@@ -324,7 +415,7 @@ class XbSupportProposal(models.Model):
             if citado:
                 rec_id = citado
             else:
-                pendientes = self.sudo().search([("state", "=", "pending")])
+                pendientes = self.sudo().search([("state", "=", "pending")] + alcance)
                 if len(pendientes) != 1:
                     if not pendientes:
                         return False  # un «sí» suelto sin nada pendiente: es plática normal
@@ -337,22 +428,27 @@ class XbSupportProposal(models.Model):
         dueno = self.env["res.users"].sudo().search([("partner_id.phone_sanitized", "like", "%" + numero)], limit=1)
         yo = self.with_user(dueno).sudo() if dueno else self.sudo()
         if lista:
-            pendientes = yo.search([("state", "=", "pending")], order="id")
+            pendientes = yo.search([("state", "=", "pending")] + alcance, order="id")
             if not pendientes:
                 canal._xb_sa_send(_("No hay solicitudes pendientes. 🙌"))
             for rec in pendientes:
                 canal._xb_sa_send(rec._xb_owner_line())
             return True
-        rec = yo.browse(rec_id).exists()
+        rec = yo.search([("id", "=", rec_id)] + alcance, limit=1)
         if not rec:
             canal._xb_sa_send(_("No encontré la solicitud #%s.") % rec_id)
         elif rec.state != "pending":
             canal._xb_sa_send(_("La #%(id)s ya estaba %(state)s.", id=rec.id,
                                 state=dict(rec._fields["state"].selection)[rec.state].lower()))
         elif aprobar:
-            rec.action_approve()
+            try:
+                rec.action_approve()
+            except UserError as error:
+                canal._xb_sa_send(str(error.args[0] if error.args else error))
+                return True
             canal._xb_sa_send(_("👍 #%(id)s aprobada.%(extra)s", id=rec.id,
-                                extra=_(" Quedó como tarea para el equipo.") if rec.state == "approved" else ""))
+                                extra=_(" Quedó como tarea para el equipo.") if rec.state == "approved" else
+                                _(" Ya se la mandé al cliente.") if rec.kind == "quote" else ""))
         else:
             rec.reject_reason = (motivo or "").strip()[:200] or False
             rec.action_reject()

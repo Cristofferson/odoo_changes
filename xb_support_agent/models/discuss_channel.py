@@ -54,6 +54,7 @@ XB_HORLI_TYPES = ("application/pdf", "application/vnd.ms-powerpoint", "image/jpe
                   "application/vnd.openxmlformats-officedocument.presentationml.presentation")
 XB_VISION_SIDE = 1568
 XB_FALLBACK_BETA = "server-side-fallback-2026-07-01"
+XB_USER_PRODUCT = 1859             # [0001027] Sistema INOOVIX (Servicio): cuota mensual por usuario
 XB_TZ = "America/Mexico_City"
 # Nombre con el que el servidor local aparece en el inventario de Despacho:
 # solo esas bases se pueden revisar por dentro.
@@ -237,6 +238,12 @@ XB_TOOLS = [
           "Un cliente actual quiere contratar algo más: registra la oportunidad en el CRM para que un asesor cotice.",
           {"resumen": {"type": "string", "description": "Una línea."},
            "detalle": {"type": "string"}}),
+    _tool("cotizar_usuarios_extra",
+          "Solo el TITULAR (quien ve dinero y autoriza servicios): cuando quiere agregar usuarios a su sistema. Hace la "
+          "cotización formal (cuota mensual por usuario) y devuelve la liga para que la revise y la acepte en línea; al "
+          "aceptarla se suma a su mensualidad. Úsala en cuanto confirme cuántos usuarios quiere: no la mandes a un asesor.",
+          {"cantidad": {"type": "integer", "description": "Cuántos usuarios nuevos."},
+           "para_quien": {"type": "string", "description": "Nombre(s) de quién usará cada usuario; vacío si no lo dijo."}}),
     _tool("ver_horarios_demo",
           "Devuelve horarios libres para la cita/demo (hora de Ciudad de México), sacados de la app de Citas, "
           "y la liga donde el cliente puede escoger otro horario él mismo.",
@@ -295,7 +302,7 @@ for _t in XB_TEAM_TOOLS:
 # (los manejadores leen la entrada con .get, así que toleran campos faltantes).
 # La API también limita la complejidad TOTAL de los esquemas strict («Schema is too complex»): las de citas
 # tampoco van strict desde que llevan «modalidad».
-XB_NON_STRICT = {"marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
+XB_NON_STRICT = {"cotizar_usuarios_extra", "marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
                  "registrar_referido_ideal", "enviar_tarjeta_bni", "ver_horarios_demo", "agendar_demo"}
 for _herramienta in XB_TOOLS:
     if _herramienta["name"] in XB_NON_STRICT:
@@ -527,7 +534,9 @@ class DiscussChannel(models.Model):
             lineas.append(f"Este número está autorizado en {len(contactos)} sistema(s):")
             for c in contactos:
                 rol = dict(c._fields["role"].selection)[c.role]
-                dinero = "sí" if c.can_billing else "no"
+                dinero = ("sí" if c.can_billing else
+                          "no (pero SÍ puedes consultarle y explicarle precios de venta, tarifas y totales de su sistema; "
+                          "solo no ve contabilidad, costos, márgenes ni saldos)")
                 lineas.append(f"- {c.name} ({'INVITADO sin usuario propio: consulta sin dinero, capturas y puede pedir cambios que autoriza el titular' if c.guest else 'usuario ' + (c.remote_login or '')}) · {rol} · sistema «{c.project_id.name}» (base {c.database_name}) · ve temas de dinero y autoriza servicios: {dinero}")
             if proyecto:
                 lineas.append(f"Sistema de esta plática: «{proyecto.name}» (base {proyecto.database_name}).")
@@ -1625,6 +1634,68 @@ class DiscussChannel(models.Model):
         job.mode = "sales"
         self._xb_sa_notify(lead, lead.user_id or acc.xb_sa_sales_user_ids, f"Oportunidad de cliente actual: {lead.name}")
         return {"ok": True, "nota": "Oportunidad registrada; un asesor preparará la cotización."}
+
+    def _xb_sa_tool_cotizar_usuarios_extra(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        _contactos, contacto, proyecto = self._xb_sa_current()
+        if not (contacto and proyecto):
+            return {"ok": False, "motivo": "Primero hay que saber de qué sistema es (seleccionar_sistema)."}
+        if not (contacto.role == "owner" and contacto.can_billing):
+            return {"ok": False, "motivo": "Solo el titular puede contratar usuarios: dile que se lo pida a él o que él nos escriba."}
+        cantidad = max(int(entrada.get("cantidad") or 0), 0)
+        if not cantidad:
+            return {"ok": False, "motivo": "Pregúntale cuántos usuarios quiere agregar."}
+        producto = self.env["product.product"].sudo().browse(XB_USER_PRODUCT).exists()
+        if not producto:
+            return {"ok": False, "motivo": "No encuentro el producto de usuarios; usa registrar_interes_compra."}
+        company = producto.company_id or acc._xb_sa_company()
+        Order = self.env["sale.order"].sudo().with_company(company)
+        sus = proyecto.sudo().despacho_subscription_id if "despacho_subscription_id" in proyecto._fields else Order
+        para = (entrada.get("para_quien") or "").strip()
+        orden = Order
+        if sus and sus.subscription_state == "3_progress":
+            try:
+                orden = sus._create_renew_upsell_order("7_upsell", Markup("Usuarios extra pedidos por WhatsApp (agente)."))
+            except Exception as error:  # noqa: BLE001 - p. ej. suscripción aún sin facturar: se cotiza aparte
+                job._xb_log(f"No se pudo hacer la venta adicional de {sus.name}: {error}")
+                orden = Order
+            if orden:
+                linea = orden.order_line.filtered(lambda l: l.product_id == producto)[:1]
+                (orden.order_line.filtered(lambda l: not l.display_type) - linea).unlink()
+                if linea:
+                    linea.product_uom_qty = cantidad
+                else:
+                    orden.order_line = [(0, 0, {"product_id": producto.id, "product_uom_qty": cantidad})]
+        if not orden:
+            partner = ((sus.partner_id if sus else False) or proyecto.partner_id or contacto.partner_id
+                       or self.whatsapp_partner_id.sudo())
+            if not partner:
+                return {"ok": False, "motivo": "No sé a nombre de quién va la cotización; usa registrar_interes_compra."}
+            plan = sus.plan_id if sus else self.env["sale.subscription.plan"].sudo().search(
+                [("billing_period_unit", "=", "month"), ("billing_period_value", "=", 1)], limit=1)
+            orden = Order.create({"partner_id": partner.id, "company_id": company.id, "plan_id": plan.id or False,
+                                  "user_id": acc.xb_sa_sales_user_ids[:1].id or False, "origin": "Agente de WhatsApp",
+                                  "order_line": [(0, 0, {"product_id": producto.id, "product_uom_qty": cantidad})]})
+        if para:
+            orden.order_line.filtered(lambda l: l.product_id == producto)[:1].name = f"{producto.display_name}\nPara: {para}"
+        orden.message_post(body=Markup("Cotización de %s usuario(s) extra de «%s», hecha por el agente de WhatsApp a "
+                                       "petición de %s.") % (cantidad, proyecto.name, contacto.name),
+                           message_type="comment", subtype_xmlid="mail.mt_note")
+        self._xb_sa_notify(orden, acc.xb_sa_sales_user_ids,
+                           f"{contacto.name} ({proyecto.name}) cotizó {cantidad} usuario(s) extra: {orden.name}, "
+                           f"${orden.amount_total:,.2f} con IVA al mes. El agente ya le mandó la liga.")
+        job.mode = "sales"
+        linea = orden.order_line.filtered(lambda l: l.product_id == producto)[:1]
+        adicional = orden.subscription_state == "7_upsell"
+        return {"ok": True, "cotizacion": orden.name, "usuarios": cantidad,
+                "por_usuario_al_mes_sin_iva": round(linea.price_unit, 2),
+                ("a_pagar_ahora_con_iva" if adicional else "al_mes_con_iva"): round(orden.amount_total, 2),
+                "liga": orden.get_base_url() + orden._get_share_url(redirect=True),
+                "nota": "Mándale la liga: ahí la revisa y la acepta (firma o pago); nosotros damos de alta el usuario. Pídele el "
+                        "nombre y correo de cada persona si no te los dio. "
+                        + ("Ahora solo paga la parte proporcional hasta su siguiente corte; de ahí en adelante se suma a su "
+                           "mensualidad (por_usuario_al_mes_sin_iva más IVA)." if adicional else
+                           "Es una cuota mensual: da el precio por usuario más IVA y el total al mes con IVA.")}
 
     @api.model
     def _xb_sa_attach_label(self, adjunto):

@@ -96,6 +96,22 @@ XB_STORE_TOOLS = [
           "(queda en espera, no se confirma solo).",
           {"pedido": {"type": "string", "description": "Número de la cotización."}}),
 ]
+# Joyería que fabrica (Anello): lo que no está en el catálogo se cotiza a la medida y lo autoriza el equipo.
+XB_CUSTOM_TOOLS = [
+    _tool("cotizacion_a_la_medida",
+          "Para una pieza que NO está en el catálogo (diseño propio, nombre o letras, una imagen religiosa, copiar una foto…). "
+          "Úsala cuando ya tengas TODOS los datos: qué pieza, metal y kilataje, piedras, medidas o largo, texto, para cuándo "
+          "la necesita y si recoge o se le envía, y su nombre completo. Deja la cotización en borrador con esos datos y las "
+          "fotos que mandó, y se la pasa al equipo, que le pone el precio y la autoriza; al autorizarla, al cliente le llega "
+          "sola por aquí. Si pidió varias opciones (p. ej. con zirconia y con diamante), ponlas en «opciones». "
+          "Un modelo del catálogo con otra forma de piedra en ZIRCONIA (oval, pera…) NO es a la medida: cotízalo con "
+          "crear_cotizacion y pon la forma en la nota.",
+          {"pieza": {"type": "string", "description": "Una línea, p. ej. «Collar con el nombre Daniela en oro blanco»."},
+           "detalle": {"type": "string", "description": "Todo lo que pidió, con medidas, texto, fecha y entrega."},
+           "opciones": {"type": "array", "items": {"type": "string"},
+                        "description": "Una por versión a cotizar, p. ej. [\"Oro blanco 10k con zirconias\", \"Oro blanco 14k con diamantes de laboratorio\"]; vacía si es una sola."},
+           "nombre_completo": {"type": "string", "description": "Nombre y apellido reales del cliente."}}),
+]
 # Catálogo por lista de precios (DIAMANE: diamantes sueltos para joyeros). Reemplazan a las de joyería.
 XB_STONE_TOOLS = {
     "buscar_productos": _tool(
@@ -154,7 +170,7 @@ XB_B2B_TOOLS = [
 XB_B2B_PRICE_KEYS = {"precio_sin_iva", "precio_con_iva", "desde_con_iva", "precio_de_la_combinacion_con_iva"}
 XB_B2B_NOTE = ("Todavía NO está verificado como negocio: no le des precios ni cotices. Pídele su Constancia de Situación "
                "Fiscal (foto o PDF) para verificar su joyería y, cuando la mande, usa verificar_joyero.")
-for _t in XB_STORE_TOOLS + list(XB_STONE_TOOLS.values()) + list(XB_SALE_TOOLS.values()) + XB_SALE_EXTRA + XB_B2B_TOOLS:
+for _t in XB_STORE_TOOLS + XB_CUSTOM_TOOLS + list(XB_STONE_TOOLS.values()) + list(XB_SALE_TOOLS.values()) + XB_SALE_EXTRA + XB_B2B_TOOLS:
     _t.pop("strict", None)
 
 
@@ -192,6 +208,8 @@ class DiscussChannel(models.Model):
             tienda = [XB_SALE_TOOLS.get(t["name"], t) for t in tienda] + XB_SALE_EXTRA
         if self.wa_account_id.sudo().xb_sa_store_b2b_category_id:
             tienda = tienda + XB_B2B_TOOLS
+        if self.wa_account_id.sudo().xb_sa_quote_approver_ids:
+            tienda = tienda + XB_CUSTOM_TOOLS
         herramientas = [t for t in XB_TOOLS if t["name"] in XB_STORE_KEEP] + tienda
         if contactos and self._xb_sa_store_team():
             herramientas += [t for t in XB_TOOLS if t["name"] in XB_STORE_TEAM_KEEP]
@@ -231,6 +249,13 @@ class DiscussChannel(models.Model):
                     f"{p.name} ({XB_STORE_STATES.get(p.state, p.state)}, ${p.amount_total:,.2f})" for p in pedidos) + ".")
         if self.xb_sa_lead_id:
             lineas.append(f"Ya hay un registro en el CRM para esta plática: «{self.xb_sa_lead_id.name}».")
+        revision = self.env["xb.support.proposal"].sudo().search([
+            ("kind", "=", "quote"), ("channel_id", "=", self.id), ("state", "=", "pending")], limit=3)
+        if revision:
+            lineas.append("Cotización(es) a la medida EN REVISIÓN del equipo: " + "; ".join(
+                f"{r.sale_order_id.name or ''} {r.name}" for r in revision) + ". Ya tienen sus datos: si pregunta, dile que la "
+                "están terminando y le llega por aquí; no la vuelvas a pedir ni des precio. Si agrega o cambia algo, vuelve a "
+                "usar cotizacion_a_la_medida con todo actualizado.")
         if acc.xb_sa_store_b2b_category_id and not equipo:
             pendiente = self.env["xb.support.proposal"].sudo().search_count([
                 ("kind", "=", "b2b"), ("channel_id", "=", self.id), ("state", "=", "pending")])
@@ -281,12 +306,49 @@ class DiscussChannel(models.Model):
         return dominio
 
     def _xb_sa_store_price_ref(self, tmpl, company):
-        """(sin IVA, con IVA) de referencia: el precio de lista de la plantilla, o el de la lista de la cuenta."""
+        """(sin IVA, con IVA) de referencia: el precio de lista de la plantilla, o el de la lista de la cuenta.
+        Joyas con precio por metal: el de su combinación más barata (ver _xb_sa_store_from_by_metal)."""
         lista = self.wa_account_id.sudo().xb_sa_store_pricelist_id
         sin = lista._get_product_price(tmpl.product_variant_id, 1.0) if lista and tmpl.product_variant_id else tmpl.list_price
+        if not lista:
+            por_metal = self._xb_sa_store_from_by_metal(tmpl, company)
+            if por_metal:
+                sin = min(por_metal.values())
+        return sin, self._xb_sa_store_with_tax(sin, company)
+
+    def _xb_sa_store_with_tax(self, sin, company):
         impuesto = self._xb_sa_store_tax(company)
-        con = impuesto.compute_all(sin, quantity=1.0)["total_included"] if impuesto else sin
-        return sin, con
+        return impuesto.compute_all(sin, quantity=1.0)["total_included"] if impuesto else sin
+
+    def _xb_sa_store_from_by_metal(self, tmpl, company):
+        """{metal: precio SIN IVA} de la combinación base de la tienda («Desde») en cada metal que ofrece la joya.
+        El precio de lista de estas joyas es 0: lo pone el peso por metal, así que hay que calcularlo por combinación."""
+        if not ("xb_precio_por_metal" in tmpl._fields and tmpl.xb_precio_por_metal):
+            return {}
+        pricelist = self._xb_sa_store_pricelist(company)
+        if not pricelist:
+            return {}
+        try:
+            base = tmpl._xb_combinacion_desde() if hasattr(tmpl, "_xb_combinacion_desde") else tmpl._get_first_possible_combination()
+            linea = tmpl.valid_product_template_attribute_line_ids.filtered(lambda l: l.attribute_id.name == "Metal")
+            metales = linea.product_template_value_ids._only_active() if linea else base.browse()
+            salida = {}
+            for metal in metales or [None]:
+                comb = (base - base.filtered(lambda v: v.attribute_line_id == linea)) | metal if metal else base
+                precio = pricelist._get_product_price(tmpl.with_context(xb_combinacion=tuple(comb.ids)), 1.0)
+                if precio:
+                    salida[metal.name if metal else ""] = precio
+            return salida
+        except Exception:  # noqa: BLE001 - una joya mal capturada no debe tumbar la búsqueda
+            return {}
+
+    def _xb_sa_store_from_text(self, tmpl, company):
+        """«desde_por_metal»: el precio con IVA de la versión más sencilla en cada metal (medida y piedra base)."""
+        por_metal = self._xb_sa_store_from_by_metal(tmpl, company)
+        if len(por_metal) < 2:
+            return {}
+        return {"desde_por_metal_con_iva": {m: round(self._xb_sa_store_with_tax(p, company), 2)
+                                            for m, p in sorted(por_metal.items(), key=lambda x: x[1])}}
 
     def _xb_sa_store_url(self, tmpl):
         website = self._xb_sa_store_website()
@@ -424,11 +486,14 @@ class DiscussChannel(models.Model):
                            "etiquetas": t.product_tag_ids.mapped("name"),
                            "metales": [v.name for l in t.attribute_line_ids if l.attribute_id.name == "Metal"
                                        for v in l.product_template_value_ids.filtered(lambda x: x.ptav_active)][:8],
-                           "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t)})
+                           "desde_con_iva": round(con, 2), **self._xb_sa_store_from_text(t, company),
+                           "liga": self._xb_sa_store_url(t)})
             if len(salida) >= min(int(entrada.get("limite") or 6), 8):
                 break
         res = {"ok": True, "resultados": salida, "etiquetas_disponibles": self._xb_sa_store_tags(),
-               "nota": "Precios de referencia con IVA; el definitivo depende del metal, ancho y medida y va en la cotización."}
+               "nota": "«desde_con_iva» es la versión más barata (normalmente plata con zirconia); «desde_por_metal_con_iva» da el "
+                       "«desde» en cada metal. Úsalos para filtrar por presupuesto; el precio exacto de una combinación lo da "
+                       "ver_producto con «opciones» y el definitivo va en la cotización."}
         if not salida:
             res["nota"] = ("Sin coincidencias. Prueba con otra etiqueta de etiquetas_disponibles (p. ej. Promesa, Solitario) o con "
                            "menos palabras antes de decir que no hay.")
@@ -466,7 +531,8 @@ class DiscussChannel(models.Model):
                 combinacion = {"combinacion": variante.display_name, "precio_de_la_combinacion_con_iva": round(total, 2)}
         return {"ok": True, **combinacion, "id": t.id, "nombre": t.name, "categoria": t.categ_id.complete_name,
                 "descripcion": (tools.html2plaintext(t.description_sale or "") or "")[:600],
-                "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2), "liga": self._xb_sa_store_url(t),
+                "etiquetas": t.product_tag_ids.mapped("name"), "opciones": opciones, "desde_con_iva": round(con, 2),
+                **self._xb_sa_store_from_text(t, company), "liga": self._xb_sa_store_url(t),
                 "dias_de_fabricacion": int(t.sale_delay or 0),
                 "nota": "Si trae «precio_de_la_combinacion_con_iva», dáselo de inmediato como el precio de esa pieza con IVA; el nombre "
                         "completo solo hace falta para formalizar la cotización. Para cotizar, cada atributo con varias opciones debe tener una elegida por el cliente. "
@@ -594,6 +660,68 @@ class DiscussChannel(models.Model):
                                 "Con la liga (o el QR del ticket) puede pagar en línea con tarjeta el total o el anticipo, y con eso "
                                 "su pedido se confirma solo."})
         return res
+
+    def _xb_sa_tool_cotizacion_a_la_medida(self, job, entrada):
+        acc = self.wa_account_id.sudo()
+        company = acc._xb_sa_company()
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No tengo a quien cotizar: pídele su nombre y vuelve a intentar."}
+        nombre = " ".join((entrada.get("nombre_completo") or "").split())
+        if not self._xb_sa_store_team():
+            if len(nombre.split()) < 2:
+                return {"ok": False, "motivo": "Falta su nombre completo (nombre y apellido) para poner la cotización a su nombre."}
+            if nombre.lower() != (partner.name or "").strip().lower():
+                partner.name = nombre
+        pieza = (entrada.get("pieza") or "").strip()
+        detalle = (entrada.get("detalle") or "").strip()
+        if not (pieza and detalle):
+            return {"ok": False, "motivo": "Faltan la pieza y el detalle de lo que pidió."}
+        Propuesta = self.env["xb.support.proposal"].sudo()
+        anterior = Propuesta.search([("kind", "=", "quote"), ("channel_id", "=", self.id), ("state", "=", "pending")], limit=1)
+        opciones = [o.strip() for o in entrada.get("opciones") or [] if (o or "").strip()]
+        renglones = [(0, 0, {"display_type": "line_note", "name": f"{pieza}\n{detalle}"})]
+        for i, opcion in enumerate(opciones, 1):
+            renglones.append((0, 0, {"display_type": "line_section", "name": f"Opción {i}: {opcion}"}))
+        orden = anterior.sale_order_id.sudo() if anterior and anterior.sale_order_id.state == "draft" else self.env["sale.order"]
+        if orden:
+            orden.order_line.filtered(lambda l: l.display_type).unlink()
+            orden.order_line = renglones
+        else:
+            orden = self.env["sale.order"].sudo().with_company(company).create({
+                "partner_id": partner.id, "company_id": company.id,
+                "pricelist_id": self._xb_sa_store_pricelist(company).id or False,
+                "user_id": acc.xb_sa_sales_user_ids[:1].id or False, "origin": "Agente de WhatsApp (a la medida)",
+                "order_line": renglones})
+        fotos = self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("message_type", "=", "whatsapp_message"),
+            ("create_date", ">=", fields.Datetime.now() - timedelta(days=7)), ("attachment_ids", "!=", False),
+        ], order="id desc", limit=20).filtered(
+            lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")).attachment_ids.filtered(
+            lambda a: (a.mimetype or "").startswith("image/"))[:6]
+        ya = set(self.env["ir.attachment"].sudo().search([("res_model", "=", "sale.order"), ("res_id", "=", orden.id)]).mapped("checksum"))
+        copias = self.env["ir.attachment"]
+        for foto in fotos.filtered(lambda a: a.checksum not in ya):
+            copias |= foto.copy({"res_model": "sale.order", "res_id": orden.id})
+        orden.message_post(body=Markup(tools.plaintext2html(f"Cotización a la medida pedida por WhatsApp:\n{pieza}\n{detalle}" +
+                                                            (("\nOpciones: " + "; ".join(opciones)) if opciones else ""))),
+                           attachment_ids=copias.ids, message_type="comment", subtype_xmlid="mail.mt_note")
+        resumen = "\n".join(filter(None, [
+            f"{partner.name} ({self.whatsapp_number})", detalle,
+            ("Opciones: " + "; ".join(opciones)) if opciones else "",
+            f"Fotos del cliente: {len(fotos)} (quedaron en la cotización)" if fotos else ""]))
+        if anterior:
+            anterior.write({"name": f"Cotización a la medida: {pieza}"[:120], "problem": resumen, "sale_order_id": orden.id})
+            anterior._xb_ask_owner()
+        else:
+            Propuesta.create({"name": f"Cotización a la medida: {pieza}"[:120], "kind": "quote", "channel_id": self.id,
+                              "partner_id": partner.id, "sale_order_id": orden.id,
+                              "whatsapp_number": self.whatsapp_number, "problem": resumen})
+        job.mode = "sales"
+        return {"ok": True, "cotizacion": orden.name,
+                "nota": "Quedó en manos del equipo: le ponen el precio y, en cuanto la autoricen, al cliente le llega sola por "
+                        "aquí con su ticket y su liga para pagar. Díselo así, sin dar plazos ni precios. No uses pasar_a_humano "
+                        "por esto."}
 
     def _xb_sa_store_b2b_pending(self):
         """Cliente sin verificar de una tienda solo para negocios: no ve precios ni compra."""

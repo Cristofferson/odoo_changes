@@ -25,7 +25,7 @@
                 <header>
                     <button name="action_approve" string="Aprobar" type="object" class="btn-primary" invisible="state != 'pending'"/>
                     <button name="action_done_notify" string="Hecho y avisar al cliente" type="object" class="btn-primary" invisible="state != 'approved'"/>
-                    <button name="action_done" string="Hecho" type="object" invisible="state not in ('pending', 'approved') or kind in ('add_number', 'b2b')"/>
+                    <button name="action_done" string="Hecho" type="object" invisible="state not in ('pending', 'approved') or kind in ('add_number', 'b2b', 'quote')"/>
                     <button name="action_reject" string="Rechazar" type="object" invisible="state not in ('pending', 'approved')"/>
                     <field name="state" widget="statusbar" statusbar_visible="pending,approved,done"/>
                 </header>
@@ -64,7 +64,11 @@
                     <group string="Cliente a verificar" invisible="kind != 'b2b'">
                         <field name="partner_id" readonly="state != 'pending'"/>
                     </group>
-                    <group string="Qué encontró el agente" invisible="kind not in ('fix', 'b2b')">
+                    <group string="Cotización a la medida" invisible="kind != 'quote'">
+                        <field name="partner_id" readonly="1"/>
+                        <field name="sale_order_id" readonly="1"/>
+                    </group>
+                    <group string="Qué encontró el agente" invisible="kind not in ('fix', 'b2b', 'quote')">
                         <field name="problem" nolabel="1" colspan="2"/>
                     </group>
                     <group string="Qué propone" invisible="kind != 'fix'">

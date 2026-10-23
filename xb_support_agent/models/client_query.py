@@ -14,7 +14,8 @@ Candados que no dependen del modelo de IA:
   fields_get, historial del chatter);
 * solo la base del contacto autorizado, y solo si vive en este servidor;
 * modelos y campos sensibles (llaves, contraseñas, binarios) nunca se devuelven;
-* a un empleado sin permiso de dinero se le quitan modelos contables y montos.
+* a un empleado sin permiso de dinero se le quitan modelos contables y costos, márgenes,
+  saldos y pagos (los precios de venta y tarifas sí los ve: son los que usa al vender).
 """
 import json
 import logging
@@ -39,10 +40,12 @@ XB_DENY_MODELS = ("ir.config_parameter", "res.users.apikeys", "res.users.identit
                   "ir.mail_server", "fetchmail.server", "payment.provider", "res.users.settings",
                   "iap.account", "ir.actions.server", "base.automation", "ir.ui.view")
 XB_DENY_FIELDS = re.compile(r"(password|passwd|token|secret|api_?key|signature|totp|private_key|_key$)", re.I)
-# Empleado sin permiso de dinero.
+# Empleado sin permiso de dinero: ni contabilidad ni nómina; de los montos, solo los que no ve al vender
+# (costos, márgenes, saldos, pagos). Precios, totales, impuestos y descuentos de ventas, tarifas y
+# reservaciones sí: los tiene en su pantalla y sin ellos no se puede explicar un precio.
 XB_MONEY_MODELS = ("account.", "hr.payslip", "hr.contract", "hr.expense", "hr.salary")
 XB_MONEY_FIELDS = re.compile(
-    r"(price|amount|cost|total|margin|balance|debit|credit|salary|wage|tax|discount|residual|cash|payment|paid)", re.I)
+    r"(cost|margin|profit|balance|debit|credit|salary|wage|commission|residual|cash|payment|paid)", re.I)
 
 
 def xb_phone_key(number):
@@ -147,7 +150,7 @@ def _allowed_field(model, nombre, rol):
     campo = model._fields.get(nombre)
     if not campo or XB_DENY_FIELDS.search(nombre) or campo.type == "binary":
         return False
-    if rol == "employee" and (campo.type == "monetary" or (campo.type == "float" and XB_MONEY_FIELDS.search(nombre))):
+    if rol == "employee" and campo.type in ("monetary", "float") and XB_MONEY_FIELDS.search(nombre):
         return False
     return True
 

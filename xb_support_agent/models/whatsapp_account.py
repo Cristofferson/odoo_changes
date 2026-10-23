@@ -97,6 +97,10 @@ class WhatsappAccount(models.Model):
     xb_sa_sales_backup_minutes = fields.Integer("Avisar al respaldo a los (min)", default=30)
     xb_sa_sales_team_id = fields.Many2one("crm.team", string="Equipo de ventas")
     xb_sa_helpdesk_team_id = fields.Many2one("helpdesk.team", string="Equipo de soporte (tickets)")
+    xb_sa_max_chars = fields.Integer(
+        "Largo máximo de cada respuesta (caracteres)", default=0,
+        help="0 = sin tope. El agente lo recibe como regla y, si una respuesta se pasa, se reescribe más corta antes de "
+             "mandarla (sin perder precios, ligas ni números). 300 caracteres ≈ 4 o 5 renglones en el celular.")
     xb_sa_pause_hours = fields.Integer(
         "Horas de pausa cuando entra una persona", default=3,
         help="Si alguien del equipo contesta en la conversación desde Odoo, el agente se calla estas "
@@ -181,7 +185,14 @@ class WhatsappAccount(models.Model):
         kb = self.env["xb.support.knowledge"].sudo().search([
             "|", ("account_ids", "=", False), ("account_ids", "in", self.ids)])
         cuerpo = kb._xb_as_text() if kb else "(Vacía: no hay información de servicios ni precios. Para cualquier detalle de servicios o precios, registra el prospecto y ofrece una cita con un asesor.)"
-        return f"{texto}\n\n# Base de conocimiento de {empresa}\n\n{cuerpo}"
+        largo = ""
+        if self.xb_sa_max_chars:
+            largo = (f"\n\nLARGO DE CADA MENSAJE (regla firme): máximo {self.xb_sa_max_chars} caracteres, unos 4 o 5 renglones "
+                     "en el celular. Una sola idea y, si hace falta, UNA pregunta al final. No repitas lo que ya dijiste en la "
+                     "plática (dirección, horario, saldo, «incluye IVA», requisitos), no agregues extras que no pidió y no cierres "
+                     "con relleno («aquí estoy», «que tengas excelente día»). Si hay mucho que decir, da lo esencial y pregunta "
+                     "si quiere el detalle. Solo los datos para transferir y los pasos numerados pueden ocupar un poco más.")
+        return f"{texto}{largo}\n\n# Base de conocimiento de {empresa}\n\n{cuerpo}"
 
     def _xb_sa_allows(self, number):
         self.ensure_one()

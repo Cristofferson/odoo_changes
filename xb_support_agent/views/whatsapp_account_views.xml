@@ -43,6 +43,7 @@
                     </setting>
                     <setting help="Si alguien del equipo contesta, el agente se calla estas horas en esa conversación.">
                         <field name="xb_sa_pause_hours"/>
+                        <field name="xb_sa_max_chars"/>
                     </setting>
                     <setting help="Si el cliente insiste mientras espera a una persona: se le contesta esto (máx. cada 2 h) y se vuelve a avisar al equipo.">
                         <field name="xb_sa_hold_message"/>

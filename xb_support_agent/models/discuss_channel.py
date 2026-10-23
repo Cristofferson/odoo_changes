@@ -919,6 +919,7 @@ class DiscussChannel(models.Model):
         if not texto:
             job.write({"state": "skipped", "reason": "El agente no produjo respuesta"})
             return
+        texto = self._xb_sa_shorten(job, acc, client, historial, texto)
         job.reply = texto
         if acc.xb_sa_shadow:
             self._xb_sa_post_draft(texto)
@@ -926,6 +927,46 @@ class DiscussChannel(models.Model):
         else:
             self._xb_sa_send(texto)
             job.state = "done"
+
+    def _xb_sa_shorten(self, job, acc, client, historial, texto):
+        """Candado de largo: si la respuesta pasa del tope de la cuenta, se le pide al modelo que la reescriba más corta,
+        sin perder datos. Los datos para transferir no se tocan; los pasos numerados tienen más espacio."""
+        tope = acc.xb_sa_max_chars
+        if not tope or "CLABE" in texto.upper():
+            return texto
+        if len(re.findall(r"(?m)^\s*\d+[.)]\s", texto)) >= 3:
+            tope = int(tope * 1.6)
+        if len(texto) <= tope * 1.15:
+            return texto
+        previos = []
+        for turno in historial[-6:]:
+            quien = "Cliente" if turno["role"] == "user" else "Asistente"
+            dicho = " ".join(b.get("text", "") for b in turno["content"] if isinstance(b, dict) and b.get("type") == "text")
+            if dicho.strip():
+                previos.append(f"{quien}: {dicho.strip()[:600]}")
+        try:
+            resp = client.messages.create(
+                model=acc.xb_sa_model, max_tokens=2000, output_config={"effort": "low"},
+                system=("Reescribes mensajes de WhatsApp de un asistente para que sean CORTOS. Devuelve SOLO el mensaje nuevo, "
+                        "en el mismo idioma, tono y trato (tú/usted), con el mismo formato (*negritas* con un asterisco). "
+                        f"Máximo {tope} caracteres. Conserva sin cambiarlos TODOS los datos concretos: precios, montos, números "
+                        "de pedido o cotización, ligas, fechas, horarios ofrecidos, nombres de piezas y la pregunta final. Quita "
+                        "lo que ya se dijo antes en la plática, los extras que el cliente no pidió, las cortesías de relleno y "
+                        "las explicaciones de más. No agregues nada nuevo."),
+                messages=[{"role": "user", "content": "Plática reciente:\n" + "\n".join(previos) +
+                           f"\n\nMensaje a reescribir ({len(texto)} caracteres):\n{texto}"}])
+            job._xb_add_usage(acc.xb_sa_model, resp.usage)
+            corto = "".join(b.text for b in resp.content if b.type == "text").strip()
+        except Exception as error:  # noqa: BLE001 - si falla, mejor largo que nada
+            job._xb_log(f"No se pudo acortar la respuesta: {error}")
+            return texto
+        faltan = [d for d in re.findall(r"https?://\S+|S\d{5}|\$[\d,]+(?:\.\d+)?", texto) if d not in corto]
+        if not corto or len(corto) >= len(texto) or faltan:
+            job._xb_log(f"Se dejó la respuesta larga ({len(texto)} caracteres): el resumen "
+                        + (f"perdía {', '.join(faltan[:3])}" if faltan else "no salió más corto") + ".")
+            return texto
+        job._xb_log(f"Respuesta acortada de {len(texto)} a {len(corto)} caracteres (tope {tope}). Original: {texto[:1500]}")
+        return corto
 
     @api.model
     def _xb_sa_just_closing(self, historial):

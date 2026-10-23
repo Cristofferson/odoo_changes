@@ -15,7 +15,7 @@ if viejo in txt:
     A.xb_sa_instructions = txt.replace(viejo, nuevo)
 elif "cotizacion_a_la_medida" not in txt:
     raise Exception("No encontré el renglón de «Diseño propio» en las instrucciones de Anello")
-A.xb_sa_quote_approver_ids = [(6, 0, [2, 13])]   # Cristofferson y Jacky
+A.xb_sa_quote_approver_ids = [(6, 0, [2])]   # solo Cristofferson (decisión del usuario 23-oct)
 viejo = "usa registrar_interes_compra y dile que un asesor le prepara la cotización."
 nuevo = ("si son MÁS USUARIOS y lo pide el titular, haz tú la cotización con cotizar_usuarios_extra y mándale la liga; "
          "para lo demás usa registrar_interes_compra y dile que un asesor le prepara la cotización.")

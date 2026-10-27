@@ -126,9 +126,9 @@ class DatabasesUser(models.Model):
         proj = self.project_id
         if not proj:
             raise UserError('Este usuario no está ligado a una base de datos.')
-        if proj.despacho_server not in ('odoo19', 'odoo18'):
+        if proj.despacho_server not in ('odoo19', 'odoo18', 'ovh4'):
             raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
-                            '(odoo19) o de OVH (odoo18). Esta está en %s.'
+                            '(odoo19), de OVH (odoo18) o del Servidor 4 (ovh4). Esta está en %s.'
                             % (proj.despacho_server or '¿?'))
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '
@@ -180,9 +180,9 @@ class DatabasesUser(models.Model):
         proj = self.project_id
         if not proj:
             raise UserError('Este usuario no está ligado a una base de datos.')
-        if proj.despacho_server not in ('odoo19', 'odoo18'):
+        if proj.despacho_server not in ('odoo19', 'odoo18', 'ovh4'):
             raise UserError('El puente MCP solo se activa en bases de ESTE servidor '
-                            '(odoo19) o de OVH (odoo18). Esta está en %s.'
+                            '(odoo19), de OVH (odoo18) o del Servidor 4 (ovh4). Esta está en %s.'
                             % (proj.despacho_server or '¿?'))
         if self.despacho_mcp_enabled:
             raise UserError('Este usuario ya tiene un puente MCP activo. Quítalo antes '

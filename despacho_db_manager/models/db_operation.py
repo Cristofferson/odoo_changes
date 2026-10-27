@@ -36,13 +36,14 @@ EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 SERVERS = [
     ('odoo19', 'odoo19 (este servidor · diamane.mx)'),
     ('odoo18', 'odoo18 (OVH · vps-f101b860)'),
+    ('ovh4', 'Servidor 4 (OVH · 15.235.94.93)'),
 ]
 SERVER_KEYS = tuple(k for k, _ in SERVERS)
 
 # Servidores cuyas BDs NO viven en este box: el puente MCP corre igual en odoo19
 # pero apunta al Odoo remoto por IP directa (xmlrpc). El VALOR es el nombre que
 # entiende add-client.sh --remote (allowlist en el worker root). Solo método token.
-MCP_REMOTE_SERVERS = {'odoo18': 'ovh'}
+MCP_REMOTE_SERVERS = {'odoo18': 'ovh', 'ovh4': 'ovh4'}
 
 
 class DespachoDbOperation(models.Model):
@@ -367,6 +368,24 @@ class DespachoDbOperation(models.Model):
             return {'type': 'ir.actions.act_window_close'}
         return True
 
+    def action_apply_real(self):
+        """Tras una simulación exitosa: crea una operación NUEVA con los mismos
+        datos y sin simular, y la ejecuta. La simulación queda intacta en el
+        historial (antes el botón "Ejecutar" desaparecía al terminar y no había
+        cómo aplicar de verdad sin recapturar todo)."""
+        self.ensure_one()
+        if not (self.simulate and self.state == 'done'):
+            raise UserError('Solo se puede aplicar de verdad una simulación terminada.')
+        real = self.copy({'simulate': False, 'state': 'draft', 'log': False})
+        real.action_provision()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': real.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
     def _build_alta_req(self):
         name = (self.db_name or '').strip().lower()
         domain = (self.domain or '').strip().lower()
@@ -581,7 +600,7 @@ class DespachoDbOperation(models.Model):
         remote = MCP_REMOTE_SERVERS.get(server)
         if server != 'odoo19' and not remote:
             raise UserError('El puente MCP solo se puede activar en bases de ESTE '
-                            'servidor (odoo19) o de OVH (odoo18); la elegida está '
+                            'servidor (odoo19), de OVH (odoo18) o del Servidor 4; la elegida está '
                             'en %s.' % server)
         # (El MCP ahora es POR USUARIO: una BD puede tener varios puentes, uno por
         #  usuario. El control "ya tiene puente" se hace por usuario en

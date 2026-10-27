@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 # Nombre LÓGICO de cada servidor, mapeado desde el hostname del SO. El hostname
 # real NO se cambia (diamane.mx corre correo; renombrarlo sería riesgoso); el
 # módulo usa estos nombres lógicos en toda su lógica e inventario.
-HOSTNAME_TO_KEY = {'diamane.mx': 'odoo19', 'vps-f101b860': 'odoo18'}
+HOSTNAME_TO_KEY = {'diamane.mx': 'odoo19', 'vps-f101b860': 'odoo18', 'vps-c566c17e': 'ovh4'}
 # Clave de ESTE servidor: distingue las BDs locales (que el worker local sí puede
 # operar) de las registradas de otros servidores.
 THIS_SERVER = HOSTNAME_TO_KEY.get(socket.gethostname(), socket.gethostname())

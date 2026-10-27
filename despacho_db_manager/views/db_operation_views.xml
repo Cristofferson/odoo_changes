@@ -9,6 +9,10 @@
                     <button name="action_provision" type="object" string="Ejecutar"
                             class="oe_highlight"
                             invisible="state not in ('draft','error')"/>
+                    <button name="action_apply_real" type="object" string="Aplicar de verdad"
+                            class="oe_highlight" icon="fa-play"
+                            invisible="state != 'done' or not simulate or op in ('mcp_add','mcp_remove')"
+                            confirm="Se creará una operación nueva con estos mismos datos y SIN simular: los cambios serán reales. ¿Continuar?"/>
                     <button name="action_refresh" type="object" string="Actualizar estado"
                             invisible="state == 'draft'"/>
                     <field name="state" widget="statusbar"
@@ -21,7 +25,10 @@
                                invisible="op in ('alta','census')"
                                required="op in ('baja','refresh','crear_test','mcp_add','mcp_remove')"
                                readonly="op in ('baja','refresh','crear_test','mcp_add','mcp_remove') and context.get('default_project_id')"/>
-                        <field name="simulate" invisible="op in ('mcp_add','mcp_remove')"/>
+                        <!-- Una vez ejecutada, "Simular" queda fija: cambiarla después
+                             falseaba el historial (decía "real" de una simulación). -->
+                        <field name="simulate" invisible="op in ('mcp_add','mcp_remove')"
+                               readonly="state not in ('draft','error')"/>
                     </group>
                     <!-- ALTA -->
                     <group string="Nuevo cliente" invisible="op != 'alta'">

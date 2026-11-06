@@ -133,6 +133,22 @@ class NvAvaluoConfig(models.Model):
         help='Lo que vale un quilate de piedras de acento naturales usadas.')
     acento_lab_usd = fields.Float(
         'Acentos de laboratorio (USD/ct)', default=50.0)
+    acento_umbral_ct = fields.Float(
+        'Desde cuántos quilates c/u una piedra se valúa como lateral', default=0.15, digits=(6, 3),
+        help='Las piedras chicas (melé) se pagan por quilate a precio fijo. Una piedra de '
+             'este tamaño o más se valúa una por una como diamante: Rapaport por su tamaño, '
+             'color y pureza (natural) o la banda de laboratorio.')
+    acento_mm_supuesto = fields.Float(
+        'Tamaño supuesto si no se midió (mm)', default=1.0, digits=(6, 2),
+        help='Si el vendedor contó las piedras pero no dijo su tamaño, se valúan como de este '
+             'diámetro (lo más chico que se usa) y el informe lo dice como supuesto.')
+    gema_zafiro_usd = fields.Float('Zafiro (USD/ct)', default=150.0)
+    gema_rubi_usd = fields.Float('Rubí (USD/ct)', default=150.0)
+    gema_esmeralda_usd = fields.Float('Esmeralda (USD/ct)', default=150.0)
+    gema_otra_usd = fields.Float(
+        'Otra piedra de color (USD/ct)', default=20.0,
+        help='Amatista, topacio, aguamarina, granate… Precio de reventa conservador; una gema '
+             'fina pide estudio gemológico aparte.')
     dudoso_ct = fields.Float(
         'Quilates «dudosos» sin certificado', default=5.0,
         help='Una piedra de este tamaño o más sin certificado verificable se '

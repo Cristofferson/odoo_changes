@@ -6,6 +6,7 @@ from . import website
 from . import res_partner
 from . import nv_avaluo_config
 from . import nv_avaluo
+from . import nv_avaluo_piedras
 from . import nv_avaluo_reporte
 from . import nv_icert
 from . import nv_ia_fotos

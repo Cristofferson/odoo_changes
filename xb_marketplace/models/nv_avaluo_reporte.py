@@ -113,7 +113,17 @@ class ProductTemplate(models.Model):
             pieza.append(('Observaciones del examen', self.nv_fis_observaciones))
         cert_num = self.nv_cert_number or c('x_studio_certificado_dia')
         diamante = []
-        if p['ct']:
+        centro = self.nv_centro or 'diamante'
+        if centro == 'gema' and p['ct']:
+            gema = dict(self._fields['nv_centro_gema'].selection).get(self.nv_centro_gema or 'otra')
+            diamante = [
+                ('Identificación', '%s (declarada; sin estudio gemológico)' % gema),
+                ('Peso', '%.2f ct · declarado' % p['ct']),
+                ('Medidas', (examen and self.nv_fis_medidas and '%s mm (calibrador)' % self.nv_fis_medidas) or 'No medidas'),
+                ('Cómo se valúa', 'Precio de referencia por quilate para %s usada; una gema fina pide estudio aparte.'
+                 % gema.lower()),
+            ]
+        elif centro == 'diamante' and p['ct']:
             # Con examen: lo medido en taller, y al lado lo que dice el reporte.
             def taller(valor, del_reporte, vacio):
                 if examen and valor:
@@ -153,27 +163,36 @@ class ProductTemplate(models.Model):
             if self.nv_reporte_diamane and self.nv_gema_lot_id:
                 diamante.insert(-1, ('Certificado ICERT', '%s · laboratorio DIAMANE' % self.nv_reporte_diamane))
         acentos = []
-        if 'dmn_accent_ids' in self._fields and self.dmn_accent_ids:
-            for l in self.dmn_accent_ids:
-                acentos.append(('%s piedras' % l.qty, '%.3f ct en total (estimado)' % (l.carats_total or 0)))
+        sin_medir = 0
+        for l in self.dmn_accent_ids:
+            valor, _como, supuesto = self._nv_valor_grupo(cfg, l, self._nv_tipo_cambio())
+            sin_medir += l.qty if supuesto and valor else 0
+            ct_txt = ('%.3f ct en total (estimado por medidas)' % l.carats_total) if l.carats_total \
+                else 'tamaño no medido'
+            acentos.append((l._nv_texto_avaluo(), '%s · %s' % (ct_txt, self._nv_dinero(valor))))
 
         # Supuestos extraordinarios: lo que se dio por cierto sin comprobarlo.
         supuestos = []
         if not examen:
             supuestos.append('La información, fotografías y documentos del vendedor son verdaderos y corresponden a esta pieza.')
-        if p['ct'] and not es_lab and calidad in ('baja', 'supuesta'):
+        if centro == 'diamante' and p['ct'] and not es_lab and calidad in ('baja', 'supuesta'):
             supuestos.append('Sin reporte de un laboratorio de confianza, se supone una calidad de %s / %s para el diamante.' % (color, pureza))
-        if p['ct'] and not es_lab and not (examen and self.nv_fis_origen in ('natural', 'lab')):
+        if centro == 'diamante' and p['ct'] and not es_lab and not (examen and self.nv_fis_origen in ('natural', 'lab')):
             supuestos.append('El diamante es natural, como lo declara el vendedor; %s' % (
                 'el detector lo refirió a laboratorio y el origen no está confirmado.' if examen and self.nv_fis_origen == 'referir'
                 else 'con fotografías no se puede distinguir de uno de laboratorio.'))
-        if cert_num and not self.nv_cert_verificado and not (examen and self.nv_fis_laser == 'coincide'):
+        if centro != 'sin' and cert_num and not self.nv_cert_verificado and not (examen and self.nv_fis_laser == 'coincide'):
             supuestos.append('El reporte de laboratorio %s corresponde a esta piedra; aún no se ha cotejado su inscripción ni sus medidas.' % cert_num)
         if examen and self.nv_fis_laser == 'no_coincide':
             supuestos.append('La inscripción láser NO coincide con el reporte %s: no se toma como reporte de esta piedra.' % (cert_num or ''))
         if examen and p['ct'] and not self.nv_fis_desmontada:
             supuestos.append('La piedra no se desmontó: su peso es el %s.' % (
                 'del reporte' if self.nv_carats and lab_nombre else 'declarado o estimado por medidas'))
+        if sin_medir:
+            supuestos.append('%s piedra(s) no tienen tamaño medido: se valúan como de %.2f mm, lo más chico que se usa.'
+                             % (sin_medir, cfg.acento_mm_supuesto))
+        if any(l.nv_ia for l in self.dmn_accent_ids):
+            supuestos.append('El número de piedras se contó en fotografías; puede haber piedras que no se vean.')
         if 'estimado' in origen_peso:
             supuestos.append('El peso del metal es el típico de un anillo %s; no se ha pesado la pieza.' % (estilo.name.lower() if estilo else ''))
         if not self.nv_metal_probado and not probado:
@@ -212,7 +231,7 @@ class ProductTemplate(models.Model):
             lo, hi = d['nv_av_piso'], d['nv_av_piso_max']
         lo, hi = min(lo, techo), min(hi, techo)
         desglose = [('Metal fino', d['nv_av_oro']), ('Hechura', d['nv_av_hechura']),
-                    ('Diamante central', d['nv_av_diamante']), ('Piedras de acento', d['nv_av_acentos'])]
+                    ('Piedra central', d['nv_av_diamante']), ('Laterales y acentos', d['nv_av_acentos'])]
         factores = 'Marca %s × %.2f · estado × %s %% · lo que acompaña +%s %%' % (
             marca.name if marca else (self.nv_brand or 'sin marca'), marca.factor if marca else 1.0,
             round(cfg._nv_desgaste(self.nv_desgaste)),
@@ -266,6 +285,9 @@ class ProductTemplate(models.Model):
             'solicitante': self.nv_seller_id.name or 'Vendedor del marketplace',
             'usuarios': 'El vendedor y los compradores de la publicación en NOVADIAM.',
             'confianza': d['nv_av_confianza'],
+            'centro_titulo': {'gema': 'Piedra central', 'sin': 'Piedra central'}.get(centro, 'Diamante central'),
+            'centro_vacio': ('La pieza no lleva piedra central.' if centro == 'sin' else
+                             'El vendedor no declaró los quilates de la piedra central: no se valúa.'),
             'pieza': pieza, 'diamante': diamante, 'acentos': acentos, 'supuestos': supuestos,
             'metodo': metodo, 'resultados': resultados,
             'conclusion': '%s – %s' % (self._nv_dinero(lo), self._nv_dinero(hi)),

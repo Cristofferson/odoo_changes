@@ -113,8 +113,8 @@ class ProductTemplate(models.Model):
         [('A', 'A'), ('B', 'B'), ('C', 'C')], 'Confianza', compute='_compute_nv_avaluo')
     nv_av_oro = fields.Monetary('Oro fino', compute='_compute_nv_avaluo', currency_field='currency_id')
     nv_av_hechura = fields.Monetary('Hechura', compute='_compute_nv_avaluo', currency_field='currency_id')
-    nv_av_diamante = fields.Monetary('Diamante central', compute='_compute_nv_avaluo', currency_field='currency_id')
-    nv_av_acentos = fields.Monetary('Acentos', compute='_compute_nv_avaluo', currency_field='currency_id')
+    nv_av_diamante = fields.Monetary('Piedra central', compute='_compute_nv_avaluo', currency_field='currency_id')
+    nv_av_acentos = fields.Monetary('Laterales y acentos', compute='_compute_nv_avaluo', currency_field='currency_id')
     nv_avaluo_metal = fields.Monetary(
         'Avalúo · metal', compute='_compute_nv_avaluo', currency_field='currency_id')
     nv_avaluo_piedras = fields.Monetary(
@@ -139,14 +139,18 @@ class ProductTemplate(models.Model):
     nv_av_veredicto_texto = fields.Char('Resultado', compute='_compute_nv_avaluo')
     nv_avaluo_detalle = fields.Text('Cómo se calculó', compute='_compute_nv_avaluo')
 
-    # Los acentos (`dmn_accent_ids`) y los campos de gema (`x_studio_*`) NO se
-    # declaran como dependencias: los aportan otros módulos o Studio, y
-    # declararlos rompe la carga si no existen. Se leen igual al calcular.
+    # Los campos de gema (`x_studio_*`) NO se declaran como dependencias: los
+    # aporta Studio, y declararlos rompe la carga si no existen. Se leen igual
+    # al calcular. Las piedras (`dmn_accent_ids`) sí: vienen de stij_diamane_plus,
+    # que ya es dependencia del módulo.
     @api.depends('nv_is_listing', 'list_price', 'nv_carats', 'nv_brand', 'nv_cert_number',
                  'x_studio_peso_joya', 'nv_peso_g', 'nv_desgaste', 'nv_acompanante_ids',
                  'nv_mercado_nuevo', 'nv_usado_min', 'nv_usado_max', 'nv_usado_tipo',
                  'nv_av_tipo', 'nv_fis_ley', 'nv_fis_origen', 'nv_fis_color', 'nv_fis_pureza',
-                 'nv_fis_ct', 'nv_fis_laser', 'attribute_line_ids.value_ids')
+                 'nv_fis_ct', 'nv_fis_laser', 'attribute_line_ids.value_ids',
+                 'nv_centro', 'nv_centro_gema', 'dmn_accent_ids.qty', 'dmn_accent_ids.carats_each',
+                 'dmn_accent_ids.stone_type', 'dmn_accent_ids.nv_gema', 'dmn_accent_ids.nv_color',
+                 'dmn_accent_ids.nv_pureza')
     def _compute_nv_avaluo(self):
         vacio = dict(nv_av_confianza=False, nv_av_oro=0, nv_av_hechura=0, nv_av_diamante=0,
                      nv_av_acentos=0, nv_avaluo_metal=0, nv_avaluo_piedras=0, nv_avaluo=0,
@@ -180,8 +184,7 @@ class ProductTemplate(models.Model):
         peso, origen_peso = self._nv_peso(estilo, metal, kt)
         if self.nv_peso_g:
             # La báscula pesa la pieza armada: las piedras no son metal.
-            ct_piedras = ct + (sum(self.dmn_accent_ids.mapped('carats_total'))
-                               if 'dmn_accent_ids' in self._fields else 0.0)
+            ct_piedras = (ct if self.nv_centro != 'sin' else 0.0) + sum(self.dmn_accent_ids.mapped('carats_total'))
             peso = max(peso - ct_piedras * GRAMOS_POR_QUILATE, 0.0)
             if ct_piedras:
                 origen_peso = '(báscula, sin %.2f ct de piedras)' % ct_piedras
@@ -191,10 +194,22 @@ class ProductTemplate(models.Model):
         pasos.append('Metal: %.2f g %s de %s × ley %.3f × %s/g = %s; hechura %s %%: %s' % (
             peso, origen_peso, nombre_metal, ley, mxn(por_gramo), mxn(oro), round(cfg.montadura_pct), mxn(hechura)))
 
-        # --- Diamante central ---
-        dudoso = ct >= cfg.dudoso_ct and est == 0 and not p['fisico']
+        # --- Piedra central ---
+        centro = self.nv_centro or 'diamante'
+        dudoso = centro == 'diamante' and ct >= cfg.dudoso_ct and est == 0 and not p['fisico']
         diamante = 0.0
-        if p['simulante']:
+        if centro == 'sin':
+            pasos.append('Sin piedra central: se valúan el metal y las piedras de la tabla.')
+        elif centro == 'gema':
+            usd = self._nv_usd_gema(cfg, self.nv_centro_gema)
+            nombre = dict(self._fields['nv_centro_gema'].selection).get(self.nv_centro_gema or 'otra')
+            if ct:
+                diamante = ct * usd * tc
+                pasos.append('Piedra central: %.2f ct de %s × %s USD/ct = %s (precio de referencia; '
+                             'una gema fina pide estudio gemológico)' % (ct, nombre.lower(), round(usd), mxn(diamante)))
+            else:
+                pasos.append('Piedra central: %s sin quilates, no se valúa.' % nombre.lower())
+        elif p['simulante']:
             pasos.append('Piedra: el detector indica que no es diamante; no se valúa como diamante.')
         elif dudoso:
             pasos.append('Piedra: %.2f ct sin certificado verificable: dato dudoso, no se valúa.' % ct)
@@ -215,11 +230,15 @@ class ProductTemplate(models.Model):
                 format(round(rap), ','), round(pct), mxn(diamante)))
 
         acentos = 0.0
-        if 'dmn_accent_ids' in self._fields and self.dmn_accent_ids:
-            ct_acentos = sum(self.dmn_accent_ids.mapped('carats_total'))
-            usd = cfg.acento_lab_usd if es_lab else cfg.acento_natural_usd
-            acentos = ct_acentos * usd * tc
-            pasos.append('Acentos: %.3f ct × %s USD/ct = %s' % (ct_acentos, round(usd), mxn(acentos)))
+        sin_medir = 0
+        for linea in self.dmn_accent_ids:
+            valor, como, supuesto = self._nv_valor_grupo(cfg, linea, tc)
+            acentos += valor
+            sin_medir += linea.qty if supuesto and valor else 0
+            pasos.append('Piedras %s: %s = %s' % (linea._nv_texto_avaluo(), como, mxn(valor)))
+        if sin_medir:
+            pasos.append('Ojo: %s piedra(s) sin tamaño medido; se supusieron de %.2f mm (lo mínimo).' % (
+                sin_medir, cfg.acento_mm_supuesto))
 
         # --- Marca, desgaste, lo que acompaña ---
         marca = cfg._nv_marca(self.nv_brand)
@@ -236,7 +255,7 @@ class ProductTemplate(models.Model):
         pasos.append('Piso (confianza %s, ±%s %%): %s – %s' % (confianza, round(rango * 100), mxn(piso), mxn(piso_max)))
 
         # --- Techo: lo más barato que cuesta nuevo ---
-        nuevo_anello = 0.0 if (dudoso or not ct or p['simulante']) else self._nv_nuevo_anello(cfg, estilo, metal, kt, ct, es_lab, color, pureza, tc, pasos)
+        nuevo_anello = 0.0 if (dudoso or not ct or p['simulante'] or centro != 'diamante') else self._nv_nuevo_anello(cfg, estilo, metal, kt, ct, es_lab, color, pureza, tc, pasos)
         refs = [v for v in (nuevo_anello, self.nv_mercado_nuevo) if v and v > 0]
         techo = min(refs) * cfg.techo_pct / 100.0 if refs else 0.0
         if techo:
@@ -264,7 +283,7 @@ class ProductTemplate(models.Model):
             v = 'sin_precio'
         elif base and precio < piso * cfg.piso_alerta / 100.0:
             v = 'bajo'
-        elif not ct:
+        elif not ct and centro != 'sin':
             v = 'sin_ct'
         elif not techo:
             v = 'sin_nuevo'
@@ -372,7 +391,9 @@ class ProductTemplate(models.Model):
         ct = self.nv_carats or 0.0
         fisico = self.nv_av_tipo == 'fisico'
         simulante = False
-        if fisico:
+        if self.nv_centro == 'sin':
+            ct = 0.0
+        elif fisico:
             if self.nv_fis_origen in ('natural', 'lab'):
                 es_lab = self.nv_fis_origen == 'lab'
             simulante = self.nv_fis_origen == 'simulante'
@@ -380,6 +401,7 @@ class ProductTemplate(models.Model):
                 color, pureza, calidad = self.nv_fis_color, self.nv_fis_pureza, 'taller'
             if not ct and self.nv_fis_ct:
                 ct = self.nv_fis_ct
+        if fisico:
             # Confianza A: el origen se confirmó, la calidad se graduó aquí (o viene de un
             # laboratorio de 2-3 estrellas cuya inscripción coincide) y la pieza se pesó.
             # Si algo de eso falta, B: siempre sabemos más que con fotos.

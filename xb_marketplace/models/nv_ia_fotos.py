@@ -8,6 +8,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.image import image_process
 
+from .nv_avaluo_piedras import POSICIONES, mm_de_quilates
+
 _logger = logging.getLogger(__name__)
 
 MODELO = 'claude-opus-5-5'
@@ -55,6 +57,14 @@ Clasifica la foto en `tipo`:
 - pieza: foto general del anillo. Describe estado (A como nuevo, B uso normal, C rayones y garras gastadas, D necesita taller) y lo que acompaña a la pieza si aparece (estuche, caja, bolsa…).
 - otro: nada de lo anterior.
 
+`piedras` (en fotos tipo pieza y calibrador): cuenta las piedras que se ven ADEMÁS de la piedra central más grande. Un elemento por cada grupo de piedras iguales en el mismo lugar:
+- `posicion`: lateral (piedras a los lados de la central, más grandes que un melé), halo (rodean la central), aro (pavé o canal sobre el aro), central (una segunda piedra igual de grande que la central, como en un anillo «tú y yo»), otra.
+- Si en la foto hay más de un anillo (un juego con argolla, o varias piezas), cuenta SOLO las del anillo principal, el de la piedra central; dilo en `piedras_nota`.
+- `cantidad`: cuéntalas una por una. Si solo se ve una parte del anillo (por ejemplo, la mitad de un aro de eternidad), cuenta SOLO las que se ven y dilo en `piedras_nota`; no extrapoles.
+- `tamano_mm`: diámetro de cada piedra, SOLO si en la foto hay un calibrador o una regla, o si te doy el diámetro de la central para comparar. Si no, 0.
+- `tipo`: blanca (diamante o zirconia: en foto no se distinguen), color (zafiro, rubí, esmeralda u otra de color).
+Si el anillo no lleva más piedras que la central, deja `piedras` vacío. `piedras_nota`: lo que impida contar bien (reflejos, piedras tapadas, parte no visible), o "".
+
 `resumen`: una línea en español de lo que muestra la foto y lo que leíste.
 `calidad_foto`: de 0 a 10, qué tan buena es para ilustrar un informe (enfoque, luz, fondo limpio, la pieza completa). Solo importa en tipo pieza.
 `confianza`: alta si el texto se lee nítido; media si hay que adivinar algún carácter; baja si casi no se lee."""
@@ -87,15 +97,26 @@ ESQUEMA = {
         'inscripcion': {'type': 'string'},
         'desgaste': {'type': 'string', 'enum': ['', 'A', 'B', 'C', 'D']},
         'acompanantes': {'type': 'array', 'items': {'type': 'string', 'enum': ACOMPANANTES_IA}},
+        'piedras': {'type': 'array', 'items': {
+            'type': 'object', 'additionalProperties': False,
+            'properties': {
+                'posicion': {'type': 'string', 'enum': ['lateral', 'halo', 'aro', 'central', 'otra']},
+                'cantidad': {'type': 'integer'},
+                'tamano_mm': {'type': 'number'},
+                'tipo': {'type': 'string', 'enum': ['blanca', 'color']},
+            },
+            'required': ['posicion', 'cantidad', 'tamano_mm', 'tipo'],
+        }},
+        'piedras_nota': {'type': 'string'},
     },
     'required': ['tipo', 'resumen', 'confianza', 'calidad_foto', 'laboratorio', 'numero_reporte', 'quilates',
                  'forma', 'color', 'pureza', 'fluorescencia', 'origen_reporte', 'medidas_mm', 'marca',
                  'fecha_compra', 'precio_compra', 'moneda', 'quintado', 'ley_quintado', 'peso_g', 'detector',
-                 'inscripcion', 'desgaste', 'acompanantes'],
+                 'inscripcion', 'desgaste', 'acompanantes', 'piedras', 'piedras_nota'],
 }
 
 
-def _leer_con_claude(api_key, contenido):
+def _leer_con_claude(api_key, contenido, contexto=''):
     """Una foto → el JSON de ESQUEMA. Corre en un hilo: no toca el ORM."""
     import anthropic  # perezoso: el módulo carga aunque falte la librería
     client = anthropic.Anthropic(api_key=api_key, timeout=120, max_retries=2)
@@ -105,7 +126,7 @@ def _leer_con_claude(api_key, contenido):
         betas=['server-side-fallback-2026-07-01'],
         fallbacks='default',
         output_config={'format': {'type': 'json_schema', 'schema': ESQUEMA}},
-        messages=[{'role': 'user', 'content': [contenido, {'type': 'text', 'text': PROMPT}]}],
+        messages=[{'role': 'user', 'content': [contenido, {'type': 'text', 'text': PROMPT + contexto}]}],
     )
     if resp.stop_reason == 'refusal':
         raise UserError(_('La IA no quiso leer esta imagen.'))
@@ -199,12 +220,13 @@ class ProductTemplate(models.Model):
         if not por_leer:
             raise UserError(_('No hay fotos nuevas por leer. Arrastra las fotos al recuadro «Fotos para leer».'))
         key = self._nv_api_key()
+        contexto = self._nv_contexto_ia()
         trabajos = [(a, self._nv_contenido_ia(a)) for a in por_leer]
         trabajos = [(a, c) for a, c in trabajos if c]
 
         def leer(contenido):
             try:
-                return _leer_con_claude(key, contenido), None
+                return _leer_con_claude(key, contenido, contexto), None
             except Exception as exc:  # una foto que falla no detiene a las demás
                 _logger.exception('NV: no se pudo leer una foto')
                 return None, str(exc)
@@ -225,6 +247,7 @@ class ProductTemplate(models.Model):
         for adjunto, dato in sorted(leidas, key=lambda x: orden.get(x[1]['tipo'], 99)):
             self.with_context(nv_ia_llenando=True)._nv_aplicar_lectura(adjunto, dato)
         self.with_context(nv_ia_llenando=True)._nv_fotos_para_informe(leidas)
+        self.with_context(nv_ia_llenando=True)._nv_piedras_de_fotos(leidas)
 
         partes = [_('%s foto(s) leída(s).') % len(leidas)]
         if self.nv_lecturas_pendientes:
@@ -329,6 +352,78 @@ class ProductTemplate(models.Model):
                        dict(self._fields['nv_desgaste'].selection).get(dato['desgaste']), clave=False)
             for a in dato.get('acompanantes') or []:
                 self._nv_acompanante(adjunto, dato, a)
+
+    def _nv_contexto_ia(self):
+        """El diámetro de la central, para que la IA estime el tamaño de las demás piedras."""
+        mm = 0.0
+        nums = [float(n) for n in re.findall(r'\d+(?:\.\d+)?', (self.nv_fis_medidas or '').replace(',', '.'))]
+        if len(nums) >= 2:
+            mm = (nums[0] + nums[1]) / 2
+        elif self.nv_centro == 'diamante' and self.nv_carats:
+            mm = mm_de_quilates(self.nv_carats)
+        if not mm:
+            return ''
+        return '\n\nDato del valuador: la piedra central mide unos %.1f mm de diámetro; úsala como regla para ' \
+               'estimar `tamano_mm` de las demás piedras.' % mm
+
+    def _nv_piedras_de_fotos(self, leidas):
+        """Junta lo que contó la IA en todas las fotos y propone los renglones de piedras.
+
+        Cada foto ve solo una parte: por grupo (posición y tipo) se queda la cuenta más
+        alta, no la suma, porque dos fotos del mismo halo no son dos halos. Nunca pisa
+        renglones que capturó una persona: si ya hay, solo deja el conteo para comparar.
+        """
+        grupos, notas, foto = {}, [], None
+        for adjunto, dato in leidas:
+            for g in dato.get('piedras') or []:
+                if (g.get('cantidad') or 0) <= 0:
+                    continue
+                k = (g['posicion'], g['tipo'])
+                previo = grupos.get(k)
+                if not previo or g['cantidad'] > previo['cantidad']:
+                    grupos[k] = dict(g, tamano_mm=max(g.get('tamano_mm') or 0, (previo or {}).get('tamano_mm') or 0),
+                                     adjunto=adjunto, dato=dato)
+                elif g.get('tamano_mm') and not previo.get('tamano_mm'):
+                    previo['tamano_mm'] = g['tamano_mm']
+            if (dato.get('piedras_nota') or '').strip():
+                notas.append(dato['piedras_nota'].strip())
+        if not grupos:
+            return
+        nota = ' '.join(dict.fromkeys(notas))[:600] or None
+        texto = lambda g: '%s de %s · %s%s' % (
+            g['cantidad'], ('~%.1f mm' % g['tamano_mm']) if g['tamano_mm'] else 'tamaño sin medir',
+            dict(POSICIONES).get(g['posicion'], '').lower(), ' · de color' if g['tipo'] == 'color' else '')
+        Lectura = self.env['nv.avaluo.lectura']
+        self.nv_lectura_ids.filtered(lambda l: l.campo == 'dmn_accent_ids' and not l.confirmado).unlink()
+        a_mano = self.dmn_accent_ids.filtered(lambda l: not l.nv_ia)
+        if a_mano:
+            for g in grupos.values():
+                Lectura.create({
+                    'product_tmpl_id': self.id, 'campo': 'dmn_accent_ids_ia', 'name': _('Piedras contadas en fotos'),
+                    'valor': texto(g), 'foto_id': g['adjunto'].id, 'foto_tipo': g['dato']['tipo'], 'clave': False,
+                    'nota': _('ya hay piedras capturadas: compáralas; no se cambiaron'),
+                })
+            return
+        # El tipo de las blancas no se ve en foto: se supone el de la central.
+        blanca = 'diamante_lab' if self._nv_piedra(self.env['nv.avaluo.config']._nv_get())['es_lab'] else 'diamante_nat'
+        if self.nv_centro == 'diamante' and self.nv_av_tipo == 'fisico' and self.nv_fis_origen == 'simulante':
+            blanca = 'zirconia'
+        self.dmn_accent_ids.filtered('nv_ia').unlink()
+        for i, g in enumerate(sorted(grupos.values(), key=lambda g: -(g['tamano_mm'] or 0))):
+            self.env['dmn.accent.line'].create({
+                'product_tmpl_id': self.id, 'qty': g['cantidad'], 'size_mm': g['tamano_mm'] or 0.0,
+                'stone_type': 'otra' if g['tipo'] == 'color' else blanca, 'nv_posicion': g['posicion'],
+                'nv_ia': True,
+            })
+            Lectura.create({
+                'product_tmpl_id': self.id, 'campo': 'dmn_accent_ids', 'name': _('Piedras contadas en fotos'),
+                'valor': texto(g), 'foto_id': g['adjunto'].id, 'foto_tipo': g['dato']['tipo'], 'clave': True,
+                'nota': '; '.join(filter(None, [
+                    not g['tamano_mm'] and _('mide una con el calibrador'),
+                    g['tipo'] == 'blanca' and _('confirma con el detector si son diamantes'),
+                    g['tipo'] == 'color' and _('elige qué piedra de color es'),
+                    i == 0 and nota])) or None,
+            })
 
     def _nv_ct_por_medidas(self, adjunto, dato, medidas):
         """Peso estimado de una piedra redonda: diámetro promedio² × profundidad × 0.0061."""

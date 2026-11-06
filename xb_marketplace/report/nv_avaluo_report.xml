@@ -138,18 +138,18 @@
                                 <tr t-foreach="r['pieza']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
                             </table>
                             <t t-if="r['acentos']">
-                                <h2>Piedras de acento</h2>
+                                <h2>Piedras laterales y acentos</h2>
                                 <table class="kv">
                                     <tr t-foreach="r['acentos']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
                                 </table>
                             </t>
                         </td>
                         <td style="width:52%; vertical-align:top; padding-left:8pt;">
-                            <h2>Diamante central</h2>
+                            <h2 t-esc="r['centro_titulo']"/>
                             <table class="kv" t-if="r['diamante']">
                                 <tr t-foreach="r['diamante']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
                             </table>
-                            <div t-else="" class="muted">El vendedor no declaró los quilates de la piedra central: no se valúa.</div>
+                            <div t-else="" class="muted" t-esc="r['centro_vacio']"/>
                         </td>
                     </tr>
                 </table>

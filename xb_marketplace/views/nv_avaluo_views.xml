@@ -73,7 +73,15 @@
                                 <group string="Acentos y datos dudosos">
                                     <field name="acento_natural_usd"/>
                                     <field name="acento_lab_usd"/>
+                                    <field name="acento_umbral_ct"/>
+                                    <field name="acento_mm_supuesto"/>
                                     <field name="dudoso_ct"/>
+                                </group>
+                                <group string="Piedras de color (central o acentos)">
+                                    <field name="gema_zafiro_usd"/>
+                                    <field name="gema_rubi_usd"/>
+                                    <field name="gema_esmeralda_usd"/>
+                                    <field name="gema_otra_usd"/>
                                 </group>
                             </group>
                         </page>
@@ -175,6 +183,19 @@
     <menuitem id="menu_marketplace_config_avaluo" name="Avalúo"
               parent="menu_marketplace_config" action="action_nv_avaluo_config" sequence="10"/>
 
+    <!-- En un anuncio las piedras se capturan en la pestaña Avalúo (con su valor);
+         la pestaña genérica de stij se esconde para no tener dos lugares. -->
+    <record id="view_product_template_form_accent_nv" model="ir.ui.view">
+        <field name="name">product.template.form.piedras.acento.nv</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stij_diamane_plus.view_product_template_form_accent"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='dmn_acento']" position="attributes">
+                <attribute name="invisible">nv_is_listing</attribute>
+            </xpath>
+        </field>
+    </record>
+
     <!-- ===================== Ficha del anuncio: pestaña Avalúo ===================== -->
     <record id="view_product_template_form_nv_avaluo" model="ir.ui.view">
         <field name="name">product.template.form.nv.avaluo</field>
@@ -232,6 +253,43 @@
                             <field name="nv_cert_verificado"/>
                         </group>
                     </group>
+                    <div class="o_horizontal_separator mt-2 mb-3 text-uppercase fw-bolder small">Piedras</div>
+                    <group>
+                        <group>
+                            <field name="nv_centro" widget="radio"/>
+                            <field name="nv_centro_gema" invisible="nv_centro != 'gema'" required="nv_centro == 'gema'"/>
+                            <field name="nv_carats" string="Quilates de la central" invisible="nv_centro == 'sin'"/>
+                        </group>
+                        <group>
+                            <div colspan="2" class="text-muted small">
+                                Un renglón por cada grupo de piedras iguales, además de la central: por ejemplo
+                                «2 laterales de 4.5 mm», «18 de 1.3 mm en el halo» y «24 de 1.0 mm en el aro».
+                                Si no sabes el tamaño, déjalo vacío: se valúan como de lo más chico y el informe lo
+                                dice. Las laterales grandes con certificado llevan su color y pureza
+                                (columnas que se muestran con el botón de la derecha de la tabla).
+                                Los renglones en azul los contó la IA: revísalos.
+                                «Leer fotos» puede contarlas por ti.
+                            </div>
+                        </group>
+                    </group>
+                    <field name="dmn_accent_ids" nolabel="1" class="mb-3"
+                           context="{'default_stone_type': 'diamante_nat'}">
+                        <list editable="bottom" decoration-info="nv_ia">
+                            <field name="qty"/>
+                            <field name="nv_posicion"/>
+                            <field name="size_mm" string="mm c/u"/>
+                            <field name="stone_type"/>
+                            <field name="nv_gema" optional="show" invisible="stone_type != 'otra'"/>
+                            <field name="nv_color" optional="hide" invisible="stone_type not in ('diamante_nat', 'diamante_lab')"/>
+                            <field name="nv_pureza" optional="hide" invisible="stone_type not in ('diamante_nat', 'diamante_lab')"/>
+                            <field name="carats_each" string="ct c/u"/>
+                            <field name="carats_total" string="Quilates" readonly="1" sum="Total"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="nv_valor" sum="Total"/>
+                            <field name="nv_valor_nota" optional="hide"/>
+                            <field name="nv_ia" optional="hide"/>
+                        </list>
+                    </field>
                     <div invisible="nv_av_tipo != 'fisico'">
                         <div class="o_horizontal_separator mt-2 mb-3 text-uppercase fw-bolder small">Fotos para leer</div>
                         <div class="text-muted small mb-2">Arrastra aquí todas las fotos, en cualquier orden: certificado, factura, quintado, báscula, detector, inscripción láser, calibrador y fotos de la pieza. «Leer fotos» llena los campos; tú confirmas lo leído.</div>

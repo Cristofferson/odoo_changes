@@ -143,7 +143,8 @@ class ProductTemplate(models.Model):
                 peso_ct = '%.2f ct · estimado por medidas' % p['ct']
             diamante = [
                 ('Identificación', ident),
-                ('Forma y talla', c('x_studio_forma') or c('x_studio_talla_o_forma') or 'Redonda brillante (supuesta)'),
+                ('Forma y talla', (examen and self.nv_fis_forma and '%s · vista en taller' % self._nv_forma_texto())
+                 or c('x_studio_forma') or c('x_studio_talla_o_forma') or 'Redonda brillante (supuesta)'),
                 ('Peso', peso_ct),
                 ('Medidas', (examen and self.nv_fis_medidas and '%s mm (calibrador)' % self.nv_fis_medidas)
                  or c('x_studio_medidas_totales') or 'No medidas'),

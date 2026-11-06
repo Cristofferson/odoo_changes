@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Folio de recepción de piezas en el taller: REC-2026-00001 -->
+    <record id="seq_nv_recepcion" model="ir.sequence">
+        <field name="name">Folio de recepción (marketplace)</field>
+        <field name="code">nv.recepcion</field>
+        <field name="prefix">REC-%(year)s-</field>
+        <field name="padding">5</field>
+        <field name="implementation">no_gap</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

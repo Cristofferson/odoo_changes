@@ -47,6 +47,9 @@ class ProductTemplate(models.Model):
         Desde aquí cada movimiento queda en la trazabilidad del visor."""
         Lot = self.env['stock.lot'].sudo()
         for t in self:
+            if not t.nv_rec_folio:
+                # El folio lo pone el sistema: consecutivo, sin huecos ni repetidos.
+                t.nv_rec_folio = self.env['ir.sequence'].sudo().next_by_code('nv.recepcion')
             plastico = (t.nv_plastico or '').strip()
             if not plastico:
                 raise UserError(_('Escribe el número del plástico NFC que se le puso a la pieza.'))
@@ -77,7 +80,56 @@ class ProductTemplate(models.Model):
                 t.nv_joya_lot_id = lote
             t.write({'nv_rec_fecha': t.nv_rec_fecha or fields.Datetime.now(),
                      'nv_rec_user_id': t.nv_rec_user_id.id or self.env.user.id})
+        if len(self) == 1:
+            # Al recibirla sale el comprobante para firmar.
+            return self.env.ref('xb_marketplace.action_report_nv_recepcion').report_action(self)
         return True
+
+    def action_nv_comprobante(self):
+        return self.env.ref('xb_marketplace.action_report_nv_recepcion').report_action(self)
+
+    def _nv_peso_declarado_txt(self):
+        peso = ((self.x_studio_peso_joya if 'x_studio_peso_joya' in self._fields else '') or '').strip()
+        return ('%s g' % peso) if re.fullmatch(r'\d+(?:[.,]\d+)?', peso) else peso
+
+    def _nv_comprobante(self):
+        """Los datos del comprobante de recepción."""
+        self.ensure_one()
+        website = self.env['website'].sudo().search([('nv_is_marketplace', '=', True)], limit=1)
+        metal = self._nv_valor_atributo('Metal')
+        medida = self._nv_valor_atributo('Medida')
+        vendedor = self.nv_seller_id.partner_id
+        if self.nv_centro == 'sin':
+            central = 'No lleva piedra central'
+        elif self.nv_centro == 'gema':
+            central = '%s%s' % (self._nv_sel('nv_centro_gema') or 'Piedra de color',
+                                (' · %.2f ct declarados' % self.nv_carats) if self.nv_carats else '')
+        else:
+            central = 'Diamante%s' % ((' · %.2f ct declarados' % self.nv_carats) if self.nv_carats else '')
+        piedras = sum(self.dmn_accent_ids.mapped('qty'))
+        pieza = [x for x in [
+            ('Descripción', self.name),
+            ('Referencia', self.default_code),
+            ('Metal declarado', metal.name if metal else ''),
+            ('Talla', medida.name if medida else self.nv_size),
+            ('Piedra central', central),
+            ('Otras piedras', ('%s, declaradas o contadas a simple vista' % piedras) if piedras else ''),
+            ('Peso declarado', self._nv_peso_declarado_txt()),
+            ('Plástico NFC', self.nv_plastico),
+        ] if x[1]]
+        return {
+            'logo': website.logo if website else False,
+            'marca_web': website.name if website else 'NOVADIAM',
+            'folio': self.nv_rec_folio or '',
+            'fecha': self._nv_fecha_hora(self.nv_rec_fecha),
+            'recibio': self.nv_rec_user_id.name or '',
+            'vendedor': vendedor.name or '',
+            'vendedor_datos': ' · '.join(filter(None, [self.nv_seller_id.city or vendedor.city,
+                                                        vendedor.phone, vendedor.email])),
+            'pieza': pieza,
+            'estado': self.nv_rec_estado or '',
+            'foto': self.image_512 if self.image_1920 else False,
+        }
 
     # ------------------------------------------------------------------
     # ICERT: la gema graduada en el taller, ligada a la joya
@@ -151,7 +203,7 @@ class ProductTemplate(models.Model):
         Tmpl = self.env['product.template'].sudo()
         categ = self.env['product.category'].sudo().search([('name', '=', 'Gema')], limit=1)
         ct = self.nv_carats or self.nv_fis_ct
-        forma = self.x_studio_forma.name if 'x_studio_forma' in self._fields and self.x_studio_forma else ''
+        forma = self._nv_forma_texto()
         vals = {
             'name': 'Diamante %s%.2f ct %s %s' % ((forma + ' ') if forma else '', ct, self.nv_fis_color, self.nv_fis_pureza),
             'categ_id': categ.id or self.categ_id.id,

@@ -8,7 +8,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.image import image_process
 
-from .nv_avaluo_piedras import POSICIONES, mm_de_quilates
+from .nv_avaluo_piedras import FORMAS, POSICIONES, ct_por_medidas, forma_de_texto, mm_de_quilates
 
 _logger = logging.getLogger(__name__)
 
@@ -61,7 +61,9 @@ Clasifica la foto en `tipo`:
 - `posicion`: lateral (piedras a los lados de la central, más grandes que un melé), halo (rodean la central), aro (pavé o canal sobre el aro), central (una segunda piedra igual de grande que la central, como en un anillo «tú y yo»), otra.
 - Si en la foto hay más de un anillo (un juego con argolla, o varias piezas), cuenta SOLO las del anillo principal, el de la piedra central; dilo en `piedras_nota`.
 - `cantidad`: cuéntalas una por una. Si solo se ve una parte del anillo (por ejemplo, la mitad de un aro de eternidad), cuenta SOLO las que se ven y dilo en `piedras_nota`; no extrapoles.
-- `tamano_mm`: diámetro de cada piedra, SOLO si en la foto hay un calibrador o una regla, o si te doy el diámetro de la central para comparar. Si no, 0.
+- `forma`: redondo, princesa (cuadrada), baguette (rectángulo largo y angosto), oval, pera, marquesa, esmeralda (rectángulo con esquinas cortadas), cojin, corazon, radiante, asscher, trillon (triángulo) u otra. Un grupo de baguettes y uno de redondas en el mismo lugar son DOS grupos.
+- `tamano_mm`: diámetro de cada piedra si es redonda, o su LARGO si es de otra forma; SOLO si en la foto hay un calibrador o una regla, o si te doy el diámetro de la central para comparar. Si no, 0.
+- `ancho_mm`: el ancho, solo si no es redonda y se puede medir igual que `tamano_mm`. Si no, 0.
 - `tipo`: blanca (diamante o zirconia: en foto no se distinguen), color (zafiro, rubí, esmeralda u otra de color).
 Si el anillo no lleva más piedras que la central, deja `piedras` vacío. `piedras_nota`: lo que impida contar bien (reflejos, piedras tapadas, parte no visible), o "".
 
@@ -103,9 +105,11 @@ ESQUEMA = {
                 'posicion': {'type': 'string', 'enum': ['lateral', 'halo', 'aro', 'central', 'otra']},
                 'cantidad': {'type': 'integer'},
                 'tamano_mm': {'type': 'number'},
+                'forma': {'type': 'string', 'enum': [f for f, _n in FORMAS]},
+                'ancho_mm': {'type': 'number'},
                 'tipo': {'type': 'string', 'enum': ['blanca', 'color']},
             },
-            'required': ['posicion', 'cantidad', 'tamano_mm', 'tipo'],
+            'required': ['posicion', 'cantidad', 'tamano_mm', 'forma', 'ancho_mm', 'tipo'],
         }},
         'piedras_nota': {'type': 'string'},
     },
@@ -306,6 +310,9 @@ class ProductTemplate(models.Model):
             if dato.get('origen_reporte') and 'x_studio_origen_c' in self._fields:
                 valor = 'Natural (mina)' if dato['origen_reporte'] == 'natural' else 'Sintético (laboratorio)'
                 anotar('x_studio_origen_c', _('Origen (reporte)'), valor, valor)
+            forma = forma_de_texto(dato.get('forma'))
+            if forma and not self.nv_fis_forma:
+                anotar('nv_fis_forma', _('Forma'), forma, dict(FORMAS)[forma], nota=_('del reporte: %s') % dato['forma'])
             if dato.get('medidas_mm') and not self.nv_fis_medidas:
                 anotar('nv_fis_medidas', _('Medidas de la piedra'), dato['medidas_mm'], dato['medidas_mm'],
                        nota=_('del reporte; mídelas para confirmar'))
@@ -357,6 +364,10 @@ class ProductTemplate(models.Model):
         """El diámetro de la central, para que la IA estime el tamaño de las demás piedras."""
         mm = 0.0
         nums = [float(n) for n in re.findall(r'\d+(?:\.\d+)?', (self.nv_fis_medidas or '').replace(',', '.'))]
+        if len(nums) >= 2 and self.nv_fis_forma and self.nv_fis_forma != 'redondo':
+            return '\n\nDato del valuador: la piedra central es %s y mide unos %.1f × %.1f mm (largo × ancho); ' \
+                   'úsala como regla para estimar el tamaño de las demás piedras.' % (
+                       dict(FORMAS)[self.nv_fis_forma].lower(), nums[0], nums[1])
         if len(nums) >= 2:
             mm = (nums[0] + nums[1]) / 2
         elif self.nv_centro == 'diamante' and self.nv_carats:
@@ -378,7 +389,8 @@ class ProductTemplate(models.Model):
             for g in dato.get('piedras') or []:
                 if (g.get('cantidad') or 0) <= 0:
                     continue
-                k = (g['posicion'], g['tipo'])
+                g.setdefault('forma', 'redondo')
+                k = (g['posicion'], g['tipo'], g['forma'])
                 previo = grupos.get(k)
                 if not previo or g['cantidad'] > previo['cantidad']:
                     grupos[k] = dict(g, tamano_mm=max(g.get('tamano_mm') or 0, (previo or {}).get('tamano_mm') or 0),
@@ -390,8 +402,9 @@ class ProductTemplate(models.Model):
         if not grupos:
             return
         nota = ' '.join(dict.fromkeys(notas))[:600] or None
-        texto = lambda g: '%s de %s · %s%s' % (
-            g['cantidad'], ('~%.1f mm' % g['tamano_mm']) if g['tamano_mm'] else 'tamaño sin medir',
+        texto = lambda g: '%s%s de %s · %s%s' % (
+            g['cantidad'], '' if g['forma'] == 'redondo' else ' ' + dict(FORMAS).get(g['forma'], '').lower(),
+            ('~%.1f mm' % g['tamano_mm']) if g['tamano_mm'] else 'tamaño sin medir',
             dict(POSICIONES).get(g['posicion'], '').lower(), ' · de color' if g['tipo'] == 'color' else '')
         Lectura = self.env['nv.avaluo.lectura']
         self.nv_lectura_ids.filtered(lambda l: l.campo == 'dmn_accent_ids' and not l.confirmado).unlink()
@@ -412,6 +425,8 @@ class ProductTemplate(models.Model):
         for i, g in enumerate(sorted(grupos.values(), key=lambda g: -(g['tamano_mm'] or 0))):
             self.env['dmn.accent.line'].create({
                 'product_tmpl_id': self.id, 'qty': g['cantidad'], 'size_mm': g['tamano_mm'] or 0.0,
+                'nv_forma': g['forma'] if g['forma'] in dict(FORMAS) else 'otra',
+                'nv_ancho_mm': (g.get('ancho_mm') or 0.0) if g['forma'] != 'redondo' else 0.0,
                 'stone_type': 'otra' if g['tipo'] == 'color' else blanca, 'nv_posicion': g['posicion'],
                 'nv_ia': True,
             })
@@ -426,10 +441,10 @@ class ProductTemplate(models.Model):
             })
 
     def _nv_ct_por_medidas(self, adjunto, dato, medidas):
-        """Peso estimado de una piedra redonda: diámetro promedio² × profundidad × 0.0061."""
-        nums = [float(n) for n in re.findall(r'\d+(?:\.\d+)?', medidas.replace(',', '.'))]
-        if len(nums) == 3 and self._nv_forma() == 'Round':
-            ct = round(((nums[0] + nums[1]) / 2) ** 2 * nums[2] * 0.0061, 2)
+        """Peso estimado con las medidas, con la fórmula de la forma de la piedra."""
+        forma = self.nv_fis_forma or forma_de_texto(dato.get('forma')) or 'redondo'
+        ct = ct_por_medidas(forma, medidas)
+        if ct:
             if 0.05 <= ct <= 10:
                 self._nv_anotar(adjunto, dato, 'nv_fis_ct', _('Peso estimado por medidas'), ct, '%.2f ct' % ct,
                                 clave=False, nota=_('calculado de las medidas'))

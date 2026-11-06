@@ -367,6 +367,10 @@ class NvAvaluoEstilo(models.Model):
     sequence = fields.Integer(default=10)
     name = fields.Char('Estilo', required=True)
     peso_14k = fields.Float('Peso estimado (g, 14K, talla 6)', digits=(6, 2))
+    montadura_trae_pave = fields.Boolean(
+        'Su montadura trae piedras chicas',
+        help='Márcalo si la montadura de referencia ya lleva pavé o halo: entonces las piedras chicas '
+             'del halo y del aro no se suman al precio de nuevo, porque ya vienen en ella.')
     montadura_ids = fields.Many2many(
         'product.template', 'nv_avaluo_estilo_montadura_rel', 'estilo_id', 'tmpl_id',
         'Montaduras de Anello para comparar',

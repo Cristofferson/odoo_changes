@@ -150,7 +150,7 @@ class ProductTemplate(models.Model):
                  'nv_fis_ct', 'nv_fis_laser', 'attribute_line_ids.value_ids',
                  'nv_centro', 'nv_centro_gema', 'dmn_accent_ids.qty', 'dmn_accent_ids.carats_each',
                  'dmn_accent_ids.stone_type', 'dmn_accent_ids.nv_gema', 'dmn_accent_ids.nv_color',
-                 'dmn_accent_ids.nv_pureza')
+                 'dmn_accent_ids.nv_pureza', 'dmn_accent_ids.nv_forma', 'nv_fis_forma')
     def _compute_nv_avaluo(self):
         vacio = dict(nv_av_confianza=False, nv_av_oro=0, nv_av_hechura=0, nv_av_diamante=0,
                      nv_av_acentos=0, nv_avaluo_metal=0, nv_avaluo_piedras=0, nv_avaluo=0,
@@ -478,10 +478,44 @@ class ProductTemplate(models.Model):
             piedra = ct * rap * (1 + corte + cert) * tc
             detalle = '%.2f ct %s / %s × Rapaport %s × (1 + corte %s %% + %s %s %%)' % (
                 ct, color, pureza, format(round(rap), ','), round(corte * 100), cfg.lab_anello, round(cert * 100))
-        total = montadura + piedra
-        pasos.append('Nuevo en Anello: montadura %s %s + diamante %s (%s) = %s' % (
-            tmpl.name, mxn(montadura), mxn(piedra), detalle, mxn(total)))
+        extra, txt_extra = self._nv_acentos_nuevos(cfg, tc, estilo)
+        total = montadura + piedra + extra
+        pasos.append('Nuevo en Anello: montadura %s %s + diamante %s (%s)%s = %s' % (
+            tmpl.name, mxn(montadura), mxn(piedra), detalle, txt_extra, mxn(total)))
         return total
+
+    def _nv_acentos_nuevos(self, cfg, tc, estilo=None):
+        """Lo que costarían nuevas las piedras que la montadura de referencia NO trae.
+
+        - Laterales grandes (de `acento_umbral_ct` en adelante): a precio de diamante nuevo.
+        - Piedras de color y diamantes chicos: a su valor del avalúo (lo mínimo que cuestan).
+        - Las chicas del halo y del aro NO se suman si la montadura del estilo ya trae pavé
+          o halo (casilla del estilo en la configuración): ya vienen en su precio.
+        Sin esto, un anillo de tres piedras se comparaba con un solitario y el techo quedaba
+        abajo del piso."""
+        mxn = lambda v: '$' + format(round(v or 0), ',')
+        icp = self.env['ir.config_parameter'].sudo()
+        trae_pave = bool(estilo and estilo.montadura_trae_pave)
+        total, partes = 0.0, []
+        for l in self.dmn_accent_ids:
+            if not l.qty or l.stone_type == 'zirconia':
+                continue
+            grande = l.stone_type in ('diamante_nat', 'diamante_lab') and (l.carats_each or 0) >= cfg.acento_umbral_ct
+            if grande and l.stone_type == 'diamante_lab':
+                v = l.carats_total * float(icp.get_param('xb_gema_precio_rapaport.lab_usd_quilate', '180')) \
+                    * float(icp.get_param('xb_gema_precio_rapaport.factor_lab', '3.88')) * tc * 1.16
+            elif grande:
+                rap, _n = self._nv_precio_rapaport(l.carats_each, l.nv_color or COLOR_SUPUESTO,
+                                                   l.nv_pureza or PUREZA_SUPUESTA, l._nv_forma_rapaport())
+                v = l.carats_total * (rap or 0.0) * tc
+            elif l.stone_type != 'otra' and trae_pave and l.nv_posicion in ('halo', 'aro'):
+                continue
+            else:
+                v = l.nv_valor
+            if v:
+                total += v
+                partes.append('%s %s' % (l._nv_texto_avaluo(), mxn(v)))
+        return total, (' + piedras que la montadura no trae %s (%s)' % (mxn(total), '; '.join(partes)) if total else '')
 
     def _nv_montadura_anello(self, cfg, estilo, metal, kt):
         """Precio con IVA de la montadura de referencia del estilo, en el mismo metal (o el

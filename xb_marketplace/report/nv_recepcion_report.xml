@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_nv_recepcion" model="ir.actions.report">
+        <field name="name">Comprobante de recepción</field>
+        <field name="model">product.template</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">xb_marketplace.report_nv_recepcion</field>
+        <field name="report_file">xb_marketplace.report_nv_recepcion</field>
+        <field name="print_report_name">'Recepcion - %s' % (object.nv_rec_folio or object.default_code or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_nv_avaluo"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(4, ref('xb_marketplace.group_marketplace_manager'))]"/>
+    </record>
+
+    <!-- Una hoja por tanto: una se queda el vendedor y otra NOVADIAM. -->
+    <template id="report_nv_recepcion_document">
+        <t t-set="r" t-value="o._nv_comprobante()"/>
+        <div class="header" style="font-family: Helvetica, Arial, sans-serif; font-size: 8pt; color: #5d6570;">
+            <table style="width:100%; border-bottom: 0.8pt solid #8a6a35;">
+                <tr>
+                    <td style="width:50%; padding-bottom:4pt; vertical-align:bottom;">
+                        <img t-if="r['logo']" t-att-src="image_data_uri(r['logo'])" style="max-height:30pt; max-width:160pt;"/>
+                        <span t-else="" style="font-family: Georgia, serif; font-size: 16pt; color:#1d2229; letter-spacing: 3pt;" t-esc="r['marca_web']"/>
+                    </td>
+                    <td style="width:50%; text-align:right; padding-bottom:4pt; vertical-align:bottom; letter-spacing: 1pt;">
+                        COMPROBANTE DE RECEPCIÓN<br/>
+                        <span style="color:#1d2229;">Folio <t t-esc="r['folio']"/></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="article">
+            <style>
+                .nvr { font-family: Helvetica, Arial, sans-serif; color: #1d2229; font-size: 10pt; line-height: 1.4; }
+                .nvr h1 { font-family: Georgia, "Times New Roman", serif; font-size: 18pt; font-weight: normal; margin: 0 0 2pt 0; }
+                .nvr h2 { font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #8a6a35; margin: 12pt 0 4pt 0; border-bottom: 0.6pt solid #d9cdb7; padding-bottom: 2pt; font-weight: bold; }
+                .nvr .tag { font-size: 7.5pt; letter-spacing: 1.4pt; text-transform: uppercase; color: #8a6a35; font-weight: bold; }
+                .nvr .muted { color: #5d6570; }
+                .nvr table.kv { width: 100%; border-collapse: collapse; }
+                .nvr table.kv td { padding: 2.5pt 4pt; border-bottom: 0.4pt solid #e6e3da; vertical-align: top; }
+                .nvr table.kv td.k { color: #5d6570; width: 32%; }
+                .nvr .caja { border: 0.6pt solid #d9cdb7; padding: 6pt 8pt; min-height: 40pt; }
+                .nvr table.firmas { width: 100%; margin-top: 34pt; }
+                .nvr table.firmas td { width: 50%; text-align: center; padding: 0 14pt; vertical-align: top; }
+                .nvr table, .nvr table td, .nvr table tr { border: none !important; }
+                .nvr table.kv td { border-bottom: 0.4pt solid #e6e3da !important; }
+                .nvr .linea { border-top: 0.6pt solid #1d2229 !important; padding-top: 3pt; }
+            </style>
+            <div class="nvr">
+                <table style="width:100%;">
+                    <tr>
+                        <td style="vertical-align:top;">
+                            <div class="tag"><t t-esc="tanto"/></div>
+                            <h1 t-esc="o.name"/>
+                            <div class="muted">Recibida el <t t-esc="r['fecha']"/> · Recibió <t t-esc="r['recibio']"/></div>
+                        </td>
+                        <td t-if="r['foto']" style="width:95pt; text-align:right; vertical-align:top;">
+                            <img t-att-src="image_data_uri(r['foto'])" style="max-width:90pt; max-height:90pt; border:0.5pt solid #d9cdb7;"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <h2>Quién entrega</h2>
+                <table class="kv" style="border:0;">
+                    <tr><td class="k">Nombre</td><td t-esc="r['vendedor']"/></tr>
+                    <tr t-if="r['vendedor_datos']"><td class="k">Datos de contacto</td><td t-esc="r['vendedor_datos']"/></tr>
+                </table>
+
+                <h2>La pieza</h2>
+                <table class="kv" style="border:0;">
+                    <tr t-foreach="r['pieza']" t-as="x"><td class="k" t-esc="x[0]"/><td t-esc="x[1]"/></tr>
+                </table>
+
+                <h2>Estado al recibirla</h2>
+                <div class="caja"><t t-esc="r['estado'] or 'Sin observaciones.'"/></div>
+
+                <p class="muted" style="margin-top:10pt; font-size:8.5pt;">
+                    <t t-esc="r['marca_web']"/> recibe esta pieza en resguardo para examinarla y valuarla, en el estado descrito arriba.
+                    La descripción es la declarada por quien entrega; el metal, las piedras y su peso se comprueban en el examen.
+                </p>
+
+                <table class="firmas" style="border:0;">
+                    <tr>
+                        <td style="border:0;"><div class="linea">Entrega · <t t-esc="r['vendedor']"/></div><div class="muted" style="font-size:8pt;">Nombre y firma</div></td>
+                        <td style="border:0;"><div class="linea">Recibe · <t t-esc="r['recibio']"/></div><div class="muted" style="font-size:8pt;">Nombre y firma</div></td>
+                    </tr>
+                </table>
+
+                <h2 style="margin-top:22pt;">Devolución o entrega de la pieza</h2>
+                <table class="kv" style="border:0;">
+                    <tr><td class="k">Fecha</td><td>&#160;</td></tr>
+                    <tr><td class="k">Entregada a</td><td>&#160;</td></tr>
+                </table>
+                <table class="firmas" style="border:0; margin-top:28pt;">
+                    <tr>
+                        <td style="border:0;"><div class="linea">Recibe la pieza</div><div class="muted" style="font-size:8pt;">Nombre y firma</div></td>
+                        <td style="border:0;"><div class="linea">Entrega · <t t-esc="r['marca_web']"/></div><div class="muted" style="font-size:8pt;">Nombre y firma</div></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="footer" style="font-family: Helvetica, Arial, sans-serif; font-size: 7pt; color: #5d6570;">
+            <table style="width:100%; border-top: 0.5pt solid #d9cdb7;">
+                <tr>
+                    <td style="padding-top:3pt;"><t t-esc="r['marca_web']"/> · Comprobante de recepción · Folio <t t-esc="r['folio']"/></td>
+                    <td style="padding-top:3pt; text-align:right;"><t t-esc="tanto"/></td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="report_nv_recepcion">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-foreach="['Tanto para quien entrega', 'Tanto para NOVADIAM']" t-as="tanto">
+                    <t t-call="xb_marketplace.report_nv_recepcion_document"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

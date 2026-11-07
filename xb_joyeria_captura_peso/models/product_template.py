@@ -26,7 +26,7 @@ class ProductTemplate(models.Model):
 
     # ------------------------------------------------------------------
     def _xb_linea(self, nombre):
-        return self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == nombre)
+        return self.attribute_line_ids.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == nombre)
 
     def _xb_tiene_metal(self):
         return bool(self._xb_linea('Metal').value_ids.filtered(

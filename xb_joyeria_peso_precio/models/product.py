@@ -29,14 +29,15 @@ class ProductTemplate(models.Model):
         de menor kilataje que ofrece la pieza (no plata/acero: sería engañoso para oro)."""
         self.ensure_one()
         comb = self._get_first_possible_combination()
-        metal_line = self.valid_product_template_attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Metal')
+        metal_line = self.valid_product_template_attribute_line_ids.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == 'Metal')
         if not metal_line:
             return comb
         oros = metal_line.product_template_value_ids._only_active().filtered(
-            lambda v: 'oro' in (v.name or '').lower() and 'imitaci' not in (v.name or '').lower() and KT.search(v.name or ''))
+            lambda v: 'oro' in (v.with_context(lang='es_MX').name or '').lower() and 'imitaci' not in (v.with_context(lang='es_MX').name or '').lower()
+            and KT.search(v.with_context(lang='es_MX').name or ''))
         if not oros:
             return comb
-        barato = min(oros, key=lambda v: int(KT.search(v.name).group(1)))
+        barato = min(oros, key=lambda v: int(KT.search(v.with_context(lang='es_MX').name).group(1)))
         return (comb - comb.filtered(lambda v: v.attribute_line_id == metal_line)) | barato
 
     def _get_sales_prices(self, website):
@@ -102,7 +103,7 @@ class ProductTemplate(models.Model):
         # Las argollas y churumbelas (p. ej. brillantes incrustados) no tienen piedra central: la opción «Piedra» solo
         # elige el material de las piedras de la banda.
         sin_central = self._xb_sin_central()
-        central = ptavs.filtered(lambda v: v.attribute_id.name == 'Piedra')[:1] if not sin_central \
+        central = ptavs.filtered(lambda v: self._xb_nombre_atributo(v.attribute_id) == 'Piedra')[:1] if not sin_central \
             else self.env['product.template.attribute.value']
         acentos = {}
         bom = self.env['mrp.bom'].sudo().search(

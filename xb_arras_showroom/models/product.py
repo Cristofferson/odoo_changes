@@ -15,7 +15,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         lineas = self.valid_product_template_attribute_line_ids
         def valores(nombre):
-            l = lineas.filtered(lambda x: x.attribute_id.name == nombre)
+            l = lineas.filtered(lambda x: x.attribute_id.with_context(lang='es_MX').name == nombre)
             return l.product_template_value_ids._only_active()
         metales, tamanos, vueltas = valores('Metal'), valores('Tamaño de arra'), valores('Vuelta')
         m_sel = (options & metales)[:1] or metales[:1]

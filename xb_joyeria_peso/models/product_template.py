@@ -106,8 +106,16 @@ class ProductTemplate(models.Model):
 
     def _xb_valor_de(self, ptavs, nombre_atributo):
         """El valor de atributo que la combinación trae para un atributo dado."""
-        v = ptavs.filtered(lambda p: p.attribute_id.name == nombre_atributo)[:1]
+        v = ptavs.filtered(lambda p: self._xb_nombre_atributo(p.attribute_id) == nombre_atributo)[:1]
         return v.product_attribute_value_id if v else False
+
+    @api.model
+    def _xb_nombre_atributo(self, atributo):
+        """Nombre del atributo SIEMPRE en español («Ancho», «Medida»), sin importar el
+        idioma de quien cotiza: en inglés son «Width» y «Ring Size» y, comparando con
+        el nombre traducido, el ancho y la medida dejaban de contar (el agente de
+        WhatsApp cotizó un par de 18 kt / 6 mm al precio de 2 mm talla 4)."""
+        return atributo.with_context(lang='es_MX').name
 
     def _xb_referencia(self):
         """La combinación de referencia: el valor más bajo que ofrezca la
@@ -117,7 +125,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         ref = {}
         for linea in self.attribute_line_ids:
-            nombre = linea.attribute_id.name
+            nombre = self._xb_nombre_atributo(linea.attribute_id)
             valores = linea.value_ids
             if not valores:
                 continue
@@ -157,7 +165,7 @@ class ProductTemplate(models.Model):
         # Densidad a la que corresponde el peso capturado. Con varios metales
         # ofrecidos, el dato viene en 14 Kt; con uno solo, en ese mismo metal.
         linea_metal = self.attribute_line_ids.filtered(
-            lambda l: l.attribute_id.name == 'Metal')
+            lambda l: self._xb_nombre_atributo(l.attribute_id) == 'Metal')
         varios = len(linea_metal.value_ids) > 1
         dens_base = DENSIDAD_CAPTURA_14K if varios else (metal.x_densidad or 1)
         factor = (metal.x_densidad or 0) / (dens_base or 1)
@@ -176,7 +184,7 @@ class ProductTemplate(models.Model):
             # La talla base es aquella a la que se pesó la pieza, no la más
             # chica del modelo. Si el modelo ofrece una sola talla, esa es.
             linea_medida = self.attribute_line_ids.filtered(
-                lambda l: l.attribute_id.name == 'Medida')
+                lambda l: self._xb_nombre_atributo(l.attribute_id) == 'Medida')
             t_ref = (TALLA_CAPTURA if len(linea_medida.value_ids) > 1
                      else self._xb_numero(medida_ref.name))
             if t and t_ref:

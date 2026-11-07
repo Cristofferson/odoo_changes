@@ -317,12 +317,13 @@ class ProductTemplate(models.Model):
     # ------------------------------------------------------------------
     def _nv_valor_atributo(self, nombre):
         """El valor (product.attribute.value) del atributo `nombre` de la pieza."""
-        linea = self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == nombre)
+        # Siempre con el nombre en español: en inglés «Medida» es «Ring Size» y no se encontraba.
+        linea = self.attribute_line_ids.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == nombre)
         return linea.value_ids[:1]
 
     @api.model
     def _nv_kilataje(self, metal):
-        nombre = (metal.name or '') if metal else ''
+        nombre = (metal.with_context(lang='es_MX').name or '') if metal else ''
         if 'platino' in nombre.lower():
             return 'PT'
         m = re.search(r'(\d+)\s*k', nombre, re.I)
@@ -330,7 +331,7 @@ class ProductTemplate(models.Model):
 
     def _nv_estilo(self, cfg):
         valor = self._nv_valor_atributo('Estilo')
-        texto = ' '.join(filter(None, [valor.name if valor else '', self.name or ''])).lower()
+        texto = ' '.join(filter(None, [valor.with_context(lang='es_MX').name if valor else '', self.name or ''])).lower()
         for e in cfg.estilo_ids:
             if e.name.lower() in texto:
                 return e
@@ -522,20 +523,20 @@ class ProductTemplate(models.Model):
         mismo kilataje si Anello no maneja ese color), a la talla de referencia."""
         if not estilo or not cfg.pricelist_id or not hasattr(self, 'xb_pos_precio_combinacion'):
             return 0.0, None
-        nombre_metal = (metal.name or '').strip().lower() if metal else ''
+        nombre_metal = (metal.with_context(lang='es_MX').name or '').strip().lower() if metal else ''
         candidatos = []
         for tmpl in estilo.montadura_ids:
             ptavs = tmpl.attribute_line_ids.product_template_value_ids
-            for v in ptavs.filtered(lambda p: p.attribute_id.name == 'Metal'):
-                n = v.name.strip().lower()
+            for v in ptavs.filtered(lambda p: p.attribute_id.with_context(lang='es_MX').name == 'Metal'):
+                n = (v.with_context(lang='es_MX').name or '').strip().lower()
                 if n == nombre_metal:
                     candidatos.insert(0, (tmpl, v))
                 elif self._nv_kilataje(v) == kt:
                     candidatos.append((tmpl, v))
         for tmpl, v_metal in candidatos:
             ptavs = tmpl.attribute_line_ids.product_template_value_ids
-            medida = ptavs.filtered(lambda p: p.attribute_id.name == 'Medida' and p.name == cfg.medida_ref)[:1]
-            piedra = ptavs.filtered(lambda p: p.attribute_id.name == 'Piedra' and p.name == 'Diamante natural')[:1]
+            medida = ptavs.filtered(lambda p: p.attribute_id.with_context(lang='es_MX').name == 'Medida' and p.with_context(lang='es_MX').name == cfg.medida_ref)[:1]
+            piedra = ptavs.filtered(lambda p: p.attribute_id.with_context(lang='es_MX').name == 'Piedra' and p.with_context(lang='es_MX').name == 'Diamante natural')[:1]
             combo = v_metal | medida | piedra
             res = self.env['product.template'].sudo().xb_pos_precio_combinacion(
                 tmpl.id, combo.ids, cfg.pricelist_id.id)

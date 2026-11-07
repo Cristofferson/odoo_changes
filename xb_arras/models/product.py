@@ -54,10 +54,10 @@ class ProductTemplate(models.Model):
         if not self.xb_arras:
             return comb
         lineas = self.valid_product_template_attribute_line_ids
-        metal_l = lineas.filtered(lambda l: l.attribute_id.name == 'Metal')
+        metal_l = lineas.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == 'Metal')
         if not metal_l:
             return comb
-        tam_l = lineas.filtered(lambda l: l.attribute_id.name == 'Tamaño de arra')
+        tam_l = lineas.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == 'Tamaño de arra')
         if tam_l:
             chico = tam_l.product_template_value_ids._only_active()[:1]
             comb = (comb - comb.filtered(lambda v: v.attribute_line_id == tam_l)) | chico
@@ -145,7 +145,7 @@ class ProductTemplateFicha(models.Model):
 
     def _xb_arras_metal(self, pav):
         """(grupo, etiqueta, tono) de un valor del atributo Metal, en palabras del cliente."""
-        n = (pav.name or '').lower()
+        n = (pav.with_context(lang='es_MX').name or '').lower()
         if (pav.x_metal or '') == 'Imitación' or 'imitaci' in n:
             oro = 'oro' in n
             return 'Imitación', 'Imitación oro' if oro else 'Imitación plata', 'g' if oro else 's'
@@ -162,7 +162,7 @@ class ProductTemplateFicha(models.Model):
         self.ensure_one()
         lineas = self.valid_product_template_attribute_line_ids
         def linea(nombre):
-            return lineas.filtered(lambda l: l.attribute_id.name == nombre)
+            return lineas.filtered(lambda l: l.attribute_id.with_context(lang='es_MX').name == nombre)
         lm, lt, lv, lg = linea('Metal'), linea('Tamaño de arra'), linea('Vuelta'), linea('Grabado de la vuelta')
         activos = lambda l: l.product_template_value_ids._only_active()
         base = self._get_first_possible_combination()
@@ -189,7 +189,7 @@ class ProductTemplateFicha(models.Model):
             g['s'] = sub.get(g['g'], '')
         vueltas = []
         for v in activos(lv):
-            n = (v.name or '').lower()
+            n = (v.with_context(lang='es_MX').name or '').lower()
             campos = [c for c, k in (('v', 'valor'), ('n', 'nombre'), ('i', 'iniciales'), ('d', 'fecha')) if k in n]
             # La foto del valor de atributo se guarda a 70 px: para la ficha se usa la del módulo (600 px).
             archivo = '%s.webp' % _slug(v.product_attribute_value_id.with_context(lang='es_MX').name)

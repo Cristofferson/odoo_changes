@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Joyería · captura de pesos",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "summary": "Pantalla para capturar el peso de cada joya; al guardarlo la joya se cotiza "
                "sola por metal, con su hechura",
     "description": """

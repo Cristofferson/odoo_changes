@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Arras 3888 en el muro del showroom",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.1.1",
     "summary": "Pantalla propia de Arras 3888 en el videowall: frente, vuelta, tamaños y precios",
     "description": """
 Puente entre ``xb_arras`` y ``xb_showroom_wall``. Cuando el muro recibe una ficha de Arras 3888

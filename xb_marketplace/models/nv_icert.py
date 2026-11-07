@@ -263,7 +263,7 @@ class ProductTemplate(models.Model):
             'x_studio_medida_joya': medida.name if medida else self.nv_size,
         }
         if metal and hasattr(Lot, '_dmn_parse_metal'):
-            info = Lot._dmn_parse_metal(metal.name)
+            info = Lot._dmn_parse_metal(metal.with_context(lang='es_MX').name)
             vals.update({'x_studio_metal_1': info['base'], 'x_studio_color_metal': info['color'],
                          'x_studio_kilataje_metal': info['kilataje'],
                          'x_studio_ley': ('%g' % info['ley']) if info['ley'] else ''})

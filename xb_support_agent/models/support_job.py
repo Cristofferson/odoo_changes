@@ -173,6 +173,11 @@ class XbSupportJob(models.Model):
         except Exception:  # noqa: BLE001 - el respaldo no debe frenar la cola
             self.env.cr.rollback()
             _logger.exception("xb_support_agent: falló el aviso al respaldo de ventas")
+        try:
+            self.env["discuss.channel"]._xb_sa_cron_promises()
+        except Exception:  # noqa: BLE001 - el seguimiento no debe frenar la cola
+            self.env.cr.rollback()
+            _logger.exception("xb_support_agent: falló el seguimiento de promesas")
         pendientes = self.sudo().search([("state", "=", "pending"), ("attempts", "<", XB_MAX_ATTEMPTS)],
                                         order="id", limit=limit)
         if not pendientes:

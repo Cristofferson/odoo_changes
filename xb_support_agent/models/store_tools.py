@@ -15,6 +15,7 @@ from markupsafe import Markup
 from PIL import Image
 
 from odoo import api, fields, models, tools
+from odoo.exceptions import UserError, ValidationError
 
 from .discuss_channel import XB_DIAS, XB_TOOLS, XB_TZ, _tool
 from .support_contact import xb_phone_key
@@ -27,7 +28,7 @@ XB_STORE_STATES = {
 }
 
 # Herramientas de XB_TOOLS que sí sirven en la tienda (el resto es de soporte de XUBAX).
-XB_STORE_KEEP = {"pasar_a_humano", "registrar_prospecto", "ver_horarios_demo", "agendar_demo"}
+XB_STORE_KEEP = {"pasar_a_humano", "registrar_prospecto", "ver_horarios_demo", "agendar_demo", "mover_mi_cita", "cancelar_mi_cita"}
 # Solo si quien escribe es del equipo y está ligada a un usuario del Odoo de la tienda: consulta, capturas y cambios
 # (sin costo) por el mismo camino y con los mismos límites que el agente de soporte.
 XB_STORE_TEAM_KEEP = {"buscar_modelos", "describir_modelo", "consultar_registros", "resumir_registros",
@@ -105,12 +106,76 @@ XB_CUSTOM_TOOLS = [
           "fotos que mandó, y se la pasa al equipo, que le pone el precio y la autoriza; al autorizarla, al cliente le llega "
           "sola por aquí. Si pidió varias opciones (p. ej. con zirconia y con diamante), ponlas en «opciones». "
           "Un modelo del catálogo con otra forma de piedra en ZIRCONIA (oval, pera…) NO es a la medida: cotízalo con "
-          "crear_cotizacion y pon la forma en la nota.",
+          "crear_cotizacion y pon la forma en la nota. Si tienes cotizar_por_gramo, usa ESA para piezas de metal hechas "
+          "en el taller; esta solo para lo que no se puede cotizar por gramo (p. ej. piedras preciosas que no están en "
+          "buscar_servicios).",
           {"pieza": {"type": "string", "description": "Una línea, p. ej. «Collar con el nombre Daniela en oro blanco»."},
            "detalle": {"type": "string", "description": "Todo lo que pidió, con medidas, texto, fecha y entrega."},
            "opciones": {"type": "array", "items": {"type": "string"},
                         "description": "Una por versión a cotizar, p. ej. [\"Oro blanco 10k con zirconias\", \"Oro blanco 14k con diamantes de laboratorio\"]; vacía si es una sola."},
            "nombre_completo": {"type": "string", "description": "Nombre y apellido reales del cliente."}}),
+]
+# Datos que el cliente manda después de cotizar o comprar (texto del grabado, medida…): quedan en el renglón del pedido
+# (la «nota del cliente» que usa el equipo), en el pedido y en su orden de fabricación, y se avisa al equipo.
+XB_ORDER_NOTE_TOOLS = [
+    _tool("anotar_en_pedido",
+          "Anota en un pedido o cotización SUYA un dato que el cliente confirma o cambia: el TEXTO DEL GRABADO (con tipo de "
+          "letra y dónde va), la MEDIDA o talla, u otro detalle de fabricación (acabado, largo, ancho). Queda escrito en el "
+          "renglón de la pieza, en el pedido y en la orden del taller, con las fotos que mandó, y se avisa al equipo. Úsala "
+          "en cuanto te lo diga, en vez de pasar_a_humano. Antes, repítele el dato tal cual para que lo confirme (sobre todo "
+          "el grabado: letra por letra, signos y fechas). No cambia el precio.",
+          {"pedido": {"type": "string", "description": "Número, p. ej. S00388."},
+           "dato": {"type": "string", "enum": ["grabado", "medida", "otro"]},
+           "texto": {"type": "string", "description": "El dato exacto, p. ej. «L&J 31•OCT•26, letra de molde, por dentro de las dos argollas» o «7.5 (antes 8)»."},
+           "pieza": {"type": "string", "description": "Palabras de la pieza a la que aplica, como sale en ver_pedidos (p. ej. «Lodi», «argolla de él»); vacío = la pieza principal o todas."},
+           "con_fotos": {"type": "boolean", "description": "true si mandó foto de referencia para este dato (letra, acabado…)."}}),
+    _tool("ya_lo_recogio",
+          "Registra como ENTREGADO un pedido SUYO cuando el cliente dice que ya lo recogió o ya lo tiene (y así dejan de "
+          "llegarle los avisos de «te estamos esperando»). Solo pedidos pagados por completo. Si tiene varios pedidos "
+          "pendientes de entregar, pregúntale cuál recogió antes de usarla. No la uses si solo dice que va a pasar.",
+          {"pedido": {"type": "string", "description": "Número, p. ej. S00299 (de ver_pedidos)."}}),
+]
+# Piezas a la medida cotizadas por gramo (el método del taller): el agente estima el peso con las fotos del cliente
+# y el sistema pone el precio real del día por gramo de cada metal, sin pasar por autorización.
+XB_GRAM_TOOLS = [
+    _tool("referencias_de_peso",
+          "Pesos REALES de piezas del catálogo, en gramos de oro de 14 kt (anillos a la medida 4), para comparar con la "
+          "pieza que pide el cliente antes de estimar su peso. Busca por tipo de pieza o palabras (dije, letra, medalla, "
+          "cadena, esclava, arete, argolla 6 mm…).",
+          {"texto": {"type": "string", "description": "Tipo de pieza o palabras, p. ej. «dije», «argolla 6mm», «esclava»."}}),
+    _tool("cotizar_por_gramo",
+          "Cotiza SOLA, con precio REAL y sin autorización ni tope de monto, una pieza fuera de catálogo hecha en el taller "
+          "(dije o letras, medalla, esclava, anillo o argolla especial, copia de una foto…). Precio = gramos × precio del día "
+          "por gramo del metal (mano de obra incluida). PASOS: 1) Pide SIEMPRE una o varias fotos de referencia. 2) Míralas "
+          "y estima el peso: compara con referencias_de_peso y, si puedes, calcula volumen (cm³) × 13.1 = gramos en 14 kt. "
+          "3) Si la foto no deja ver el tamaño o el grosor, pregunta medidas (largo, ancho, grosor, medida del anillo, alto "
+          "de las letras) antes de cotizar. 4) Si no tiene foto, propón tú un diseño concreto (o una pieza parecida del "
+          "catálogo con buscar_productos), con medidas, y sigue la plática. 5) Si lleva piedras, agrégalas con su servicio "
+          "de colocación de buscar_servicios. Da los gramos en 14 kt: el sistema los convierte a cada metal por su densidad. "
+          "Después manda el ticket con enviar_ticket.",
+          {"pieza": {"type": "string", "description": "Una línea, p. ej. «Dije con el nombre Daniela, letra cursiva 1.5 cm»."},
+           "detalle": {"type": "string", "description": "Todo lo que pidió: medidas, texto, acabado, fecha y entrega."},
+           "gramos_14k": {"type": "number", "description": "Peso estimado de la pieza terminada en oro de 14 kt, en gramos."},
+           "como_lo_estimaste": {"type": "string", "description": "Medidas que usaste y piezas de referencia con su peso, para el equipo."},
+           "metales": {"type": "array", "items": {"type": "string"},
+                       "description": "Uno o varios metales con su nombre exacto, p. ej. [\"Oro amarillo 14kt\", \"Oro amarillo 10kt\"]; cada uno sale como opción."},
+           "piedras": {"type": "array", "items": {"type": "object", "properties": {
+               "servicio_id": {"type": "integer"}, "cantidad": {"type": "number"}}, "required": ["servicio_id", "cantidad"]},
+               "description": "Servicios de colocación de piedras (de buscar_servicios) con cuántas lleva; vacío si no lleva."},
+           "nombre_completo": {"type": "string", "description": "Nombre y apellido reales del cliente."},
+           "reemplaza": {"type": "string", "description": "Si es un cambio de una cotización por gramo que ya hiciste en esta plática "
+                                                         "para la MISMA pieza (otro metal, otras medidas), su número (p. ej. S00514) para "
+                                                         "corregirla en vez de crear otra; vacío si es una pieza nueva."}}),
+]
+# Servicios de taller (reparación, grabado, relojería…): productos de las categorías de servicio de la cuenta,
+# publicados o no en el sitio, con su precio tal cual (ya incluye IVA).
+XB_SERVICE_TOOLS = [
+    _tool("buscar_servicios",
+          "Lista de SERVICIOS DE TALLER con su precio real: reparaciones (agrandar o recortar medida, soldar, pulir, baño de oro "
+          "o rodio, broches, engarzado, colocar piedras), GRABADO y RELOJERÍA (baterías, eslabones, mica…). Úsala siempre que "
+          "pregunten cuánto cuesta arreglar, ajustar, grabar o dar mantenimiento a una pieza o reloj; NO uses buscar_productos "
+          "para eso. Sin «texto» devuelve la lista completa. Para cotizar uno, pasa su id a crear_cotizacion (opciones vacías).",
+          {"texto": {"type": "string", "description": "Palabras del servicio, p. ej. «pulido», «agrandar», «bateria»; vacío = todos."}}),
 ]
 # Catálogo por lista de precios (DIAMANE: diamantes sueltos para joyeros). Reemplazan a las de joyería.
 XB_STONE_TOOLS = {
@@ -170,7 +235,7 @@ XB_B2B_TOOLS = [
 XB_B2B_PRICE_KEYS = {"precio_sin_iva", "precio_con_iva", "desde_con_iva", "precio_de_la_combinacion_con_iva"}
 XB_B2B_NOTE = ("Todavía NO está verificado como negocio: no le des precios ni cotices. Pídele su Constancia de Situación "
                "Fiscal (foto o PDF) para verificar su joyería y, cuando la mande, usa verificar_joyero.")
-for _t in XB_STORE_TOOLS + XB_CUSTOM_TOOLS + list(XB_STONE_TOOLS.values()) + list(XB_SALE_TOOLS.values()) + XB_SALE_EXTRA + XB_B2B_TOOLS:
+for _t in XB_STORE_TOOLS + XB_ORDER_NOTE_TOOLS + XB_SERVICE_TOOLS + XB_GRAM_TOOLS + XB_CUSTOM_TOOLS + list(XB_STONE_TOOLS.values()) + list(XB_SALE_TOOLS.values()) + XB_SALE_EXTRA + XB_B2B_TOOLS:
     _t.pop("strict", None)
 
 
@@ -206,6 +271,12 @@ class DiscussChannel(models.Model):
             tienda = [XB_STONE_TOOLS.get(t["name"], t) for t in XB_STORE_TOOLS]
         if self.wa_account_id.sudo().xb_sa_store_autonomous:
             tienda = [XB_SALE_TOOLS.get(t["name"], t) for t in tienda] + XB_SALE_EXTRA
+        if not self.wa_account_id.sudo().xb_sa_store_pricelist_id:  # joyería (no diamantes sueltos)
+            tienda = tienda + XB_ORDER_NOTE_TOOLS
+        if self._xb_sa_store_service_categories():
+            tienda = tienda + XB_SERVICE_TOOLS
+        if self._xb_sa_store_gram_product():
+            tienda = tienda + XB_GRAM_TOOLS
         if self.wa_account_id.sudo().xb_sa_store_b2b_category_id:
             tienda = tienda + XB_B2B_TOOLS
         if self.wa_account_id.sudo().xb_sa_quote_approver_ids:
@@ -273,13 +344,21 @@ class DiscussChannel(models.Model):
             tz = pytz.timezone(XB_TZ)
             citas = self.env["calendar.event"].sudo().search([
                 ("appointment_type_id", "!=", False), ("stop", ">", fields.Datetime.now()),
+                "|", ("appointment_booker_id", "in", self.whatsapp_partner_id.ids),
                 ("partner_ids", "in", self.whatsapp_partner_id.ids)], order="start", limit=3)
             if citas:
                 lineas.append("Citas agendadas vigentes: " + "; ".join(
                     f"{XB_DIAS[pytz.utc.localize(c.start).astimezone(tz).weekday()]} "
-                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M}" + (f" con {c.user_id.name}" if equipo else "") for c in citas) + ".")
+                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M}" + (f" con {c.user_id.name}" if equipo else "") for c in citas) + ". "
+                    "Si quiere cambiarla usa mover_mi_cita (no apartes otra); si la quiere cancelar, cancelar_mi_cita.")
             else:
-                lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda).")
+                faltada = self._xb_sa_my_event()
+                if faltada.appointment_status == "no_show":
+                    local = pytz.utc.localize(faltada.start).astimezone(tz)
+                    lineas.append(f"No llegó a su cita del {XB_DIAS[local.weekday()]} {local:%d/%m/%Y %H:%M} (ya se le escribió "
+                                  "para reagendar). Sin reclamarle: si quiere otro horario, ve horarios y muévela con mover_mi_cita.")
+                else:
+                    lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda).")
         return "\n".join(lineas)
 
     # ------------------------------------------------------------------
@@ -303,7 +382,379 @@ class DiscussChannel(models.Model):
         dominio = [("is_published", "=", True), ("sale_ok", "=", True), ("company_id", "in", [False, company.id])]
         if website:
             dominio.append(("website_id", "in", [False, website.id]))
+        servicios = self._xb_sa_store_service_categories()
+        if servicios:  # los servicios de taller van por buscar_servicios, con su precio final
+            dominio += ["!", ("categ_id", "child_of", servicios.ids)]
         return dominio
+
+    def _xb_sa_store_service_categories(self):
+        """Categorías de servicios de taller de esta cuenta (parámetro del sistema
+        «xb_support_agent.service_categories.<id de la cuenta>», nombres separados por comas). Vacío = sin servicios."""
+        acc = self.wa_account_id.sudo()
+        if acc.xb_sa_store_pricelist_id:
+            return self.env["product.category"]
+        nombres = self.env["ir.config_parameter"].sudo().get_param(f"xb_support_agent.service_categories.{acc.id}") or ""
+        nombres = [n.strip() for n in nombres.split(",") if n.strip()]
+        if not nombres:
+            return self.env["product.category"]
+        return self.env["product.category"].sudo().search([("name", "in", nombres)])
+
+    def _xb_sa_store_service_domain(self):
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        dominio = [("categ_id", "child_of", self._xb_sa_store_service_categories().ids or [0]),
+                   ("sale_ok", "=", True), ("company_id", "in", [False, company.id])]
+        if "xb_por_gramo" in self.env["product.template"]._fields:
+            dominio.append(("xb_por_gramo", "=", False))  # la pieza a la medida por gramo no es un servicio
+        return dominio
+
+    def _xb_sa_store_service(self, product_id):
+        if not self._xb_sa_store_service_categories() or not product_id:
+            return self.env["product.template"]
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        return self.env["product.template"].sudo().with_company(company).search(
+            self._xb_sa_store_service_domain() + [("id", "=", int(product_id))], limit=1)
+
+    def _xb_sa_store_service_taxes(self, tmpl, company):
+        """Los impuestos del propio servicio (Odoo los pone así en la caja). Sin impuestos = su precio ya es el final."""
+        return tmpl.taxes_id._filter_taxes_by_company(company)
+
+    def _xb_sa_store_service_price(self, tmpl, company):
+        """Precio final que paga el cliente: el de su lista de precios con los impuestos del propio servicio."""
+        pricelist = self._xb_sa_store_pricelist(company)
+        variante = tmpl.product_variant_id
+        sin = self._xb_sa_store_line_price(variante, pricelist) if variante else tmpl.list_price
+        impuestos = self._xb_sa_store_service_taxes(tmpl, company)
+        return impuestos.compute_all(sin, quantity=1.0)["total_included"] if impuestos else sin
+
+    def _xb_sa_tool_buscar_servicios(self, job, entrada):
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        dominio = self._xb_sa_store_service_domain()
+        for palabra in (entrada.get("texto") or "").split():
+            plano = _plano(palabra)
+            if plano in self._XB_STOP or len(plano) < 3:
+                continue
+            raiz = plano[:-1] if len(plano) > 4 and plano.endswith("s") else plano
+            dominio += ["|", ("name", "ilike", raiz), ("default_code", "ilike", raiz)]
+        servicios = self.env["product.template"].sudo().with_company(company).search(dominio, order="name")
+        salida = [{"id": t.id, "servicio": t.name, "precio_con_iva": round(self._xb_sa_store_service_price(t, company), 2)}
+                  for t in servicios[:80]]
+        res = {"ok": True, "servicios": salida,
+               "nota": "Precios REALES de la tienda, por pieza, con IVA incluido: dalos tal cual, sin sumarles nada. Elige el que "
+                       "corresponde a lo que describe el cliente; si depende de algo que no sabes (peso de la pieza, cuántos números "
+                       "agrandar, tamaño de la piedra, oro o plata), pregúntaselo antes de dar el precio. El servicio se hace con la "
+                       "pieza en el estudio: dile que la traiga y que ahí la revisan antes de trabajarla. Para dejarlo por escrito, "
+                       "cotízalo con crear_cotizacion (id, opciones vacías)."}
+        if not salida and entrada.get("texto"):
+            res["nota"] = "Sin coincidencias con esas palabras: vuelve a llamar sin «texto» para ver la lista completa."
+        return res
+
+    def _xb_sa_tool_anotar_en_pedido(self, job, entrada):
+        equipo = self._xb_sa_store_team()
+        orden = self._xb_sa_store_order(entrada.get("pedido"), equipo)
+        if not orden:
+            return {"ok": False, "motivo": "No encuentro ese pedido entre los suyos; revisa el número con ver_pedidos."}
+        if orden.state == "cancel":
+            return {"ok": False, "motivo": f"{orden.name} está cancelado."}
+        texto = " ".join((entrada.get("texto") or "").split())
+        if not texto:
+            return {"ok": False, "motivo": "Falta el dato a anotar."}
+        dato = entrada.get("dato") or "otro"
+        etiqueta = {"grabado": "Grabado", "medida": "Medida"}.get(dato, "Detalle")
+        piezas = orden.order_line.filtered(lambda l: not l.display_type and l.product_id
+                                            and not getattr(l, "is_downpayment", False) and l.price_unit >= 0)
+        palabras = [_plano(p) for p in (entrada.get("pieza") or "").split() if len(_plano(p)) >= 3]
+        if palabras:
+            elegidas = piezas.filtered(lambda l: all(p in _plano(l.name or "") for p in palabras))
+            if not elegidas:
+                return {"ok": False, "motivo": "Ninguna pieza del pedido coincide con «%s». Piezas: %s" % (
+                    entrada.get("pieza"), "; ".join((l.name or "").split("\n")[0] for l in piezas))}
+        else:
+            # Sin pieza: la principal (la más cara); un dato de grabado puede ir en todas si así lo dijo en el texto.
+            elegidas = piezas.sorted("price_subtotal", reverse=True)[:1]
+        if not elegidas:
+            return {"ok": False, "motivo": f"{orden.name} no tiene piezas a las que anotarle el dato."}
+        hoy = fields.Date.context_today(self).strftime("%d/%m")
+        renglon = f"{etiqueta}: {texto} (cliente por WhatsApp {hoy})"
+        campo = "xb_customer_note" if "xb_customer_note" in orden.order_line._fields else "name"
+        for linea in elegidas:
+            previo = (linea[campo] or "").strip()
+            linea.sudo()[campo] = f"{previo}\n{renglon}" if previo else renglon
+        fotos = self._xb_sa_store_customer_photos() if entrada.get("con_fotos") else self.env["ir.attachment"]
+        ya = set(self.env["ir.attachment"].sudo().search([("res_model", "=", "sale.order"), ("res_id", "=", orden.id)]).mapped("checksum"))
+        copias = self.env["ir.attachment"]
+        for foto in fotos.filtered(lambda a: a.checksum not in ya):
+            copias |= foto.copy({"res_model": "sale.order", "res_id": orden.id})
+        piezas_txt = "; ".join((l.name or "").split("\n")[0] for l in elegidas)
+        cuerpo = Markup(tools.plaintext2html(f"{etiqueta} que mandó el cliente por WhatsApp:\n{texto}\nPieza: {piezas_txt}"))
+        orden.message_post(body=cuerpo, attachment_ids=copias.ids, message_type="comment", subtype_xmlid="mail.mt_note")
+        talleres = []
+        if "mrp.production" in self.env:
+            talleres = orden.mrp_production_ids if "mrp_production_ids" in orden._fields else self.env["mrp.production"]
+            talleres = (talleres | self.env["mrp.production"].sudo().search([("origin", "=", orden.name)])).filtered(
+                lambda m: m.state not in ("done", "cancel"))
+        for mo in talleres:
+            mo.message_post(body=cuerpo, attachment_ids=[c.copy({"res_model": "mrp.production", "res_id": mo.id}).id for c in copias],
+                            message_type="comment", subtype_xmlid="mail.mt_note")
+        acc = self.wa_account_id.sudo()
+        if not equipo:
+            self._xb_sa_notify(orden, (orden.user_id | acc.xb_sa_sales_user_ids)[:3],
+                               f"{orden.name} ({orden.partner_id.name}): {etiqueta.lower()} nuevo — {texto}")
+        return {"ok": True, "pedido": orden.name, "anotado_en": piezas_txt,
+                "aviso_al_taller": bool(talleres), "fotos_adjuntas": len(copias),
+                "nota": "Quedó escrito en su pedido y el taller ya tiene el dato. Díselo así, repitiendo el dato exacto. No "
+                        "prometas fechas ni cambios de precio; si el cambio de medida es grande o la pieza ya está terminada, "
+                        "di que la tienda le confirma si se puede."}
+
+    def _xb_sa_store_pending_goods(self, orden):
+        """{renglón: cantidad por entregar} de las piezas (bienes) que siguen sin entregarse."""
+        pendientes = {}
+        for linea in orden.order_line:
+            if linea.display_type or getattr(linea, "is_downpayment", False) or linea.product_id.type != "consu":
+                continue
+            en_caja = sum(linea.sudo().pos_order_line_ids.filtered(
+                lambda p: p.order_id.state not in ("draft", "cancel")).mapped("qty")) if "pos_order_line_ids" in linea._fields else 0.0
+            falta = linea.product_uom_qty - max(linea.qty_delivered, en_caja)
+            if falta > 0.0001:
+                pendientes[linea] = falta
+        return pendientes
+
+    def _xb_sa_tool_ya_lo_recogio(self, job, entrada):
+        equipo = self._xb_sa_store_team()
+        orden = self._xb_sa_store_order(entrada.get("pedido"), equipo)
+        if not orden:
+            return {"ok": False, "motivo": "No encuentro ese pedido entre los suyos; revisa el número con ver_pedidos."}
+        orden = orden.sudo()
+        if orden.state != "sale":
+            return {"ok": False, "motivo": f"{orden.name} no es un pedido confirmado; no hay nada que entregar."}
+        pendientes = self._xb_sa_store_pending_goods(orden)
+        if not pendientes:
+            return {"ok": True, "pedido": orden.name, "ya_estaba_entregado": True,
+                    "nota": "Ya estaba registrado como entregado. Agradécele y pregúntale si todo le gustó."}
+        saldo = getattr(orden, "amount_unpaid", 0.0) or 0.0
+        if saldo > 0.01:
+            self._xb_sa_notify(orden, (orden.user_id | self.wa_account_id.sudo().xb_sa_sales_user_ids)[:3],
+                               f"{orden.partner_id.name} dice que ya recogió {orden.name}, pero en Odoo tiene saldo de "
+                               f"${saldo:,.2f}. Registra el pago y la entrega en la caja.", urgente=True)
+            return {"ok": False, "pedido": orden.name, "saldo_pendiente": round(saldo, 2),
+                    "motivo": "En el sistema todavía tiene saldo pendiente, así que no lo marco como entregado: ya avisé a la "
+                              "tienda para que lo revise. Dile que la tienda lo revisa; no le cobres ni le reclames por aquí."}
+        try:
+            with self.env.cr.savepoint():
+                entrega = self._xb_sa_store_deliver(orden, pendientes)
+        except (UserError, ValidationError) as error:
+            self._xb_sa_notify(orden, (orden.user_id | self.wa_account_id.sudo().xb_sa_sales_user_ids)[:3],
+                               f"{orden.partner_id.name} dice que ya recogió {orden.name}, pero no pude registrar la "
+                               f"entrega: {error}. Regístrala en la caja.")
+            return {"ok": False, "pedido": orden.name,
+                    "motivo": "No pude registrarlo yo; ya le avisé a la tienda para que lo marque. Agradécele igual."}
+        if "xb.sale.order.wa.log" in self.env:
+            # El agente ya se lo dijo por aquí: la plantilla automática de «pedido entregado» saldría repetida.
+            self.env["xb.sale.order.wa.log"].sudo().create({
+                "order_id": orden.id, "partner_id": orden.partner_id.id, "kind": "delivered", "automatic": False})
+        orden.message_post(body=Markup(tools.plaintext2html(
+            f"Entrega registrada por el agente de WhatsApp: el cliente dijo que ya recogió su pedido.\n"
+            f"Entrega {entrega.name}: " + "; ".join(f"{q:g} × {l.product_id.display_name}" for l, q in pendientes.items()))),
+            message_type="comment", subtype_xmlid="mail.mt_note")
+        return {"ok": True, "pedido": orden.name, "entregado": True,
+                "nota": "Quedó registrado como entregado y ya no le llegarán recordatorios. Agradécele y pregúntale si todo le gustó."}
+
+    def _xb_sa_store_deliver(self, orden, pendientes):
+        """Entrega nativa de Odoo (transferencia de salida de su almacén, ligada a los renglones del pedido) y la valida.
+        No lanza abastecimientos: nada de fabricar ni comprar de nuevo. Las piezas con número de serie toman el único
+        que hay en existencia; si no hay uno claro, no se adivina."""
+        tipo = orden.warehouse_id.out_type_id
+        if not tipo:
+            raise UserError("El almacén del pedido no tiene operación de entrega.")
+        origen = tipo.default_location_src_id
+        destino = tipo.default_location_dest_id or self.env.ref("stock.stock_location_customers")
+        Quant = self.env["stock.quant"].sudo()
+        series = {}
+        for linea, cantidad in pendientes.items():
+            if linea.product_id.tracking == "none":
+                continue
+            quants = Quant.search([("product_id", "=", linea.product_id.id), ("location_id", "child_of", origen.id),
+                                   ("quantity", ">", 0), ("lot_id", "!=", False)])
+            if len(quants.lot_id) != cantidad or linea.product_id.tracking != "serial":
+                raise UserError(f"{linea.product_id.display_name}: no hay un número de serie claro en existencia.")
+            series[linea] = quants
+        entrega = self.env["stock.picking"].sudo().with_company(orden.company_id).create({
+            "picking_type_id": tipo.id, "partner_id": orden.partner_shipping_id.id, "origin": orden.name,
+            "location_id": origen.id, "location_dest_id": destino.id,
+            "move_ids": [(0, 0, {
+                "product_id": linea.product_id.id, "product_uom_qty": cantidad, "product_uom": linea.product_uom_id.id,
+                "sale_line_id": linea.id, "location_id": origen.id, "location_dest_id": destino.id,
+                "description_picking": (linea.name or "").split("\n")[0], "company_id": orden.company_id.id,
+            }) for linea, cantidad in pendientes.items()]})
+        entrega.action_confirm()
+        for move in entrega.move_ids:
+            quants = series.get(move.sale_line_id)
+            if quants:
+                move.move_line_ids.unlink()
+                move.move_line_ids = [(0, 0, {"product_id": move.product_id.id, "lot_id": q.lot_id.id, "quantity": 1,
+                                              "location_id": q.location_id.id, "location_dest_id": destino.id,
+                                              "picking_id": entrega.id}) for q in quants]
+            else:
+                move.quantity = move.product_uom_qty
+        entrega.move_ids.picked = True
+        entrega.with_context(skip_backorder=True, cancel_backorder=True, skip_sms=True, skip_expired=True).button_validate()
+        if entrega.state != "done":
+            raise UserError("Odoo no dejó validar la entrega.")
+        return entrega
+
+    def _xb_sa_store_gram_product(self):
+        """La «pieza a la medida por gramo» de la tienda (si la hay y la cuenta es de joyería)."""
+        acc = self.wa_account_id.sudo()
+        if acc.xb_sa_store_pricelist_id or "xb_por_gramo" not in self.env["product.template"]._fields:
+            return self.env["product.template"]
+        company = acc._xb_sa_company()
+        return self.env["product.template"].sudo().with_company(company).search([
+            ("xb_por_gramo", "=", True), ("sale_ok", "=", True), ("company_id", "in", [False, company.id])], limit=1)
+
+    def _xb_sa_store_weight(self, t):
+        """Peso capturado de la pieza (g en 14 kt), o 0."""
+        if "x_studio_peso_joya" not in t._fields:
+            return 0.0
+        m = re.search(r"\d+(?:[.,]\d+)?", str(t.x_studio_peso_joya or ""))
+        return float(m.group(0).replace(",", ".")) if m and "ct" not in str(t.x_studio_peso_joya).lower() else 0.0
+
+    def _xb_sa_tool_referencias_de_peso(self, job, entrada):
+        company = self.wa_account_id.sudo()._xb_sa_company()
+        dominio = [("sale_ok", "=", True), ("company_id", "in", [False, company.id]), ("x_studio_peso_joya", "!=", False)]
+        for palabra in (entrada.get("texto") or "").split():
+            plano = _plano(palabra)
+            if plano in self._XB_STOP or len(plano) < 3:
+                continue
+            raiz = plano[:-1] if len(plano) > 4 and plano.endswith("s") else plano
+            dominio += ["|", "|", ("name", "ilike", raiz), ("categ_id.complete_name", "ilike", raiz), ("product_tag_ids.name", "ilike", raiz)]
+        piezas = self.env["product.template"].sudo().with_company(company).search(dominio, order="is_published desc, id desc", limit=200)
+        salida = []
+        for t in piezas:
+            peso = self._xb_sa_store_weight(t)
+            if 0 < peso < 300:
+                salida.append({"pieza": t.name, "categoria": t.categ_id.complete_name, "gramos_14k": round(peso, 2)})
+            if len(salida) >= 15:
+                break
+        return {"ok": True, "referencias": salida,
+                "nota": "Pesos en oro de 14 kt de piezas reales. Compara forma, tamaño y grosor con la foto del cliente. "
+                        "Densidad del oro de 14 kt: 13.1 g/cm³ (volumen en cm³ × 13.1 = gramos)."
+                        + ("" if salida else " Sin referencias con esas palabras: prueba con el tipo de pieza (anillo, arete, pulsera, cadena).")}
+
+    def _xb_sa_store_customer_photos(self):
+        """Fotos que mandó el cliente en esta plática (últimos 7 días)."""
+        return self.env["mail.message"].sudo().search([
+            ("model", "=", "discuss.channel"), ("res_id", "=", self.id), ("message_type", "=", "whatsapp_message"),
+            ("create_date", ">=", fields.Datetime.now() - timedelta(days=7)), ("attachment_ids", "!=", False),
+        ], order="id desc", limit=20).filtered(
+            lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound")).attachment_ids.filtered(
+            lambda a: (a.mimetype or "").startswith("image/"))[:6]
+
+    def _xb_sa_tool_cotizar_por_gramo(self, job, entrada):
+        if self._xb_sa_store_b2b_pending():
+            return {"ok": False, "motivo": XB_B2B_NOTE}
+        acc = self.wa_account_id.sudo()
+        company = acc._xb_sa_company()
+        tmpl = self._xb_sa_store_gram_product()
+        if not tmpl:
+            return {"ok": False, "motivo": "Esta tienda no cotiza piezas por gramo."}
+        equipo = self._xb_sa_store_team()
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return {"ok": False, "motivo": "No tengo a quien cotizar: pídele su nombre y vuelve a intentar."}
+        nombre = " ".join((entrada.get("nombre_completo") or "").split())
+        if not equipo:
+            if len(nombre.split()) < 2:
+                return {"ok": False, "motivo": "Falta su nombre completo (nombre y apellido) para poner la cotización a su nombre."}
+            if nombre.lower() != (partner.name or "").strip().lower():
+                partner.name = nombre
+        pieza = (entrada.get("pieza") or "").strip()
+        detalle = (entrada.get("detalle") or "").strip()
+        gramos = float(entrada.get("gramos_14k") or 0)
+        if not (pieza and detalle):
+            return {"ok": False, "motivo": "Faltan la pieza y el detalle de lo que pidió."}
+        if not 0 < gramos <= 1000:
+            return {"ok": False, "motivo": "Falta el peso estimado en gramos de 14 kt (mayor a 0)."}
+        metales = [m.strip() for m in entrada.get("metales") or [] if (m or "").strip()]
+        if not metales:
+            return {"ok": False, "motivo": "Falta el metal: pregúntale en qué metal y kilataje la quiere."}
+        if not partner.lang or partner.lang.startswith("en"):
+            partner.lang = "es_MX"
+        pricelist = self._xb_sa_store_pricelist(company)
+        piedras = []
+        for p in entrada.get("piedras") or []:
+            servicio = self._xb_sa_store_service(p.get("servicio_id"))
+            if not servicio:
+                return {"ok": False, "motivo": f"El servicio {p.get('servicio_id')} no está en buscar_servicios."}
+            piedras.append((servicio, float(p.get("cantidad") or 1)))
+        renglones, opciones = [], []
+        for i, metal in enumerate(metales, 1):
+            variante, error = self._xb_sa_store_variant(tmpl, [metal])
+            if error:
+                return {"ok": False, "motivo": f"{metal}: {error}"}
+            valor = variante.product_template_attribute_value_ids.product_attribute_value_id[:1]
+            densidad = float(valor.x_densidad or 0) if "x_densidad" in valor._fields else 0.0
+            g = round(gramos * densidad / 13.1, 2) if densidad else round(gramos, 2)
+            if len(metales) > 1:
+                renglones.append((0, 0, {"display_type": "line_section", "name": f"Opción {i}: {valor.name}"}))
+            descripcion = variante.with_context(lang=partner.lang).display_name
+            if tmpl.description_sale:
+                descripcion += "\n" + tmpl.with_context(lang=partner.lang).description_sale
+            renglones.append((0, 0, {
+                "product_id": variante.id, "product_uom_qty": g,
+                "price_unit": self._xb_sa_store_line_price(variante, pricelist),
+                "name": f"{descripcion}\n{pieza}\nPeso estimado: {g:g} g",
+                "tax_ids": [(6, 0, tmpl.taxes_id._filter_taxes_by_company(company).ids)]}))
+            for servicio, cantidad in piedras:
+                renglones.append((0, 0, {
+                    "product_id": servicio.product_variant_id.id, "product_uom_qty": cantidad,
+                    "price_unit": self._xb_sa_store_line_price(servicio.product_variant_id, pricelist),
+                    "tax_ids": [(6, 0, self._xb_sa_store_service_taxes(servicio, company).ids)]}))
+            opciones.append((valor.name, g))
+        origen = "Agente de WhatsApp (a la medida por gramo)"
+        anterior = self.env["sale.order"]
+        if (entrada.get("reemplaza") or "").strip():
+            anterior = self.env["sale.order"].sudo().search([
+                ("name", "=ilike", entrada["reemplaza"].strip()), ("company_id", "=", company.id), ("origin", "=", origen),
+                ("partner_id", "=", partner.id), ("state", "in", ("draft", "sent"))], limit=1)
+            if not anterior:
+                return {"ok": False, "motivo": f"No encuentro la cotización por gramo {entrada['reemplaza']} de este cliente "
+                                               "sin confirmar; si es otra pieza, cotiza sin «reemplaza»."}
+        if anterior:
+            anterior.order_line.unlink()
+            anterior.with_context(lang=partner.lang).write({"order_line": renglones})
+            orden = anterior
+        else:
+            orden = self.env["sale.order"].sudo().with_company(company).with_context(lang=partner.lang).create({
+                "partner_id": partner.id, "company_id": company.id, "pricelist_id": pricelist.id or False,
+                "user_id": (equipo or acc.xb_sa_sales_user_ids[:1]).id or False,
+                "origin": origen, "order_line": renglones})
+        fotos = self._xb_sa_store_customer_photos()
+        ya = set(self.env["ir.attachment"].sudo().search([("res_model", "=", "sale.order"), ("res_id", "=", orden.id)]).mapped("checksum"))
+        copias = self.env["ir.attachment"]
+        for foto in fotos.filtered(lambda a: a.checksum not in ya):
+            copias |= foto.copy({"res_model": "sale.order", "res_id": orden.id})
+        orden.message_post(body=Markup(tools.plaintext2html(
+            f"Cotización a la medida por gramo, {'corregida' if anterior else 'hecha'} por el agente de WhatsApp:\n{pieza}\n{detalle}\n"
+            f"Peso estimado: {gramos:g} g en 14 kt ({'; '.join(f'{m}: {g:g} g' for m, g in opciones)}).\n"
+            f"Cómo lo estimó: {(entrada.get('como_lo_estimaste') or '').strip() or 'sin detalle'}\n"
+            f"Fotos del cliente: {len(fotos)}")),
+            attachment_ids=copias.ids, message_type="comment", subtype_xmlid="mail.mt_note")
+        if not equipo:
+            self._xb_sa_notify(orden, acc.xb_sa_sales_user_ids,
+                               f"Cotización a la medida {orden.name} para {partner.name} ({gramos:g} g en 14 kt): "
+                               f"${orden.amount_total:,.2f}. Revisa el peso estimado en la nota.")
+        job.mode = "sales"
+        # Cada opción son sus renglones seguidos: la pieza y, detrás, sus piedras.
+        lineas = orden.order_line.filtered(lambda l: not l.display_type).sorted(lambda l: (l.sequence, l.id))
+        por_bloque = 1 + len(piedras)
+        por_opcion = [{"metal": nombre_metal, "gramos": g,
+                       "total_con_iva": round(sum(lineas[i * por_bloque:(i + 1) * por_bloque].mapped("price_total")), 2)}
+                      for i, (nombre_metal, g) in enumerate(opciones)]
+        return {"ok": True, "pedido": orden.name, "opciones": por_opcion,
+                "liga_cotizacion": self._xb_sa_store_share_url(orden),
+                "nota": "Es una cotización (borrador) con precio real del día. Mándale el ticket con enviar_ticket y dale el "
+                        "total de cada opción por separado (se elige una; el total del ticket las suma). Explica que el precio "
+                        "es por el peso de su pieza (los gramos de cada opción) al precio del día del metal, con mano de obra "
+                        "e IVA incluidos. Si cambia medidas o metal, vuelve a cotizar."}
 
     def _xb_sa_store_price_ref(self, tmpl, company):
         """(sin IVA, con IVA) de referencia: el precio de lista de la plantilla, o el de la lista de la cuenta.
@@ -490,9 +941,24 @@ class DiscussChannel(models.Model):
                            "liga": self._xb_sa_store_url(t)})
             if len(salida) >= min(int(entrada.get("limite") or 6), 8):
                 break
+        # Un mismo modelo puede tener una ficha por color de oro, con el mismo nombre y precios distintos: el nombre
+        # dice de qué color es cada ficha para que nunca se mezclen sus precios.
+        repetidos = {r["nombre"] for r in salida if sum(1 for o in salida if o["nombre"] == r["nombre"]) > 1}
+        for r in salida:
+            if r["nombre"] in repetidos and r["metales"]:
+                colores = []
+                for m in r["metales"]:
+                    plano = _plano(m)
+                    color = next((c for c in ("oro blanco", "oro amarillo", "oro rosa", "oro bitono", "platino", "plata")
+                                  if c in plano), "")
+                    if color and color not in colores:
+                        colores.append(color)
+                if colores:
+                    r["nombre"] = f"{r['nombre']} (ficha en {', '.join(colores)})"
         res = {"ok": True, "resultados": salida, "etiquetas_disponibles": self._xb_sa_store_tags(),
                "nota": "«desde_con_iva» es la versión más barata (normalmente plata con zirconia); «desde_por_metal_con_iva» da el "
-                       "«desde» en cada metal. Úsalos para filtrar por presupuesto; el precio exacto de una combinación lo da "
+                       "«desde» en cada metal. Un modelo puede venir en dos fichas (una de oro blanco y otra de oro amarillo) con "
+                       "precios distintos: da SIEMPRE el precio y la liga de la ficha del color que te piden, nunca mezcles las dos. Úsalos para filtrar por presupuesto; el precio exacto de una combinación lo da "
                        "ver_producto con «opciones» y el definitivo va en la cotización."}
         if not salida:
             res["nota"] = ("Sin coincidencias. Prueba con otra etiqueta de etiquetas_disponibles (p. ej. Promesa, Solitario) o con "
@@ -617,7 +1083,8 @@ class DiscussChannel(models.Model):
         impuesto = self._xb_sa_store_tax(company)
         valores_lineas = []
         for ln in lineas:
-            t = self.env["product.template"].sudo().with_company(company).search(
+            servicio = self._xb_sa_store_service(ln.get("producto_id"))
+            t = servicio or self.env["product.template"].sudo().with_company(company).search(
                 self._xb_sa_store_product_domain() + [("id", "=", int(ln.get("producto_id") or 0))], limit=1)
             if not t:
                 return {"ok": False, "motivo": f"El producto {ln.get('producto_id')} no está en el catálogo publicado."}
@@ -625,9 +1092,11 @@ class DiscussChannel(models.Model):
             if error:
                 return {"ok": False, "motivo": f"{t.name}: {error}"}
             cantidad = float(ln.get("cantidad") or 1)
+            # Un servicio lleva sus propios impuestos (su precio ya es el final); una joya, el IVA de la tienda.
+            impuestos_linea = self._xb_sa_store_service_taxes(t, company) if servicio else impuesto
             vals = {"product_id": variante.id, "product_uom_qty": cantidad,
                     "price_unit": self._xb_sa_store_line_price(variante, pricelist),
-                    "tax_ids": [(6, 0, impuesto.ids)] if impuesto else [(5,)]}
+                    "tax_ids": [(6, 0, impuestos_linea.ids)] if impuestos_linea else [(5,)]}
             nota = (ln.get("nota") or "").strip()
             if nota:
                 vals["name"] = f"{variante.with_context(lang=partner.lang).display_name}\n{nota}"
@@ -867,7 +1336,9 @@ class DiscussChannel(models.Model):
             if l.display_type == "line_section":
                 salida.append(f"— {texto} —")
             elif not l.display_type:
-                salida.append(f"{l.product_uom_qty:g} × {texto}: ${l.price_total:,.2f} con IVA")
+                nota = " ".join((l.xb_customer_note or "").split()) if "xb_customer_note" in l._fields else ""
+                salida.append(f"{l.product_uom_qty:g} × {texto}: ${l.price_total:,.2f} con IVA"
+                              + (f" — anotado: {nota[:200]}" if nota else ""))
         return salida
 
     def _xb_sa_tool_enviar_ticket(self, job, entrada):

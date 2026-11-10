@@ -9,3 +9,5 @@ from . import discuss_channel
 from . import store_tools
 from . import crm_lead
 from . import support_service
+from . import calendar_event
+from . import promises

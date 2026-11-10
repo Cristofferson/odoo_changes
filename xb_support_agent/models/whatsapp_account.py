@@ -95,6 +95,13 @@ class WhatsappAccount(models.Model):
         string="Respaldo de ventas", domain=[("share", "=", False)],
         help="Si nadie de ventas contesta al prospecto a tiempo, se les avisa a ellos.")
     xb_sa_sales_backup_minutes = fields.Integer("Avisar al respaldo a los (min)", default=30)
+    # Media hora después de cada cita: «¿llegó?» a quien la atiende, por los medios marcados.
+    xb_sa_arrival_activity = fields.Boolean("Actividad", default=True)
+    xb_sa_arrival_inbox = fields.Boolean("Notificación de Odoo")
+    xb_sa_arrival_email = fields.Boolean("Correo")
+    xb_sa_arrival_whatsapp = fields.Boolean(
+        "WhatsApp", help="Solo si esa persona escribió a este número en las últimas 24 h (sin plantilla). "
+                         "Contesta SÍ o NO y la cita se marca sola.")
     xb_sa_sales_team_id = fields.Many2one("crm.team", string="Equipo de ventas")
     xb_sa_helpdesk_team_id = fields.Many2one("helpdesk.team", string="Equipo de soporte (tickets)")
     xb_sa_max_chars = fields.Integer(

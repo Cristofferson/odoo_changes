@@ -257,6 +257,14 @@ XB_TOOLS = [
            "correo": {"type": "string", "description": "Cadena vacía si no lo dio."},
            "modalidad": {"type": "string", "enum": ["presencial", "videollamada"],
                          "description": "La que eligió la persona (la misma que usaste en ver_horarios_demo)."}}),
+    _tool("mover_mi_cita",
+          "Cambia la fecha y hora de la cita que ESTA persona ya tiene apartada (o de la que no llegó, para reagendarla), "
+          "a uno de los horarios que devolvió ver_horarios_demo. Úsala en vez de agendar_demo cuando ya tiene cita.",
+          {"inicio": {"type": "string", "description": "Fecha y hora exactamente como la dio ver_horarios_demo (AAAA-MM-DD HH:MM)."}}),
+    _tool("cancelar_mi_cita",
+          "Cancela la cita que ESTA persona tiene apartada. Úsala SOLO cuando ella diga claramente que la quiere cancelar "
+          "(si solo no puede a esa hora, ofrécele otro horario con mover_mi_cita).",
+          {}),
 ]
 
 
@@ -303,7 +311,8 @@ for _t in XB_TEAM_TOOLS:
 # La API también limita la complejidad TOTAL de los esquemas strict («Schema is too complex»): las de citas
 # tampoco van strict desde que llevan «modalidad».
 XB_NON_STRICT = {"cotizar_usuarios_extra", "marcar_miembro_bni", "avisar_salida_bni", "enviar_horli_xubax", "guardar_horli_miembro",
-                 "registrar_referido_ideal", "enviar_tarjeta_bni", "ver_horarios_demo", "agendar_demo"}
+                 "registrar_referido_ideal", "enviar_tarjeta_bni", "ver_horarios_demo", "agendar_demo",
+                 "mover_mi_cita", "cancelar_mi_cita"}
 for _herramienta in XB_TOOLS:
     if _herramienta["name"] in XB_NON_STRICT:
         _herramienta.pop("strict", None)
@@ -463,6 +472,13 @@ class DiscussChannel(models.Model):
         if message.message_type == "whatsapp_message":
             self.filtered(lambda c: c.channel_type == "whatsapp").sudo().xb_wa_last_dt = message.create_date
         for channel in self:
+            if channel.channel_type == "chat" and message.message_type == "comment" and                     message.author_id.user_ids.filtered(lambda u: not u.share) and                     message.author_id != self.env.ref("base.partner_root"):
+                # «SÍ» / «NO» a «¿llegó el cliente?» en el chat de OdooBot.
+                try:
+                    self.env["calendar.event"]._xb_sa_arrival_reply(channel, html2plaintext(message.body or ""))
+                except Exception:  # noqa: BLE001 - nunca romper el chat
+                    _logger.exception("xb_support_agent: no se pudo leer la respuesta de asistencia %s", message.id)
+                continue
             if channel.channel_type != "whatsapp" or not channel.wa_account_id.xb_sa_enabled:
                 continue
             if not channel.wa_account_id.sudo()._xb_sa_allows(channel.whatsapp_number):
@@ -470,6 +486,9 @@ class DiscussChannel(models.Model):
             try:
                 if kwargs.get("whatsapp_inbound_msg_uid"):
                     if hasattr(channel, "_xb_is_campaign_reply") and channel._xb_is_campaign_reply(message):
+                        continue
+                    # «SÍ» / «NO» de la tienda a «¿llegó el cliente?»: marca la cita y no va al agente.
+                    if self.env["calendar.event"]._xb_sa_arrival_reply(channel, html2plaintext(message.body or "")):
                         continue
                     # «SÍ 12» / «NO 12» / «Ver solicitudes» del dueño: no van al agente.
                     if self.env["xb.support.proposal"]._xb_owner_command(
@@ -615,13 +634,21 @@ class DiscussChannel(models.Model):
             tz = pytz.timezone(XB_TZ)
             citas = self.env["calendar.event"].sudo().search([
                 ("appointment_type_id", "!=", False), ("stop", ">", fields.Datetime.now()),
+                "|", ("appointment_booker_id", "in", self.whatsapp_partner_id.ids),
                 ("partner_ids", "in", self.whatsapp_partner_id.ids)], order="start", limit=3)
             if citas:
                 lineas.append("Citas agendadas vigentes: " + "; ".join(
                     f"{XB_DIAS[pytz.utc.localize(c.start).astimezone(tz).weekday()]} "
-                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M} con {c.user_id.name}" for c in citas) + ".")
+                    f"{pytz.utc.localize(c.start).astimezone(tz):%d/%m/%Y %H:%M} con {c.user_id.name}" for c in citas) + ". "
+                    "Si quiere cambiarla usa mover_mi_cita (no apartes otra); si la quiere cancelar, cancelar_mi_cita.")
             else:
-                lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda: no la menciones como apartada).")
+                faltada = self._xb_sa_my_event()
+                if faltada.appointment_status == "no_show":
+                    local = pytz.utc.localize(faltada.start).astimezone(tz)
+                    lineas.append(f"No llegó a su cita del {XB_DIAS[local.weekday()]} {local:%d/%m/%Y %H:%M} (ya se le escribió "
+                                  "para reagendar). Sin reclamarle: si quiere otro horario, ve horarios y muévela con mover_mi_cita.")
+                else:
+                    lineas.append("No tiene citas agendadas vigentes (si en la plática se habló de una, ya no está en la agenda: no la menciones como apartada).")
         return "\n".join(lineas)
 
     def _xb_sa_contracted(self, proyecto, contacto):
@@ -823,10 +850,23 @@ class DiscussChannel(models.Model):
             self._xb_sa_on_hold(job)
             return
         historial = self._xb_sa_history()
-        if not historial or historial[-1]["role"] != "user":
+        seguimiento = self.env.context.get("xb_sa_followup")
+        if seguimiento:
+            # Revisión de una promesa (promises.py): el turno lo abre el sistema, no el cliente.
+            if not historial:
+                job.write({"state": "skipped", "reason": "Seguimiento: no hay plática reciente"})
+                return
+            if historial[-1]["role"] == "user":
+                # Lo último del cliente no pedía respuesta (un «gracias»): el aviso va en el mismo turno.
+                previo = historial[-1]["content"]
+                bloques = previo if isinstance(previo, list) else [{"type": "text", "text": str(previo)}]
+                historial = historial[:-1] + [{"role": "user", "content": bloques + [{"type": "text", "text": seguimiento}]}]
+            else:
+                historial = historial + [{"role": "user", "content": seguimiento}]
+        elif not historial or historial[-1]["role"] != "user":
             job.write({"state": "skipped", "reason": "No hay nada nuevo que contestar"})
             return
-        if self._xb_sa_just_closing(historial):
+        if not seguimiento and self._xb_sa_just_closing(historial):
             job.write({"state": "skipped", "reason": "Solo se despidió o agradeció; no hace falta contestar"})
             return
         if not acc.xb_sa_api_key:
@@ -861,6 +901,9 @@ class DiscussChannel(models.Model):
         texto = ""
         if tienda:
             herramientas = self._xb_sa_store_tools(contactos)
+            if seguimiento:
+                from .promises import XB_CLOSE_TOOL
+                herramientas = herramientas + [XB_CLOSE_TOOL]
         else:
             herramientas = (XB_TOOLS + ([XB_WEB_SEARCH] if self._xb_sa_first_bni_contact() else [])
                             + (XB_TEAM_TOOLS if self._xb_sa_team_user() else []))
@@ -916,8 +959,11 @@ class DiscussChannel(models.Model):
         else:
             job._xb_log("Se alcanzó el máximo de rondas de herramientas.")
 
+        if seguimiento and texto.strip().upper().startswith("SIN_MENSAJE"):
+            texto = ""
         if not texto:
-            job.write({"state": "skipped", "reason": "El agente no produjo respuesta"})
+            job.write({"state": "skipped", "reason": "El agente no produjo respuesta" if not seguimiento
+                       else "Seguimiento sin mensaje al cliente"})
             return
         texto = self._xb_sa_shorten(job, acc, client, historial, texto)
         job.reply = texto
@@ -1052,7 +1098,12 @@ class DiscussChannel(models.Model):
             job.write({"state": "done", "reason": "En pausa; se avisó al equipo y al cliente"})
 
     def _xb_sa_run_tool(self, job, nombre, entrada):
-        metodo = getattr(self, f"_xb_sa_tool_{nombre}", None)
+        canal = self
+        if self.wa_account_id.sudo().xb_sa_profile == "tienda":
+            # El catálogo de la tienda se lee en español (nombres de metal, opciones, productos), sea cual sea el
+            # idioma del usuario que corre el agente o el que WhatsApp le puso al contacto.
+            canal = self.with_context(lang="es_MX")
+        metodo = getattr(canal, f"_xb_sa_tool_{nombre}", None)
         if not metodo:
             return f"Herramienta desconocida: {nombre}", True
         try:
@@ -2265,6 +2316,7 @@ class DiscussChannel(models.Model):
         ).sudo().create(vals)
         if not self.xb_sa_lead_id and evento.opportunity_id:
             self.sudo().xb_sa_lead_id = evento.opportunity_id
+        evento.sudo().xb_sa_channel_id = self  # por aquí le llega el recordatorio y el seguimiento
         self._xb_sa_fix_event(evento, tipo, nombre)
         self._xb_sa_ensure_videocall(evento, tipo)
         if not evento.opportunity_id:  # con oportunidad, la app Citas ya le deja la actividad a quien da la demo
@@ -2280,6 +2332,62 @@ class DiscussChannel(models.Model):
         elif tipo.location_id:
             res["direccion"] = tipo.location or tipo.location_id.contact_address.replace("\n", ", ").strip(", ")
         return res
+
+    def _xb_sa_my_event(self):
+        """La cita de esta persona: la próxima, o la de los últimos días a la que no llegó."""
+        partner = self.whatsapp_partner_id.sudo()
+        if not partner:
+            return self.env["calendar.event"]
+        base = [("appointment_type_id", "!=", False),
+                "|", ("appointment_booker_id", "=", partner.id), ("partner_ids", "in", partner.ids)]
+        Evento = self.env["calendar.event"].sudo()
+        return Evento.search(base + [("stop", ">", fields.Datetime.now()), ("appointment_status", "=", "booked")],
+                             order="start", limit=1) or             Evento.search(base + [("start", ">", fields.Datetime.now() - timedelta(days=7)),
+                                  ("appointment_status", "=", "no_show")], order="start desc", limit=1)
+
+    def _xb_sa_tool_mover_mi_cita(self, job, entrada):
+        evento = self._xb_sa_my_event()
+        if not evento:
+            return {"ok": False, "motivo": "No tiene una cita apartada: apártale una con agendar_demo."}
+        tipo = evento.appointment_type_id
+        tz = pytz.timezone(XB_TZ)
+        pedido = (entrada.get("inicio") or "")[:16]
+        try:
+            dia = tz.localize(datetime.strptime(pedido[:10], "%Y-%m-%d")).astimezone(pytz.utc).replace(tzinfo=None)
+        except ValueError:
+            return {"ok": False, "motivo": "El horario debe ir como AAAA-MM-DD HH:MM."}
+        libres = [x for x in self._xb_sa_day_slots(tipo, dia) if x[0].astimezone(tz).strftime("%Y-%m-%d %H:%M") == pedido]
+        # Con la misma persona si se puede; si no, con quien tenga ese hueco.
+        libres.sort(key=lambda x: x[1] != evento.user_id)
+        if not libres:
+            return {"ok": False, "motivo": "Ese horario ya no está libre; vuelve a consultar ver_horarios_demo."}
+        inicio, usuario = libres[0]
+        inicio = inicio.replace(tzinfo=None)
+        vals = {"start": inicio, "stop": inicio + (evento.stop - evento.start), "appointment_status": "booked",
+                "xb_sa_noshow_step": 0, "xb_sa_noshow_dt": False, "xb_sa_channel_id": self.id}
+        if usuario != evento.user_id:
+            vals.update({"user_id": usuario.id,
+                         "partner_ids": [(3, evento.user_id.partner_id.id), (4, usuario.partner_id.id)]})
+        evento.write(vals)
+        cliente = evento._xb_sa_customer()
+        evento._xb_sa_todo(usuario, f"{cliente.name or self.whatsapp_number} movió su cita por WhatsApp: ahora es el "
+                                    f"{XB_DIAS[tz.localize(datetime.strptime(pedido, '%Y-%m-%d %H:%M')).weekday()]} {pedido}.")
+        res = {"ok": True, "cuando": pedido, "con": usuario.name}
+        if evento.videocall_location:
+            res["liga_videollamada"] = evento.videocall_location
+        elif tipo.location_id:
+            res["direccion"] = tipo.location or tipo.location_id.contact_address.replace("\n", ", ").strip(", ")
+        return res
+
+    def _xb_sa_tool_cancelar_mi_cita(self, job, entrada):
+        evento = self._xb_sa_my_event()
+        if not evento or evento.appointment_status != "booked":
+            return {"ok": False, "motivo": "No tiene una cita próxima apartada."}
+        cliente = evento._xb_sa_customer()
+        cuando = f"{XB_DIAS[self._xb_sa_local(evento.start).weekday()]} {self._xb_sa_local(evento.start):%d/%m/%Y %H:%M}"
+        evento._xb_sa_todo(evento.user_id, f"{cliente.name or self.whatsapp_number} canceló por WhatsApp su cita del {cuando}.")
+        evento.action_cancel_meeting(cliente.ids)
+        return {"ok": True, "cancelada": cuando}
 
     def _xb_sa_ensure_videocall(self, evento, tipo):
         """Liga de videollamada de Odoo para citas de un tipo «Odoo Discuss» (al crear por código Odoo no

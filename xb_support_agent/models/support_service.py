@@ -24,6 +24,22 @@ XB_AI_MAX_MINUTES = 60
 XB_QUOTE_HOURS = 24
 # «Sí», «si», «sí, adelante», «autorizo», «ok», «de acuerdo», «hágalo»…
 XB_YES = re.compile(r"^\W*(s[ií]|sip|claro|ok|okay|autorizo|adelante|de acuerdo|h[aá]g[ao]l[oa]|dale)\b", re.I)
+# Palabras que convierten un «sí» en condición o en cambio: «sí, pero más barato» no autoriza.
+XB_YES_BUT = re.compile(r"\b(pero|excepto|menos|salvo|aunque|mejor|c[aá]mbi\w*|qu[ií]t\w*|corr[ií]g\w*|corr[eé]g\w*|"
+                        r"agr[eé]g\w*|aum[eé]nt\w*|b[aá]j\w*|f[aá]lt\w*|bar[aá]t\w*|desc[uú]ent\w*)\b", re.I)
+
+# Lo que se escribe después del sí sin cambiar nada: «gracias», «perfecto», un emoji.
+XB_THANKS = re.compile(r"^\W*((muchas|mil)\s+)?(gracias|perfecto|listo|excelente|vale|va|ok)?\W*$", re.I)
+
+
+def xb_plain_yes(texto):
+    """«Sí» limpio: empieza con sí, no es pregunta, no pone condiciones y no añade un encargo largo."""
+    texto = re.sub(r"<[^>]+>", " ", texto or "").strip()
+    m = XB_YES.search(texto)
+    if not m or "?" in texto:
+        return False
+    resto = texto[m.end():]
+    return len(re.findall(r"\w+", resto)) <= 6 and not XB_YES_BUT.search(resto)
 
 
 class XbSupportService(models.Model):
@@ -74,19 +90,24 @@ class XbSupportService(models.Model):
     @api.model
     def _xb_inbound_yes(self, channel, since, horas=XB_QUOTE_HOURS):
         """Un «SÍ» entrante del cliente en esa plática, después de ``since`` y dentro de ``horas``.
-        Se busca en código, no se le cree al modelo."""
+        Se busca en código, no se le cree al modelo. Cuenta solo si su ÚLTIMO mensaje es un sí limpio
+        y ninguno de antes pidió un cambio (eso pide cotizar de nuevo)."""
         if not channel or not since or fields.Datetime.now() - since > timedelta(hours=horas):
             return False
         mensajes = self.env["mail.message"].sudo().search([
             ("model", "=", "discuss.channel"), ("res_id", "=", channel.id),
             ("message_type", "=", "whatsapp_message"), ("create_date", ">", since),
-        ], order="id desc", limit=5)
-        for m in mensajes:
-            if not m.wa_message_ids.filtered(lambda w: w.message_type == "inbound"):
-                continue
-            if XB_YES.search(re.sub(r"<[^>]+>", " ", m.body or "")):
-                return m
-        return False
+        ], order="id desc", limit=20)
+        entrantes = mensajes.filtered(lambda m: m.wa_message_ids.filtered(lambda w: w.message_type == "inbound"))
+        limpio = [re.sub(r"<[^>]+>", " ", m.body or "").strip() for m in entrantes]
+        i = 0
+        while i < len(limpio) - 1 and XB_THANKS.match(limpio[i]):  # «sí» + «gracias» sigue siendo sí
+            i += 1
+        if not entrantes or not xb_plain_yes(limpio[i]):
+            return False
+        if any(XB_YES_BUT.search(t) for t in limpio[i + 1:]):
+            return False
+        return entrantes[i]
 
     def _xb_authorization(self, channel=None):
         """El SÍ debe venir de quien autoriza: en la plática del invitado no cuenta, en la del titular sí."""

@@ -70,6 +70,14 @@
                     <setting>
                         <field name="xb_sa_sales_team_id"/>
                     </setting>
+                    <setting string="¿Llegó el cliente?" help="Media hora después de cada cita que apartó el agente, se le pregunta a quien la atiende. Si no se pudo avisar por ningún medio, queda una actividad.">
+                        <div class="d-flex flex-wrap gap-3">
+                            <div><field name="xb_sa_arrival_activity"/> <label for="xb_sa_arrival_activity"/></div>
+                            <div><field name="xb_sa_arrival_inbox"/> <label for="xb_sa_arrival_inbox"/></div>
+                            <div><field name="xb_sa_arrival_email"/> <label for="xb_sa_arrival_email"/></div>
+                            <div><field name="xb_sa_arrival_whatsapp"/> <label for="xb_sa_arrival_whatsapp"/></div>
+                        </div>
+                    </setting>
                     <setting help="Cita de la app Citas: horarios, encargado y oportunidad en el CRM salen de ahí.">
                         <field name="xb_sa_appointment_type_id"/>
                         <field name="xb_sa_video_appointment_type_id"/>

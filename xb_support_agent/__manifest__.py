@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "XB Agente IA de soporte y ventas por WhatsApp",
-    "version": "19.0.1.25.0",
+    "version": "19.0.1.26.0",
     "summary": "Un agente de IA (Claude) atiende el WhatsApp: soporte revisando el sistema del cliente, ventas y prospectos",
     "description": """
 Agente de IA para un número de WhatsApp de Odoo:
@@ -20,7 +20,7 @@ en la conversación, sin enviarse, hasta que se apague el ensayo.
     "category": "Productivity/WhatsApp",
     "author": "XUBAX",
     "license": "OPL-1",
-    "depends": ["whatsapp", "despacho_db_manager", "crm", "calendar", "helpdesk", "resource", "appointment_crm", "xb_whatsapp_web_leads"],
+    "depends": ["whatsapp", "despacho_db_manager", "crm", "calendar", "helpdesk", "resource", "appointment_crm", "xb_whatsapp_web_leads", "xb_whatsapp_conversations"],
     "external_dependencies": {"python": ["anthropic"]},
     "data": [
         "security/ir.model.access.csv",
